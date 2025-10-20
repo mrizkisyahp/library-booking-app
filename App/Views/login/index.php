@@ -44,6 +44,13 @@ use App\Core\Form\Form;
           </div>
         </div>
 
+        <div
+          class="cf-turnstile"
+          data-sitekey="0x4AAAAAAB7hTzPz5mNjJs1V"
+          data-theme="light"
+          data-size="normal"
+          data-callback="onSuccess"
+        ></div>
         <div>
           <?= Form::button('Sign in') ?>
         </div>
@@ -60,3 +67,5 @@ use App\Core\Form\Form;
 
   <p>© 2025 Politeknik Negeri Jakarta. All rights reserved.</p>
 </div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

@@ -20,6 +20,42 @@ class AuthController extends Controller
         $this->registerMiddleware(new GuestMiddleware(['logout']));
     }
 
+    private function verifyTurnstile(Response $response): bool
+{
+    $token  = $_POST['cf-turnstile-response'] ?? null;
+    $secret = $_ENV['TURNSTILE_SECRET'] ?? null;
+
+    if (!$token || !$secret) {
+        App::$app->session->setFlash('error', 'Missing Turnstile token.');
+        return false;
+    }
+
+    $payload = http_build_query([
+        'secret'   => $secret,
+        'response' => $token,
+        // omit 'remoteip' on localhost to avoid 400
+    ]);
+
+    $context = stream_context_create([
+        'http' => [
+            'method'  => 'POST',
+            'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => $payload,
+        ],
+    ]);
+
+    $verify = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
+
+    if ($verify === false) {
+        App::$app->session->setFlash('error', 'Could not connect to Turnstile API.');
+        return false;
+    }
+
+    $result = json_decode($verify, true);
+    return isset($result['success']) && $result['success'] === true;
+    }
+
+
     public function login(Request $request, Response $response)
     {
         $loginModel = new LoginForm();
@@ -32,6 +68,11 @@ class AuthController extends Controller
                 App::$app->session->setFlash('error', 'Invalid CSRF token.');
                 return $this->render('login/index', ['model' => $loginModel]);
             }
+        
+        if (!$this->verifyTurnstile($response)) {
+            App::$app->session->setFlash('error', 'Turnstile verification gagal');
+            return $this->render('login/index', ['model' => $loginModel]);
+        }
 
             $loginModel->loadData($request->getBody());
             $loginModel->remember = isset($_POST['remember']);
@@ -68,6 +109,11 @@ class AuthController extends Controller
             if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
                 App::$app->session->setFlash('error', 'Invalid CSRF token.');
                 return $this->render('register/mahasiswa', ['model' => $user]);
+            }
+
+        if (!$this->verifyTurnstile($response)) {
+            App::$app->session->setFlash('error', 'Turnstile verification failed.');
+            return $this->render('register/mahasiswa', ['model' => $user]);
             }
 
             $user->loadData($request->getBody());

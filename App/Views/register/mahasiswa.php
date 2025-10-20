@@ -25,9 +25,11 @@ use App\Core\Form\Form;
   <?= $form->field($model, 'email')->label('Email PNJ') ?>
   <?= $form->field($model, 'password') ?>
   <?= $form->field($model, 'confirm_password')->label('Confirm Password') ?>
-
+  <div class="cf-turnstile" data-sitekey="<?= $_ENV['TURNSTILE_SITE']; ?>"></div>
   <?= Form::button('Register') ?>
 <?php Form::end(); ?>
 
 <p>Already have an account? <a href="/login">Login</a></p>
 <p>Register as Dosen? <a href="/register/dosen">Click here</a></p>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
