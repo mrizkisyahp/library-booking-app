@@ -102,4 +102,103 @@ class EmailService
         return self::send($user->email, $user->nama, $subject, $body);
     }
 
+    // send valid notif
+    public static function sendBookingValidated(User $user, $booking): bool
+    {
+        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+        
+        if ($isDevelopment) {
+            \App\Core\App::$app->session->setFlash('dev_email', 'Booking validated email would be sent to: ' . $user->email);
+            return true;
+        }
+
+        $subject = 'Booking Validated | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Reservasi ruangan kamu telah divalidasi oleh admin!</p>
+            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
+            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
+            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            <p>Jangan lupa untuk check-in 10 menit sebelum waktu reservasi dimulai.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return self::send($user->email, $user->nama, $subject, $body);
+    }
+
+    // send cancel notif
+    public static function sendBookingCancelled(User $user, $booking, string $reason = ''): bool
+    {
+        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+        
+        if ($isDevelopment) {
+            \App\Core\App::$app->session->setFlash('dev_email', 'Booking cancelled email would be sent to: ' . $user->email);
+            return true;
+        }
+
+        $reasonText = $reason ? "<p><strong>Alasan:</strong> {$reason}</p>" : '';
+
+        $subject = 'Booking Cancelled | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Reservasi ruangan kamu telah dibatalkan.</p>
+            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
+            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
+            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            {$reasonText}
+            <p>Kamu bisa membuat reservasi baru jika diperlukan.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return self::send($user->email, $user->nama, $subject, $body);
+    }
+
+    // send feedback notif
+    public static function sendFeedbackRequest(User $user, $booking): bool
+    {
+        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+        
+        if ($isDevelopment) {
+            \App\Core\App::$app->session->setFlash('dev_email', 'Feedback request email would be sent to: ' . $user->email);
+            return true;
+        }
+
+        $subject = 'Berikan Feedback Anda | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Terima kasih telah menggunakan ruangan kami!</p>
+            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
+            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
+            <p>Kami ingin mendengar pengalaman kamu. Silakan berikan feedback melalui sistem kami.</p>
+            <p><a href=\"" . ($_ENV['APP_URL'] ?? 'http://localhost') . "/feedback?booking_id={$booking->id}\">Berikan Feedback</a></p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return self::send($user->email, $user->nama, $subject, $body);
+    }
+
+    // send check in remind
+    public static function sendCheckInReminder(User $user, $booking): bool
+    {
+        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+        
+        if ($isDevelopment) {
+            \App\Core\App::$app->session->setFlash('dev_email', 'Check-in reminder would be sent to: ' . $user->email);
+            return true;
+        }
+
+        $subject = 'Reminder: Check-in Reservasi Anda | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Reservasi ruangan kamu akan dimulai dalam 10 menit!</p>
+            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
+            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
+            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            <p><strong>PENTING:</strong> Jangan lupa untuk check-in sebelum waktu dimulai, atau reservasi akan otomatis dibatalkan.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return self::send($user->email, $user->nama, $subject, $body);
+    }
+
 }

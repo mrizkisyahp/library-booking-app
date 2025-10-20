@@ -2,7 +2,6 @@
 /** @var \App\Models\Room $room */
 use App\Core\App;
 use App\Core\Csrf;
-use App\Core\Form\Form;
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -13,13 +12,45 @@ use App\Core\Form\Form;
   <p><?= htmlspecialchars($m) ?></p>
 <?php endif; ?>
 
-<?php $form = Form::begin('/admin/rooms/create', 'post'); ?>
+<form action="/admin/rooms/create" method="post" enctype="multipart/form-data">
   <?= Csrf::field() ?>
 
-  <?= $form->field($room, 'title')->label('Room Title') ?>
-  <?= $form->field($room, 'capacity_min')->type('number')->label('Minimum Capacity') ?>
-  <?= $form->field($room, 'capacity_max')->type('number')->label('Maximum Capacity') ?>
-  <?= $form->field($room, 'description')->type('textarea')->rows(4) ?>
+  <div>
+    <label for="title">Room Title</label>
+    <input id="title" type="text" name="title" value="<?= htmlspecialchars($room->title ?? '') ?>" />
+    <?php if ($room->hasError('title')): ?>
+      <p><?= htmlspecialchars($room->getFirstError('title')) ?></p>
+    <?php endif; ?>
+  </div>
+
+  <div>
+    <label for="capacity_min">Minimum Capacity</label>
+    <input id="capacity_min" type="number" name="capacity_min" value="<?= htmlspecialchars($room->capacity_min ?? '') ?>" />
+    <?php if ($room->hasError('capacity_min')): ?>
+      <p><?= htmlspecialchars($room->getFirstError('capacity_min')) ?></p>
+    <?php endif; ?>
+  </div>
+
+  <div>
+    <label for="capacity_max">Maximum Capacity</label>
+    <input id="capacity_max" type="number" name="capacity_max" value="<?= htmlspecialchars($room->capacity_max ?? '') ?>" />
+    <?php if ($room->hasError('capacity_max')): ?>
+      <p><?= htmlspecialchars($room->getFirstError('capacity_max')) ?></p>
+    <?php endif; ?>
+  </div>
+
+  <div>
+    <label for="description">Description</label>
+    <textarea id="description" name="description" rows="4"><?= htmlspecialchars($room->description ?? '') ?></textarea>
+    <?php if ($room->hasError('description')): ?>
+      <p><?= htmlspecialchars($room->getFirstError('description')) ?></p>
+    <?php endif; ?>
+  </div>
+
+  <div>
+    <label for="image">Room Image</label>
+    <input type="file" id="image" name="image" accept="image/*">
+  </div>
 
   <div>
     <label for="status">Status</label>
@@ -30,6 +61,6 @@ use App\Core\Form\Form;
   </div>
 
   <button type="submit">Create Room</button>
-<?php Form::end(); ?>
+</form>
 
 <p><a href="/admin/rooms">Back to Room List</a></p>

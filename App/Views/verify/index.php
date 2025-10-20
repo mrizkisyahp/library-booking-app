@@ -1,6 +1,7 @@
 <?php
 /** @var \App\Models\VerificationModel $model */
 use App\Core\App;
+use App\Core\Csrf;
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -28,12 +29,18 @@ use App\Core\App;
 
 <p>Enter the 6-digit code sent to your email.</p>
 
-<?php
-use App\Core\Form\Form;
-$form = Form::begin('/verify', 'post');
-?>
-  <?= $form->field($model, 'code')->label('Verification Code')->type('text') ?>
-  <?= Form::button('Verify') ?>
-<?php Form::end(); ?>
+<form action="/verify" method="post">
+  <?= Csrf::field() ?>
+  
+  <div class="mb-4">
+    <label class="block text-sm font-medium <?= $model->hasError('code') ? 'text-red-700' : 'text-gray-700' ?> mb-2" for="code">Verification Code</label>
+    <input id="code" type="text" name="code" value="<?= htmlspecialchars($model->code ?? '') ?>" placeholder="Enter 6-character code" class="w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $model->hasError('code') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' ?>" />
+    <?php if ($model->hasError('code')): ?>
+      <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('code')) ?></p>
+    <?php endif; ?>
+  </div>
+
+  <button type="submit">Verify</button>
+</form>
 
 <p>Didn't receive code? <a href="/resend">Resend</a></p>

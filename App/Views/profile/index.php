@@ -1,6 +1,6 @@
 <?php
 use App\Core\App;
-use App\Core\Form\Form;
+use App\Core\Csrf;
 $user = App::$app->user;
 ?>
 
@@ -36,10 +36,14 @@ $user = App::$app->user;
       <div>
         <h3>Upload KuBaca PNJ</h3>
         <p>Please upload your KuBaca image to complete verification</p>
-        <?php $f = Form::begin('/upload-kubaca', 'post', ['enctype' => 'multipart/form-data']); ?>
-          <?= Form::fileField('kubaca_img', 'KuBaca Image', 'image/png,image/jpeg,image/webp', true) ?>
-          <?= Form::button('Upload') ?>
-        <?php Form::end(); ?>
+        <form action="/upload-kubaca" method="post" enctype="multipart/form-data">
+          <?= Csrf::field() ?>
+          <div>
+            <label for="kubaca_img">KuBaca Image</label>
+            <input type="file" id="kubaca_img" name="kubaca_img" accept="image/png,image/jpeg,image/webp" required>
+          </div>
+          <button type="submit">Upload</button>
+        </form>
       </div>
     <?php elseif ($user->kubaca_img && $user->status === 'active'): ?>
       <p style="color: orange;">KuBaca image uploaded. Waiting for admin verification.</p>

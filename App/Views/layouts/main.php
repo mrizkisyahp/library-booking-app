@@ -1,6 +1,6 @@
 <?php
 use App\Core\App;
-use App\Core\Form\Form;
+use App\Core\Csrf;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,6 +22,7 @@ use App\Core\Form\Form;
                 <?php $user = App::$app->user; ?>
                 <?php if ($user->role === 'admin'): ?>
                     <a href="/admin">Admin Dashboard</a> |
+                    <a href="/admin/bookings">Manage Bookings</a> |
                     <a href="/admin/rooms">Manage Rooms</a> |
                     <a href="/admin/users">Manage Users</a> |
                     <a href="/admin/reports">Reports</a> |
@@ -32,9 +33,10 @@ use App\Core\Form\Form;
                     <a href="/my-bookings">My Bookings</a> |
                 <?php endif; ?>
                 <a href="/profile">Profile</a> |
-                <?php $f = Form::begin('/logout', 'post'); ?>
-                    <?= Form::button('Logout') ?>
-                <?php Form::end(); ?>
+                <form action="/logout" method="post">
+                    <?= Csrf::field() ?>
+                    <button type="submit">Logout</button>
+                </form>
             <?php endif; ?>
         </nav>
     </header>

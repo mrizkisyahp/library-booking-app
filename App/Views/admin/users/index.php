@@ -1,7 +1,7 @@
 <?php
 /** @var array $users */
 use App\Core\App;
-use App\Core\Form\Form;
+use App\Core\Csrf;
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -47,32 +47,36 @@ use App\Core\Form\Form;
         </td>
         <td>
           <?php if ($user->kubaca_img && $user->status === 'active'): ?>
-            <?php $f = Form::begin('/admin/users/status', 'post'); ?>
-              <?= Form::hiddenField('user_id', $user->id) ?>
-              <?= Form::hiddenField('action', 'verify_kubaca') ?>
-              <?= Form::button('Verify KuBaca') ?>
-            <?php Form::end(); ?>
-            <?php $f = Form::begin('/admin/users/status', 'post'); ?>
-              <?= Form::hiddenField('user_id', $user->id) ?>
-              <?= Form::hiddenField('action', 'reject_kubaca') ?>
-              <?= Form::button('Reject KuBaca') ?>
-            <?php Form::end(); ?>
+            <form action="/admin/users/status" method="post" style="display:inline;">
+              <?= Csrf::field() ?>
+              <input type="hidden" name="user_id" value="<?= htmlspecialchars($user->id) ?>">
+              <input type="hidden" name="action" value="verify_kubaca">
+              <button type="submit">Verify KuBaca</button>
+            </form>
+            <form action="/admin/users/status" method="post" style="display:inline;">
+              <?= Csrf::field() ?>
+              <input type="hidden" name="user_id" value="<?= htmlspecialchars($user->id) ?>">
+              <input type="hidden" name="action" value="reject_kubaca">
+              <button type="submit">Reject KuBaca</button>
+            </form>
           <?php endif; ?>
           
           <?php if ($user->status !== 'suspended'): ?>
-            <?php $f = Form::begin('/admin/users/status', 'post'); ?>
-              <?= Form::hiddenField('user_id', $user->id) ?>
-              <?= Form::hiddenField('action', 'suspend') ?>
-              <?= Form::button('Suspend') ?>
-            <?php Form::end(); ?>
+            <form action="/admin/users/status" method="post" style="display:inline;">
+              <?= Csrf::field() ?>
+              <input type="hidden" name="user_id" value="<?= htmlspecialchars($user->id) ?>">
+              <input type="hidden" name="action" value="suspend">
+              <button type="submit">Suspend</button>
+            </form>
           <?php endif; ?>
           
           <?php if ($user->status === 'suspended'): ?>
-            <?php $f = Form::begin('/admin/users/status', 'post'); ?>
-              <?= Form::hiddenField('user_id', $user->id) ?>
-              <?= Form::hiddenField('action', 'activate') ?>
-              <?= Form::button('Activate') ?>
-            <?php Form::end(); ?>
+            <form action="/admin/users/status" method="post" style="display:inline;">
+              <?= Csrf::field() ?>
+              <input type="hidden" name="user_id" value="<?= htmlspecialchars($user->id) ?>">
+              <input type="hidden" name="action" value="activate">
+              <button type="submit">Activate</button>
+            </form>
           <?php endif; ?>
         </td>
       </tr>

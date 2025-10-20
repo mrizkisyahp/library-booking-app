@@ -69,4 +69,65 @@ echo "  Email: dosen@tik.pnj.ac.id\n";
 echo "  NIP: 123456789012345678\n";
 echo "  Password: test1234\n\n";
 
+echo "Seeding rooms...\n";
+
+$rooms = [
+    [
+        'title' => 'Meeting Room A',
+        'capacity_min' => 5,
+        'capacity_max' => 10,
+        'description' => 'Small meeting room with projector and whiteboard',
+        'status' => 'available'
+    ],
+    [
+        'title' => 'Meeting Room B',
+        'capacity_min' => 10,
+        'capacity_max' => 20,
+        'description' => 'Medium meeting room with video conferencing equipment',
+        'status' => 'available'
+    ],
+    [
+        'title' => 'Conference Hall',
+        'capacity_min' => 20,
+        'capacity_max' => 50,
+        'description' => 'Large conference hall with stage and sound system',
+        'status' => 'available'
+    ],
+    [
+        'title' => 'Study Room 1',
+        'capacity_min' => 2,
+        'capacity_max' => 5,
+        'description' => 'Quiet study room for small groups',
+        'status' => 'available'
+    ],
+    [
+        'title' => 'Study Room 2',
+        'capacity_min' => 2,
+        'capacity_max' => 5,
+        'description' => 'Quiet study room for small groups',
+        'status' => 'available'
+    ],
+];
+
+$checkRoom = $db->prepare('SELECT id FROM rooms WHERE title = ?');
+$insertRoom = $db->prepare('INSERT INTO rooms (title, capacity_min, capacity_max, description, status) VALUES (?, ?, ?, ?, ?)');
+
+foreach ($rooms as $room) {
+    $checkRoom->execute([$room['title']]);
+    if ($checkRoom->fetch()) {
+        echo "  {$room['title']} already exists\n";
+        continue;
+    }
+
+    $insertRoom->execute([
+        $room['title'],
+        $room['capacity_min'],
+        $room['capacity_max'],
+        $room['description'],
+        $room['status']
+    ]);
+
+    echo "  {$room['title']} inserted\n";
+}
+
 echo "Seeding complete!\n";

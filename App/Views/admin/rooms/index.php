@@ -2,7 +2,6 @@
 /** @var array $rooms */
 use App\Core\App;
 use App\Core\Csrf;
-use App\Core\Form\Form;
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -38,11 +37,11 @@ use App\Core\Form\Form;
       <td><?= htmlspecialchars($room->status) ?></td>
       <td>
         <a href="/admin/rooms/edit?id=<?= $room->id ?>">Edit</a> |
-        <?php $f = Form::begin('/admin/rooms/delete', 'post'); ?>
+        <form action="/admin/rooms/delete" method="post" style="display:inline;">
           <?= Csrf::field() ?>
-          <?= Form::hiddenField('id', $room->id) ?>
+          <input type="hidden" name="id" value="<?= htmlspecialchars($room->id) ?>">
           <button type="submit" onclick="return confirm('Delete this room?')">Delete</button>
-        <?php Form::end(); ?>
+        </form>
       </td>
     </tr>
     <?php endforeach; ?>

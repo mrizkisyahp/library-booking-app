@@ -1,0 +1,27 @@
+feat: implement booking workflow, check-in system, and image uploads
+
+- Add admin booking management (validate/cancel/complete)
+- Implement check-in/check-out system with booking codes
+- Add image upload for rooms and bookings
+- Fix admin dashboard statistics and recent bookings display
+- Add email notifications for booking lifecycle events
+- Bypass Turnstile verification in development mode
+- Remove all CSS classes and inline styles from views
+- Fix room usage calculation (per-room basis instead of total bookings)
+- Add "Manage Bookings" link to admin navigation
+
+Database changes:
+- Add image column to rooms table
+- Add image column to bookings table
+
+Functional requirements implemented:
+- FR-05: Admin can cancel bookings
+- FR-11: User attendance confirmation required
+- FR-12: Booking validation workflow
+- FR-16: Reschedule via cancel + new booking
+- FR-17: Check-in requirement at booking time
+- FR-18: Booking code verification
+- FR-19: Auto-cancel if no check-in within 10 minutes
+- FR-21: Feedback request after completion
+- FR-24: Admin dashboard with statistics
+- FR-31: Email notifications

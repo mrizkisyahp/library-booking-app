@@ -13,6 +13,8 @@ use App\Controllers\BookingController;
 use App\Controllers\AdminRoomController;
 use App\Controllers\AdminUserController;
 use App\Controllers\AdminReportController;
+use App\Controllers\AdminBookingController;
+use App\Controllers\CheckInController;
 
 // Auth routes
 $app->router->get('/', [AuthController::class, 'login']);
@@ -44,6 +46,11 @@ $app->router->get('/book', [BookingController::class, 'create']);
 $app->router->post('/book', [BookingController::class, 'create']);
 $app->router->get('/my-bookings', [BookingController::class, 'myBookings']);
 
+// Check-in routes
+$app->router->get('/checkin', [CheckInController::class, 'index']);
+$app->router->post('/checkin/verify', [CheckInController::class, 'verify']);
+$app->router->post('/checkout', [CheckInController::class, 'checkout']);
+
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index']);
 $app->router->get('/admin/rooms', [AdminRoomController::class, 'index']);
@@ -54,5 +61,9 @@ $app->router->post('/admin/rooms/edit', [AdminRoomController::class, 'edit']);
 $app->router->post('/admin/rooms/delete', [AdminRoomController::class, 'delete']);
 $app->router->get('/admin/users', [AdminUserController::class, 'index']);
 $app->router->post('/admin/users/status', [AdminUserController::class, 'updateStatus']);
+$app->router->get('/admin/bookings', [AdminBookingController::class, 'index']);
+$app->router->post('/admin/bookings/validate', [AdminBookingController::class, 'validate']);
+$app->router->post('/admin/bookings/cancel', [AdminBookingController::class, 'cancel']);
+$app->router->post('/admin/bookings/complete', [AdminBookingController::class, 'complete']);
 $app->router->get('/admin/reports', [AdminReportController::class, 'index']);
 $app->router->get('/admin/reports/generate', [AdminReportController::class, 'generate']);

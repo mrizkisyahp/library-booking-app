@@ -21,38 +21,43 @@ class AuthController extends Controller
     }
 
     private function verifyTurnstile(Response $response): bool
-{
-    $token  = $_POST['cf-turnstile-response'] ?? null;
-    $secret = $_ENV['TURNSTILE_SECRET'] ?? null;
+    {
+        // skip turnstile/captcha kalau di dev
+        if (($_ENV['APP_ENV'] ?? 'production') === 'development') {
+            return true;
+        }
 
-    if (!$token || !$secret) {
-        App::$app->session->setFlash('error', 'Missing Turnstile token.');
-        return false;
-    }
+        $token  = $_POST['cf-turnstile-response'] ?? null;
+        $secret = $_ENV['TURNSTILE_SECRET'] ?? null;
 
-    $payload = http_build_query([
-        'secret'   => $secret,
-        'response' => $token,
-        // omit 'remoteip' on localhost to avoid 400
-    ]);
+        if (!$token || !$secret) {
+            App::$app->session->setFlash('error', 'Missing Turnstile token.');
+            return false;
+        }
 
-    $context = stream_context_create([
-        'http' => [
-            'method'  => 'POST',
-            'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
-            'content' => $payload,
-        ],
-    ]);
+        $payload = http_build_query([
+            'secret'   => $secret,
+            'response' => $token,
+            // omit 'remoteip' on localhost to avoid 400
+        ]);
 
-    $verify = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
+        $context = stream_context_create([
+            'http' => [
+                'method'  => 'POST',
+                'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+                'content' => $payload,
+            ],
+        ]);
 
-    if ($verify === false) {
-        App::$app->session->setFlash('error', 'Could not connect to Turnstile API.');
-        return false;
-    }
+        $verify = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
 
-    $result = json_decode($verify, true);
-    return isset($result['success']) && $result['success'] === true;
+        if ($verify === false) {
+            App::$app->session->setFlash('error', 'Could not connect to Turnstile API.');
+            return false;
+        }
+
+        $result = json_decode($verify, true);
+        return isset($result['success']) && $result['success'] === true;
     }
 
 
@@ -80,7 +85,13 @@ class AuthController extends Controller
             if ($loginModel->validate() && $loginModel->login()) {
                 Logger::auth('logged in', App::$app->user->id);
                 App::$app->session->setFlash('success', 'Login successful!');
-                $response->redirect('/dashboard');
+                
+                // Redirect based on user role
+                if (App::$app->user->role === 'admin') {
+                    $response->redirect('/admin');
+                } else {
+                    $response->redirect('/dashboard');
+                }
                 return;
             }
 
