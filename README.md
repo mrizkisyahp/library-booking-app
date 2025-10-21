@@ -96,3 +96,6 @@ Buka browser, akses **http://localhost:8000**
 
 ---
 
+===== Running TailwindCSS =====
+npx tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch
+
