@@ -8,9 +8,9 @@ use App\Core\Csrf;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(App::$app->getTitle()) ?></title>
-    <!-- Disini za buat styling css sama atur2 margin lah -->
+    <link href="<?= './css/output.css' ?>" rel="stylesheet">
 </head>
-<body>
+<body class="min-h-dvh">
     <header>
         <h1>Library Booking App</h1>
         <nav>

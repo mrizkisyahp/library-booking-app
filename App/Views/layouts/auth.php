@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(App::$app->getTitle()) ?></title>
-    <link href="/css/output.css" rel="stylesheet">
+    <link href="./css/output.css" rel="stylesheet">
 </head>
-<body>
+<body class="min-h-dvh">
     {{content}}
 </body>
 </html>
