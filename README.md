@@ -73,6 +73,10 @@ php seed.php
 npm run dev
 ```
 
+```bash
+php rollback.php -> jika mau ngerollback migrasi
+```
+
 ### 4. Jalanin Server
 
 ```bash
