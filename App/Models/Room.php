@@ -38,7 +38,7 @@ class Room extends DbModel
 
     public function attributes(): array
     {
-        return ['title', 'capacity_min', 'capacity_max', 'description', 'image', 'status'];
+        return ['title', 'capacity_min', 'capacity_max', 'description', 'status'];
     }
 
     // apakah available roomnya

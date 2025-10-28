@@ -62,22 +62,6 @@ class BookingController extends Controller
             $booking->loadData($request->getBody());
             $booking->room_id = $room->id; 
 
-            // Handle image upload
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../../public/uploads/bookings/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-
-                $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $filename = 'booking_' . time() . '_' . uniqid() . '.' . $extension;
-                $uploadPath = $uploadDir . $filename;
-
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
-                    $booking->image = $filename;
-                }
-            }
-
             // Validate basic rules
             if (!$booking->validate()) {
                 return $this->render('bookings/create', [

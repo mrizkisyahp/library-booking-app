@@ -12,6 +12,7 @@ use App\Core\Services\EmailService;
 use App\Core\Services\CacheService;
 use App\Core\Services\Logger;
 use App\Core\Middleware\GuestMiddleware;
+use App\Core\Middleware\AuthMiddleware;
 
 class AuthController extends Controller
 {
@@ -31,14 +32,14 @@ class AuthController extends Controller
         $secret = $_ENV['TURNSTILE_SECRET'] ?? null;
 
         if (!$token || !$secret) {
-            App::$app->session->setFlash('error', 'Missing Turnstile token.');
+            App::$app->session->setFlash('error', 'CAPTCHA token is missing. Please try again.');
             return false;
         }
 
         $payload = http_build_query([
             'secret'   => $secret,
             'response' => $token,
-            // omit 'remoteip' on localhost to avoid 400
+            'remoteip' => $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
 
         $context = stream_context_create([
@@ -59,7 +60,6 @@ class AuthController extends Controller
         $result = json_decode($verify, true);
         return isset($result['success']) && $result['success'] === true;
     }
-
 
     public function login(Request $request, Response $response)
     {

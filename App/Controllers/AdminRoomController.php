@@ -49,22 +49,6 @@ class AdminRoomController extends Controller
 
             $room->loadData($request->getBody());
 
-            // Handle image upload
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../../public/uploads/rooms/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-
-                $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $filename = 'room_' . time() . '_' . uniqid() . '.' . $extension;
-                $uploadPath = $uploadDir . $filename;
-
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
-                    $room->image = $filename;
-                }
-            }
-
             // Additional validation
             if ($room->capacity_max < $room->capacity_min) {
                 $room->addError('capacity_max', 'Maximum capacity must be greater than or equal to minimum capacity.');
@@ -72,9 +56,8 @@ class AdminRoomController extends Controller
 
             if ($room->validate() && empty($room->errors)) {
                 if ($room->save()) {
-                    \App\Core\Services\Logger::info('room_created', App::$app->user->id, 
-                        "Room '{$room->title}' created");
-                    
+                    \App\Core\Services\Logger::admin('created a room', App::$app->user->id, "Room '{$room->title}' created");
+  
                     App::$app->session->setFlash('success', 'Room created successfully!');
                     $response->redirect('/admin/rooms');
                     return;
@@ -137,8 +120,8 @@ class AdminRoomController extends Controller
                 $stmt->bindValue(':id', $room->id);
                 
                 if ($stmt->execute()) {
-                    \App\Core\Services\Logger::info('room_updated', App::$app->user->id, 
-                        "Room #{$room->id} '{$room->title}' updated");
+                    \App\Core\Services\Logger::admin('updated a room', App::$app->user->id, "Room '{$room->title}' created");
+
                     
                     App::$app->session->setFlash('success', 'Room updated successfully!');
                     $response->redirect('/admin/rooms');
@@ -199,8 +182,8 @@ class AdminRoomController extends Controller
         $stmt->bindValue(':id', $roomId);
         
         if ($stmt->execute()) {
-            \App\Core\Services\Logger::info('room_deleted', App::$app->user->id, 
-                "Room #{$room->id} '{$room->title}' deleted");
+            \App\Core\Services\Logger::admin('deleted a room', App::$app->user->id, "Room '{$room->title}' created");
+
             
             App::$app->session->setFlash('success', 'Room deleted successfully!');
         } else {

@@ -15,7 +15,6 @@ class Booking extends DbModel
     public string $end_time = '';
     public int $participants = 1;
     public string $purpose = '';
-    public ?string $image = null;
     public string $status = 'pending'; // pending, validated, active, completed, cancelled
     public ?string $booking_code = null;
     public ?string $check_in_time = null;
@@ -49,10 +48,10 @@ class Booking extends DbModel
     {
         return [
             'user_id', 'room_id', 'booking_date', 'start_time', 'end_time',
-            'participants', 'purpose', 'image', 'status', 'booking_code',
+            'participants', 'purpose', 'status', 'booking_code',
             'check_in_time', 'check_out_time'
         ];
-    }
+    }   
 
     // booking rules
     public function validateBooking(): bool
@@ -273,7 +272,8 @@ class Booking extends DbModel
                 AND CONCAT(b.booking_date, ' ', b.start_time) BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 10 MINUTE)
                 AND b.check_in_time IS NULL";
         
-        $stmt = App::$app->db->query($sql);
+        $stmt = App::$app->db->prepare($sql);
+        $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

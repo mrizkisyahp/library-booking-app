@@ -84,6 +84,24 @@ class Database
         $statement->execute();
     }
 
+    public function rollbackLastMigration(): void {
+    $applied = $this->getAppliedMigration();
+    if (empty($applied)) {
+        $this->log("No migrations to rollback.");
+        return;
+    }
+
+    $lastMigration = end($applied);
+    require_once App::$ROOT_DIR . '/migrations/' . $lastMigration;
+    $className = pathinfo($lastMigration, PATHINFO_FILENAME);
+    $instance = new $className();
+
+    $this->log("Rolling back $lastMigration...");
+    $instance->down();
+    $this->pdo->prepare("DELETE FROM migrations WHERE migration = ?")->execute([$lastMigration]);
+    $this->log("Rolled back $lastMigration successfully.");
+    }
+
     public function prepare($sql)
     {
         return $this->pdo->prepare($sql);

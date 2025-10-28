@@ -45,13 +45,8 @@ use App\Core\Csrf;
     <?php if ($room->hasError('description')): ?>
       <p><?= htmlspecialchars($room->getFirstError('description')) ?></p>
     <?php endif; ?>
-  </div>
-
-  <div>
-    <label for="image">Room Image</label>
-    <input type="file" id="image" name="image" accept="image/*">
-  </div>
-
+    </div>
+    
   <div>
     <label for="status">Status</label>
     <select id="status" name="status" required>

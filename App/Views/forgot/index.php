@@ -1,5 +1,5 @@
 <?php
-/** @var \App\Models\PasswordResetModel $model */
+/** @var \App\Models\PasswordResetForm $model */
 use App\Core\App;
 use App\Core\Csrf;
 ?>

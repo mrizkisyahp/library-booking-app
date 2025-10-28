@@ -2,21 +2,6 @@
 
 Aplikasi web untuk booking ruangan perpustakaan, dibuat pakai PHP dengan arsitektur MVC. Ini adalah bagian dari project **PBL (Project-Based Learning)** di **Teknik Informatika – Politeknik Negeri Jakarta**.
 
-
----
-
-## Fitur sekarang:
-- Register (pakai NIM untuk Mahasiswa, NIP untuk Dosen)
-- Verifikasi email pakai OTP
-- Login (bisa pakai Email/NIM/NIP)
-- Logout
-- Lupa password & reset password
-- CSRF protection, password hashing, input validation
-- Middleware (Auth, Admin, Guest) di `App\Core\Middleware`
-- Email service & logging di `App\Core\Services`
-
----
-
 ## Cara Jalanin Aplikasi
 
 Yang dibutuhin:
@@ -64,10 +49,17 @@ MAIL_PASSWORD = your_gmail_app_password
 MAIL_ENCRYPTION = tls
 MAIL_FROM_ADDRESS = yourgmail@gmail.com
 MAIL_FROM_NAME = "Library Booking App"
+
+# TURNSTILE
+TURNSTILE_SITE=your_site_key_here
+TURNSTILE_SECRET=your_secret_key_here
 ```
 
 **Buat Gmail App Password:**  
 Buka [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), aktifin 2-Step Verification dulu, terus bikin app password buat SMTP.
+
+**Buat Turnstile**  
+Buka [https://www.cloudflare.com/application-services/products/turnstile/]
 
 ### 3. Bikin Database & Jalanin Migration
 
@@ -78,6 +70,7 @@ CREATE DATABASE library_booking_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicod
 ```bash
 php migration.php
 php seed.php
+npm run dev
 ```
 
 ### 4. Jalanin Server
@@ -96,7 +89,5 @@ Buka browser, akses **http://localhost:8000**
 
 ---
 
-===== Running TailwindCSS =====
-npm run dev
 
 

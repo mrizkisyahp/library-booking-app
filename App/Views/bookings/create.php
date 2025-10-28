@@ -70,12 +70,6 @@ use App\Core\Csrf;
     <?php endif; ?>
   </div>
 
-  <div>
-    <label for="image">Booking Image (optional)</label>
-    <input type="file" id="image" name="image" accept="image/*">
-    <small>Upload an image related to your booking (optional)</small>
-  </div>
-
   <button type="submit">Submit Booking</button>
 </form>
 

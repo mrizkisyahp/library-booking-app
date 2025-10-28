@@ -10,7 +10,6 @@ class App
 {
     public static string $ROOT_DIR;
     public string $userClass;
-    
     public Router $router;
     public Request $request;
     public Response $response;
@@ -85,10 +84,6 @@ class App
         return !self::$app->user;
     }
 
-    public function addGlobalMiddleware(Middleware $middleware): void
-    {
-        $this->globalMiddlewares[] = $middleware;
-    }
 
     public function getTitle(): string
     {
@@ -106,34 +101,56 @@ class App
         };
     }
 
+
     public function run(): void
-    {
-        try {
-            foreach ($this->globalMiddlewares as $middleware) {
-                $middleware->execute();
-            }
+{
+    try {
+        echo $this->router->resolve();
 
-            echo $this->router->resolve();
+    } catch (\App\Core\Exceptions\NotFoundException $e) {
+        http_response_code(404);
+        $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
 
-        } catch (NotFoundException $e) {
-            $this->response->setStatusCode(404);
-            echo $this->router->renderView('errors/404', ['exception' => $e]);
-            
-        } catch (ForbiddenException $e) {
-            $this->response->setStatusCode(403);
-            echo $this->router->renderView('errors/403', ['exception' => $e]);
-            
-        } catch (\Exception $e) {
-            $code = (int)($e->getCode() ?: 500);
-            $this->response->setStatusCode($code);
-            
-            $errorView = match ($code) {
-                403 => 'errors/403',
-                404 => 'errors/404',
-                default => 'errors/500'
-            };
-            
-            echo $this->router->renderView($errorView, ['exception' => $e]);
+        echo $this->router->renderView('errors/404', [
+            'message' => $isDev ? $e->getMessage() : null,
+            'file'    => $isDev ? $e->getFile() : null,
+            'line'    => $isDev ? $e->getLine() : null,
+            'trace'   => $isDev ? $e->getTraceAsString() : null,
+        ]);
+
+    } catch (\App\Core\Exceptions\ForbiddenException $e) {
+        http_response_code(403);
+        $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+
+        echo $this->router->renderView('errors/403', [
+            'message' => $isDev ? $e->getMessage() : null,
+            'file'    => $isDev ? $e->getFile() : null,
+            'line'    => $isDev ? $e->getLine() : null,
+            'trace'   => $isDev ? $e->getTraceAsString() : null,
+        ]);
+
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+
+        $context = [
+            'message' => $isDev ? $e->getMessage() : null,
+            'file'    => $isDev ? $e->getFile() : null,
+            'line'    => $isDev ? $e->getLine() : null,
+            'trace'   => $isDev ? $e->getTraceAsString() : null,
+        ];
+
+        if (class_exists('\App\Core\Services\Logger')) {
+            \App\Core\Services\Logger::error('Unhandled exception', [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+            ]);
         }
+
+        echo $this->router->renderView('errors/500', $context);
     }
 }
+
+}
+    
