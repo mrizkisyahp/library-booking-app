@@ -107,7 +107,7 @@ class App
     try {
         echo $this->router->resolve();
 
-    } catch (\App\Core\Exceptions\NotFoundException $e) {
+    } catch (NotFoundException $e) {
         http_response_code(404);
         $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
 
@@ -118,7 +118,7 @@ class App
             'trace'   => $isDev ? $e->getTraceAsString() : null,
         ]);
 
-    } catch (\App\Core\Exceptions\ForbiddenException $e) {
+    } catch (ForbiddenException $e) {
         http_response_code(403);
         $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
 

@@ -84,7 +84,7 @@ use App\Core\App;
               <th>Time</th>
               <th>Status</th>
             </tr>
-            <?php foreach ($bookings as $booking): ?>
+            <?php foreach ($recentBookings as $booking): ?>
               <tr>
                 <td><?= htmlspecialchars($booking['user_name']) ?></td>
                 <td><?= htmlspecialchars($booking['room_title']) ?></td>

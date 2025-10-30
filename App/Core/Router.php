@@ -92,13 +92,15 @@ class Router {
         return str_replace('{{content}}', $viewContent, $layoutsContent);
     }
 
-    protected function  layoutContent(): string {
+    protected function layoutContent(): string {
         $controller = App::$app->controller ?? null;
         $layout = 'main';
 
         if ($controller && property_exists($controller, 'layout') && !empty($controller->layout)) {
             $layout = $controller->layout;
         }
+
+        $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 
         ob_start();
         include_once App::$ROOT_DIR . "/App/Views/layouts/{$layout}.php";
@@ -109,6 +111,8 @@ class Router {
         foreach ($data as $key => $value) {
             $$key = $value;
         }
+
+        $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 
         ob_start();
         include_once App::$ROOT_DIR . "/App/Views/{$view}.php";

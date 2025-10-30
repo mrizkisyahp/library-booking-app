@@ -1,6 +1,7 @@
-<?php
+<?php 
 use App\Core\App;
 use App\Core\Csrf;
+/** @var \App\Models\User $user */ $user = App::$app->user; 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +10,7 @@ use App\Core\Csrf;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(App::$app->getTitle()) ?></title>
-    <link href="<?= './css/output.css' ?>" rel="stylesheet">
+    <link href="<?= $basePath === '' ? '' : $basePath ?>/css/output.css" rel="stylesheet">
 </head>
 
 <body class="min-h-dvh">
@@ -18,7 +19,6 @@ use App\Core\Csrf;
             <?php if (App::isGuest()): ?>
                 href="/"
             <?php else: ?>
-                <?php $user = App::$app->user; ?>
                 <?php if ($user->role === 'admin'): ?>
                     href="/admin" 
                 <?php else: ?>
@@ -33,7 +33,6 @@ use App\Core\Csrf;
                 <a href="/login">Login</a>
                 <a href="/register">Register</a>
             <?php else: ?>
-                <?php $user = App::$app->user; ?>
                 <?php if ($user->role === 'admin'): ?>
                     <div class=" *:px-2">
                         <a href="/admin/bookings">Manage Bookings</a>

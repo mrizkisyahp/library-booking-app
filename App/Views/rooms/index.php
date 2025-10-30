@@ -1,6 +1,7 @@
 <?php
 /** @var array $rooms */
 use App\Core\App;
+/** @var \App\Models\User $user */ $user = App::$app->user; 
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -39,4 +40,7 @@ use App\Core\App;
   </table>
 <?php endif; ?>
 
-<p><a href="/dashboard">Back to Dashboard</a></p>
+<p><a href="<?= $user->role === 'admin' ? '/admin' : '/dashboard' ?>" class="text-indigo-600 hover:underline">
+    Back to Dashboard
+  </a>
+</p>

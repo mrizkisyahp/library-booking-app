@@ -23,7 +23,6 @@ class AdminBookingController extends Controller
         $this->setTitle('Manage Bookings | Admin');
         $this->setLayout('main');
 
-        // ambil booking dengan detail2nya
         $bookings = Booking::getAllBookingsWithDetails();
 
         return $this->render('admin/bookings/index', [

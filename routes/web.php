@@ -39,7 +39,7 @@ $app->router->get('/dashboard', [UserDashboardController::class, 'index']);
 $app->router->get('/profile', [ProfileController::class, 'index']);
 $app->router->post('/upload-kubaca', [ProfileController::class, 'uploadKubaca']);
 
-// Room & booking routes (placeholder - not implemented yet)
+// Room & booking routes 
 $app->router->get('/rooms', [RoomController::class, 'index']);
 $app->router->get('/room', [RoomController::class, 'view']);
 $app->router->get('/book', [BookingController::class, 'create']);
