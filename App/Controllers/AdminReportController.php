@@ -14,6 +14,8 @@ class AdminReportController extends Controller
 
     public function index()
     {
+        $this->setTitle('Manage Report | Admin');
+        $this->setLayout('main');
         echo "Fitur ini akan diimplementasi nanti terima kasih :)";
         exit;
     }

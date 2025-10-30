@@ -29,7 +29,7 @@ class Logger
     {
         self::write('INFO', $message, $context);
     }
-
+    
     public static function error(string $message, array $context = []): void
     {
         self::write('ERROR', $message, $context);

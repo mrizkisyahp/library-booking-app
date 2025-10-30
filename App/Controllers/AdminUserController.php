@@ -23,6 +23,7 @@ class AdminUserController extends Controller
         $users = $stmt->fetchAll(\PDO::FETCH_CLASS, User::class);
 
         $this->setTitle('Manage Users | Admin');
+        $this->setLayout('main');
         return $this->render('admin/users/index', ['users' => $users]);
     }
 

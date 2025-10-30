@@ -119,4 +119,12 @@ class BookingController extends Controller
             'bookings' => $bookings
         ]);
     }
+
+    // public function getOccupied() {
+    //     const $Occupied = [];
+    // }
+
+    // public function isOverlap() {
+
+    // }
 }

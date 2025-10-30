@@ -18,6 +18,7 @@ class ProfileController extends Controller
     public function index()
     {
         $this->setTitle('Profile | Library Booking App');
+        $this->setLayout('main');
         return $this->render('profile/index');
     }
 
