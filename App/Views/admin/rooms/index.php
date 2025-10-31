@@ -42,7 +42,7 @@ use App\Core\Csrf;
       <?php foreach ($rooms as $room): ?>
         <tr class="border-b border-gray-200 dark:border-gray-700 *:px-6 *:py-4 even:bg-gray-50">
           <td scope="row"><?= $room->id ?></td>
-          <td><?= htmlspecialchars($room->title) ?></td>
+          <td class="font-medium text-gray-900 whitespace-nowrap"><?= htmlspecialchars($room->title) ?></td>
           <td><?= $room->capacity_min ?> - <?= $room->capacity_max ?></td>
           <td><?= htmlspecialchars($room->status) ?></td>
           <td>
