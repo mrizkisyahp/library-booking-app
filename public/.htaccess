@@ -1,0 +1,11 @@
+Options -Indexes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # serve existing files/folders as-is
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # pass everything else to index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
