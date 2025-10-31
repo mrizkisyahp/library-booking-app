@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules
+vendor
+storage
+.idea
+.vscode
+*.log
+Dockerfile
+docker-compose.yml
+# Allow docker build assets to be included in build context
+# (needed for COPY docker/apache/vhost.conf and docker/php/php.ini)
+# Remove or comment out the next line that previously excluded the folder:
+# docker/
