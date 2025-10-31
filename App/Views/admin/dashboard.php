@@ -99,7 +99,7 @@ use App\Core\App;
     </div>
 
     <div class="mt-8">
-      <h2 class="text-lg font-meium">
+      <h2 class="text-lg font-medium">
         Rooms Usage
       </h2>
       <div class="mt-4 relative overflow-x-auto bg-gray-100 rounded-md shadow-md p-4">
