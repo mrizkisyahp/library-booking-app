@@ -14,7 +14,7 @@ use App\Core\Csrf;
 </head>
 
 <body class="min-h-dvh">
-    <header class="w-full bg-primary text-white flex justify-between items-center px-16 py-2">
+    <header class="w-full bg-primary text-white flex justify-between items-center px-16 py-2 fixed">
         <a 
             <?php if (App::isGuest()): ?>
                 href="/"
@@ -34,10 +34,10 @@ use App\Core\Csrf;
                 <a href="/register">Register</a>
             <?php else: ?>
                 <?php if ($user->role === 'admin'): ?>
-                    <div class=" *:px-2">
-                        <a href="/admin/bookings">Manage Bookings</a>
-                        <a href="/admin/rooms">Manage Rooms</a>
-                        <a href="/admin/users">Manage Users</a>
+                    <div class=" *:px-4">
+                        <a href="/admin/bookings">Bookings</a>
+                        <a href="/admin/rooms">Rooms</a>
+                        <a href="/admin/users">Users</a>
                         <a href="/admin/reports">Reports</a>
                         <a href="/rooms">Book Room</a>
                     </div>
@@ -69,8 +69,10 @@ use App\Core\Csrf;
         <?php if ($m = App::$app->session->getFlash('success')): ?>
             <p><?= htmlspecialchars($m) ?></p>
         <?php endif; ?>
-
-        {{content}}
+        
+        <div class="mt-4">
+            {{content}}
+        </div>
     </main>
 
     <footer class="w-full bg-primary text-center text-white text-sm font-light py-4">

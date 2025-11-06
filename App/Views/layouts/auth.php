@@ -7,7 +7,7 @@
     <title><?= htmlspecialchars(App::$app->getTitle()) ?></title>
     <link href="<?= $basePath === '' ? '' : $basePath ?>/css/output.css" rel="stylesheet">
 </head>
-<body class="min-h-dvh">
+<body class="min-h-dvh bg-primary">
     {{content}}
 </body>
 </html>

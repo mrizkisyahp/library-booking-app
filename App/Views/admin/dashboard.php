@@ -14,10 +14,10 @@ use App\Core\App;
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
   <div class="col-span-2 p-4 border-r border-r-gray-300">
-    <h2 class="text-lg font-meium">
+    <h2 class="text-lg font-medium">
       Your Booking Statistics
     </h2>
-    <div class=" grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-4">
+    <div class=" grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
       <div class="bg-gray-100 rounded-md shadow-md p-4 ">
         <p class="font-semibold text-lg">Total Booking</p>
         <div class="ml-2 text-lg font-medium ">
@@ -69,7 +69,7 @@ use App\Core\App;
     </div>
 
     <div class="mt-8">
-      <h2 class="text-lg font-meium">
+      <h2 class="text-lg">
         Recent Bookings
       </h2>
       <div class="bg-gray-100 p-4 rounded-md shadow-md mt-4">
@@ -133,11 +133,11 @@ use App\Core\App;
   </div>
 
   <div class="mt-4">
-    <h2 class="text-lg font-meium">
+    <h2 class="text-lg">
       Quick Links
     </h2>
     <div class="bg-gray-100 rounded-md shadow-md p-4 mt-4">
-      <ul>
+      <ul class=" list-disc list-inside *:hover:underline text-gray-700">
         <li><a href="/admin/bookings">Manage Bookings</a></li>
         <li><a href="/admin/rooms">Manage Rooms</a></li>
         <li><a href="/admin/users">Manage Users</a></li>
