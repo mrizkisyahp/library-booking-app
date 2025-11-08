@@ -20,11 +20,11 @@ class GuestMiddleware extends Middleware
     {
         $action = App::$app->controller->action ?? '';
         
-        if (in_array($action, $this->except)) {
+        if (in_array($action, $this->except, true)) {
             return true;
         }
 
-        if (!App::isGuest()) {
+        if (!App::$app->auth->isGuest()) {
             $response->redirect('/dashboard');
             return false;
         }

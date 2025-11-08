@@ -2,9 +2,11 @@
 
 namespace App\Core;
 
-use App\Core\Middleware;
 use App\Core\Exceptions\NotFoundException;
 use App\Core\Exceptions\ForbiddenException;
+use App\Core\Services\AuthService;
+use App\Core\Services\Logger;
+use App\Models\User;
 
 class App
 {
@@ -15,92 +17,31 @@ class App
     public Response $response;
     public Session $session;
     public Database $db;
-    
+    public Logger $log;
     public static App $app;
     public ?Controller $controller = null;
     public ?DbModel $user;
-    
-    protected array $globalMiddlewares = [];
-
+    public AuthService $auth;
     public function __construct($rootPath, array $config)
     {
-        $this->userClass = $config['userClass'];
+        $this->userClass = $config['userClass'] ?? User::class;
         self::$ROOT_DIR = $rootPath;
         self::$app = $this;
 
         $this->request = new Request();
         $this->response = new Response();
         $this->session = new Session();
+        $this->log = new Logger();
         $this->router = new Router($this->request, $this->response);
 
         $dbConfig = $config['database'] ?? $config['db'] ?? [];
         
         $this->db = new Database($dbConfig);
 
-        $primaryValue = $this->session->get('user');
-        
-        if (!$primaryValue && isset($_COOKIE['remember_user'])) {
-            $primaryValue = $_COOKIE['remember_user'];
-            if ($primaryValue) {
-                $this->session->set('user', $primaryValue);
-            }
-        }
-        
-        if ($primaryValue) {
-            $primaryKey = $this->userClass::primaryKey();
-            $this->user = $this->userClass::findOne([$primaryKey => $primaryValue]);
-        } else {
-            $this->user = null;
-        }
+        $this->auth = new AuthService($this->session, $this->userClass);
+        $this->auth->bootstrap();
+        $this->user = $this->auth->getUser();
     }
-
-    public function login(DbModel $user, bool $remember = false): bool
-    {
-        $this->user = $user;
-        $primaryKey = $user->primaryKey();
-        $primaryValue = $user->{$primaryKey};
-        $this->session->set('user', $primaryValue);
-
-        if ($remember) {
-            $lifetime = (int)($_ENV['SESSION_LIFETIME'] ?? 7200);
-            setcookie('remember_user', $primaryValue, time() + $lifetime, '/', '', false, true);
-        }
-
-        return true;
-    }
-
-    public function logout(): void
-    {
-        $this->user = null;
-        $this->session->remove('user');
-        
-        if (isset($_COOKIE['remember_user'])) {
-            setcookie('remember_user', '', time() - 3600, '/');
-        }
-    }
-
-    public static function isGuest(): bool
-    {
-        return !self::$app->user;
-    }
-
-
-    public function getTitle(): string
-    {
-        if ($this->controller && method_exists($this->controller, 'getTitle')) {
-            $title = $this->controller->getTitle();
-            if (!empty($title)) {
-                return $title;
-            }
-        }
-
-        return match ($this->response->getStatusCode()) {
-            403 => '403 Forbidden | Library Booking App',
-            404 => '404 Not Found | Library Booking App',
-            default => 'Library Booking App',
-        };
-    }
-
 
     public function run(): void
 {
@@ -141,7 +82,7 @@ class App
         ];
 
         if (class_exists('\App\Core\Services\Logger')) {
-            \App\Core\Services\Logger::error('Unhandled exception', [
+            Logger::error('Unhandled exception', [
                 'error' => $e->getMessage(),
                 'file'  => $e->getFile(),
                 'line'  => $e->getLine(),
@@ -151,6 +92,5 @@ class App
         echo $this->router->renderView('errors/500', $context);
     }
 }
-
 }
     

@@ -45,7 +45,7 @@ abstract class Model
                     }
 
                     $domain = strtolower(substr(strrchr($value, '@'), 1));
-                    $allowed = ['stu.pnj.ac.id'];
+                    $allowed = ['stu.pnj.ac.id', 'pnj.ac.id'];
                     $departments = ['akuntansi', 'grafika', 'tik', 'mesin', 'sipil', 'bisnis', 'elektro'];
 
                     $valid = in_array($domain, $allowed, true)

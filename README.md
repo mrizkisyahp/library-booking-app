@@ -1,7 +1,5 @@
 # Library Booking App 
 
-Aplikasi web untuk booking ruangan perpustakaan, dibuat pakai PHP dengan arsitektur MVC. Ini adalah bagian dari project **PBL (Project-Based Learning)** di **Teknik Informatika – Politeknik Negeri Jakarta**.
-
 ## Cara Jalanin Aplikasi
 
 Yang dibutuhin:
@@ -61,35 +59,38 @@ Buka [https://myaccount.google.com/apppasswords](https://myaccount.google.com/ap
 **Buat Turnstile**  
 Buka [https://www.cloudflare.com/application-services/products/turnstile/]
 
-### 3. Bikin Database & Jalanin Migration
+### 3. Bikin Database, Jalanin Aplikasi
 
 ```sql
 CREATE DATABASE library_booking_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ```bash
-php migration.php
-php seed.php
+php Migration.php
+
+php Seed.php
+
+npm install
+
 npm run dev
+
+cd C:\xampp\htdocs\PBL\library-booking-app
+.\Mailpit\mailpit.exe --smtp :1025 --listen :8025
+
+php -S localhost:8000 -t public
 ```
 
 ```bash
 php rollback.php -> jika mau ngerollback migrasi
 ```
 
-### 4. Jalanin Server
-
-```bash
-php -S localhost:8000 -t public
-```
-
 Buka browser, akses **http://localhost:8000**
 
-### 5. Login
+### 4. Login
 
-**Admin:** `admin@pnj.ac.id` / `admin123`  
-**Mahasiswa:** `mahasiswa@stu.pnj.ac.id` / `test1234`  
-**Dosen:** `dosen@tik.pnj.ac.id` / `test1234`
+**Admin:** `admin@pnj.ac.id` / `admin`  
+**Mahasiswa:** `mahasiswa@stu.pnj.ac.id` / `mahasiswa`  
+**Dosen:** `dosen@pnj.ac.id` / `dosen`
 
 ---
 

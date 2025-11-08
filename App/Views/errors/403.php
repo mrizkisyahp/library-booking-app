@@ -6,7 +6,7 @@ use App\Core\App;
 <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-6 text-center">
   <div class="bg-white shadow-xl rounded-2xl p-10 max-w-lg w-full border border-gray-100">
     <div class="flex flex-col items-center space-y-3 mb-6">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
         403
       </div>
       <h1 class="text-3xl font-extrabold text-gray-800">Forbidden</h1>
@@ -21,7 +21,7 @@ use App\Core\App;
       </div>
     <?php endif; ?>
 
-    <a href="/login" class="inline-block px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl shadow transition-all">
+    <a href="/login" class="inline-block px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
       Go to Login
     </a>
   </div>

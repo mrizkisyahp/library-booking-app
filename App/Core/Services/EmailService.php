@@ -14,12 +14,12 @@ class EmailService
     {
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host = $_ENV['MAIL_HOST'] ?? 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['MAIL_USERNAME'] ?? $_ENV['MAIL_USER'] ?? '';
-        $mail->Password = $_ENV['MAIL_PASSWORD'] ?? $_ENV['MAIL_PASS'] ?? '';
-        $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'] ?? 'tls';
-        $mail->Port = (int)($_ENV['MAIL_PORT'] ?? 587);
+        $mail->Host = $_ENV['MAIL_HOST'];
+        $mail->SMTPAuth = false;
+        $mail->Username = $_ENV['MAIL_USERNAME'];
+        $mail->Password = $_ENV['MAIL_PASSWORD'];
+        $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
+        $mail->Port = (int)($_ENV['MAIL_PORT']);
         $mail->isHTML(true);
         return $mail;
     }
@@ -28,8 +28,8 @@ class EmailService
     {
         try {
             $mail = self::configureMailer();
-            $fromEmail = $_ENV['MAIL_FROM_ADDRESS'] ?? $_ENV['MAIL_USERNAME'] ?? $_ENV['MAIL_USER'] ?? 'noreply@librarybooking.local';
-            $fromName = $_ENV['MAIL_FROM_NAME'] ?? 'Library Booking App';
+            $fromEmail = $_ENV['MAIL_FROM_ADDRESS'];
+            $fromName = $_ENV['MAIL_FROM_NAME'];
             $mail->setFrom($fromEmail, $fromName);
             $mail->addAddress($to, $toName);
             if ($ccSelf) $mail->addCC($to);
@@ -46,18 +46,6 @@ class EmailService
 
     public static function sendVerificationCode(User $user, string $otp, string $purpose = 'register'): bool
     {
-        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-        
-        if ($isDevelopment) {
-            \App\Core\App::$app->session->set('dev_otp_display', [
-                'otp' => $otp,
-                'user' => $user->nama,
-                'email' => $user->email,
-                'purpose' => $purpose
-            ]);
-            return true;
-        }
-
         $subject = $purpose === 'reset_password'
             ? 'Password Reset Request | Library Booking App'
             : 'Account Verification Code | Library Booking App';
@@ -84,13 +72,6 @@ class EmailService
 
     public static function sendKubacaVerified(User $user): bool
     {
-        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-        
-        if ($isDevelopment) {
-            \App\Core\App::$app->session->setFlash('dev_email', 'KuBaca verified email would be sent to: ' . $user->email);
-            return true;
-        }
-
         $subject = 'KuBaca Verified | Library Booking App';
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
@@ -105,13 +86,6 @@ class EmailService
     // send valid notif
     public static function sendBookingValidated(User $user, $booking): bool
     {
-        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-        
-        if ($isDevelopment) {
-            \App\Core\App::$app->session->setFlash('dev_email', 'Booking validated email would be sent to: ' . $user->email);
-            return true;
-        }
-
         $subject = 'Booking Validated | Library Booking App';
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
@@ -129,12 +103,6 @@ class EmailService
     // send cancel notif
     public static function sendBookingCancelled(User $user, $booking, string $reason = ''): bool
     {
-        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-        
-        if ($isDevelopment) {
-            \App\Core\App::$app->session->setFlash('dev_email', 'Booking cancelled email would be sent to: ' . $user->email);
-            return true;
-        }
 
         $reasonText = $reason ? "<p><strong>Alasan:</strong> {$reason}</p>" : '';
 
@@ -156,13 +124,6 @@ class EmailService
     // send feedback notif
     public static function sendFeedbackRequest(User $user, $booking): bool
     {
-        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-        
-        if ($isDevelopment) {
-            \App\Core\App::$app->session->setFlash('dev_email', 'Feedback request email would be sent to: ' . $user->email);
-            return true;
-        }
-
         $subject = 'Berikan Feedback Anda | Library Booking App';
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
@@ -180,12 +141,6 @@ class EmailService
     // send check in remind
     public static function sendCheckInReminder(User $user, $booking): bool
     {
-        $isDevelopment = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-        
-        if ($isDevelopment) {
-            \App\Core\App::$app->session->setFlash('dev_email', 'Check-in reminder would be sent to: ' . $user->email);
-            return true;
-        }
 
         $subject = 'Reminder: Check-in Reservasi Anda | Library Booking App';
         $body = "

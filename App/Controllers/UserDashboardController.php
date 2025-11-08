@@ -2,9 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\App;
+use App\Core\Controller;
 use App\Core\Middleware\AuthMiddleware;
+use App\Models\Role;
+use App\Models\Booking;
 
 class UserDashboardController extends Controller
 {
@@ -15,21 +17,34 @@ class UserDashboardController extends Controller
 
     public function index()
     {
+        Booking::expireStaleDrafts();
+        /** @var \App\Models\User $user */
         $user = App::$app->user;
 
-        if ($user->role === 'mahasiswa' && $user->status === 'active' && !$user->kubaca_img) {
+        $roleName = Role::getNameById($user->id_role ?? null);
+        if ($roleName === 'mahasiswa' && $user->status === 'verified' && !$user->kubaca_img) {
             App::$app->session->setFlash('warning', 'Warning! Your account has not been verified, please upload kubaca image.');
         }
 
-        $stats = $this->getUserStatistics($user->id);
-        $recentBookings = $this->getRecentBookings($user->id);
+        $userId = (int)$user->id_user;
+        $stats = $this->getUserStatistics($userId);
+        $bookings = App::$app->db->pdo->prepare("
+            SELECT b.*, r.nama_ruangan,
+                EXISTS(SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking) AS feedback_submitted
+            FROM booking b
+            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
+            WHERE b.user_id = :user
+            ORDER BY b.created_at DESC
+        ");
+        $bookings->bindValue(':user', $user->id_user, \PDO::PARAM_INT);
+        $bookings->execute();
+        $pendingFeedbacks = Booking::getPendingFeedbackBookings($userId);
 
-        $this->setTitle('Dashboard | Library Booking App');
-        $this->setLayout('main');
-        return $this->render('user/dashboard', [
+        return $this->render('User/UserDashboard', [
             'user' => $user,
             'stats' => $stats,
-            'bookings' => $recentBookings
+            'bookings' => $bookings->fetchAll(\PDO::FETCH_ASSOC),
+            'pendingFeedbacks' => $pendingFeedbacks,
         ]);
     }
 
@@ -37,27 +52,27 @@ class UserDashboardController extends Controller
     {
         $db = App::$app->db;
 
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE user_id = :user_id");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id");
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
         $totalBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE user_id = :user_id AND status = 'pending'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'pending'");
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
         $pendingBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE user_id = :user_id AND status = 'validated'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'verified'");
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
         $validatedBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE user_id = :user_id AND status = 'active'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'ongoing'");
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
         $activeBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE user_id = :user_id AND status = 'completed'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'completed'");
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
         $completedBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
@@ -69,20 +84,5 @@ class UserDashboardController extends Controller
             'activeBookings' => $activeBookings,
             'completedBookings' => $completedBookings
         ];
-    }
-
-    private function getRecentBookings(int $userId): array
-    {
-        $sql = "SELECT b.*, r.title as room_title
-                FROM bookings b
-                INNER JOIN rooms r ON b.room_id = r.id
-                WHERE b.user_id = :user_id
-                ORDER BY b.created_at DESC
-                LIMIT 5";
-
-        $stmt = App::$app->db->prepare($sql);
-        $stmt->bindValue(':user_id', $userId);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

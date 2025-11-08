@@ -3,6 +3,7 @@
 namespace App\Core;
 
 use PDO;
+use PDOStatement;
 
 class Database
 {
@@ -10,12 +11,12 @@ class Database
 
     public function __construct(array $config)
     {
-        $host = $config['host'] ?? 'localhost';
-        $port = $config['port'] ?? '3306';
-        $dbname = $config['name'] ?? '';
-        $charset = $config['charset'] ?? 'utf8mb4';
-        $user = $config['user'] ?? '';
-        $pass = $config['pass'] ?? '';
+        $host = $config['host'];
+        $port = $config['port'];
+        $dbname = $config['name'];
+        $charset = $config['charset'];
+        $user = $config['user'];
+        $pass = $config['pass'];
 
         $this->pdo = new PDO(
             "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}",
@@ -102,7 +103,7 @@ class Database
     $this->log("Rolled back $lastMigration successfully.");
     }
 
-    public function prepare($sql)
+    public function prepare(string $sql): PDOStatement
     {
         return $this->pdo->prepare($sql);
     }

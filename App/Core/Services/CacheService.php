@@ -2,93 +2,67 @@
 
 namespace App\Core\Services;
 
+use App\Core\App;
+
 class CacheService
 {
-    private static ?\Redis $redis = null;
+    private const CACHE_DIR = '/Storage/Cache';
 
-    private static function getRedis(): ?\Redis
+    private static function getCachePath(string $key): string
     {
-        if (self::$redis === null && extension_loaded('redis')) {
-            try {
-                self::$redis = new \Redis();
-                self::$redis->connect('127.0.0.1', 6379);
-            } catch (\Exception $e) {
-                self::$redis = false;
-            }
+        $dir = App::$ROOT_DIR . self::CACHE_DIR;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
         }
-        return self::$redis ?: null;
+
+        return $dir . '/' . md5($key) . '.cache';
     }
 
     public static function set(string $key, mixed $value, int $ttl = 900): bool
     {
-        $redis = self::getRedis();
-        if ($redis) {
-            return $redis->setex($key, $ttl, serialize($value));
-        }
+        $file = self::getCachePath($key);
+        $data = [
+            'value' => $value,
+            'expires' => time() + $ttl,
+        ];
 
-        $dir = \App\Core\App::$ROOT_DIR . '/storage/cache';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
-        }
-        $file = $dir . '/' . md5($key) . '.cache';
-        $data = ['value' => $value, 'expires' => time() + $ttl];
         return file_put_contents($file, serialize($data)) !== false;
     }
 
     public static function get(string $key): mixed
     {
-        $redis = self::getRedis();
-        if ($redis) {
-            $value = $redis->get($key);
-            return $value !== false ? unserialize($value) : null;
-        }
-
-        $dir = \App\Core\App::$ROOT_DIR . '/storage/cache';
-        $file = $dir . '/' . md5($key) . '.cache';
-        
+        $file = self::getCachePath($key);
         if (!file_exists($file)) {
             return null;
         }
 
-        $data = unserialize(file_get_contents($file));
-        
-        if ($data['expires'] < time()) {
+        $data = @unserialize(file_get_contents($file));
+        if (!is_array($data) || ($data['expires'] ?? 0) < time()) {
             unlink($file);
             return null;
         }
 
-        return $data['value'];
+        return $data['value'] ?? null;
     }
 
     public static function delete(string $key): bool
     {
-        $redis = self::getRedis();
-        if ($redis) {
-            return $redis->del($key) > 0;
-        }
-
-        $dir = \App\Core\App::$ROOT_DIR . '/storage/cache';
-        $file = $dir . '/' . md5($key) . '.cache';
-        if (file_exists($file)) {
-            return unlink($file);
-        }
-        return true;
+        $file = self::getCachePath($key);
+        return file_exists($file) ? unlink($file) : true;
     }
 
     public static function clear(): void
     {
-        $redis = self::getRedis();
-        if ($redis) {
-            $redis->flushDB();
+        $dir = App::$ROOT_DIR . self::CACHE_DIR;
+        if (!is_dir($dir)) {
             return;
         }
 
-        $dir = \App\Core\App::$ROOT_DIR . '/storage/cache';
-        $files = glob($dir . '/*.cache');
-        foreach ($files as $file) {
+        foreach (glob($dir . '/*.cache') as $file) {
             if (is_file($file)) {
                 unlink($file);
             }
         }
     }
 }
+

@@ -8,13 +8,12 @@ use App\Controllers\VerifyController;
 use App\Controllers\PasswordController;
 use App\Controllers\UserDashboardController;
 use App\Controllers\AdminDashboardController;
-use App\Controllers\RoomController;
-use App\Controllers\BookingController;
-use App\Controllers\AdminRoomController;
-use App\Controllers\AdminUserController;
-use App\Controllers\AdminReportController;
+use App\Controllers\UserRoomController;
+use App\Controllers\UserBookingController;
 use App\Controllers\AdminBookingController;
 use App\Controllers\CheckInController;
+use App\Controllers\FeedbackController;
+use App\Models\User;
 
 // Auth routes
 $app->router->get('/', [AuthController::class, 'login']);
@@ -40,30 +39,21 @@ $app->router->get('/profile', [ProfileController::class, 'index']);
 $app->router->post('/upload-kubaca', [ProfileController::class, 'uploadKubaca']);
 
 // Room & booking routes 
-$app->router->get('/rooms', [RoomController::class, 'index']);
-$app->router->get('/room', [RoomController::class, 'view']);
-$app->router->get('/book', [BookingController::class, 'create']);
-$app->router->post('/book', [BookingController::class, 'create']);
-$app->router->get('/my-bookings', [BookingController::class, 'myBookings']);
+$app->router->get('/rooms', [UserRoomController::class, 'index']);
+$app->router->get('/rooms/show', [UserRoomController::class, 'show']);
+$app->router->get('/bookings/draft', [UserBookingController::class, 'showDraft']);
+$app->router->post('/bookings/draft', [UserBookingController::class, 'createDraft']);
+$app->router->post('/bookings/submit', [UserBookingController::class, 'submitDraft']);
+$app->router->post('/bookings/member', [UserBookingController::class, 'addMember']);
+$app->router->get('/feedback/create', [FeedbackController::class, 'create']);
+$app->router->post('/feedback', [FeedbackController::class, 'store']);
 
 // Check-in routes
 $app->router->get('/checkin', [CheckInController::class, 'index']);
-$app->router->post('/checkin/verify', [CheckInController::class, 'verify']);
-$app->router->post('/checkout', [CheckInController::class, 'checkout']);
+$app->router->post('/checkin', [CheckInController::class, 'verify']);
 
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index']);
-$app->router->get('/admin/rooms', [AdminRoomController::class, 'index']);
-$app->router->get('/admin/rooms/create', [AdminRoomController::class, 'create']);
-$app->router->post('/admin/rooms/create', [AdminRoomController::class, 'create']);
-$app->router->get('/admin/rooms/edit', [AdminRoomController::class, 'edit']);
-$app->router->post('/admin/rooms/edit', [AdminRoomController::class, 'edit']);
-$app->router->post('/admin/rooms/delete', [AdminRoomController::class, 'delete']);
-$app->router->get('/admin/users', [AdminUserController::class, 'index']);
-$app->router->post('/admin/users/status', [AdminUserController::class, 'updateStatus']);
 $app->router->get('/admin/bookings', [AdminBookingController::class, 'index']);
-$app->router->post('/admin/bookings/validate', [AdminBookingController::class, 'validate']);
-$app->router->post('/admin/bookings/cancel', [AdminBookingController::class, 'cancel']);
+$app->router->post('/admin/bookings/verify', [AdminBookingController::class, 'verify']);
 $app->router->post('/admin/bookings/complete', [AdminBookingController::class, 'complete']);
-$app->router->get('/admin/reports', [AdminReportController::class, 'index']);
-$app->router->get('/admin/reports/generate', [AdminReportController::class, 'generate']);

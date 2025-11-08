@@ -22,7 +22,7 @@ class AdminDashboardController extends Controller
         $recentBookings = $this->getRecentBookings();
         $roomUsage = $this->getRoomUsage();
 
-        return $this->render('admin/dashboard', [
+        return $this->render('Admin/AdminDashboard', [
             'stats' => $stats,
             'recentBookings' => $recentBookings,
             'roomUsage' => $roomUsage
@@ -35,42 +35,42 @@ class AdminDashboardController extends Controller
         $db = App::$app->db;
 
         // Total bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking");
         $stmt->execute();
         $totalBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Pending bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE status = 'pending'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = 'pending'");
         $stmt->execute();
         $pendingBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        // Active bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE status = 'active'");
+        // Ongoing bookings
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = 'active'");
         $stmt->execute();
         $activeBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Completed bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM bookings WHERE status = 'completed'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = 'completed'");
         $stmt->execute();
         $completedBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Total rooms
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM rooms");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM ruangan");
         $stmt->execute();
         $totalRooms = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Available rooms
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM rooms WHERE status = 'available'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM ruangan WHERE status_ruangan = 'available'");
         $stmt->execute();
         $availableRooms = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Total users
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE role != 'admin'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users u INNER JOIN role r ON u.id_role = r.id_role WHERE r.nama_role != 'admin'");
         $stmt->execute();
         $totalUsers = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Verified users
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE status = 'verified' AND role != 'admin'");
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users u INNER JOIN role r ON u.id_role = r.id_role WHERE u.status = 'verified' AND r.nama_role != 'admin'");
         $stmt->execute();
         $verifiedUsers = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
@@ -89,10 +89,10 @@ class AdminDashboardController extends Controller
     // recent booking
     private function getRecentBookings(): array
     {
-        $sql = "SELECT b.*, u.nama as user_name, r.title as room_title
-                FROM bookings b
-                INNER JOIN users u ON b.user_id = u.id
-                INNER JOIN rooms r ON b.room_id = r.id
+        $sql = "SELECT b.*, u.nama as user_name, r.nama_ruangan as room_title
+                FROM booking b
+                INNER JOIN users u ON b.user_id = u.id_user
+                INNER JOIN ruangan r ON b.ruangan_id = r.id_ruangan
                 ORDER BY b.created_at DESC
                 LIMIT 10";
 
@@ -104,10 +104,10 @@ class AdminDashboardController extends Controller
     // room usage
     private function getRoomUsage(): array
     {
-        $sql = "SELECT r.title, COUNT(b.id) as booking_count
-                FROM rooms r
-                LEFT JOIN bookings b ON r.id = b.room_id
-                GROUP BY r.id, r.title
+        $sql = "SELECT r.nama_ruangan, COUNT(b.id_booking) as booking_count
+                FROM ruangan r
+                LEFT JOIN booking b ON r.id_ruangan = b.ruangan_id
+                GROUP BY r.id_ruangan, r.nama_ruangan
                 ORDER BY booking_count DESC";
 
         $stmt = App::$app->db->prepare($sql);

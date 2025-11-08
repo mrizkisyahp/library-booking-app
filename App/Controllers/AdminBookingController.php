@@ -2,207 +2,83 @@
 
 namespace App\Controllers;
 
+use App\Core\App;
 use App\Core\Controller;
+use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\Middleware\AdminMiddleware;
+use App\Core\Services\Logger;
 use App\Models\Booking;
-use App\Models\User;
-use App\Core\App;
-use App\Core\Services\EmailService;
 
-class AdminBookingController extends Controller
-{
-    public function __construct()
-    {
+class AdminBookingController extends Controller {
+    public function __construct() {
         $this->registerMiddleware(new AdminMiddleware());
     }
 
-    public function index()
-    {
-        $this->setTitle('Manage Bookings | Admin');
+    public function index() {
+        Booking::expireStaleDrafts();
         $this->setLayout('main');
+        $this->setTitle('Manajemen Booking | Library Booking App');
 
-        $bookings = Booking::getAllBookingsWithDetails();
+        $pending = App::$app->db->pdo
+            ->query("SELECT * FROM booking ORDER BY created_at DESC")
+            ->fetchAll(\PDO::FETCH_ASSOC);
 
-        return $this->render('admin/bookings/index', [
-            'bookings' => $bookings
+        return $this->render('Admin/Bookings/Index', [
+            'bookings' => $pending,
         ]);
     }
 
-    // approve booking/validate booking
-    public function validate(Request $request, Response $response)
-    {
-        if (!$request->isPost()) {
+    public function verify(Request $request, Response $response) {
+        /** @var \App\Models\User $admin */
+        $admin = App::$app->user;
+        $id_booking = (int)($request->getBody()['booking_id']);
+        $booking = Booking::findOne($id_booking);
+
+        if (!$booking || $booking->status !== 'pending') {
+            App::$app->session->setFlash('error', 'Booking tidak valid');
             $response->redirect('/admin/bookings');
             return;
         }
 
-        // Validate CSRF token
-        if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-            App::$app->session->setFlash('error', 'Invalid CSRF token.');
-            $response->redirect('/admin/bookings');
-            return;
+        $booking->status = 'verified';
+        if (!$booking->checkin_code) {
+            $booking->checkin_code = $this->generateCheckinCode();
         }
+        $booking->save();
 
-        $bookingId = $_POST['booking_id'] ?? null;
-
-        if (!$bookingId) {
-            App::$app->session->setFlash('error', 'Booking not found.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $booking = Booking::findOne(['id' => $bookingId]);
-
-        if (!$booking) {
-            App::$app->session->setFlash('error', 'Booking not found.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        if ($booking->status !== 'pending') {
-            App::$app->session->setFlash('error', 'Only pending bookings can be validated.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        // Update status to validated
-        $stmt = App::$app->db->prepare("UPDATE bookings SET status = 'validated' WHERE id = :id");
-        $stmt->bindValue(':id', $bookingId);
-        
-        if ($stmt->execute()) {
-            // Get user info for email
-            $user = User::findOne(['id' => $booking->user_id]);
-            
-            // Send email notification
-            EmailService::sendBookingValidated($user, $booking);
-            
-            \App\Core\Services\Logger::info('Booking validated', [
-                'admin_id' => App::$app->user->id,
-                'booking_id' => $bookingId,
-                'user_id' => $booking->user_id
-            ]);
-            
-            App::$app->session->setFlash('success', 'Booking validated successfully!');
-        } else {
-            App::$app->session->setFlash('error', 'Failed to validate booking.');
-        }
-
+        Logger::admin('verified booking', (int)$admin->id_user, "Booking #{$id_booking} verified");
+        App::$app->session->setFlash('success', 'Booking disetujui.');
         $response->redirect('/admin/bookings');
     }
 
-    // cancel booking
-    public function cancel(Request $request, Response $response)
-    {
-        if (!$request->isPost()) {
+    public function complete(Request $request, Response $response) {
+        /** @var \App\Models\User $admin */
+        $admin = App::$app->user;
+        $id_booking = (int)($request->getBody()['booking_id']);
+        $booking = Booking::findOne($id_booking);
+
+        if (!$booking || $booking->status !== 'active') {
+            App::$app->session->setFlash('error', 'Booking tidak valid.');
             $response->redirect('/admin/bookings');
             return;
         }
 
-        // Validate CSRF token
-        if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-            App::$app->session->setFlash('error', 'Invalid CSRF token.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
+        $booking->status = 'completed';
+        $booking->save();
 
-        $bookingId = $_POST['booking_id'] ?? null;
-        $reason = $_POST['reason'] ?? 'Cancelled by admin';
-
-        if (!$bookingId) {
-            App::$app->session->setFlash('error', 'Booking not found.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $booking = Booking::findOne(['id' => $bookingId]);
-
-        if (!$booking) {
-            App::$app->session->setFlash('error', 'Booking not found.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        // Update status to cancelled
-        $stmt = App::$app->db->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = :id");
-        $stmt->bindValue(':id', $bookingId);
-        
-        if ($stmt->execute()) {
-            // Get user info for email
-            $user = User::findOne(['id' => $booking->user_id]);
-            
-            // Send email notification
-            EmailService::sendBookingCancelled($user, $booking, $reason);
-            
-            \App\Core\Services\Logger::info('Booking cancelled by admin', [
-                'admin_id' => App::$app->user->id,
-                'booking_id' => $bookingId,
-                'user_id' => $booking->user_id,
-                'reason' => $reason
-            ]);
-            
-            App::$app->session->setFlash('success', 'Booking cancelled successfully!');
-        } else {
-            App::$app->session->setFlash('error', 'Failed to cancel booking.');
-        }
-
+        Logger::admin('completed booking', (int)$admin->id_user, "Booking #{$id_booking} marked as completed");
+        App::$app->session->setFlash('success', 'Booking selesai.');
         $response->redirect('/admin/bookings');
     }
 
-    // tandain booking complete
-    public function complete(Request $request, Response $response)
+    private function generateCheckinCode(): string
     {
-        if (!$request->isPost()) {
-            $response->redirect('/admin/bookings');
-            return;
-        }
+        do {
+            $code = strtoupper(bin2hex(random_bytes(4)));
+            $exists = Booking::findOne(['checkin_code' => $code]);
+        } while ($exists);
 
-        // Validate CSRF token
-        if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-            App::$app->session->setFlash('error', 'Invalid CSRF token.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $bookingId = $_POST['booking_id'] ?? null;
-
-        if (!$bookingId) {
-            App::$app->session->setFlash('error', 'Booking not found.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $booking = Booking::findOne(['id' => $bookingId]);
-
-        if (!$booking) {
-            App::$app->session->setFlash('error', 'Booking not found.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        // Update status to completed
-        $stmt = App::$app->db->prepare("UPDATE bookings SET status = 'completed' WHERE id = :id");
-        $stmt->bindValue(':id', $bookingId);
-        
-        if ($stmt->execute()) {
-            // Get user info for feedback email
-            $user = User::findOne(['id' => $booking->user_id]);
-            
-            // Send feedback request email
-            EmailService::sendFeedbackRequest($user, $booking);
-            
-            \App\Core\Services\Logger::info('Booking completed', [
-                'admin_id' => App::$app->user->id,
-                'booking_id' => $bookingId,
-                'user_id' => $booking->user_id
-            ]);
-            
-            App::$app->session->setFlash('success', 'Booking marked as completed! Feedback request sent to user.');
-        } else {
-            App::$app->session->setFlash('error', 'Failed to complete booking.');
-        }
-
-        $response->redirect('/admin/bookings');
+        return $code;
     }
 }

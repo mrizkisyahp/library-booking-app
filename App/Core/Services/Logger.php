@@ -8,7 +8,7 @@ class Logger
 {
     private static function getLogDir(): string
     {
-        $dir = App::$ROOT_DIR . '/storage/logs';
+        $dir = App::$ROOT_DIR . '/Storage/Logs';
         if (!is_dir($dir)) {
             mkdir($dir, 0775, true);
         }
