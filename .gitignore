@@ -13,4 +13,3 @@ public/uploads/kubaca/*
 .DS_Store
 Thumbs.db
 composer.lock
-.env.example

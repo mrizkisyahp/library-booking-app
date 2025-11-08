@@ -11,8 +11,8 @@ use App\Controllers\AdminDashboardController;
 use App\Controllers\UserRoomController;
 use App\Controllers\UserBookingController;
 use App\Controllers\AdminBookingController;
-use App\Controllers\CheckInController;
 use App\Controllers\FeedbackController;
+use App\Controllers\CheckInController;
 use App\Models\User;
 
 // Auth routes
@@ -40,10 +40,10 @@ $app->router->post('/upload-kubaca', [ProfileController::class, 'uploadKubaca'])
 
 // Room & booking routes 
 $app->router->get('/rooms', [UserRoomController::class, 'index']);
-$app->router->get('/rooms/show', [UserRoomController::class, 'show']);
 $app->router->get('/bookings/draft', [UserBookingController::class, 'showDraft']);
 $app->router->post('/bookings/draft', [UserBookingController::class, 'createDraft']);
 $app->router->post('/bookings/submit', [UserBookingController::class, 'submitDraft']);
+$app->router->get('/rooms/show', [UserRoomController::class, 'show']);
 $app->router->post('/bookings/member', [UserBookingController::class, 'addMember']);
 $app->router->get('/feedback/create', [FeedbackController::class, 'create']);
 $app->router->post('/feedback', [FeedbackController::class, 'store']);
