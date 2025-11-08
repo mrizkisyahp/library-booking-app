@@ -22,37 +22,6 @@ composer install
 cp .env.example .env
 ```
 
-Buka file `.env`, isi konfigurasi database & email:
-```ini
-# Application
-APP_NAME = "Library Booking App"
-APP_ENV = development
-APP_DEBUG = true
-APP_TIMEZONE = Asia/Jakarta
-SESSION_LIFETIME = 7200
-
-
-# Database
-DB_HOST = localhost
-DB_PORT = 3306
-DB_NAME = library_booking_app
-DB_USER = root
-DB_PASS = 
-
-# Email (Gmail)
-MAIL_HOST = smtp.gmail.com
-MAIL_PORT = 587
-MAIL_USERNAME = yourgmail@gmail.com
-MAIL_PASSWORD = your_gmail_app_password
-MAIL_ENCRYPTION = tls
-MAIL_FROM_ADDRESS = yourgmail@gmail.com
-MAIL_FROM_NAME = "Library Booking App"
-
-# TURNSTILE
-TURNSTILE_SITE=your_site_key_here
-TURNSTILE_SECRET=your_secret_key_here
-```
-
 **Buat Gmail App Password:**  
 Buka [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), aktifin 2-Step Verification dulu, terus bikin app password buat SMTP.
 
