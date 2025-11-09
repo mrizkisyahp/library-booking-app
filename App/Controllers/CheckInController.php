@@ -9,12 +9,15 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Services\Logger;
 use App\Models\Booking;
+use App\Models\User;
 
 class CheckInController extends Controller
 {
+    protected ?User $currentUser = null;
     public function __construct()
     {
         $this->registerMiddleware(new AdminMiddleware());
+        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
     public function index()
@@ -50,8 +53,7 @@ class CheckInController extends Controller
         $booking->status = 'active';
         $booking->save();
 
-        /** @var \App\Models\User $admin */
-        $admin = App::$app->user;
+        $admin = $this->currentUser;
         Logger::admin('checked in booking', (int)$admin->id_user, "Booking #{$booking->id_booking} checked in with code: {$code}");
         App::$app->session->setFlash('success', 'Booking ditandai sebagai sedang berjalan.');
         $response->redirect('/admin/bookings');

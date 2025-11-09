@@ -9,10 +9,13 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Services\Logger;
 use App\Models\Booking;
+use App\Models\User;
 
 class AdminBookingController extends Controller {
+    protected ?User $currentUser = null;
     public function __construct() {
         $this->registerMiddleware(new AdminMiddleware());
+        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
     public function index() {
@@ -30,8 +33,7 @@ class AdminBookingController extends Controller {
     }
 
     public function verify(Request $request, Response $response) {
-        /** @var \App\Models\User $admin */
-        $admin = App::$app->user;
+        $admin = $this->currentUser;
         $id_booking = (int)($request->getBody()['booking_id']);
         $booking = Booking::findOne($id_booking);
 
@@ -53,8 +55,7 @@ class AdminBookingController extends Controller {
     }
 
     public function complete(Request $request, Response $response) {
-        /** @var \App\Models\User $admin */
-        $admin = App::$app->user;
+        $admin = $this->currentUser;
         $id_booking = (int)($request->getBody()['booking_id']);
         $booking = Booking::findOne($id_booking);
 

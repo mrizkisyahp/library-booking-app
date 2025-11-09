@@ -14,15 +14,16 @@ use App\Models\User;
 
 class FeedbackController extends Controller
 {
+    protected ?User $currentUser = null;
     public function __construct()
     {
         $this->registerMiddleware(new AuthMiddleware(['create', 'store']));
+        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
     public function create(Request $request, Response $response): string
     {
-        /** @var User|null $user */
-        $user = App::$app->user;
+        $user = $this->currentUser;
         if (!$user instanceof User) {
             $response->redirect('/login');
             return '';
@@ -54,14 +55,13 @@ class FeedbackController extends Controller
 
     public function store(Request $request, Response $response)
     {
+        $user = $this->currentUser;
         if (!$request->isPost()) {
             $response->redirect('/dashboard');
             return;
         }
 
-        /** @var User|null $user */
-        $user = App::$app->user;
-        if (!$user instanceof User) {
+        if (!$this->currentUser instanceof User) {
             $response->redirect('/login');
             return;
         }
