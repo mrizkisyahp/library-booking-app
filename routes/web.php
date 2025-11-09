@@ -47,6 +47,8 @@ $app->router->get('/rooms/show', [UserRoomController::class, 'show']);
 $app->router->post('/bookings/member', [UserBookingController::class, 'addMember']);
 $app->router->get('/feedback/create', [FeedbackController::class, 'create']);
 $app->router->post('/feedback', [FeedbackController::class, 'store']);
+$app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm']);
+$app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink']);
 
 // Check-in routes
 $app->router->get('/checkin', [CheckInController::class, 'index']);

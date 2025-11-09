@@ -3,6 +3,7 @@
 /** @var array $bookings */
 /** @var array $pendingFeedbacks */
 /** @var \App\Models\User $user */
+use App\Core\Csrf;
 use App\Core\App;
 ?>
 
@@ -119,6 +120,7 @@ use App\Core\App;
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Ruangan</th>
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Tanggal & Waktu</th>
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Status</th>
+                <th class="px-4 py-3 text-left font-semibold text-slate-700">Peran</th>
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Kode Check-in</th>
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Aksi</th>
               </tr>
@@ -152,6 +154,9 @@ use App\Core\App;
                     <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold <?= $statusColor ?>">
                       <?= htmlspecialchars($statusLabel) ?>
                     </span>
+                  </td>
+                  <td class="px-4 py-4 text-slate-600">
+                    <?= htmlspecialchars($booking['role']) ?>
                   </td>
                   <td class="px-4 py-4 text-center">
                     <?php if ($statusKey === 'verified' && !empty($booking['checkin_code'])): ?>
@@ -212,13 +217,7 @@ use App\Core\App;
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
           <span class="font-medium text-slate-700 group-hover:text-emerald-700">My Bookings</span>
-        </a>
-        <a href="/checkin" class="flex items-center p-3 rounded-xl hover:bg-emerald-50 transition-colors group">
-          <svg class="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span class="font-medium text-slate-700 group-hover:text-emerald-700">Check-in</span>
-        </a>
+        </a>  
         <a href="/profile" class="flex items-center p-3 rounded-xl hover:bg-emerald-50 transition-colors group">
           <svg class="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -228,18 +227,27 @@ use App\Core\App;
       </div>
     </div>
 
-    <!-- Help Section -->
-    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl shadow-lg p-6 border-2 border-emerald-200">
-      <div class="text-center">
-        <svg class="w-12 h-12 mx-auto text-emerald-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <!-- Join Booking -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
         </svg>
-        <h3 class="font-bold text-emerald-800 mb-2">Butuh Bantuan?</h3>
-        <p class="text-sm text-emerald-700 mb-4">Hubungi admin jika mengalami kendala</p>
-        <a href="/help" class="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm">
-          Hubungi Admin
-        </a>
-      </div>
+        Join Booking
+      </h2>
+      <p class="text-sm text-slate-600 mb-4">Punya token undangan? Gabung ke booking.</p>
+      <form method="post" action="/bookings/join" class="space-y-3">
+        <?= Csrf::field() ?>
+        <div>
+          <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
+                 class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                 placeholder="Masukkan token..." required>
+        </div>
+        <button type="submit"
+                class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow">
+          Gabung
+        </button>
+      </form>
     </div>
   </div>
 </div>

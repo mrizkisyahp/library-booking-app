@@ -3,6 +3,10 @@
 use App\Core\App;
 use App\Models\Booking;
 use App\Core\Csrf;
+use App\Models\User;
+
+$currentUser = App::$app->user instanceof User ? App::$app->user : null;
+$isOwner = $currentUser && (int)$currentUser->id_user === (int)$booking->user_id;
 
 /** @var Booking $booking */
 ?>
@@ -83,17 +87,36 @@ use App\Core\Csrf;
 
       <!-- Members Section -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center justify-between">
-          <span class="flex items-center">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-slate-800 flex items-center">
             <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Daftar Anggota
-          </span>
-          <span class="text-sm font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">
-            <?= (int)$currentMembers ?> / <?= (int)$requiredMembers ?> minimum
-          </span>
-        </h3>
+          </h3>
+          <div class="text-sm font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">
+            <?= (int)$currentMembers ?> / <?= isset($maximumMembers) && $maximumMembers > 0 ? (int)$maximumMembers : '∞' ?> peserta
+            <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+              · Min <?= (int)$requiredMembers ?>
+            <?php endif; ?>
+          </div>
+        </div>
+
+        <?php if (isset($maximumMembers) && $maximumMembers > 0 && $currentMembers >= $maximumMembers): ?>
+          <div class="mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div class="ml-3">
+                <p class="text-sm font-semibold text-red-800">Kapasitas Penuh</p>
+                <p class="text-sm text-red-700 mt-1">
+                  Ruangan sudah mencapai kapasitas maksimum. Anda tidak bisa menambah anggota lagi.
+                </p>
+              </div>
+            </div>
+          </div>
+        <?php endif; ?>
 
         <?php $members = $booking->getMembers(); ?>
         <?php if (empty($members)): ?>
@@ -115,62 +138,74 @@ use App\Core\Csrf;
                 <div class="flex-1 min-w-0">
                   <p class="font-semibold text-slate-800 truncate"><?= htmlspecialchars($member['nama'] ?? 'Unknown') ?></p>
                   <p class="text-sm text-slate-500 truncate"><?= htmlspecialchars($member['email']) ?></p>
+                  <?php if (!empty($member['is_owner'])): ?>
+                    <span class="text-xs text-emerald-600 font-semibold flex items-center mt-1">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      PIC
+                    </span>
+                  <?php endif; ?>
                 </div>
               </div>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
 
-        <!-- Add Member Form -->
-        <form action="/bookings/member" method="post" class="border-t pt-6">
-          <?= Csrf::field() ?>
-          <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Tambah Anggota</label>
-          <div class="flex gap-3">
-            <input type="email" name="member_email" required placeholder="Email anggota" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
-            <button type="submit" class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold whitespace-nowrap">
-              <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Tambah
-            </button>
-          </div>
-        </form>
+        <?php if ($isOwner): ?>
+          <!-- Add Member Form -->
+          <form action="/bookings/member" method="post" class="border-t pt-6">
+            <?= Csrf::field() ?>
+            <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Tambah Anggota</label>
+            <div class="flex gap-3">
+              <input type="email" name="member_email" required placeholder="Email anggota" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+              <button type="submit" class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold whitespace-nowrap">
+                <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Tambah
+              </button>
+            </div>
+          </form>
 
-        <!-- Requirement Warning -->
-        <?php if (!$canSubmit): ?>
-          <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <div class="ml-3">
-                <p class="text-sm font-semibold text-yellow-800">Anggota Belum Mencukupi</p>
-                <p class="text-sm text-yellow-700 mt-1">
-                  Minimal <?= (int)$requiredMembers ?> anggota diperlukan. Saat ini: <?= (int)$currentMembers ?> anggota.
-                </p>
+          <!-- Requirement Warning -->
+          <?php if (!$canSubmit): ?>
+            <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div class="ml-3">
+                  <p class="text-sm font-semibold text-yellow-800">Anggota Belum Mencukupi</p>
+                  <p class="text-sm text-yellow-700 mt-1">
+                    Minimal <?= (int)$requiredMembers ?> anggota diperlukan. Saat ini: <?= (int)$currentMembers ?> anggota.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          <?php endif; ?>
         <?php endif; ?>
       </div>
 
       <!-- Submit Form -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <form action="/bookings/submit" method="post">
-          <?= CSRF::field() ?>
-          <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
-          
-          <button type="submit" 
-            <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
-            class="w-full bg-primary text-white px-8 py-4 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
-          </button>
-        </form>
-      </div>
+      <?php if ($isOwner): ?>
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+          <form action="/bookings/submit" method="post">
+            <?= CSRF::field() ?>
+            <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
+            
+            <button type="submit" 
+              <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
+              class="w-full bg-primary text-white px-8 py-4 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
+            </button>
+          </form>
+        </div>
+      <?php endif; ?>
     </div>
 
     <!-- Sidebar -->

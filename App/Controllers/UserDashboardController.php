@@ -21,6 +21,11 @@ class UserDashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = App::$app->user;
 
+        if ((int)$user->id_role === 1) {
+            App::$app->response->redirect('/admin');
+            return;
+        }
+
         $roleName = Role::getNameById($user->id_role ?? null);
         if ($roleName === 'mahasiswa' && $user->status === 'verified' && !$user->kubaca_img) {
             App::$app->session->setFlash('warning', 'Warning! Your account has not been verified, please upload kubaca image.');
@@ -30,11 +35,22 @@ class UserDashboardController extends Controller
         $stats = $this->getUserStatistics($userId);
         $bookings = App::$app->db->pdo->prepare("
             SELECT b.*, r.nama_ruangan,
+            'PIC' AS role,
                 EXISTS(SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking) AS feedback_submitted
             FROM booking b
             JOIN ruangan r ON r.id_ruangan = b.ruangan_id
             WHERE b.user_id = :user
-            ORDER BY b.created_at DESC
+
+            UNION ALL
+
+            SELECT b.*, r.nama_ruangan,
+                'Anggota' AS role,
+                EXISTS(SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking) AS feedback_submitted
+            FROM booking b
+            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
+            JOIN anggota_booking ab ON ab.booking_id = b.id_booking
+            WHERE ab.user_id = :user AND b.user_id <> :user
+            ORDER BY created_at DESC
         ");
         $bookings->bindValue(':user', $user->id_user, \PDO::PARAM_INT);
         $bookings->execute();

@@ -3,18 +3,8 @@
 /** @var array $recentBookings */
 /** @var array $roomUsage */
 use App\Core\App;
+use App\Core\Csrf;
 ?>
-
-<?php if ($m = App::$app->session->getFlash('success')): ?>
-  <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-lg">
-    <div class="flex items-center">
-      <svg class="w-5 h-5 text-emerald-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-      </svg>
-      <p class="text-emerald-800 font-medium"><?= htmlspecialchars($m) ?></p>
-    </div>
-  </div>
-<?php endif; ?>
 
 <div class="mb-8">
   <h2 class="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
@@ -245,6 +235,28 @@ $users = $resourceStats['users'];
           </a>
         </li>
       </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+        Join Booking
+      </h2>
+      <p class="text-sm text-slate-600 mb-4">Punya token undangan? Gabung ke booking.</p>
+      <form method="post" action="/bookings/join" class="space-y-3">
+        <?= Csrf::field() ?>
+        <div>
+          <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
+                 class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                 placeholder="Masukkan token..." required>
+        </div>
+        <button type="submit"
+                class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow">
+          Gabung
+        </button>
+      </form>
     </div>
   </div>
 </div>

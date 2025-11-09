@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\App;
 use App\Core\Controller;
 use App\Core\Middleware\AuthMiddleware;
+use App\Core\Middleware\BookingMiddleware;
 use App\Core\Request;
 use App\Core\Response;
 use App\Models\Booking;
@@ -15,8 +16,16 @@ use App\Core\Services\Logger;
 use App\Models\Anggota_Booking;
 
 class UserBookingController extends Controller {
+    protected ?User $currentUser = null;
     public function __construct() {
         $this->registerMiddleware(new AuthMiddleware());
+        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
+
+        $this->registerMiddleware(new BookingMiddleware([
+            'showDraft',
+            'submitDraft',
+            'addMember',
+        ]));
     }
 
     public function createDraft(Request $request, Response $response) {
@@ -26,8 +35,7 @@ class UserBookingController extends Controller {
             return;
         }
 
-        /** @var User|null $user */
-        $user = App::$app->user;
+        $user = $this->currentUser;
         if (!$user instanceof User) {
             $response->redirect('/login');
             return;
@@ -49,8 +57,8 @@ class UserBookingController extends Controller {
             return;
         }
 
-        if (Booking::userHasUpcomingBooking((int)$user->id_user, $usageDate)) {
-            App::$app->session->setFlash('error', 'Anda sudah memiliki booking yang akan datang. Selesaikan terlebih dahulu sebelum membuat yang baru.');
+        if (Booking::userHasActiveParticipation((int)$user->id_user)) {
+            App::$app->session->setFlash('error', 'Anda sudah create booking/join booking yang akan datang. Selesaikan terlebih dahulu sebelum membuat yang baru.');
             $response->redirect('/dashboard');
             return;
         }
@@ -95,8 +103,7 @@ class UserBookingController extends Controller {
 
     public function submitDraft(Request $request, Response $response) {
         Booking::expireStaleDrafts();
-        /** @var User|null $user */
-        $user = App::$app->user;
+        $user = $this->currentUser;
         $id_booking = (int)($request->getBody()['booking_id']);
         $booking = Booking::findOne($id_booking);
 
@@ -106,8 +113,21 @@ class UserBookingController extends Controller {
             return;
         }
 
+        $currentUserId = (int)$user->id_user;
+        if (!$booking->userCanAccess($currentUserId)) {
+            App::$app->session->setFlash('error', 'Anda tidak memiliki akses ke draft ini.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
         if (!$booking->meetsMemberMinimum()) {
             App::$app->session->setFlash('error', 'Jumlah anggota belum memenuhi syarat minimum.');
+            $response->redirect('/bookings/draft?id=' . $booking->id_booking);
+            return;
+        }
+
+        if ($booking->meetsMemberMaximum()) {
+            App::$app->session->setFlash('error', 'Jumlah anggota melebihi kapaistas maksimal');
             $response->redirect('/bookings/draft?id=' . $booking->id_booking);
             return;
         }
@@ -122,21 +142,20 @@ class UserBookingController extends Controller {
 
     public function showDraft(Request $request, Response $response) {
         Booking::expireStaleDrafts();
-        /** @var User|null $user */
-        $user = App::$app->user;
+        $user = $this->currentUser;
         if (!$user instanceof User) {
             $response->redirect('/login');
             return;
         }
+        $body = $request->getBody();
+        $id_booking = (int)($body['id'] ?? $body['booking_id'] ?? 0);
+        $booking = Booking::findOne($id_booking);
 
         if (Booking::userHasPendingFeedback((int)$user->id_user)) {
             App::$app->session->setFlash('error', 'Silakan isi feedback untuk booking sebelumnya sebelum membuat booking baru.');
             $response->redirect('/dashboard');
             return;
         }
-
-        $body = $request->getBody();
-        $id_booking = (int)($body['id'] ?? $body['booking_id'] ?? 0);
         
         Logger::debug('showDraft accessed', [
             'user_id' => $user->id_user,
@@ -144,7 +163,6 @@ class UserBookingController extends Controller {
             'request_body' => $body
         ]);
         
-        $booking = Booking::findOne($id_booking);
         
         if (!$booking || $booking->status !== 'draft') {
             Logger::warning('Draft booking not found or invalid', [
@@ -158,19 +176,28 @@ class UserBookingController extends Controller {
             return;
         }
 
+        $currentUserId = (int)$user->id_user;
+        if (!$booking->userCanAccess($currentUserId)) {
+            App::$app->session->setFlash('error', 'Anda tidak memiliki akses ke draft ini.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
         $this->setLayout('main');
         $this->setTitle('Draft Booking');
 
         echo $this->render('User/Bookings/Draft', [
             'booking' => $booking,
-            'canSubmit' => $booking->meetsMemberMinimum(),
+            'canSubmit' => $booking->meetMemberRequirement(),
             'requiredMembers' => $booking->getMinimumMembersRequired(),
+            'maximumMembers' => $booking->getMaximumMembersRequired(),
             'currentMembers' => $booking->getMemberCount(),
         ]);
     }
 
     public function addMember(Request $request, Response $response) {
         Booking::expireStaleDrafts();
+        $user = $this->currentUser;
         if (!$request->isPost()) {
             $response->redirect('/dashboard');
             return;
@@ -178,6 +205,7 @@ class UserBookingController extends Controller {
 
         $bookingId = (int)$request->getBody()['booking_id'];
         $memberEmail = trim($request->getBody()['member_email']);
+        $currentUserId = (int)$user->id_user;
 
         $booking = Booking::findOne($bookingId);
         if (!$booking || $booking->status !== 'draft') {
@@ -189,6 +217,29 @@ class UserBookingController extends Controller {
         $member = User::findOne(['email' => $memberEmail]);
         if (!$member) {
             App::$app->session->setFlash('error', 'User tidak ditemukan.');
+            $response->redirect('/bookings/draft?id=' . $bookingId);
+            return;
+        }
+
+        if ((int)$member->id_user === (int)$booking->user_id) {
+            App::$app->session->setFlash('error', 'PIC tidak perlu ditambahkan sebagai anggota.');
+            $response->redirect('/bookings/draft?id=' . $bookingId);
+        }
+        
+        if (Booking::userHasActiveParticipation((int)$member->id_user)) {
+            App::$app->session->setFlash('error', 'User tersebut sudah terlibat dalam booking lain.');
+            $response->redirect('/bookings/draft?id=' . $bookingId);
+            return;
+        }
+
+        if ((int)$booking->user_id !== $currentUserId) {
+            App::$app->session->setFlash('error', 'Hanya PIC yang dapat menambah anggota.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
+        if ($booking->getMaximumMembersRequired()) {
+            App::$app->session->setFlash('error', 'Jumlah anggota sudah mencapai kapasitas maksimum.');
             $response->redirect('/bookings/draft?id=' . $bookingId);
             return;
         }
@@ -226,5 +277,67 @@ class UserBookingController extends Controller {
         } while ($exists);
 
         return $token;
+    }
+
+    public function showJoinForm(Request $request, Response $response)
+    {
+        $this->setLayout('main');
+        $this->setTitle('Gabung Booking');
+
+        return $this->render('User/Bookings/Join', [
+            'prefill' => $request->getBody()['token'] ?? null,
+        ]);
+    }
+
+    public function joinByLink(Request $request, Response $response) {
+        Booking::expireStaleDrafts();
+
+        $user = $this->currentUser;
+        if (!$user instanceof User) {
+            $response->redirect('/login');
+            return;
+        }
+
+        $body = $request->getBody();
+        $token = trim((string)$body['invite_token'] ?? '');
+        if ($token === '') {
+            App::$app->session->setFlash('error', 'Link tidak boleh kosong');
+            $response->redirect('/bookings/join');
+            return;
+        }
+        
+        $booking = Booking::findOne(['invite_token' => $token]);
+        if (!$booking || $booking->status !== 'draft') {
+        App::$app->session->setFlash('error', 'Link tidak valid.');
+        $response->redirect('/bookings/join');
+        return;
+        }
+
+        if ($booking->user_id === (int)$user->id_user) {
+            App::$app->session->setFlash('error', 'Anda adalah pemilik booking ini.');
+            $response->redirect('/bookings/join');
+            return;
+        }
+
+        $alreadyMember = App::$app->db->prepare("
+            SELECT 1 FROM anggota_booking where booking_id = :booking AND user_id = :user LIMIT 1
+        ");
+        $alreadyMember->bindValue(':booking', $booking->id_booking, \PDO::PARAM_INT);
+        $alreadyMember->bindValue(':user', $user->id_user, \PDO::PARAM_INT);
+        $alreadyMember->execute();
+
+        if ($alreadyMember->fetch()) {
+            App::$app->session->setFlash('info', 'Anda sudah tergabung.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
+        $member = new Anggota_Booking();
+        $member->booking_id = $booking->id_booking;
+        $member->user_id = $user->id_user;
+        $member->save();
+
+        App::$app->session->setFlash('success', 'Berhasil bergabung ke draft booking.');
+        $response->redirect('/bookings/draft?id=' . $booking->id_booking);
     }
 }
