@@ -57,32 +57,26 @@ class UserDashboardController extends Controller
         $stmt->execute();
         $totalBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'pending'");
-        $stmt->bindValue(':user_id', $userId);
-        $stmt->execute();
-        $pendingBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
-
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'verified'");
-        $stmt->bindValue(':user_id', $userId);
-        $stmt->execute();
-        $validatedBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
-
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'ongoing'");
-        $stmt->bindValue(':user_id', $userId);
-        $stmt->execute();
-        $activeBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
-
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = 'completed'");
-        $stmt->bindValue(':user_id', $userId);
-        $stmt->execute();
-        $completedBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $statusList = ['draft', 'pending', 'verified', 'active', 'completed', 'cancelled', 'expired', 'no_show'];
+        $statusCounts = [];
+        foreach ($statusList as $status) {
+            $statusCounts[$status] = $this->countByStatus($userId, $status);
+        }
 
         return [
             'totalBookings' => $totalBookings,
-            'pendingBookings' => $pendingBookings,
-            'validatedBookings' => $validatedBookings,
-            'activeBookings' => $activeBookings,
-            'completedBookings' => $completedBookings
+            'statusCounts' => $statusCounts,
         ];
+    }
+
+    private function countByStatus(int $userId, string $status): int
+    {
+        $stmt = App::$app->db->prepare("
+            SELECT COUNT(*) as count FROM booking WHERE user_id = :user_id AND status = :status
+        ");
+        $stmt->bindValue(':user_id', $userId);
+        $stmt->bindValue(':status', $status);
+        $stmt->execute();
+        return (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
     }
 }

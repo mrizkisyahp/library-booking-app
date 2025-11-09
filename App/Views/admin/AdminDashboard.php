@@ -21,150 +21,196 @@ use App\Core\App;
   <p class="text-gray-600 mt-2">Kelola sistem booking ruangan perpustakaan</p>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <div class="col-span-2 p-4 border-r border-r-gray-300">
-    <h2 class="text-lg font-medium">
-      Your Booking Statistics
-    </h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Total Booking</p>
-        <div class="text-3xl font-bold text-emerald-600">
-          <?= $stats['totalBookings'] ?>
+<?php
+$bookingStats = $stats['bookingStats'] ?? ['total' => 0, 'statuses' => []];
+$resourceStats = $stats['resources'] ?? [
+  'rooms' => ['total' => 0, 'available' => 0, 'unavailable' => 0],
+  'users' => ['total' => 0, 'verified' => 0, 'pending' => 0],
+];
+$statusCards = [
+  'draft' => ['label' => 'Draft', 'class' => 'from-gray-50 to-gray-100 border-gray-200'],
+  'pending' => ['label' => 'Pending', 'class' => 'from-yellow-50 to-yellow-100 border-yellow-200'],
+  'verified' => ['label' => 'Verified', 'class' => 'from-blue-50 to-blue-100 border-blue-200'],
+  'active' => ['label' => 'Active', 'class' => 'from-emerald-50 to-emerald-100 border-emerald-200'],
+  'completed' => ['label' => 'Completed', 'class' => 'from-green-50 to-green-100 border-green-200'],
+  'cancelled' => ['label' => 'Cancelled', 'class' => 'from-red-50 to-red-100 border-red-200'],
+  'expired' => ['label' => 'Expired', 'class' => 'from-slate-50 to-slate-100 border-slate-200'],
+  'no_show' => ['label' => 'No-Show', 'class' => 'from-orange-50 to-orange-100 border-orange-200'],
+];
+$rooms = $resourceStats['rooms'];
+$users = $resourceStats['users'];
+?>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <div class="xl:col-span-2 space-y-6">
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900">Booking Stats</h3>
+          <p class="text-sm text-gray-500">Total booking dan distribusi status terkini</p>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Pending</p>
-        <div class="text-3xl font-bold text-yellow-600">
-          <?= $stats['pendingBookings'] ?>
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
+          <p class="text-xs font-semibold text-blue-600 mb-1">Total Booking</p>
+          <p class="text-3xl font-bold text-blue-800"><?= $bookingStats['total'] ?? 0 ?></p>
+        </div>
+        <?php foreach ($statusCards as $key => $config): ?>
+          <div class="bg-gradient-to-br <?= $config['class'] ?> rounded-xl p-4 border-2">
+            <p class="text-xs font-semibold text-slate-600 mb-1"><?= $config['label'] ?></p>
+            <p class="text-3xl font-bold text-slate-900"><?= $bookingStats['statuses'][$key] ?? 0 ?></p>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900">System / Resources</h3>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Active</p>
-        <div class="text-3xl font-bold text-blue-600">
-          <?= $stats['activeBookings'] ?>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h4 class="text-sm font-semibold text-gray-600 mb-3">Rooms</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
+              <p class="text-xs font-semibold text-purple-600 mb-1">Total</p>
+              <p class="text-2xl font-bold text-purple-800"><?= $rooms['total'] ?></p>
+            </div>
+            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border-2 border-emerald-200">
+              <p class="text-xs font-semibold text-emerald-600 mb-1">Available</p>
+              <p class="text-2xl font-bold text-emerald-800"><?= $rooms['available'] ?></p>
+            </div>
+            <div class="bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl p-4 border-2 border-rose-200">
+              <p class="text-xs font-semibold text-rose-600 mb-1">Unavailable</p>
+              <p class="text-2xl font-bold text-rose-800"><?= $rooms['unavailable'] ?></p>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Completed</p>
-        <div class="text-3xl font-bold text-green-600">
-          <?= $stats['completedBookings'] ?>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Total Rooms</p>
-        <div class="text-3xl font-bold text-purple-600">
-          <?= $stats['totalRooms'] ?>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Available Rooms</p>
-        <div class="text-3xl font-bold text-indigo-600">
-          <?= $stats['availableRooms'] ?>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Total Users</p>
-        <div class="text-3xl font-bold text-teal-600">
-          <?= $stats['totalUsers'] ?>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-        <p class="text-sm font-semibold text-gray-600 mb-2">Verified Users</p>
-        <div class="text-3xl font-bold text-cyan-600">
-          <?= $stats['verifiedUsers'] ?>
+        <div>
+          <h4 class="text-sm font-semibold text-gray-600 mb-3">Users</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 border-2 border-teal-200">
+              <p class="text-xs font-semibold text-teal-600 mb-1">Total</p>
+              <p class="text-2xl font-bold text-teal-800"><?= $users['total'] ?></p>
+            </div>
+            <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 border-2 border-cyan-200">
+              <p class="text-xs font-semibold text-cyan-600 mb-1">Verified</p>
+              <p class="text-2xl font-bold text-cyan-800"><?= $users['verified'] ?></p>
+            </div>
+            <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 border-2 border-amber-200">
+              <p class="text-xs font-semibold text-amber-600 mb-1">Pending</p>
+              <p class="text-2xl font-bold text-amber-800"><?= $users['pending'] ?></p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="mt-8">
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <h2 class="text-xl font-semibold text-gray-900 mb-4">
         Recent Bookings
       </h2>
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-        <?php if (empty($recentBookings)): ?>
-          <p class="p-6 text-gray-600 text-center">No recent bookings.</p>
-        <?php else: ?>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">User</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Room</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date & Time</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+      <?php if (empty($recentBookings)): ?>
+        <p class="p-6 text-gray-600 text-center">No recent bookings.</p>
+      <?php else: ?>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">User</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Room</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date & Time</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <?php
+              $statusBadges = [
+                'draft' => 'bg-gray-100 text-gray-800',
+                'pending' => 'bg-yellow-100 text-yellow-800',
+                'verified' => 'bg-blue-100 text-blue-800',
+                'active' => 'bg-emerald-100 text-emerald-800',
+                'completed' => 'bg-green-100 text-green-800',
+                'cancelled' => 'bg-red-100 text-red-800',
+                'expired' => 'bg-slate-100 text-slate-600',
+                'no_show' => 'bg-orange-100 text-orange-800',
+              ];
+              ?>
+              <?php foreach ($recentBookings as $booking): ?>
+                <?php
+                  $statusKey = strtolower($booking['status']);
+                  $badgeClass = $statusBadges[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                  $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
+                ?>
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($booking['user_name']) ?></td>
+                  <td class="px-6 py-4 text-sm text-gray-700"><?= htmlspecialchars($booking['room_title']) ?></td>
+                  <td class="px-6 py-4 text-sm text-gray-700">
+                    <?= htmlspecialchars($booking['tanggal_penggunaan_ruang']) ?>
+                    <?= htmlspecialchars($booking['waktu_mulai']) ?> - <?= htmlspecialchars($booking['waktu_selesai']) ?>
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full <?= $badgeClass ?>">
+                      <?= htmlspecialchars($statusLabel) ?>
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                <?php foreach ($recentBookings as $booking): ?>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($booking['user_name']) ?></td>
-                    <td class="px-6 py-4 text-sm text-gray-700"><?= htmlspecialchars($booking['room_title']) ?></td>
-                    <td class="px-6 py-4 text-sm text-gray-700"><?= htmlspecialchars($booking['tanggal_penggunaan_ruang']) ?> <?= htmlspecialchars($booking['waktu_mulai']) ?> - <?= htmlspecialchars($booking['waktu_selesai']) ?></td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-2 py-1 text-xs font-semibold rounded-full <?= $booking['status'] === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800' ?>">
-                        <?= htmlspecialchars(ucfirst($booking['status'])) ?>
-                      </span>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        <?php endif; ?>
-      </div>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php endif; ?>
     </div>
 
-    <div class="mt-8">
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <h2 class="text-xl font-semibold text-gray-900 mb-4">
         Rooms Usage
       </h2>
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-        <?php if (empty($roomUsage)): ?>
-          <p class="p-6 text-gray-600 text-center">No room usage data.</p>
-        <?php else: ?>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-800">
-              <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
-                <tr>
-                  <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Room</th>
-                  <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Total Bookings</th>
-                  <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Usage (%)</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                <?php
-                $totalBookings = array_sum(array_column($roomUsage, 'booking_count'));
-                foreach ($roomUsage as $usage):
-                  $usagePercentage = $totalBookings > 0 ? round(($usage['booking_count'] / $totalBookings) * 100, 2) : 0;
-                  ?>
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><?= htmlspecialchars($usage['nama_ruangan']) ?></td>
-                    <td class="px-6 py-4 text-gray-700"><?= $usage['booking_count'] ?></td>
-                    <td class="px-6 py-4 text-gray-900">
-                      <div class="flex items-center">
-                        <span class="font-semibold"><?= $usagePercentage ?>%</span>
-                        <div class="ml-3 w-24 bg-gray-200 rounded-full h-2">
-                          <div class="bg-emerald-600 h-2 rounded-full" style="width: <?= $usagePercentage ?>%"></div>
-                        </div>
+      <?php if (empty($roomUsage)): ?>
+        <p class="p-6 text-gray-600 text-center">No room usage data.</p>
+      <?php else: ?>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-800">
+            <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
+              <tr>
+                <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Room</th>
+                <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Total Bookings</th>
+                <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Usage (%)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <?php
+              $totalBookingsRoom = array_sum(array_column($roomUsage, 'booking_count'));
+              foreach ($roomUsage as $usage):
+                $usagePercentage = $totalBookingsRoom > 0 ? round(($usage['booking_count'] / $totalBookingsRoom) * 100, 2) : 0;
+              ?>
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><?= htmlspecialchars($usage['nama_ruangan']) ?></td>
+                  <td class="px-6 py-4 text-gray-700"><?= $usage['booking_count'] ?></td>
+                  <td class="px-6 py-4 text-gray-900">
+                    <div class="flex items-center">
+                      <span class="font-semibold"><?= $usagePercentage ?>%</span>
+                      <div class="ml-3 w-24 bg-gray-200 rounded-full h-2">
+                        <div class="bg-emerald-600 h-2 rounded-full" style="width: <?= $usagePercentage ?>%"></div>
                       </div>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        <?php endif; ?>
-      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php endif; ?>
     </div>
-
   </div>
 
-  <div class="mt-4">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">
-      Quick Links
-    </h2>
-    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+  <div class="space-y-6">
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">
+        Quick Links
+      </h2>
       <ul class="space-y-3">
         <li>
           <a href="/admin/bookings" class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">

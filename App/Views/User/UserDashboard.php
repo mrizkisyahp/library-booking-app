@@ -63,27 +63,29 @@ use App\Core\App;
         </svg>
         Statistik Booking Anda
       </h2>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <?php
+        $statusCards = [
+          'draft' => ['label' => 'Draft', 'class' => 'from-gray-50 to-gray-100 border-gray-200'],
+          'pending' => ['label' => 'Pending', 'class' => 'from-yellow-50 to-yellow-100 border-yellow-200'],
+          'verified' => ['label' => 'Verified', 'class' => 'from-blue-50 to-blue-100 border-blue-200'],
+          'active' => ['label' => 'Active', 'class' => 'from-emerald-50 to-emerald-100 border-emerald-200'],
+          'completed' => ['label' => 'Completed', 'class' => 'from-green-50 to-green-100 border-green-200'],
+          'cancelled' => ['label' => 'Cancelled', 'class' => 'from-red-50 to-red-100 border-red-200'],
+          'expired' => ['label' => 'Expired', 'class' => 'from-slate-50 to-slate-100 border-slate-200'],
+          'no_show' => ['label' => 'No-Show', 'class' => 'from-orange-50 to-orange-100 border-orange-200'],
+        ];
+      ?>
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
         <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
           <p class="text-xs font-semibold text-blue-600 mb-1">Total</p>
           <p class="text-3xl font-bold text-blue-700"><?= $stats['totalBookings'] ?? 0 ?></p>
         </div>
-        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 border-2 border-yellow-200">
-          <p class="text-xs font-semibold text-yellow-600 mb-1">Pending</p>
-          <p class="text-3xl font-bold text-yellow-700"><?= $stats['pendingBookings'] ?? 0 ?></p>
-        </div>
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
-          <p class="text-xs font-semibold text-purple-600 mb-1">Validated</p>
-          <p class="text-3xl font-bold text-purple-700"><?= $stats['validatedBookings'] ?? 0 ?></p>
-        </div>
-        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border-2 border-emerald-200">
-          <p class="text-xs font-semibold text-emerald-600 mb-1">Active</p>
-          <p class="text-3xl font-bold text-emerald-700"><?= $stats['activeBookings'] ?? 0 ?></p>
-        </div>
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border-2 border-green-200">
-          <p class="text-xs font-semibold text-green-600 mb-1">Completed</p>
-          <p class="text-3xl font-bold text-green-700"><?= $stats['completedBookings'] ?? 0 ?></p>
-        </div>
+        <?php foreach ($statusCards as $statusKey => $config): ?>
+          <div class="bg-gradient-to-br <?= $config['class'] ?> rounded-xl p-4 border-2">
+            <p class="text-xs font-semibold text-slate-600 mb-1"><?= $config['label'] ?></p>
+            <p class="text-3xl font-bold text-slate-800"><?= $stats['statusCounts'][$statusKey] ?? 0 ?></p>
+          </div>
+        <?php endforeach; ?>
       </div>
     </div>
 
@@ -136,31 +138,34 @@ use App\Core\App;
                     $statusColors = [
                       'draft' => 'bg-gray-100 text-gray-800',
                       'pending' => 'bg-yellow-100 text-yellow-800',
-                      'validated' => 'bg-purple-100 text-purple-800',
                       'verified' => 'bg-blue-100 text-blue-800',
                       'active' => 'bg-emerald-100 text-emerald-800',
                       'completed' => 'bg-green-100 text-green-800',
-                      'cancelled' => 'bg-red-100 text-red-800'
+                      'cancelled' => 'bg-red-100 text-red-800',
+                      'expired' => 'bg-slate-100 text-slate-700',
+                      'no_show' => 'bg-orange-100 text-orange-800',
                     ];
-                    $statusColor = $statusColors[strtolower($booking['status'])] ?? 'bg-gray-100 text-gray-800';
+                    $statusKey = strtolower($booking['status']);
+                    $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                    $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
                     ?>
                     <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold <?= $statusColor ?>">
-                      <?= htmlspecialchars(ucfirst($booking['status'])) ?>
+                      <?= htmlspecialchars($statusLabel) ?>
                     </span>
                   </td>
                   <td class="px-4 py-4 text-center">
-                    <?php if ($booking['status'] === 'verified' && !empty($booking['checkin_code'])): ?>
+                    <?php if ($statusKey === 'verified' && !empty($booking['checkin_code'])): ?>
                       <span class="font-mono font-bold text-emerald-600 text-lg"><?= htmlspecialchars($booking['checkin_code']) ?></span>
                     <?php else: ?>
                       <span class="text-slate-400">—</span>
                     <?php endif; ?>
                   </td>
                   <td class="px-4 py-4">
-                    <?php if ($booking['status'] === 'draft'): ?>
+                    <?php if ($statusKey === 'draft'): ?>
                       <a href="/bookings/draft?id=<?= (int)$booking['id_booking'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
                         Lihat Draft
                       </a>
-                    <?php elseif ($booking['status'] === 'completed' && empty($booking['feedback_submitted'])): ?>
+                    <?php elseif ($statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
                       <a href="/feedback/create?booking=<?= (int)$booking['id_booking'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
                         Isi Feedback
                       </a>

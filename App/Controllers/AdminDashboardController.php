@@ -37,53 +37,63 @@ class AdminDashboardController extends Controller
         // Total bookings
         $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking");
         $stmt->execute();
-        $totalBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $totalBookings = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        // Pending bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
-
-        // Ongoing bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = 'active'");
-        $stmt->execute();
-        $activeBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
-
-        // Completed bookings
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = 'completed'");
-        $stmt->execute();
-        $completedBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        // Booking status distribution
+        $statusList = ['draft', 'pending', 'verified', 'active', 'completed', 'cancelled', 'expired', 'no_show'];
+        $statusCounts = [];
+        foreach ($statusList as $status) {
+            $statusCounts[$status] = $this->countBookingByStatus($status);
+        }
 
         // Total rooms
         $stmt = $db->prepare("SELECT COUNT(*) as count FROM ruangan");
         $stmt->execute();
-        $totalRooms = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $totalRooms = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Available rooms
         $stmt = $db->prepare("SELECT COUNT(*) as count FROM ruangan WHERE status_ruangan = 'available'");
         $stmt->execute();
-        $availableRooms = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $availableRooms = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $unavailableRooms = max($totalRooms - $availableRooms, 0);
 
         // Total users
         $stmt = $db->prepare("SELECT COUNT(*) as count FROM users u INNER JOIN role r ON u.id_role = r.id_role WHERE r.nama_role != 'admin'");
         $stmt->execute();
-        $totalUsers = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $totalUsers = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
         // Verified users
         $stmt = $db->prepare("SELECT COUNT(*) as count FROM users u INNER JOIN role r ON u.id_role = r.id_role WHERE u.status = 'verified' AND r.nama_role != 'admin'");
         $stmt->execute();
-        $verifiedUsers = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $verifiedUsers = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $pendingUsers = max($totalUsers - $verifiedUsers, 0);
 
         return [
-            'totalBookings' => $totalBookings,
-            'pendingBookings' => $pendingBookings,
-            'activeBookings' => $activeBookings,
-            'completedBookings' => $completedBookings,
-            'totalRooms' => $totalRooms,
-            'availableRooms' => $availableRooms,
-            'totalUsers' => $totalUsers,
-            'verifiedUsers' => $verifiedUsers
+            'bookingStats' => [
+                'total' => $totalBookings,
+                'statuses' => $statusCounts,
+            ],
+            'resources' => [
+                'rooms' => [
+                    'total' => $totalRooms,
+                    'available' => $availableRooms,
+                    'unavailable' => $unavailableRooms,
+                ],
+                'users' => [
+                    'total' => $totalUsers,
+                    'verified' => $verifiedUsers,
+                    'pending' => $pendingUsers,
+                ],
+            ],
         ];
+    }
+
+    private function countBookingByStatus(string $status): int
+    {
+        $stmt = App::$app->db->prepare("SELECT COUNT(*) as count FROM booking WHERE status = :status");
+        $stmt->bindValue(':status', $status);
+        $stmt->execute();
+        return (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
     }
 
     // recent booking
