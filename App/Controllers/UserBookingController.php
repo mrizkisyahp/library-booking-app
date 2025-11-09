@@ -238,7 +238,7 @@ class UserBookingController extends Controller {
             return;
         }
 
-        if ($booking->getMaximumMembersRequired()) {
+        if ($booking->meetsMemberMaximum()) {
             App::$app->session->setFlash('error', 'Jumlah anggota sudah mencapai kapasitas maksimum.');
             $response->redirect('/bookings/draft?id=' . $bookingId);
             return;
