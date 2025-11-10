@@ -1,12 +1,12 @@
 <?php use App\Core\Csrf; ?>
 <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-  <h2 class="text-2xl font-bold text-slate-800 mb-4">Masukkan Token Undangan</h2>
-  <p class="text-slate-600 mb-6">Tempel token yang dibagikan oleh ketua booking untuk bergabung.</p>
+  <h2 class="text-2xl font-bold text-slate-800 mb-4">Masukkan Code Undangan</h2>
+  <p class="text-slate-600 mb-6">Tempel code yang dibagikan oleh ketua booking untuk bergabung.</p>
 
   <form method="post" action="/bookings/join" class="space-y-4">
     <?= Csrf::field() ?>
     <div>
-      <label class="block text-sm font-semibold text-slate-700 mb-2">Token</label>
+      <label class="block text-sm font-semibold text-slate-700 mb-2">Code</label>
       <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
              placeholder="Contoh: 9f1c2e3a4b5d6f78..." required>

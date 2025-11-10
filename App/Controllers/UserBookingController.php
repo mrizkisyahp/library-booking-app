@@ -12,6 +12,7 @@ use App\Models\Booking;
 use App\Models\Room;
 use App\Models\User;
 use App\Core\Services\BookingValidator;
+use App\Core\Services\EmailService;
 use App\Core\Services\Logger;
 use App\Models\Anggota_Booking;
 
@@ -65,7 +66,7 @@ class UserBookingController extends Controller {
 
         $validation = BookingValidator::validate($body, $room, $user);
         if (!$validation['valid']) {
-            App::$app->session->setFlash('error', implode(' ', $validation['errors']));
+            App::$app->session->setFlash('error', implode("\n", $validation['errors']));
             $response->redirect('/rooms/show?id_ruangan=' . $room->id_ruangan);
             return;
         }
@@ -80,14 +81,49 @@ class UserBookingController extends Controller {
         $booking->tujuan = $body['tujuan'];
         $booking->status = 'draft';
         // error_log('Before save - status: ' . $booking->status);
-        $booking->invite_token = $booking->invite_token ?? $this->generateInviteToken();
+        $booking->invite_token = $booking->invite_token ?? $this->generateInviteKode();
         
         if ($booking->save()) {
+
+            $room = Room::findOne(['id_ruangan' => $roomId]);
+            $pic = User::findOne(['id_user' => $booking->user_id]);
+            $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
+            if ($pic instanceof User) {
+                $subject = 'Created Booking Draft | Library Booking App';
+                $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
+                $emailBody = "
+                <p> Hai <strong>{$pic->nama}</strong>, </p>
+                <p> Anda membuat booking di <strong>{$room->nama_ruangan}</strong> </p>
+                <p> <strong> Tanggal Penggunaan: </strong> {$bookingDate} </p>
+                <p> <strong> Waktu: </strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+                <p> <strong> Kami harap anda untuk segera menambahkan anggota sesuai dengan kapasitas minimum: <strong>{$room->kapasitas_min}</strong> dan kapasitas maksimum ruangan <strong>{$room->kapasitas_max}</strong> </p>
+                <p> <strong> Batas akhir pengiriman draft adalah 5 menit sebelum waktu mulai </strong> </p>
+                <p> <strong> Jika melewati batas akhir maka akan booking akan otomatis expired dan konsekuensi peringatan akan ditanggung oleh PIC (Orang yang membuat booking) </strong </p>
+
+                <p> Terima kasih, <br> Library Booking App </p>
+                ";
+
+            $emailSent = EmailService::send($pic->email, $pic->nama, $subject, $emailBody);
+            if (!$emailSent) {
+                Logger::warning('Failed to send notification email', [
+                    'booking_id' => $booking->id_booking,
+                    'user_id' => $pic->id_user,
+                ]);
+            }
+            } else {
+                Logger::warning('Booking Owner not found while sending approval email', [
+                    'booking_id' => $booking->id_booking,
+                    'user_id' => $booking->user_id,
+                ]);
+            }
+
             Logger::booking('draft created', (int)$user->id_user, $booking->id_booking, [
                 'room_id' => $roomId,
                 'usage_date' => $usageDate,
-                'time' => $body['waktu_mulai'] . ' - ' . $body['waktu_selesai']
+                'time' => $body['waktu_mulai'] . ' - ' . $body['waktu_selesai'],
+                'status' => $booking->status
             ]);
+
             App::$app->session->setFlash('success', 'Draft booking berhasil dibuat.');
             $response->redirect('/bookings/draft?id=' . $booking->id_booking);
             return;
@@ -126,14 +162,57 @@ class UserBookingController extends Controller {
             return;
         }
 
-        if ($booking->meetsMemberMaximum()) {
-            App::$app->session->setFlash('error', 'Jumlah anggota melebihi kapaistas maksimal');
+        $maxMembers = $booking->getMaximumMembersRequired();
+        $currentMembers = $maxMembers > 0 ? $booking->getMemberCount() : 0;
+        if ($maxMembers > 0 && $currentMembers > $maxMembers) {
+            // error_log(sprintf(
+            //     'Maximum members exceeded for booking %d: %d/%d',
+            //     $booking->id_booking,
+            //     $currentMembers,
+            //     $maxMembers
+            // ));
+            App::$app->session->setFlash('error', 'Jumlah anggota melebihi kapasitas maksimal');
             $response->redirect('/bookings/draft?id=' . $booking->id_booking);
             return;
         }
 
         $booking->status ='pending';
         $booking->save();
+
+        $pic = User::findone(['id_user' => $booking->user_id]);
+        if ($pic instanceof User) {
+            $room = Room::findone(['id_ruangan' => $booking->ruangan_id]);
+            $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
+            $subject = 'Draft sent | Library Booking App';
+            $members = $booking->getMembers();
+            $memberLines = array_map(function ($m) {
+                return sprintf('%s (%s)', $m['nama'], $m['email']);
+            }, $members);
+            $memberList = implode('<br>', $memberLines);
+            $emailBody = "
+                <p> Hai <strong>{$pic->nama}</strong>, </p>
+                <p> Draft booking kamu untuk <strong> {$room->nama_ruangan} </strong> sudah dikirim ke admin. </p>
+                <p><strong>Tanggal Penggunaan:</strong> {$bookingDate}</p>
+                <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+                <p> Anggota : </p>
+                <p> {$memberList} </p>
+                <p>Kami akan memberi tahu kamu setelah admin memberikan keputusan.</p>
+                <p>Terima kasih,<br>Library Booking App</p>
+            ";
+
+            $emailSent = EmailService::send($pic->email, $pic->nama, $subject, $emailBody);
+            if (!$emailSent) {
+                Logger::warning('Failed to send booking submission email', [
+                    'booking_id' => $booking->id_booking,
+                    'user_id' => $pic->id_user,
+                ]);
+            }
+        } else {
+            Logger::warning('Booking owner missing when sending submission email', [
+                'booking_id' => $booking->id_booking,
+                'owner_id' => $booking->user_id,
+            ]);
+        }
 
         Logger::booking('submitted to admin', (int)$user->id_user, $id_booking);
         App::$app->session->setFlash('success', 'Booking dikirim ke admin.');
@@ -238,7 +317,8 @@ class UserBookingController extends Controller {
             return;
         }
 
-        if ($booking->meetsMemberMaximum()) {
+        $maximumMembers = $booking->getMaximumMembersRequired();
+        if ($maximumMembers > 0 && $booking->getMemberCount() >= $maximumMembers) {
             App::$app->session->setFlash('error', 'Jumlah anggota sudah mencapai kapasitas maksimum.');
             $response->redirect('/bookings/draft?id=' . $bookingId);
             return;
@@ -256,23 +336,49 @@ class UserBookingController extends Controller {
             return;
         }
 
-        $anggota = new Anggota_Booking();
-        $anggota->booking_id = $bookingId;
-        $anggota->user_id = $member->id_user;
-        $anggota->save();
+        $inviteToken = $booking->invite_token ?: $this->generateInviteKode();
+        $booking->invite_token = $inviteToken;
+        $booking->save();
+        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+        $pic = User::findOne(['id_user' => $booking->user_id]);
+        if ($pic instanceof User) {
+        $subject = 'Booking Link Invitation | Library Booking App';
+        $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
+        $link = ($_ENV['APP_URL']) . "/bookings/join?code={$inviteToken}";
+        $emailBody = "
+        <p> Hai <strong> {$member->nama}</strong>, </p>
+        <p> <strong>{$pic->nama} </strong> mengundang kamu untuk bergabung pada booking di <strong>{$room->nama_ruangan}</strong>. </p>
+        <p> <strong>Tanggal Penggunaan: </strong> {$bookingDate} </p>
+        <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+        <p> Klik link berikut untuk menerima undangan: </p>
+        <p><a href=\"{$link}\">Gabung ke Booking</a></p>
+        <p>Jika tombol tidak berfungsi, salin link berikut:</p>
+        <p style=\"word-break: break-all;\">{$link}</p>
+        <p> Terima kasih, <br> Library Booking App</p>
+        ";
 
-        Logger::booking('member added', $booking->user_id, $bookingId, [
-            'member_email' => $memberEmail,
-            'member_id' => $member->id_user
-        ]);
-        App::$app->session->setFlash('success', 'Anggota ditambahkan.');
+        $emailSent = EmailService::send($member->email, $member->nama, $subject, $emailBody);
+        if (!$emailSent) {
+                Logger::warning('Failed to send booking invitation email', [
+                    'booking_id' => $bookingId,
+                    'member_id' => $member->id_user,
+                ]);
+            }
+        } else {
+            Logger::warning('Booking owner missing when sending invite', [
+                'booking_id' => $bookingId,
+                'owner_id' => $booking->user_id,
+            ]);
+        }
+
+        App::$app->session->setFlash('success', "Link Join dikirim ke : {$memberEmail}");
         $response->redirect('/bookings/draft?id=' . $bookingId);
     }
 
-    private function generateInviteToken(): string
+    private function generateInviteKode(): string
     {
         do {
-            $token = bin2hex(random_bytes(16));
+            $token = strtoupper(bin2hex(random_bytes(3)));
             $exists = Booking::findOne(['invite_token' => $token]);
         } while ($exists);
 
@@ -285,7 +391,7 @@ class UserBookingController extends Controller {
         $this->setTitle('Gabung Booking');
 
         return $this->render('User/Bookings/Join', [
-            'prefill' => $request->getBody()['token'] ?? null,
+            'prefill' => $request->getBody()['code'] ?? null,
         ]);
     }
 

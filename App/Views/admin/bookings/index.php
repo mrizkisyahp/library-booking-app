@@ -43,7 +43,6 @@ $statusColors = [
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal & Waktu</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kode Check-in</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
@@ -64,9 +63,6 @@ $statusColors = [
                   <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $statusColors[$booking['status']] ?? 'bg-gray-100 text-gray-800' ?>">
                     <?= htmlspecialchars(ucfirst($booking['status'])) ?>
                   </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                  <?= htmlspecialchars($booking['checkin_code'] ?? '-') ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                   <?php if ($booking['status'] === 'pending'): ?>

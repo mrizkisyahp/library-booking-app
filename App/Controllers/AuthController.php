@@ -22,6 +22,11 @@ class AuthController extends Controller
 
     private function verifyTurnstile(Response $response): bool
     {
+        $enabled = filter_var($_ENV['TURNSTILE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        if (!$enabled) {
+            return true;
+        }
+
         $token  = $_POST['cf-turnstile-response'] ?? null;
         $secret = $_ENV['TURNSTILE_SECRET'] ?? null;
 

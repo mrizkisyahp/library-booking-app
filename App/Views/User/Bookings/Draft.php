@@ -164,7 +164,7 @@ $isOwner = $currentUser && (int)$currentUser->id_user === (int)$booking->user_id
                 <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Tambah
+                Kirim Link Undangan
               </button>
             </div>
           </form>
@@ -226,7 +226,7 @@ $isOwner = $currentUser && (int)$currentUser->id_user === (int)$booking->user_id
             </p>
           </div>
           <button type="button" 
-            onclick="navigator.clipboard.writeText(window.location.origin + '/bookings/join?token=<?= rawurlencode($booking->invite_token) ?>'); alert('Link berhasil disalin!');"
+            onclick="navigator.clipboard.writeText(window.location.origin + '/bookings/join?code=<?= rawurlencode($booking->invite_token) ?>'); alert('Link berhasil disalin!');"
             class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm flex items-center justify-center">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />

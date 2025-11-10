@@ -121,6 +121,7 @@ class User extends DbModel {
         return (string)$this->id_role === '3';
     }
 
+
     public static function isLoggedIn(): bool {
         return isset($_SESSION['user_id']);
     }
