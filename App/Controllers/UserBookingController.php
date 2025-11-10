@@ -179,41 +179,6 @@ class UserBookingController extends Controller {
         $booking->status ='pending';
         $booking->save();
 
-        $pic = User::findone(['id_user' => $booking->user_id]);
-        if ($pic instanceof User) {
-            $room = Room::findone(['id_ruangan' => $booking->ruangan_id]);
-            $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
-            $subject = 'Draft sent | Library Booking App';
-            $members = $booking->getMembers();
-            $memberLines = array_map(function ($m) {
-                return sprintf('%s (%s)', $m['nama'], $m['email']);
-            }, $members);
-            $memberList = implode('<br>', $memberLines);
-            $emailBody = "
-                <p> Hai <strong>{$pic->nama}</strong>, </p>
-                <p> Draft booking kamu untuk <strong> {$room->nama_ruangan} </strong> sudah dikirim ke admin. </p>
-                <p><strong>Tanggal Penggunaan:</strong> {$bookingDate}</p>
-                <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
-                <p> Anggota : </p>
-                <p> {$memberList} </p>
-                <p>Kami akan memberi tahu kamu setelah admin memberikan keputusan.</p>
-                <p>Terima kasih,<br>Library Booking App</p>
-            ";
-
-            $emailSent = EmailService::send($pic->email, $pic->nama, $subject, $emailBody);
-            if (!$emailSent) {
-                Logger::warning('Failed to send booking submission email', [
-                    'booking_id' => $booking->id_booking,
-                    'user_id' => $pic->id_user,
-                ]);
-            }
-        } else {
-            Logger::warning('Booking owner missing when sending submission email', [
-                'booking_id' => $booking->id_booking,
-                'owner_id' => $booking->user_id,
-            ]);
-        }
-
         Logger::booking('submitted to admin', (int)$user->id_user, $id_booking);
         App::$app->session->setFlash('success', 'Booking dikirim ke admin.');
         $response->redirect('/dashboard');
