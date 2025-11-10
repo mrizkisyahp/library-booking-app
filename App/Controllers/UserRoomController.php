@@ -21,6 +21,7 @@ class UserRoomController extends Controller {
         $this->setTitle('Room | Library Booking App');
 
         $filters = [
+            'nama_ruangan' => $request->getBody()['nama_ruangan'] ?? null,
             'kapasitas_min' => $request->getBody()['kapasitas_min'] ?? null,
             'kapasitas_max' => $request->getBody()['kapasitas_max'] ?? null,
             'jenis_ruangan' => $request->getBody()['jenis_ruangan'] ?? null,

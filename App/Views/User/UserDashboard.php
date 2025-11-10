@@ -170,7 +170,7 @@ use App\Core\App;
                       <a href="/bookings/draft?id=<?= (int)$booking['id_booking'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
                         Lihat Draft
                       </a>
-                    <?php elseif ($statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
+                    <?php elseif ($booking['role'] === 'PIC' && $statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
                       <a href="/feedback/create?booking=<?= (int)$booking['id_booking'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
                         Isi Feedback
                       </a>

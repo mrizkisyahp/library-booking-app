@@ -15,6 +15,17 @@ use App\Models\Room;
 
     <!-- Filter Form -->
     <form method="get" action="/rooms" class="bg-white rounded-2xl shadow-lg p-8 mb-10">
+      <!-- Keyword Search -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-3">
+          <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Cari Nama Ruangan
+        </label>
+        <input type="text" name="nama_ruangan" value="<?= htmlspecialchars($filters['nama_ruangan'] ?? '') ?>" placeholder="Cari berdasarkan nama ruangan..." class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-3">
@@ -54,7 +65,7 @@ use App\Models\Room;
           </svg>
           Cari Ruangan
         </button>
-        <?php if (!empty($filters['kapasitas_min']) || !empty($filters['kapasitas_max']) || !empty($filters['jenis_ruangan'])): ?>
+        <?php if (!empty($filters['nama_ruangan']) || !empty($filters['kapasitas_min']) || !empty($filters['kapasitas_max']) || !empty($filters['jenis_ruangan'])): ?>
           <a href="/rooms" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-300 transition-all font-semibold">
             Reset Filter
           </a>

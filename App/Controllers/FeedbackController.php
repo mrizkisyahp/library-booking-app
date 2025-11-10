@@ -87,7 +87,8 @@ class FeedbackController extends Controller
         $feedback = new Feedback();
         $feedback->booking_id = $bookingId;
         $feedback->user_id = (int)$user->id_user;
-        $feedback->rating = (int)floor(($serviceRating + $roomRating) / 2);
+        $averageRating = ($serviceRating + $roomRating) / 2;
+        $feedback->rating = round($averageRating, 1);
         $feedback->komentar = $comments;
 
         if ($feedback->save()) {

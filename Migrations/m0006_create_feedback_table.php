@@ -10,7 +10,7 @@ class m0006_create_feedback_table
             id_feedback INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             booking_id INT UNSIGNED NOT NULL,
             user_id INT UNSIGNED NOT NULL,
-            rating TINYINT UNSIGNED CHECK (rating BETWEEN 1 AND 10),
+            rating DECIMAL(2,1) check (rating BETWEEN 1.0 and 5.0),
             komentar TEXT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

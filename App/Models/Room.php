@@ -81,6 +81,11 @@ class Room extends DbModel {
             $params[':jenis'] = '%' . $filters['jenis_ruangan'] . '%';
         }
 
+        if (!empty($filters['nama_ruangan'])) {
+            $sql .= " AND nama_ruangan LIKE :nama";
+            $params[':nama'] = '%' . $filters['nama_ruangan'] . '%';
+        }
+
         $sql .= " ORDER BY nama_ruangan ASC";
 
         $stmt = App::$app->db->prepare($sql);
