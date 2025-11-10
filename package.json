@@ -16,8 +16,8 @@
   "type": "commonjs",
   "main": "tailwind.config.js",
   "scripts": {
-    "dev": "npx @tailwindcss/cli -i ./public/src/input.css -o ./public/css/output.css --watch",
-    "build": "npx @tailwindcss/cli -i ./public/src/input.css -o ./public/css/output.css --minify"
+    "dev": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --watch",
+    "build": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --minify"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

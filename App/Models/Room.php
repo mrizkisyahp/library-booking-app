@@ -3,57 +3,173 @@
 namespace App\Models;
 
 use App\Core\DbModel;
+use App\Core\App;
 
-class Room extends DbModel
-{
-    public ?int $id = null;
-    public string $title = '';
-    public int $capacity_min = 1;
-    public int $capacity_max = 1;
-    public ?string $description = null;
-    public ?string $image = null;
-    public string $status = 'available'; // available, maintenance
+class Room extends DbModel {
+    public ?int $id_ruangan = null;
+    public string $nama_ruangan = '';
+    public ?int $kapasitas_min = null;
+    public ?int $kapasitas_max = null;
+    public string $jenis_ruangan = '';
+    public string $deskripsi_ruangan = '';
+    public string $status_ruangan = 'available';
     public ?string $created_at = null;
     public ?string $updated_at = null;
 
-    public static function tableName(): string
-    {
-        return 'rooms';
+    public static function tableName(): string {
+        return 'ruangan';
     }
 
-    public static function primaryKey(): string
-    {
-        return 'id';
+    public static function primaryKey(): string {
+        return 'id_ruangan';
     }
 
-    public function rules(): array
-    {
+    public function rules(): array {
+        $rules = [
+            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
+            'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
+            'kapasitas_max' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
+            'jenis_ruangan' => [self::RULE_REQUIRED],
+            'deskripsi_ruangan' => [self::RULE_REQUIRED],
+        ];
+
+        return $rules;
+    }
+
+    public function attributes(): array {
         return [
-            'title' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
-            'capacity_min' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-            'capacity_max' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-            'status' => [self::RULE_REQUIRED],
+            'id_ruangan',
+            'nama_ruangan',
+            'kapasitas_min',
+            'kapasitas_max',
+            'jenis_ruangan',
+            'deskripsi_ruangan',
+            'status_ruangan',
+            'created_at',
+            'updated_at',
         ];
     }
 
-    public function attributes(): array
-    {
-        return ['title', 'capacity_min', 'capacity_max', 'description', 'status'];
+    public function isAvailable(): bool {
+        return $this->status_ruangan === 'available';
     }
 
-    // apakah available roomnya
-    public function isAvailable(): bool
-    {
-        return $this->status === 'available';
-    }
+    public static function getAvailableRooms(): array {
+        $stmt = App::$app->db->prepare("SELECT * FROM ruangan WHERE status_ruangan = 'available' ORDER BY nama_ruangan ASC");
 
-    // ambil semua room
-    public static function getAvailableRooms(): array
-    {
-        $stmt = \App\Core\App::$app->db->prepare(
-            "SELECT * FROM rooms WHERE status = 'available' ORDER BY title ASC"
-        );
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    }
+
+    public static function search(array $filters = []): array
+    {
+        $sql = "SELECT * FROM ruangan WHERE status_ruangan = 'available'";
+        $params = [];
+
+        if (!empty($filters['kapasitas_min'])) {
+            $sql .= " AND kapasitas_max >= :kapasitas_min";
+            $params[':kapasitas_min'] = (int)$filters['kapasitas_min'];
+        }
+
+        if (!empty($filters['kapasitas_max'])) {
+            $sql .= " AND kapasitas_min <= :kapasitas_max";
+            $params[':kapasitas_max'] = (int)$filters['kapasitas_max'];
+        }
+
+        if (!empty($filters['jenis_ruangan'])) {
+            $sql .= " AND jenis_ruangan LIKE :jenis";
+            $params[':jenis'] = '%' . $filters['jenis_ruangan'] . '%';
+        }
+
+        $sql .= " ORDER BY nama_ruangan ASC";
+
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    }
+
+    public function getFacilities(): array
+    {
+        if (empty($this->deskripsi_ruangan)) {
+            return [];
+        }
+
+        $parts = preg_split('/[\r\n;,]+/', $this->deskripsi_ruangan);
+        return array_values(array_filter(array_map('trim', $parts)));
+    }
+
+    public function getPhotoDataUris(): array
+    {
+        $dir = App::$ROOT_DIR . '/Storage/Room Photos/';
+        $slug = $this->slugify($this->nama_ruangan);
+        $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
+        $files = glob($pattern, GLOB_BRACE) ?: [];
+        sort($files);
+        $photos = [];
+
+        foreach ($files as $file) {
+            $mime = match (strtolower(pathinfo($file, PATHINFO_EXTENSION))) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+                default => 'application/octet-stream',
+            };
+            $photos[] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file));
+        }
+
+        return $photos;
+    }
+
+    public function getThumbnail(): ?string
+    {
+        $photos = $this->getPhotoDataUris();
+        return $photos[0] ?? null;
+    }
+
+    public function getAvailabilityCalendar(int $days = 5): array
+    {
+        $start = date('Y-m-d');
+        $stmt = App::$app->db->prepare("
+            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status
+            FROM booking
+            WHERE ruangan_id = :room
+              AND tanggal_penggunaan_ruang BETWEEN :start AND :end
+            ORDER BY tanggal_penggunaan_ruang ASC, waktu_mulai ASC
+        ");
+        $stmt->bindValue(':room', $this->id_ruangan, \PDO::PARAM_INT);
+        $stmt->bindValue(':start', $start);
+        $stmt->bindValue(':end', date('Y-m-d', strtotime('+21 days')));
+        $stmt->execute();
+
+        $calendar = [];
+        $added = 0;
+        $offset = 0;
+        while ($added < $days) {
+            $date = date('Y-m-d', strtotime("+{$offset} days"));
+            $offset++;
+            $day = (int)date('N', strtotime($date));
+            if ($day === 6 || $day === 7) {
+                continue;
+            }
+            $calendar[$date] = [];
+            $added++;
+        }
+
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+            $calendar[$row['tanggal']][] = $row;
+        }
+
+        return $calendar;
+    }
+
+    private function slugify(string $name): string
+    {
+        $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $name);
+        return trim($slug, '_');
     }
 }

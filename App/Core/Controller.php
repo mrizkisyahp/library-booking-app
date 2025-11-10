@@ -29,6 +29,11 @@ abstract class Controller
         return $this->middlewares;
     }
 
+    public function getAction(): string
+    {
+        return $this->action;
+    }
+
     public function setTitle(string $title): void
     {
         $this->title = $title;
@@ -38,4 +43,5 @@ abstract class Controller
     {
         return $this->title;
     }
+
 }

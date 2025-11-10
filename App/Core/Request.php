@@ -37,13 +37,16 @@ class Request
 
         if ($this->method() === 'get') {
             foreach ($_GET as $key => $value) {
-                $body[$key] = filter_input(INPUT_GET, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+                // For GET parameters (IDs, query strings), preserve raw value
+                // Strip only control characters to prevent injection
+                $body[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
             }
         }
 
         if ($this->method() === 'post') {
             foreach ($_POST as $key => $value) {
-                $body[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+                // For POST data, use the same approach
+                $body[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
             }
         }
 

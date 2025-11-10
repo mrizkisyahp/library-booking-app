@@ -101,9 +101,18 @@ class Router {
         }
 
         $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+        
+        $layoutPath = App::$ROOT_DIR . "/App/Views/Layouts/{$layout}.php";
+        if (!file_exists($layoutPath)) {
+            $layoutPath = App::$ROOT_DIR . "/App/Views/Layouts/" . ucfirst($layout) . ".php";
+        }
+
+        if (!file_exists($layoutPath)) {
+            throw new \RuntimeException("Layout file not found for layout '{$layout}'.");
+        }
 
         ob_start();
-        include_once App::$ROOT_DIR . "/App/Views/layouts/{$layout}.php";
+        include_once $layoutPath;
         return ob_get_clean();
     }
 

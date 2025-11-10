@@ -5,275 +5,225 @@ namespace App\Models;
 use App\Core\DbModel;
 use App\Core\App;
 
-class Booking extends DbModel
-{
-    public ?int $id = null;
+class Booking extends DbModel {
+    public ?int $id_booking = null;
     public ?int $user_id = null;
-    public ?int $room_id = null;
-    public string $booking_date = '';
-    public string $start_time = '';
-    public string $end_time = '';
-    public int $participants = 1;
-    public string $purpose = '';
-    public string $status = 'pending'; // pending, validated, active, completed, cancelled
-    public ?string $booking_code = null;
-    public ?string $check_in_time = null;
-    public ?string $check_out_time = null;
+    public ?int $ruangan_id = null;
+    public string $tanggal_booking = '';
+    public string $tanggal_penggunaan_ruang = '';
+    public string $waktu_mulai = '';
+    public string $waktu_selesai = '';
+    public string $tujuan = '';
+    public string $status = 'draft'; // draft, pending, verified, active, completed, cancelled, expired, no_show
+    public ?string $checkin_code = null;
+    public ?string $invite_token = null;
     public ?string $created_at = null;
     public ?string $updated_at = null;
 
-    public static function tableName(): string
-    {
-        return 'bookings';
+    public static function tableName(): string {
+        return 'booking';
     }
 
-    public static function primaryKey(): string
-    {
-        return 'id';
+    public static function primaryKey(): string {
+        return 'id_booking';
     }
 
-    public function rules(): array
-    {
+    public function attributes(): array {
         return [
-            'room_id' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-            'booking_date' => [self::RULE_REQUIRED],
-            'start_time' => [self::RULE_REQUIRED],
-            'end_time' => [self::RULE_REQUIRED],
-            'participants' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-            'purpose' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 10]],
+            'user_id',
+            'ruangan_id',
+            'tanggal_booking',
+            'tanggal_penggunaan_ruang',
+            'waktu_mulai',
+            'waktu_selesai',
+            'tujuan',
+            'status',
+            'checkin_code',
+            'invite_token',
         ];
     }
 
-    public function attributes(): array
-    {
-        return [
-            'user_id', 'room_id', 'booking_date', 'start_time', 'end_time',
-            'participants', 'purpose', 'status', 'booking_code',
-            'check_in_time', 'check_out_time'
-        ];
-    }   
-
-    // booking rules
-    public function validateBooking(): bool
-    {
-        // Check if room exists
-        $room = Room::findOne(['id' => $this->room_id]);
-        if (!$room) {
-            $this->addError('room_id', 'Room not found.');
-            return false;
-        }
-
-        // Check if room is available
-        if (!$room->isAvailable()) {
-            $this->addError('room_id', 'Room is not available for booking.');
-            return false;
-        }
-
-        // Check participants against room capacity
-        if ($this->participants < $room->capacity_min || $this->participants > $room->capacity_max) {
-            $this->addError('participants', "Participants must be between {$room->capacity_min} and {$room->capacity_max}.");
-            return false;
-        }
-
-        // Check if booking date is not in the past
-        $bookingDateTime = strtotime($this->booking_date . ' ' . $this->start_time);
-        if ($bookingDateTime < time()) {
-            $this->addError('booking_date', 'Cannot book in the past.');
-            return false;
-        }
-
-        // Check if end time is after start time
-        if ($this->end_time <= $this->start_time) {
-            $this->addError('end_time', 'End time must be after start time.');
-            return false;
-        }
-
-        // Check for time slot conflicts
-        if ($this->hasTimeConflict()) {
-            $this->addError('start_time', 'This time slot is already booked.');
-            return false;
-        }
-
-        // Check if user already has an active booking 
-        if ($this->userHasActiveBooking()) {
-            $this->addError('room_id', 'You already have an active booking. Please complete or cancel it first.');
-            return false;
-        }
-
-        return true;
+    public function rules(): array {
+        return [];
     }
 
-    // apakah sudah ada booking di jam itu
-    private function hasTimeConflict(): bool
+    public static function expireStaleDrafts(): void
     {
-        $sql = "SELECT COUNT(*) as count FROM bookings 
-                WHERE room_id = :room_id 
-                AND booking_date = :booking_date 
-                AND status NOT IN ('cancelled', 'completed')
-                AND (
-                    (start_time < :end_time AND end_time > :start_time)
-                )";
-        
-        if ($this->id) {
-            $sql .= " AND id != :id";
-        }
-
-        $stmt = App::$app->db->prepare($sql);
-        $stmt->bindValue(':room_id', $this->room_id);
-        $stmt->bindValue(':booking_date', $this->booking_date);
-        $stmt->bindValue(':start_time', $this->start_time);
-        $stmt->bindValue(':end_time', $this->end_time);
-        
-        if ($this->id) {
-            $stmt->bindValue(':id', $this->id);
-        }
-
+        $stmt = App::$app->db->prepare("
+            UPDATE booking
+            SET status = 'expired'
+            WHERE status = 'draft'
+              AND (
+                    TIMESTAMPDIFF(HOUR, created_at, NOW()) >= 24
+                 OR (tanggal_penggunaan_ruang = CURDATE() AND waktu_mulai <= CURTIME())
+              )
+        ");
         $stmt->execute();
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
-        return $result['count'] > 0;
     }
 
-    // apakah user dah punya booking room?
-    private function userHasActiveBooking(): bool
+    public static function userHasPendingFeedback(int $userId): bool
     {
-        $sql = "SELECT COUNT(*) as count FROM bookings 
-                WHERE user_id = :user_id 
-                AND status IN ('pending', 'validated', 'active')";
-        
-        if ($this->id) {
-            $sql .= " AND id != :id";
-        }
-
-        $stmt = App::$app->db->prepare($sql);
-        $stmt->bindValue(':user_id', $this->user_id);
-        
-        if ($this->id) {
-            $stmt->bindValue(':id', $this->id);
-        }
-
+        $stmt = App::$app->db->prepare("
+            SELECT COUNT(*) AS cnt
+            FROM booking b
+            WHERE b.user_id = :user_id
+              AND b.status = 'completed'
+              AND NOT EXISTS (
+                SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking
+              )
+        ");
+        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
-        return $result['count'] > 0;
+        return (int)$stmt->fetchColumn() > 0;
     }
 
-    // generate bookingcode
-    public function generateBookingCode(): string
+    public static function getPendingFeedbackBookings(int $userId): array
     {
-        return 'BK' . date('Ymd') . strtoupper(substr(md5(uniqid()), 0, 6));
-    }
-
-    // save booking code
-    public function save(): bool
-    {
-        $this->user_id = App::$app->user->id;
-        $this->status = 'pending';
-        $this->booking_code = $this->generateBookingCode();
-        
-        return parent::save();
-    }
-
-    // get user booking
-    public static function getUserBookings(int $userId): array
-    {
-        $sql = "SELECT b.*, r.title as room_title, r.capacity_min, r.capacity_max
-                FROM bookings b
-                INNER JOIN rooms r ON b.room_id = r.id
-                WHERE b.user_id = :user_id
-                ORDER BY b.booking_date DESC, b.start_time DESC";
-        
-        $stmt = App::$app->db->prepare($sql);
-        $stmt->bindValue(':user_id', $userId);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    // get user booking dengan id (for admin)
-    public static function getAllBookingsWithDetails(): array
-    {
-        $sql = "SELECT b.*, 
-                       u.nama as user_name, u.email as user_email, u.role as user_role,
-                       r.title as room_title
-                FROM bookings b
-                INNER JOIN users u ON b.user_id = u.id
-                INNER JOIN rooms r ON b.room_id = r.id
-                ORDER BY b.booking_date DESC, b.start_time DESC";
-        $stmt = App::$app->db->prepare($sql);
+        $stmt = App::$app->db->prepare("
+            SELECT b.id_booking, b.tanggal_penggunaan_ruang, b.waktu_mulai, r.nama_ruangan
+            FROM booking b
+            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
+            WHERE b.user_id = :user_id
+              AND b.status = 'completed'
+              AND NOT EXISTS (
+                SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking
+              )
+            ORDER BY b.tanggal_penggunaan_ruang DESC, b.waktu_mulai DESC
+        ");
+        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    // check in booking
-    public function checkIn(): bool
+    public function getMembers(): array
     {
-        if ($this->status !== 'validated') {
-            return false;
+        $stmt = App::$app->db->prepare("
+            SELECT ab.*, u.nama, u.email
+            FROM anggota_booking ab
+            JOIN users u ON u.id_user = ab.user_id
+            WHERE ab.booking_id = :id
+            ORDER BY u.nama ASC
+        ");
+        $stmt->bindValue(':id', $this->id_booking, \PDO::PARAM_INT);
+        $stmt->execute();
+        $members = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $picAlreadyListed = false;
+        foreach ($members as $member) {
+            if ((int)$member['user_id'] === (int)$this->user_id) {
+                $picAlreadyListed = true;
+                break;
+            }
         }
 
-        $stmt = App::$app->db->prepare(
-            "UPDATE bookings SET status = 'active', check_in_time = NOW() WHERE id = :id"
-        );
-        $stmt->bindValue(':id', $this->id);
-        
-        if ($stmt->execute()) {
-            $this->status = 'active';
-            $this->check_in_time = date('Y-m-d H:i:s');
+        if (!$picAlreadyListed) {
+            $pic = User::findOne(['id_user' => $this->user_id]);
+            if ($pic) {
+                $members[] = [
+                    'id_anggota' => null,
+                    'booking_id' => $this->id_booking,
+                    'user_id' => $pic->id_user,
+                    'nama' => $pic->nama,
+                    'email' => $pic->email,
+                    'joined_at' => $pic->created_at,
+                    'is_owner' => true,
+                ];
+            }
+        }
+
+        return $members;
+    }
+
+    public function getMemberCount(): int {
+        $db = App::$app->db;
+
+        $membersStmt = $db->prepare("
+        SELECT COUNT(*) FROM anggota_booking WHERE booking_id = :id 
+        ");
+        $membersStmt->bindValue(':id', $this->id_booking, \PDO::PARAM_INT);
+        $membersStmt->execute();
+        $members = (int)$membersStmt->fetchColumn();
+
+        $picStmt = $db->prepare("
+        SELECT 1 from anggota_booking where booking_id = :id AND user_id = :pic Limit 1
+        ");
+
+        $picStmt->bindValue(':id', $this->id_booking, \PDO::PARAM_INT);
+        $picStmt->bindValue(':pic', $this->user_id, \PDO::PARAM_INT);
+        $picStmt->execute();
+        $picAlreadyCounted = (bool)$picStmt->fetchColumn();
+
+        return $picAlreadyCounted ? $members : $members + 1;
+    }
+
+    public function getMinimumMembersRequired(): int
+    {
+        $room = Room::findOne(['id_ruangan' => $this->ruangan_id]);
+        return $room && $room->kapasitas_min ? (int)$room->kapasitas_min : 0;
+    }
+
+    public function getMaximumMembersRequired(): int {
+        $room = Room::findOne(['id_ruangan' => $this->ruangan_id]);
+        return $room && $room->kapasitas_max ? (int)$room->kapasitas_max : 0;
+    }
+
+    public function meetsMemberMinimum(): bool
+    {
+        $required = $this->getMinimumMembersRequired();
+        if ($required <= 0) {
+            return true;
+        }
+        return $this->getMemberCount() >= $required;
+    }
+
+    public function meetsMemberMaximum(): bool {
+        $required = $this->getMaximumMembersRequired();
+        if ($required <= 0) {
+            return true;
+        }
+        return $this->getMemberCount() <= $required;
+    }
+
+    public function meetMemberRequirement(): bool {
+        $minRequired = $this->getMinimumMembersRequired();
+        $maxRequired = $this->getMaximumMembersRequired();
+        $currentCount = $this->getMemberCount();
+
+        if ($minRequired <= 0 && $maxRequired <= 0) {
             return true;
         }
 
-        return false;
+        $meetsMin = $minRequired <= 0 || $currentCount >= $minRequired;
+        $meetsMax = $maxRequired <= 0 || $currentCount <= $maxRequired;
+
+        return $meetsMin && $meetsMax;
     }
 
-    // check out booking
-    public function checkOut(): bool
-    {
-        if ($this->status !== 'active') {
-            return false;
-        }
+    public static function userHasActiveParticipation(int $userId): bool {
+        $stmt = App::$app->db->prepare("
+            SELECT COUNT(*) from booking b left join anggota_booking ab
+            on ab.booking_id = b.id_booking and ab.user_id = :user
+            where (b.user_id = :user or ab.user_id = :user)
+            and b.status in ('draft','pending','verified','active') 
+        ");
+        $stmt->bindValue(':user', $userId, \PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn() > 0;
+    }
 
-        $stmt = App::$app->db->prepare(
-            "UPDATE bookings SET check_out_time = NOW() WHERE id = :id"
-        );
-        $stmt->bindValue(':id', $this->id);
-        
-        if ($stmt->execute()) {
-            $this->check_out_time = date('Y-m-d H:i:s');
+    public function userCanAccess(int $userId): bool {
+        if ($this->user_id === $userId) {
             return true;
         }
 
-        return false;
-    }
+        $stmt = App::$app->db->prepare("
+            SELECT 1 from anggota_booking where booking_id = :booking AND user_id = :user LIMIT 1
+        ");
 
-    // auto cancel kalau expired
-    public static function autoCancelExpiredBookings(): int
-    {
-        // Get bookings that should have started but haven't been checked in
-        $sql = "UPDATE bookings 
-                SET status = 'cancelled' 
-                WHERE status = 'validated' 
-                AND CONCAT(booking_date, ' ', start_time) < DATE_SUB(NOW(), INTERVAL 10 MINUTE)
-                AND check_in_time IS NULL";
-        
-        $stmt = App::$app->db->prepare($sql);
+        $stmt->bindValue(':booking', $this->id_booking, \PDO::PARAM_INT);
+        $stmt->bindValue(':user', $userId, \PDO::PARAM_INT);
         $stmt->execute();
-        
-        return $stmt->rowCount();
-    }
 
-    // get booking yang perlu reminder
-    public static function getBookingsNeedingReminder(): array
-    {
-        $sql = "SELECT b.*, u.nama, u.email
-                FROM bookings b
-                INNER JOIN users u ON b.user_id = u.id
-                WHERE b.status = 'validated'
-                AND CONCAT(b.booking_date, ' ', b.start_time) BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 10 MINUTE)
-                AND b.check_in_time IS NULL";
-        
-        $stmt = App::$app->db->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return (bool)$stmt->fetchColumn();
     }
 }
