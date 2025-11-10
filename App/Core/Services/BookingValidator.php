@@ -33,21 +33,21 @@ class BookingValidator
             $errors[] = 'Durasi maksimal 3 jam.';
         }
 
-        // $openAt = strtotime("$date 08:00");
-        // $closeAt = strtotime("$date 21:00");
-        // if ($startAt < $openAt || $endAt > $closeAt) {
-        //     $errors[] = 'Booking harus dalam jam operasional (08:00-21:00).';
-        // }
+        $openAt = strtotime("$date 08:00");
+        $closeAt = strtotime("$date 16:20");
+        if ($startAt < $openAt || $endAt > $closeAt) {
+            $errors[] = 'Booking harus dalam jam operasional (08:00-16:20).';
+        }
 
         $maxDate = strtotime('+7 days', strtotime(date('Y-m-d')));
         if ($startAt > strtotime(date('Y-m-d', $maxDate) . ' 23:59:59')) {
             $errors[] = 'Booking hanya bisa dibuat untuk 7 hari ke depan.';
         }
 
-        // $dayOfWeek = (int)date('N', strtotime($date));
-        // if ($dayOfWeek === 6 || $dayOfWeek === 7) {
-        //     $errors[] = 'Booking tidak tersedia pada hari Sabtu dan Minggu.';
-        // }
+        $dayOfWeek = (int)date('N', strtotime($date));
+        if ($dayOfWeek === 6 || $dayOfWeek === 7) {
+            $errors[] = 'Booking tidak tersedia pada hari Sabtu dan Minggu.';
+        }
 
         $requiresPegawaiFields = $user && $user->isDosen() && strcasecmp($room->nama_ruangan, 'Ruang Rapat') === 0;
 
