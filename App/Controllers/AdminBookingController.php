@@ -108,7 +108,7 @@ class AdminBookingController extends Controller {
 
             $emailBody = "
             <p>Hai <strong>{$pic->nama}</strong>,</p>
-            <p>Terima kasih sudah menggunakan ruangan <strong>{$room->nama_ruangan}</strong>. Booking kamu pada <strong>{BOOKING_DATE}</strong> pukul <strong>{START_TIME} - {END_TIME}</strong> sudah ditandai selesai.</p>
+            <p>Terima kasih sudah menggunakan ruangan <strong>{$room->nama_ruangan}</strong>. Booking kamu pada <strong>{$bookingDate}</strong> pukul <strong>{$booking->waktu_mulai} - {$booking->waktu_selesai}</strong> sudah ditandai selesai.</p>
             <p>Kami ingin mendengar pengalaman kamu. Silakan isi feedback melalui tautan berikut:</p>
             <p>Masukan kamu membantu kami meningkatkan layanan.</p>
             <p>Terima kasih,<br>Library Booking App</p>

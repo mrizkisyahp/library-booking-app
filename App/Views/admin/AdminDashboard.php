@@ -250,7 +250,7 @@ $users = $resourceStats['users'];
         <div>
           <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
                  class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                 placeholder="Masukkan token..." required>
+                 placeholder="Masukkan code..." required>
         </div>
         <button type="submit"
                 class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow">

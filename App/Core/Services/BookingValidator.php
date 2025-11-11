@@ -63,7 +63,7 @@ class BookingValidator
         if ($startAt > strtotime(date('Y-m-d', $maxDate) . ' 23:59:59')) {
             $errors[] = 'Booking hanya bisa dibuat untuk 7 hari ke depan.';
         }
-
+        
         $dayOfWeek = (int)date('N', strtotime($date));
         if ($dayOfWeek === 6 || $dayOfWeek === 7) {
             $errors[] = 'Booking tidak tersedia pada hari Sabtu dan Minggu.';

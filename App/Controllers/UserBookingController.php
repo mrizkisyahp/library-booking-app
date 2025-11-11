@@ -64,6 +64,12 @@ class UserBookingController extends Controller {
             return;
         }
 
+        if (Booking::userHasPendingFeedback((int)$user->id_user)) {
+            App::$app->session->setFlash('error', 'Silakan isi feedback untuk booking sebelumnya sebelum membuat booking baru.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
         $validation = BookingValidator::validate($body, $room, $user);
         if (!$validation['valid']) {
             App::$app->session->setFlash('error', implode("\n", $validation['errors']));
@@ -194,12 +200,6 @@ class UserBookingController extends Controller {
         $body = $request->getBody();
         $id_booking = (int)($body['id'] ?? $body['booking_id'] ?? 0);
         $booking = Booking::findOne($id_booking);
-
-        if (Booking::userHasPendingFeedback((int)$user->id_user)) {
-            App::$app->session->setFlash('error', 'Silakan isi feedback untuk booking sebelumnya sebelum membuat booking baru.');
-            $response->redirect('/dashboard');
-            return;
-        }
         
         Logger::debug('showDraft accessed', [
             'user_id' => $user->id_user,
