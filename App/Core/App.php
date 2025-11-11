@@ -22,6 +22,11 @@ class App
     public ?Controller $controller = null;
     public ?DbModel $user;
     public AuthService $auth;
+    public static function getBaseUrl(): string {
+        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        return rtrim(str_replace('//', '/', $scriptDir), '/');
+    }
+
     public function __construct($rootPath, array $config)
     {
         $this->userClass = $config['userClass'] ?? User::class;

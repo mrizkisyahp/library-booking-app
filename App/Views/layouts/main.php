@@ -10,7 +10,8 @@ use App\Core\Csrf;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(App::$app->response->resolveTitle(App::$app->controller)) ?></title>
-    <link href="<?= $basePath === '' ? '' : $basePath ?>/css/output.css" rel="stylesheet">
+    <base href="<?= App::getBaseUrl() ?>/" />
+    <link href="css/output.css" rel="stylesheet">
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">

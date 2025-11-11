@@ -133,6 +133,53 @@ class User extends DbModel {
         return null;
     }
 
+    public static function findPaginated(int $page, int $perPage) {
+        $offset = ($page - 1) * $perPage;
+
+        $db = App::$app->db;
+
+        $stmt = $db->prepare("
+         select users.*, role.nama_role from users 
+         left join role on users.id_role = role.id_role
+         order by users.id_user desc 
+         limit :limit offset :offset
+        ");
+
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public static function count(): int {
+        $db = App::$app->db;
+        $stmt = $db->prepare("SELECT COUNT(*) AS COUNT FROM users");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public static function countActive(): int {
+        $db = App::$app->db;
+        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'active'");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public static function countPending(): int {
+        $db = App::$app->db;
+        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'verified'");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public static function countSuspended(): int {
+        $db = App::$app->db;
+        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'suspended'");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
     public function login(): bool
     {
         $user = User::findOne(['email' => $this->identifier]);

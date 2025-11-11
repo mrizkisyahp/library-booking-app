@@ -9,6 +9,7 @@ use App\Core\Csrf;
 <div class="mb-8">
   <h2 class="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
   <p class="text-gray-600 mt-2">Kelola sistem booking ruangan perpustakaan</p>
+  
 </div>
 
 <?php

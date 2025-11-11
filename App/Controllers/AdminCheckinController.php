@@ -13,7 +13,7 @@ use App\Models\Room;
 use App\Models\Booking;
 use App\Models\User;
 
-class AdminChckinController extends Controller
+class AdminCheckinController extends Controller
 {
     protected ?User $currentUser = null;
     public function __construct()
