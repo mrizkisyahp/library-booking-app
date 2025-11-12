@@ -12,7 +12,8 @@ use App\Controllers\UserRoomController;
 use App\Controllers\UserBookingController;
 use App\Controllers\AdminBookingController;
 use App\Controllers\FeedbackController;
-use App\Controllers\CheckInController;
+use App\Controllers\AdminCheckinController;
+use App\Controllers\AdminUserController;
 use App\Models\User;
 
 // Auth routes
@@ -51,11 +52,12 @@ $app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm
 $app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink']);
 
 // Check-in routes
-$app->router->get('/checkin', [CheckInController::class, 'index']);
-$app->router->post('/checkin', [CheckInController::class, 'verify']);
+$app->router->get('/checkin', [AdminCheckinController::class, 'index']);
+$app->router->post('/checkin', [AdminCheckinController::class, 'verify']);
 
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index']);
 $app->router->get('/admin/bookings', [AdminBookingController::class, 'index']);
 $app->router->post('/admin/bookings/verify', [AdminBookingController::class, 'verify']);
 $app->router->post('/admin/bookings/complete', [AdminBookingController::class, 'complete']);
+$app->router->get('/admin/users', [AdminUserController::class, 'index']);

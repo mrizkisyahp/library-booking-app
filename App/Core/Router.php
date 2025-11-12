@@ -99,8 +99,6 @@ class Router {
         if ($controller && property_exists($controller, 'layout') && !empty($controller->layout)) {
             $layout = $controller->layout;
         }
-
-        $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
         
         $layoutPath = App::$ROOT_DIR . "/App/Views/Layouts/{$layout}.php";
         if (!file_exists($layoutPath)) {
@@ -120,8 +118,6 @@ class Router {
         foreach ($data as $key => $value) {
             $$key = $value;
         }
-
-        $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 
         ob_start();
         include_once App::$ROOT_DIR . "/App/Views/{$view}.php";

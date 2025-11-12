@@ -109,7 +109,7 @@ class Room extends DbModel {
 
     public function getPhotoDataUris(): array
     {
-        $dir = App::$ROOT_DIR . '/Storage/Room Photos/';
+        $dir = App::$ROOT_DIR . '/Public/uploads/Room_Photos/';
         $slug = $this->slugify($this->nama_ruangan);
         $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
         $files = glob($pattern, GLOB_BRACE) ?: [];
