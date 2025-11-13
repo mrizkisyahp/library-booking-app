@@ -229,6 +229,8 @@ use App\Models\Role;
               <!-- Modal pop-up  -->
                <div id="imagePopUp" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-md z-50">
                   <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 transition-all scale-95 opacity-0 duration-300">
+
+                    <!-- HELP OVER HERE -->
                     <img id="popUpImage" src="uploads/kubaca/<?= htmlspecialchars($user['kubaca_img']) ?> " alt="Pop-up Image" class="w-full h-64 object-cover rounded-md mb-4">
                     <div class="flex items-center justify-start gap-4">
                       <p><?php if ($user['nim'] ?? $user['nip']): ?>

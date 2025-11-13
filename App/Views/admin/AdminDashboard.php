@@ -42,12 +42,12 @@ $users = $resourceStats['users'];
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
+        <div class="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
           <p class="text-xs font-semibold text-blue-600 mb-1">Total Booking</p>
           <p class="text-3xl font-bold text-blue-800"><?= $bookingStats['total'] ?? 0 ?></p>
         </div>
         <?php foreach ($statusCards as $key => $config): ?>
-          <div class="bg-gradient-to-br <?= $config['class'] ?> rounded-xl p-4 border-2">
+          <div class="bg-linear-to-br <?= $config['class'] ?> rounded-xl p-4 border-2">
             <p class="text-xs font-semibold text-slate-600 mb-1"><?= $config['label'] ?></p>
             <p class="text-3xl font-bold text-slate-900"><?= $bookingStats['statuses'][$key] ?? 0 ?></p>
           </div>
@@ -65,15 +65,15 @@ $users = $resourceStats['users'];
         <div>
           <h4 class="text-sm font-semibold text-gray-600 mb-3">Rooms</h4>
           <div class="grid grid-cols-3 gap-3">
-            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
+            <div class="bg-linear-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
               <p class="text-xs font-semibold text-purple-600 mb-1">Total</p>
               <p class="text-2xl font-bold text-purple-800"><?= $rooms['total'] ?></p>
             </div>
-            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border-2 border-emerald-200">
+            <div class="bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border-2 border-emerald-200">
               <p class="text-xs font-semibold text-emerald-600 mb-1">Available</p>
               <p class="text-2xl font-bold text-emerald-800"><?= $rooms['available'] ?></p>
             </div>
-            <div class="bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl p-4 border-2 border-rose-200">
+            <div class="bg-linear-to-br from-rose-50 to-rose-100 rounded-xl p-4 border-2 border-rose-200">
               <p class="text-xs font-semibold text-rose-600 mb-1">Unavailable</p>
               <p class="text-2xl font-bold text-rose-800"><?= $rooms['unavailable'] ?></p>
             </div>
@@ -82,15 +82,15 @@ $users = $resourceStats['users'];
         <div>
           <h4 class="text-sm font-semibold text-gray-600 mb-3">Users</h4>
           <div class="grid grid-cols-3 gap-3">
-            <div class="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 border-2 border-teal-200">
+            <div class="bg-linear-to-br from-teal-50 to-teal-100 rounded-xl p-4 border-2 border-teal-200">
               <p class="text-xs font-semibold text-teal-600 mb-1">Total</p>
               <p class="text-2xl font-bold text-teal-800"><?= $users['total'] ?></p>
             </div>
-            <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 border-2 border-cyan-200">
+            <div class="bg-linear-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 border-2 border-cyan-200">
               <p class="text-xs font-semibold text-cyan-600 mb-1">Verified</p>
               <p class="text-2xl font-bold text-cyan-800"><?= $users['verified'] ?></p>
             </div>
-            <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 border-2 border-amber-200">
+            <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-xl p-4 border-2 border-amber-200">
               <p class="text-xs font-semibold text-amber-600 mb-1">Pending</p>
               <p class="text-2xl font-bold text-amber-800"><?= $users['pending'] ?></p>
             </div>
@@ -108,7 +108,7 @@ $users = $resourceStats['users'];
       <?php else: ?>
         <div class="overflow-x-auto">
           <table class="w-full">
-            <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
+            <thead class="bg-linear-to-r from-emerald-50 to-teal-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">User</th>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Room</th>
@@ -164,7 +164,7 @@ $users = $resourceStats['users'];
       <?php else: ?>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left text-gray-800">
-            <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
+            <thead class="bg-linear-to-r from-emerald-50 to-teal-50">
               <tr>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Room</th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-700 uppercase">Total Bookings</th>

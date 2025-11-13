@@ -37,7 +37,7 @@ $statusColors = [
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
       <div class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-gradient-to-r from-emerald-50 to-teal-50">
+          <thead class="bg-linear-to-r from-emerald-50 to-teal-50">
             <tr>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan ID</th>
