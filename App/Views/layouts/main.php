@@ -14,7 +14,7 @@ use App\Core\Csrf;
     <link href="css/output.css" rel="stylesheet">
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+<body class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
     <!-- Header -->
     <header class="w-full bg-primary text-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">

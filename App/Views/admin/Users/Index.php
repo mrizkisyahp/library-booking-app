@@ -211,8 +211,11 @@ use App\Models\Role;
               <!-- Foto Kubaca -->
               <td class="px-6 py-4">
                 <?php if ($user['kubaca_img']): ?>
-                  <button class="text-emerald-600 hover:text-emerald-700 text-sm font-semibold flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button class="view-button text-emerald-600 hover:text-emerald-700 text-sm font-semibold flex items-center"
+                  data-img="<?= htmlspecialchars($user['kubaca_img']) ?>"
+                  data-nim="<?= htmlspecialchars($user['nim'] ?? $user['nip']) ?>"
+                  >
+                    <svg class=" w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
@@ -222,6 +225,33 @@ use App\Models\Role;
                   <span class="text-xs text-slate-400">No photo</span>
                 <?php endif; ?>
               </td>
+
+              <!-- Modal pop-up  -->
+               <div id="imagePopUp" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-md z-50">
+                  <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 transition-all scale-95 opacity-0 duration-300">
+                    <img id="popUpImage" src="uploads/kubaca/<?= htmlspecialchars($user['kubaca_img']) ?> " alt="Pop-up Image" class="w-full h-64 object-cover rounded-md mb-4">
+                    <div class="flex items-center justify-start gap-4">
+                      <p><?php if ($user['nim'] ?? $user['nip']): ?>
+                            NIM: 
+                            <?php else: ?>
+                            NIP: 
+                          <?php endif;?>
+                        </p>
+                        <p id="popUpId" class="text-sm font-semibold text-gray-600"><?= htmlspecialchars($user['nim'] ?? $user['nip']) ?></p>
+                    </div>
+                    <div class="flex items-center justify-start gap-4">
+                      <p>
+                        Nama:
+                      </p>
+                      <p id="popUpNama" class="text-sm font-semibold text-gray-600 capitalize"><?= htmlspecialchars($user['nama']) ?></p>
+                    </div>
+                    <button id="closePopUp" class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-800 w-full transition-all">
+                      Tutup
+                    </button>
+                  </div>
+               </div>
+
+               <script src="./src/script.js"></script>
 
               <!-- Status -->
               <td class="px-6 py-4">
