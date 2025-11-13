@@ -84,10 +84,8 @@ class PasswordController extends Controller
             }
 
             $hash = password_hash($model->password, PASSWORD_DEFAULT);
-            $stmt = App::$app->db->prepare("UPDATE users SET password = :pass WHERE id_user = :id");
-            $stmt->bindValue(':pass', $hash);
-            $stmt->bindValue(':id', $user->id_user);
-            $stmt->execute();
+            $user->password = $hash;
+            $user->save();
 
             CacheService::delete('reset_otp_' . $userId);
             App::$app->session->remove('reset_user_id');

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             popUpImage.src = img;
             popUpId.textContent = nim;
+            popUpNama.textContent = nama;
 
             imagePopUp.classList.remove('hidden');
 
@@ -28,10 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closePopUp.addEventListener('click', () => {
         const content = imagePopUp.querySelector('div');
+        content.classList.remove('opacity-100', 'scale-100');
         content.classList.add('opacity-0', 'scale-95');
         setTimeout(() => {
             imagePopUp.classList.add('hidden');
-        }, 200);
+        }, 250);
     });
 
     imagePopUp.addEventListener('click', (e) => {

@@ -7,19 +7,21 @@ use App\Core\Controller;
 use App\Core\Middleware\AuthMiddleware;
 use App\Models\Role;
 use App\Models\Booking;
+use App\Models\User;
 
 class UserDashboardController extends Controller
 {
+    protected ?User $currentUser = null;
     public function __construct()
     {
         $this->registerMiddleware(new AuthMiddleware());
+        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
     public function index()
     {
         Booking::expireStaleDrafts();
-        /** @var \App\Models\User $user */
-        $user = App::$app->user;
+        $user = $this->currentUser;
 
         if ((int)$user->id_role === 1) {
             App::$app->response->redirect('/admin');
@@ -27,8 +29,10 @@ class UserDashboardController extends Controller
         }
 
         $roleName = Role::getNameById($user->id_role ?? null);
-        if ($roleName === 'mahasiswa' && $user->status === 'verified' && !$user->kubaca_img) {
-            App::$app->session->setFlash('warning', 'Warning! Your account has not been verified, please upload kubaca image.');
+        if ($roleName === 'mahasiswa' && $user->status === 'pending kubaca' && !$user->kubaca_img) {
+            App::$app->session->setFlash('warning', 'Warning! Your account has not been verified fully, please upload kubaca image.');
+        } else if ($roleName === 'mahasiswa' && $user->status === 'rejected') {
+            App::$app->session->setFlash('warning', 'Warning! Your kubaca image has been rejected, please reupload kubaca in profile.');
         }
 
         $userId = (int)$user->id_user;
@@ -73,7 +77,7 @@ class UserDashboardController extends Controller
         $stmt->execute();
         $totalBookings = $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        $statusList = ['draft', 'pending', 'verified', 'active', 'completed', 'cancelled', 'expired', 'no_show'];
+        $statusList = ['draft', 'pending', 'pending', 'active', 'completed', 'cancelled', 'expired', 'no_show'];
         $statusCounts = [];
         foreach ($statusList as $status) {
             $statusCounts[$status] = $this->countByStatus($userId, $status);

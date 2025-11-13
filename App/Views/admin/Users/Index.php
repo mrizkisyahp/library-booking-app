@@ -1,6 +1,7 @@
-
 <?php
+
 /** @var array $users */
+use App\Core\Csrf;
 use App\Models\Role;
 ?>
 
@@ -18,12 +19,13 @@ use App\Models\Role;
         <p class="text-slate-600">Kelola pengguna, verifikasi akun, dan monitoring aktivitas</p>
       </div>
       <div class="flex gap-3">
-        <button class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Add User
-        </button>
+        <a href="/admin/users/create"
+          class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add User
+        </a>
       </div>
     </div>
   </div>
@@ -58,21 +60,21 @@ use App\Models\Role;
 
   <!-- Statistics Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+    <button class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl hover:scale-105 transition-all duration-300 hover:border-l-8 cursor-pointer text-left">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-semibold text-slate-600">Total Users</p>
           <p class="text-3xl font-bold text-slate-800 mt-1"><?= $totalUsers ?></p>
         </div>
-        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
           <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </div>
       </div>
-    </div>
+    </button>
 
-    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+    <button class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl hover:scale-105 transition-all duration-300 hover:border-l-8 cursor-pointer text-left">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-semibold text-slate-600">Active</p>
@@ -80,15 +82,15 @@ use App\Models\Role;
             <?= $totalActive ?>
           </p>
         </div>
-        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center transition-colors">
           <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
       </div>
-    </div>
+    </button>
 
-    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+    <button class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500 hover:shadow-xl hover:scale-105 transition-all duration-300 hover:border-l-8 cursor-pointer text-left">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-semibold text-slate-600">Pending</p>
@@ -96,15 +98,15 @@ use App\Models\Role;
             <?= $totalPending ?>
           </p>
         </div>
-        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center transition-colors">
           <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
       </div>
-    </div>
+    </button>
 
-    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+    <button class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 hover:shadow-xl hover:scale-105 transition-all duration-300 hover:border-l-8 cursor-pointer text-left">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-semibold text-slate-600">Suspended</p>
@@ -112,13 +114,13 @@ use App\Models\Role;
             <?= $totalSuspended ?>
           </p>
         </div>
-        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center transition-colors">
           <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
           </svg>
         </div>
       </div>
-    </div>
+    </button>
   </div>
 
   <!-- Users Table -->
@@ -174,9 +176,19 @@ use App\Models\Role;
 
               <!-- NIM/NIP -->
               <td class="px-6 py-4">
-                <p class="text-sm font-mono text-slate-700">
-                  <?= htmlspecialchars($user['nim'] ?? $user['nip']) ?>
-                </p>
+                  <p class="text-sm font-mono text-slate-700">
+                      <?php 
+                      $identifier = '';
+                      if (!empty($user['nim'])) {
+                          $identifier = htmlspecialchars($user['nim']);
+                      } elseif (!empty($user['nip'])) {
+                          $identifier = htmlspecialchars($user['nip']);
+                      } else {
+                          $identifier = '-';
+                      }
+                      echo $identifier;
+                      ?>
+                  </p>
               </td>
 
               <!-- Jurusan -->
@@ -212,9 +224,9 @@ use App\Models\Role;
               <td class="px-6 py-4">
                 <?php if ($user['kubaca_img']): ?>
                   <button class="view-button text-emerald-600 hover:text-emerald-700 text-sm font-semibold flex items-center"
-                  data-img="<?= htmlspecialchars($user['kubaca_img']) ?>"
-                  data-nim="<?= htmlspecialchars($user['nim'] ?? $user['nip']) ?>"
-                  >
+                    data-img="uploads/kubaca/<?= htmlspecialchars($user['kubaca_img']) ?>"
+                    data-nim="<?= htmlspecialchars($user['nim'] ?? $user['nip']) ?>"
+                    data-nama="<?= htmlspecialchars($user['nama']) ?>">
                     <svg class=" w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -222,51 +234,21 @@ use App\Models\Role;
                     View
                   </button>
                 <?php else: ?>
-                  <span class="text-xs text-slate-400">No photo</span>
+                  <span class="text-xs text-slate-400">User not uploaded yet.</span>
                 <?php endif; ?>
               </td>
-
-              <!-- Modal pop-up  -->
-               <div id="imagePopUp" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-md z-50">
-                  <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 transition-all scale-95 opacity-0 duration-300">
-
-                    <!-- HELP OVER HERE -->
-                    <img id="popUpImage" src="uploads/kubaca/<?= htmlspecialchars($user['kubaca_img']) ?> " alt="Pop-up Image" class="w-full h-64 object-cover rounded-md mb-4">
-                    <div class="flex items-center justify-start gap-4">
-                      <p><?php if ($user['nim'] ?? $user['nip']): ?>
-                            NIM: 
-                            <?php else: ?>
-                            NIP: 
-                          <?php endif;?>
-                        </p>
-                        <p id="popUpId" class="text-sm font-semibold text-gray-600"><?= htmlspecialchars($user['nim'] ?? $user['nip']) ?></p>
-                    </div>
-                    <div class="flex items-center justify-start gap-4">
-                      <p>
-                        Nama:
-                      </p>
-                      <p id="popUpNama" class="text-sm font-semibold text-gray-600 capitalize"><?= htmlspecialchars($user['nama']) ?></p>
-                    </div>
-                    <button id="closePopUp" class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-800 w-full transition-all">
-                      Tutup
-                    </button>
-                  </div>
-               </div>
-
-               <script src="./src/script.js"></script>
 
               <!-- Status -->
               <td class="px-6 py-4">
                 <?php
                 $statusColors = [
                   'active' => 'bg-green-100 text-green-800',
-                  'verified' => 'bg-yellow-100 text-yellow-800',
                   'pending' => 'bg-yellow-100 text-yellow-800',
                   'suspended' => 'bg-red-100 text-red-800'
                 ];
 
                 $statusDisplay = [
-                  'verified' => 'pending',
+                  'pending kubaca' => 'pending',
                   'suspended' => 'suspended',
                   'active' => 'active'
                 ];
@@ -283,33 +265,66 @@ use App\Models\Role;
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
-                  <?php if ($user['status'] === 'verified'): ?>
-                    <!-- Approve/Reject for pending users -->
-                    <button class="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors" title="Approve">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </button>
-                    <button class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors" title="Reject">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                  <?php if (!empty($user['kubaca_img'])): ?>
+
+                  <!-- APPROVE -->
+                  <?php if ($user['status'] === 'pending kubaca' || $user['status'] === 'rejected'): ?>
+                    <form action="/admin/users/approve-kubaca" method="post" class="inline"
+                          onsubmit="return confirm('Approve KuBaca for <?= htmlspecialchars($user['nama']) ?>?');">
+                      <?= Csrf::field() ?>
+                      <input type="hidden" name="id_user" value="<?= (int)$user['id_user'] ?>">
+                      
+                      <button class="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors" 
+                              title="Approve">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                    </form>
                   <?php endif; ?>
-                  
+
+                  <!-- REJECT -->
+                  <?php if ($user['status'] === 'pending kubaca' || $user['status'] === 'active'): ?>
+                    <form action="/admin/users/reject-kubaca" method="post" class="inline"
+                          onsubmit="return confirm('Reject KuBaca for <?= htmlspecialchars($user['nama']) ?>?');">
+                      <?= Csrf::field() ?>
+                      <input type="hidden" name="id_user" value="<?= (int)$user['id_user'] ?>">
+
+                      <button class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors" 
+                              title="Reject">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </form>
+                  <?php endif; ?>
+
+                <?php endif; ?>
+
+
                   <!-- Edit -->
-                  <button class="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors" title="Edit">
+                  <a href="/admin/users/edit?id_user=<?= (int)$user['id_user'] ?>" class="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors" title="Edit">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                  </button>
-                  
+                  </a>
+
                   <!-- Delete -->
-                  <button class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors" title="Delete">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  <form action="/admin/users/delete" method="post"
+                        onsubmit="return confirm('Hapus pengguna ini secara permanen?');">
+                    <?= Csrf::field() ?>
+                    <input type="hidden" name="id_user" value="<?= (int)$user['id_user'] ?>">
+                    <button type="submit"
+                            class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                            title="Delete">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </form>
                 </div>
               </td>
             </tr>
@@ -345,3 +360,31 @@ use App\Models\Role;
     </div>
   </div>
 </div>
+
+<!-- Modal pop-up  -->
+    <div id="imagePopUp" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-md z-50">
+      <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 transition-all scale-95 opacity-0 duration-300">
+
+        <!-- HELP OVER HERE -->
+
+        <img id="popUpImage" src="<?= !empty($user['kubaca_img']) ? $user['kubaca_img'] : '' ?> " alt="Pop-up Image" class="w-full h-64 object-cover rounded-md mb-4">
+        <div class="flex items-center justify-start gap-4">
+          <p><?php if ($user['nim'] ?? $user['nip']): ?>
+              NIM:
+            <?php else: ?>
+              NIP:
+            <?php endif; ?>
+          </p>
+          <p id="popUpId" class="text-sm font-semibold text-gray-600"><?= htmlspecialchars($user['nim'] ?? $user['nip']) ?></p>
+        </div>
+        <div class="flex items-center justify-start gap-4">
+          <p>
+            Nama:
+          </p>
+          <p id="popUpNama" class="text-sm font-semibold text-gray-600 capitalize"><?= htmlspecialchars($user['nama']) ?></p>
+        </div>
+        <button id="closePopUp" class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-800 w-full transition-all">
+          Tutup
+        </button>
+      </div>
+    </div>

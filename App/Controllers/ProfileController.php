@@ -10,6 +10,7 @@ use App\Core\Response;
 use App\Core\Services\Logger;
 use App\Models\Role;
 use App\Models\User;
+use App\Core\Services\FileUploaderService;
 
 class ProfileController extends Controller
 {
@@ -29,11 +30,14 @@ class ProfileController extends Controller
             return;
         }
 
-        $roleLabel = Role::getNameById($user->id_role ?? null) ?? 'Unknown';
+        $roleName = Role::getNameById($user->id_role ?? null);
+        if ($roleName === 'mahasiswa' && $user->status === 'pending kubaca' && !$user->kubaca_img) {
+            App::$app->session->setFlash('warning', 'Warning! Your account has not been verified fully, please upload kubaca image.');
+        }
 
         return $this->render('Profile/Index', [
             'user' => $user,
-            'roleLabel' => $roleLabel,
+            'roleLabel' => $roleName,
         ]);
     }
 
@@ -57,14 +61,16 @@ class ProfileController extends Controller
             return;
         }
         
-        if ($user->status !== 'verified') {
-            App::$app->session->setFlash('error', 'Only active users can upload KuBaca.');
+        if ($user->status !== 'pending kubaca' && $user->status !== 'rejected') {
+            App::$app->session->setFlash('error', 'Only pending users can upload KuBaca.');
             $response->redirect('/profile');
             return;
         }
 
-        if ($user->kubaca_img) {
+        if ($user->kubaca_img && $user->status !== 'rejected') {
             App::$app->session->setFlash('error', 'You have already uploaded KuBaca image.');
+            $user->status = 'pending kubaca';
+            $user->save();
             $response->redirect('/profile');
             return;
         }
@@ -75,50 +81,39 @@ class ProfileController extends Controller
             return;
         }
 
-        $file = $_FILES['kubaca_img'];
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        
-        if (!in_array($file['type'], $allowedTypes)) {
-            App::$app->session->setFlash('error', 'Only JPG, PNG, and WEBP images are allowed.');
-            $response->redirect('/profile');
-            return;
+        $result = FileUploaderService::upload(
+        $_FILES['kubaca_img'],
+        App::$ROOT_DIR . '/public/uploads/kubaca/',
+        ['image/jpeg', 'image/png', 'image/webp'],
+        2,
+        'kubaca_' . $user->id_user
+        );
+
+        if (!$result['success']) {
+            App::$app->session->setFlash('error', $result['error']);
+            return $response->redirect('/profile');
         }
 
-        if ($file['size'] > 2 * 1024 * 1024) {
-            App::$app->session->setFlash('error', 'File size must be less than 2MB.');
-            $response->redirect('/profile');
-            return;
-        }
+        $stmt = App::$app->db->prepare("
+            UPDATE users SET kubaca_img = :img WHERE id_user = :id
+        ");
 
-        $uploadDir = App::$ROOT_DIR . '/public/uploads/kubaca/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
+        $stmt->bindValue(':img', $result['filename']);
+        $stmt->bindValue(':id', $user->id_user, \PDO::PARAM_INT);
+        $stmt->execute();
 
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'kubaca_' . $user->id_user . '_' . time() . '.' . $extension;
-        $uploadPath = $uploadDir . $filename;
+        $user->kubaca_img = $result['filename'];
+        $user->status = 'pending kubaca';
+        $user->save();
 
-        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            $stmt = App::$app->db->prepare("UPDATE users SET kubaca_img = :img WHERE id_user = :id");
-            $stmt->bindValue(':img', $filename);
-            $stmt->bindValue(':id', $user->id_user, \PDO::PARAM_INT);
-            $stmt->execute();
-
-            $user->kubaca_img = $filename;
-            Logger::info('KuBaca image uploaded', [
+        if (class_exists(Logger::class)) {
+            Logger::info('KuBaca uploaded', [
                 'user_id' => $user->id_user,
-                'filename' => $filename
+                'filename' => $result['filename']
             ]);
-            App::$app->session->setFlash('success', 'KuBaca image uploaded successfully.');
-
-            $response->redirect('/profile');
-        } else {
-            Logger::error('Failed to upload KuBaca image', [
-                'user_id' => $user->id_user
-            ]);
-            App::$app->session->setFlash('error', 'Failed to upload image. Please try again.');
-            $response->redirect('/profile');
         }
+
+        App::$app->session->setFlash('success', 'KuBaca uploaded successfully.');
+        return $response->redirect('/profile');
     }
 }

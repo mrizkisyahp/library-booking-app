@@ -49,12 +49,10 @@ class VerifyController extends Controller {
             }
 
             $user = User::findOne($userId);
-            $newStatus = ($user->isDosen()) ? 'active' : 'verified';
+            $newStatus = ($user->isDosen()) ? 'active' : 'pending kubaca';
 
-            $stmt = App::$app->db->prepare("UPDATE users SET status = :status WHERE id_user = :id");
-            $stmt->bindValue(':status', $newStatus);
-            $stmt->bindValue(':id', $userId);
-            $stmt->execute();           
+            $user->status = $newStatus;
+            $user->save();
             
             CacheService::delete('otp_' . $userId);
             App::$app->session->remove('user_id_pending');

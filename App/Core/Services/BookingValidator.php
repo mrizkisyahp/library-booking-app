@@ -73,6 +73,10 @@ class BookingValidator
             $errors[] = 'Akun harus terverifikasi kubaca terlebih dahulu sebelum booking';
         }
 
+        if (!$user || $user->status === 'rejected') {
+            $errors[] = 'Akun tidak dapat melakukan peminjaman ruangan, silahkan upload kembali kubaca di profile';
+        }
+
         $requiresPegawaiFields = $user && $user->isDosen() && strcasecmp($room->nama_ruangan, 'Ruang Rapat') === 0;
 
         if ($requiresPegawaiFields) {

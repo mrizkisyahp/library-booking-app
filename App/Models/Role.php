@@ -33,4 +33,11 @@ class Role
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $row['nama_role'] ?? null;
     }
+
+    public static function getAllRoleName(): array
+    {
+        $stmt = App::$app->db->prepare("SELECT * FROM role");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

@@ -87,13 +87,17 @@ abstract class Model
                     $className = $rule['class'];
                     $uniqueAttr = $rule['attribute'] ?? $attribute;
                     $tableName = $className::tableName();
-
-                    $statement = App::$app->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttr = :attr");
+                    $statement = App::$app->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttr = :attr LIMIT 1");
                     $statement->bindValue(":attr", $value);
                     $statement->execute();
 
                     $record = $statement->fetchObject();
                     if ($record) {
+                        $primary = $className::primaryKey();
+                        $exceptId = $rule['except'] ?? null;
+                        if ($exceptId && (int)$record->{$primary} === (int)$exceptId) {
+                            continue;
+                        }
                         $this->addErrorForRule($attribute, self::RULE_UNIQUE, ['field' => $attribute]);
                     }
                 }
@@ -138,5 +142,9 @@ abstract class Model
     public function getFirstError(string $attribute): ?string
     {
         return $this->errors[$attribute][0] ?? null;
+    }
+
+    public function getAllErrors(): array {
+        return $this->errors;
     }
 }

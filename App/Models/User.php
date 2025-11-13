@@ -8,6 +8,8 @@ Use App\Core\App;
 class User extends DbModel {
     public const SCENARIO_REGISTER = 'register';
     public const SCENARIO_LOGIN = 'login';
+    public const SCENARIO_UPDATE = 'update';
+
     public ?int $id_user = null;
     public string $nama = '';
     public ?string $nim = null;
@@ -46,35 +48,43 @@ class User extends DbModel {
                 'identifier' => [self::RULE_REQUIRED],
                 'password' => [self::RULE_REQUIRED],
             ];
-        } else if ($this->scenario === self::SCENARIO_REGISTER) {
+        } else if ($this->scenario === self::SCENARIO_REGISTER || $this->scenario === self::SCENARIO_UPDATE) {
             $rules = [
-            'nama' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
-            'email' => [self::RULE_REQUIRED, self::RULE_EMAIL, [self::RULE_UNIQUE, 'class' => self::class]],
-            'password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]],
-            'confirm_password' => [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'password']],
-            'jurusan' => [self::RULE_REQUIRED],
-            'nomor_hp' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-            'id_role' => [self::RULE_REQUIRED],
-        ];
+                'nama' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
+                'email' => [
+                    self::RULE_REQUIRED,
+                    self::RULE_EMAIL,
+                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
+                ],
+                'jurusan' => [self::RULE_REQUIRED],
+                'nomor_hp' => [self::RULE_REQUIRED, self::RULE_NUMBER],
+                'id_role' => [self::RULE_REQUIRED],
+            ];
 
-        if ((string)$this->id_role === '3') {
-            $rules['nim'] = [
-                self::RULE_REQUIRED,
-                self::RULE_NUMBER,
-                [self::RULE_MIN, 'min' => 10],
-                [self::RULE_MAX, 'max' => 10],
-                [self::RULE_UNIQUE, 'class' => self::class]
-            ];
-        } elseif ((string)$this->id_role === '2') {
-            $rules['nip'] = [
-                self::RULE_REQUIRED,
-                self::RULE_NUMBER,
-                [self::RULE_MIN, 'min' => 18],
-                [self::RULE_MAX, 'max' => 18],
-                [self::RULE_UNIQUE, 'class' => self::class]
-            ];
-        }
-        return $rules;
+            if ($this->scenario === self::SCENARIO_REGISTER || $this->password !== '') {
+                $rules['password'] = [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]];
+                $rules['confirm_password'] = [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'password']];
+            }
+
+            if ((string)$this->id_role === '3') {
+                $rules['nim'] = [
+                    self::RULE_REQUIRED,
+                    self::RULE_NUMBER,
+                    [self::RULE_MIN, 'min' => 10],
+                    [self::RULE_MAX, 'max' => 10],
+                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
+                ];
+            } elseif ((string)$this->id_role === '2') {
+                $rules['nip'] = [
+                    self::RULE_REQUIRED,
+                    self::RULE_NUMBER,
+                    [self::RULE_MIN, 'min' => 18],
+                    [self::RULE_MAX, 'max' => 18],
+                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
+                ];
+            }
+
+            return $rules;
         }
 
         return [];
@@ -100,10 +110,8 @@ class User extends DbModel {
     }
 
     public function save(): bool {
-        $this->status = 'pending';
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
         return parent::save();
-    }
+    }   
 
     public function getDisplayName(): string {
         return $this->nama;
@@ -168,7 +176,7 @@ class User extends DbModel {
 
     public static function countPending(): int {
         $db = App::$app->db;
-        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'verified'");
+        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'pending kubaca'");
         $stmt->execute();
         return $stmt->fetchColumn();
     }

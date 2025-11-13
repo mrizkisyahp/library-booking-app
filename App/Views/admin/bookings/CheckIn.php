@@ -3,7 +3,7 @@ use App\Core\App;
 use App\Core\Csrf;
 ?>
 
-<div class="max-w-2xl mx-auto p-6">
+<div class="max-w-7xl mx-auto">  
   <!-- Header -->
   <div class="mb-8">
     <h2 class="text-3xl font-bold text-gray-900 mb-2">Check-in Booking</h2>

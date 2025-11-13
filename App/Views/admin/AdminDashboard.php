@@ -13,11 +13,8 @@ use App\Core\Csrf;
 </div>
 
 <?php
-$bookingStats = $stats['bookingStats'] ?? ['total' => 0, 'statuses' => []];
-$resourceStats = $stats['resources'] ?? [
-  'rooms' => ['total' => 0, 'available' => 0, 'unavailable' => 0],
-  'users' => ['total' => 0, 'verified' => 0, 'pending' => 0],
-];
+$bookingStats = $stats['bookingStats'];
+$resourceStats = $stats['resources'];
 $statusCards = [
   'draft' => ['label' => 'Draft', 'class' => 'from-gray-50 to-gray-100 border-gray-200'],
   'pending' => ['label' => 'Pending', 'class' => 'from-yellow-50 to-yellow-100 border-yellow-200'],

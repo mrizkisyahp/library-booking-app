@@ -158,51 +158,119 @@ use App\Models\Room;
       Buat Booking
     </h3>
 
-    <form action="/bookings/draft" method="post" enctype="multipart/form-data" class="space-y-6">
-      <?= CSRF::field() ?>
-      <input type="hidden" name="ruangan_id" value="<?= (int)$room->id_ruangan ?>">
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Penggunaan</label>
-          <input type="date" name="tanggal_penggunaan_ruang" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+    <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?>
+      <!-- Blocked Booking Form Overlay -->
+      <div class="relative">
+        <!-- Blurred Form (for visual context) -->
+        <div class="pointer-events-none select-none blur-sm opacity-40">
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Penggunaan</label>
+                <input type="date" disabled class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Mulai</label>
+                <input type="time" disabled class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Selesai</label>
+                <input type="time" disabled class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Tujuan Penggunaan</label>
+              <select disabled class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+                <option>Pilih tujuan penggunaan</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Mulai</label>
-          <input type="time" name="waktu_mulai" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Selesai</label>
-          <input type="time" name="waktu_selesai" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+        <!-- Overlay Message -->
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 <?= $user->status === 'pending kubaca' ? 'border-amber-300' : 'border-red-300' ?> p-8 max-w-md text-center transform hover:scale-105 transition-transform">
+            <div class="w-20 h-20 mx-auto mb-4 <?= $user->status === 'pending kubaca' ? 'bg-amber-100' : 'bg-red-100' ?> rounded-full flex items-center justify-center">
+              <?php if ($user->status === 'pending kubaca'): ?>
+                <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              <?php else: ?>
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              <?php endif; ?>
+            </div>
+            
+            <?php if ($user->status === 'pending kubaca'): ?>
+              <h4 class="text-xl font-bold text-amber-900 mb-3">Booking Tidak Tersedia</h4>
+              <p class="text-amber-800 mb-2 leading-relaxed">
+                Akun Anda sedang dalam proses verifikasi. Anda tidak dapat membuat booking hingga akun Anda disetujui oleh admin.
+              </p>
+              <p class="text-sm text-amber-700">
+                Harap menunggu konfirmasi dari admin.
+              </p>
+            <?php else: ?>
+              <h4 class="text-xl font-bold text-red-900 mb-3">Akses Ditolak</h4>
+              <p class="text-red-800 mb-2 leading-relaxed">
+                Akun Anda telah ditolak. Anda tidak dapat membuat booking saat ini.
+              </p>
+              <p class="text-sm text-red-700">
+                Silakan upload kembali kubaca di profile.
+              </p>
+            <?php endif; ?>
+          </div>
         </div>
       </div>
+    <?php else: ?>
+      <!-- Active Booking Form -->
+      <form action="/bookings/draft" method="post" enctype="multipart/form-data" class="space-y-6">
+        <?= CSRF::field() ?>
+        <input type="hidden" name="ruangan_id" value="<?= (int)$room->id_ruangan ?>">
 
-      <div>
-        <?php
-        $tujuanMahasiswa = [
-          'Diskusi Kelompok',
-          'Belajar Bersama',
-          'Presentasi Tugas',
-          'Pembuatan Konten Edukasi',
-          'Rekaman Audio/Video',
-          'Konseling Akademik',
-          'Latihan Bahasa Asing',
-          'Kegiatan Literasi',
-          'Proyek Kreatif'
-        ];
-        ?>
-        <label for="tujuan" class="block text-sm font-semibold text-slate-700 mb-2">Tujuan Penggunaan</label>
-        <select name="tujuan" id="tujuan" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
-          <option value="" disabled selected>Pilih tujuan penggunaan</option>
-          <?php foreach ($tujuanMahasiswa as $tujuan): ?>
-            <option value="<?= htmlspecialchars($tujuan) ?>">
-              <?= htmlspecialchars($tujuan) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Penggunaan</label>
+            <input type="date" name="tanggal_penggunaan_ruang" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Mulai</label>
+            <input type="time" name="waktu_mulai" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Selesai</label>
+            <input type="time" name="waktu_selesai" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+          </div>
+        </div>
+
+        <div>
+          <?php
+          $tujuanMahasiswa = [
+            'Diskusi Kelompok',
+            'Belajar Bersama',
+            'Presentasi Tugas',
+            'Pembuatan Konten Edukasi',
+            'Rekaman Audio/Video',
+            'Konseling Akademik',
+            'Latihan Bahasa Asing',
+            'Kegiatan Literasi',
+            'Proyek Kreatif'
+          ];
+          ?>
+          <label for="tujuan" class="block text-sm font-semibold text-slate-700 mb-2">Tujuan Penggunaan</label>
+          <select name="tujuan" id="tujuan" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+            <option value="" disabled selected>Pilih tujuan penggunaan</option>
+            <?php foreach ($tujuanMahasiswa as $tujuan): ?>
+              <option value="<?= htmlspecialchars($tujuan) ?>">
+                <?= htmlspecialchars($tujuan) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </form>
+    <?php endif; ?>
 
       <?php if ($user->isDosen()): ?>
         <div class="border-t pt-6 space-y-6">

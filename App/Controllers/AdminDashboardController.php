@@ -62,11 +62,11 @@ class AdminDashboardController extends Controller
         $stmt->execute();
         $totalUsers = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
 
-        // Verified users
-        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users u INNER JOIN role r ON u.id_role = r.id_role WHERE u.status = 'verified' AND r.nama_role != 'admin'");
+        // Pending Kubaca users
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users u INNER JOIN role r ON u.id_role = r.id_role WHERE u.status = 'pending kubaca' AND r.nama_role != 'admin'");
         $stmt->execute();
-        $verifiedUsers = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
-        $pendingUsers = max($totalUsers - $verifiedUsers, 0);
+        $pendingUsers = (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        $verifiedUsers = max($totalUsers - $pendingUsers, 0);
 
         return [
             'bookingStats' => [

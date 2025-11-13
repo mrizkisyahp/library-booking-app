@@ -131,7 +131,10 @@ class AuthController extends Controller
             $user->loadData($request->getBody());
             $user->id_role = Role::getIdByName('mahasiswa');
 
-            if ($user->validate() && $user->save()) {
+            if ($user->validate()) {
+            $user->status = 'pending kubaca';
+            $user->password = password_hash($user->password, PASSWORD_DEFAULT);
+            if ($user->save()) {
                 $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                 CacheService::set('otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
                 
@@ -140,9 +143,10 @@ class AuthController extends Controller
 
                 Logger::auth('registered', $user->id_user, "Email: {$user->email}, Role: mahasiswa");
                 App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
-                $response->redirect('/verify');
-                return;
             }
+            $response->redirect('/verify');
+            return;
+        }
 
             return $this->render('Auth/Mahasiswa', ['model' => $user]);
         }
@@ -167,8 +171,11 @@ class AuthController extends Controller
 
             $user->loadData($request->getBody());
             $user->id_role = Role::getIdByName('dosen');
-
-            if ($user->validate() && $user->save()) {
+            
+            if ($user->validate()) {
+            $user->status = 'pending kubaca';
+            $user->password = password_hash($user->password, PASSWORD_DEFAULT);
+            if ($user->save()) {
                 $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                 CacheService::set('otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
                 
@@ -177,9 +184,10 @@ class AuthController extends Controller
 
                 Logger::auth('registered', $user->id_user, "Email: {$user->email}, Role: dosen");
                 App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
-                $response->redirect('/verify');
-                return;
             }
+            $response->redirect('/verify');
+            return;
+        }
 
             return $this->render('Auth/Dosen', ['model' => $user]);
         }

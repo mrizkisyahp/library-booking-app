@@ -152,3 +152,5 @@ use App\Core\Csrf;
 </body>
 
 </html>
+
+<script src="src/script.js"></script>
