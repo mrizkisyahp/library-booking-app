@@ -9,8 +9,8 @@ class Session
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
-            $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (($_ENV['APP_ENV'] ?? '') === 'production');
+            $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+                || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 
             $lifetime = (int)($_ENV['SESSION_LIFETIME'] ?? 7200);
 

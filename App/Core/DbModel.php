@@ -14,6 +14,7 @@ abstract class DbModel extends Model
 
     public function save(): bool
     {
+        
     $primaryKey = static::primaryKey();
     if (!empty($this->{$primaryKey})) {
         $fields = [];

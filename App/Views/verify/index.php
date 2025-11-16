@@ -1,5 +1,5 @@
 <?php
-/** @var \App\Models\VerificationForm $model */
+/** @var \App\Models\User $model */
 use App\Core\App;
 use App\Core\Csrf;
 ?>

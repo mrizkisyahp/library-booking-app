@@ -7,8 +7,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\App;
 use App\Models\User;
-use App\Core\Services\EmailService;
-use App\Core\Services\CacheService;
+use App\Core\Csrf;
 use App\Core\Services\Logger;
 use App\Core\Middleware\GuestMiddleware;
 use App\Models\Role;
@@ -20,73 +19,35 @@ class AuthController extends Controller
         $this->registerMiddleware(new GuestMiddleware(['logout']));
     }
 
-    private function verifyTurnstile(Response $response): bool
-    {
-        $enabled = filter_var($_ENV['TURNSTILE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        if (!$enabled) {
-            return true;
-        }
-
-        $token  = $_POST['cf-turnstile-response'] ?? null;
-        $secret = $_ENV['TURNSTILE_SECRET'] ?? null;
-
-        if (!$token || !$secret) {
-            App::$app->session->setFlash('error', 'CAPTCHA token is missing. Please try again.');
-            return false;
-        }
-
-        $payload = http_build_query([
-            'secret'   => $secret,
-            'response' => $token,
-            'remoteip' => $_SERVER['REMOTE_ADDR'] ?? null,
-        ]);
-
-        $context = stream_context_create([
-            'http' => [
-                'method'  => 'POST',
-                'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
-                'content' => $payload,
-            ],
-        ]);
-
-        $verify = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $context);
-
-        if ($verify === false) {
-            App::$app->session->setFlash('error', 'Could not connect to Turnstile API.');
-            return false;
-        }
-
-        $result = json_decode($verify, true);
-        return isset($result['success']) && $result['success'] === true;
-    }
-
     public function login(Request $request, Response $response)
     {
         $loginModel = new User();
         $loginModel->setScenario(User::SCENARIO_LOGIN);
+        $authService = App::$app->auth;
 
         $this->setLayout('auth');
         $this->setTitle('Login | Library Booking App');
 
         if ($request->isPost()) {
-            if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
                 App::$app->session->setFlash('error', 'Invalid CSRF token.');
                 return $this->render('Auth/Login', ['model' => $loginModel]);
             }
-        
-        if (!$this->verifyTurnstile($response)) {
-            App::$app->session->setFlash('error', 'Turnstile verification gagal');
-            return $this->render('Auth/Login', ['model' => $loginModel]);
-        }
+
+            $token = $_POST['cf-turnstile-response'] ?? null;
+            $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
+
+            if (!$authService->verifyTurnstile($token, $remoteIp)) {
+                return $this->render('Auth/Login', ['model' => $loginModel]);
+            }
 
             $loginModel->loadData($request->getBody());
 
-            if ($loginModel->validate() && $loginModel->login()) {
-                $currentUser = App::$app->user;
+            if ($loginModel->validate() && $authService->processLogin($loginModel)) {
+                $currentUser = $authService->getUser();
                 $roleName = null;
 
                 if ($currentUser instanceof User && $currentUser->id_user !== null) {
-                    Logger::auth('logged in', $currentUser->id_user);
                     $roleName = Role::getNameById($currentUser->id_role ?? null);
                 }
 
@@ -94,6 +55,15 @@ class AuthController extends Controller
                 $response->redirect($roleName === 'admin' ? '/admin' : '/dashboard');
                 return;
             }
+
+            // $this->debugRegistration('login', [
+            //     'request_body' => $request->getBody(),
+            //     'errors' => $loginModel->getAllErrors(),
+            //     'session_token' => $_SESSION['csrf_token'] ?? null,
+            //     'posted_token' => $_POST['csrf_token'] ?? null,
+            //     'turnstile_token' => $token ?? null,
+            //     'session_flash' => $_SESSION['flash_messages'] ?? [],
+            // ]);
 
             return $this->render('Auth/Login', ['model' => $loginModel]);
         }
@@ -113,40 +83,44 @@ class AuthController extends Controller
         $user = new User();
         $user->setScenario(User::SCENARIO_REGISTER);
         $user->id_role = Role::getIdByName('mahasiswa');
+        $authService = App::$app->auth;
 
         $this->setTitle('Register Mahasiswa | Library Booking App');
         $this->setLayout('auth');
 
         if ($request->isPost()) {
-            if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
                 App::$app->session->setFlash('error', 'Invalid CSRF token.');
                 return $this->render('Auth/Mahasiswa', ['model' => $user]);
             }
 
-        if (!$this->verifyTurnstile($response)) {
-            App::$app->session->setFlash('error', 'Turnstile verification failed.');
-            return $this->render('Auth/Mahasiswa', ['model' => $user]);
+            $token = $_POST['cf-turnstile-response'] ?? null;
+            $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
+
+            if (!$authService->verifyTurnstile($token, $remoteIp)) {
+                return $this->render('Auth/Mahasiswa', ['model' => $user]);
             }
 
             $user->loadData($request->getBody());
             $user->id_role = Role::getIdByName('mahasiswa');
 
             if ($user->validate()) {
-            $user->status = 'pending kubaca';
-            $user->password = password_hash($user->password, PASSWORD_DEFAULT);
-            if ($user->save()) {
-                $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                CacheService::set('otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
-                
-                App::$app->session->set('user_id_pending', $user->id_user);
-                EmailService::sendVerificationCode($user, $otp, 'register');
-
-                Logger::auth('registered', $user->id_user, "Email: {$user->email}, Role: mahasiswa");
-                App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
+                if ($authService->registerUser($user, 'mahasiswa')) {
+                    App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
+                    $response->redirect('/verify');
+                    return;
+                }
             }
-            $response->redirect('/verify');
-            return;
-        }
+
+            // $this->debugRegistration('register_mahasiswa', [
+            //     'request_body'   => $request->getBody(),
+            //     'errors'         => $user->getAllErrors(),
+            //     'role_id'        => $user->id_role,
+            //     'session_token'  => $_SESSION['csrf_token'] ?? null,
+            //     'posted_token'   => $_POST['csrf_token'] ?? null,
+            //     'turnstile_token'=> $token ?? null,
+            //     'session_flash'  => $_SESSION['flash_messages'] ?? [],
+            // ]);
 
             return $this->render('Auth/Mahasiswa', ['model' => $user]);
         }
@@ -159,13 +133,21 @@ class AuthController extends Controller
         $user = new User();
         $user->setScenario(User::SCENARIO_REGISTER);
         $user->id_role = Role::getIdByName('dosen');
+        $authService = App::$app->auth;
 
         $this->setTitle('Register Dosen | Library Booking App');
         $this->setLayout('auth');
 
         if ($request->isPost()) {
-            if (!\App\Core\Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
                 App::$app->session->setFlash('error', 'Invalid CSRF token.');
+                return $this->render('Auth/Dosen', ['model' => $user]);
+            }
+
+            $token = $_POST['cf-turnstile-response'] ?? null;
+            $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
+
+            if (!$authService->verifyTurnstile($token, $remoteIp)) {
                 return $this->render('Auth/Dosen', ['model' => $user]);
             }
 
@@ -173,21 +155,22 @@ class AuthController extends Controller
             $user->id_role = Role::getIdByName('dosen');
             
             if ($user->validate()) {
-            $user->status = 'pending kubaca';
-            $user->password = password_hash($user->password, PASSWORD_DEFAULT);
-            if ($user->save()) {
-                $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                CacheService::set('otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
-                
-                App::$app->session->set('user_id_pending', $user->id_user);
-                EmailService::sendVerificationCode($user, $otp, 'register');
-
-                Logger::auth('registered', $user->id_user, "Email: {$user->email}, Role: dosen");
-                App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
+                if ($authService->registerUser($user, 'dosen')) {
+                    App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
+                    $response->redirect('/verify');
+                    return;
+                }
             }
-            $response->redirect('/verify');
-            return;
-        }
+
+            // $this->debugRegistration('register_dosen', [
+            //     'request_body'   => $request->getBody(),
+            //     'errors'         => $user->getAllErrors(),
+            //     'role_id'        => $user->id_role,
+            //     'session_token'  => $_SESSION['csrf_token'] ?? null,
+            //     'posted_token'   => $_POST['csrf_token'] ?? null,
+            //     'turnstile_token'=> $token ?? null,
+            //     'session_flash'  => $_SESSION['flash_messages'] ?? [],
+            // ]);
 
             return $this->render('Auth/Dosen', ['model' => $user]);
         }
@@ -209,4 +192,16 @@ class AuthController extends Controller
         $response->redirect('/');
     }
 
+    // private function debugRegistration(string $label, array $context): void
+    // {
+    //     $enabled = filter_var($_ENV['AUTH_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    //     if (!$enabled) {
+    //         return;
+    //     }
+
+    //     echo '<pre>';
+    //     echo '[' . strtoupper($label) . ']' . PHP_EOL;
+    //     print_r($context);
+    //     echo '</pre>';
+    // }
 }

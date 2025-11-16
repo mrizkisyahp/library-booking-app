@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Core\DbModel;
 use App\Core\App;
+use App\Core\DbModel;
 
 class Room extends DbModel {
     public ?int $id_ruangan = null;
@@ -25,15 +25,13 @@ class Room extends DbModel {
     }
 
     public function rules(): array {
-        $rules = [
-            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
+        return [
+            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3], [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_ruangan]],
             'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
             'kapasitas_max' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
             'jenis_ruangan' => [self::RULE_REQUIRED],
             'deskripsi_ruangan' => [self::RULE_REQUIRED],
         ];
-
-        return $rules;
     }
 
     public function attributes(): array {
@@ -50,30 +48,70 @@ class Room extends DbModel {
         ];
     }
 
-    public function isAvailable(): bool {
-        return $this->status_ruangan === 'available';
-    }
+    public static function search(array $filters = []): array
+    {
+        [$sql, $params] = self::buildQuery($filters, [
+            'only_available' => true,
+        ]);
 
-    public static function getAvailableRooms(): array {
-        $stmt = App::$app->db->prepare("SELECT * FROM ruangan WHERE status_ruangan = 'available' ORDER BY nama_ruangan ASC");
-
+        $stmt = App::$app->db->prepare($sql . " ORDER BY nama_ruangan ASC");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
         $stmt->execute();
+
         return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
     }
 
-    public static function search(array $filters = []): array
+    public static function findPaginated(int $page, int $perPage, array $filters = [], array $options = [])
     {
-        $sql = "SELECT * FROM ruangan WHERE status_ruangan = 'available'";
+        $offset = ($page - 1) * $perPage;
+
+        $options = array_merge([
+            'only_available' => false,
+            'order' => 'ruangan.id_ruangan DESC',
+        ], $options);
+
+        [$baseSql, $params] = self::buildQuery($filters, $options);
+        $sql = $baseSql . " ORDER BY {$options['order']} LIMIT :limit OFFSET :offset";
+
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    }
+
+    public static function count(array $filters = []): int
+    {
+        [$baseSql, $params] = self::buildQuery($filters);
+        $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
+
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    private static function buildQuery(array $filters, array $options = []): array
+    {
+        $options = array_merge([
+            'only_available' => false,
+        ], $options);
+
+        $sql = "SELECT * FROM ruangan WHERE 1=1";
         $params = [];
 
-        if (!empty($filters['kapasitas_min'])) {
-            $sql .= " AND kapasitas_max >= :kapasitas_min";
-            $params[':kapasitas_min'] = (int)$filters['kapasitas_min'];
-        }
-
-        if (!empty($filters['kapasitas_max'])) {
-            $sql .= " AND kapasitas_min <= :kapasitas_max";
-            $params[':kapasitas_max'] = (int)$filters['kapasitas_max'];
+        if (!empty($filters['nama_ruangan'])) {
+            $sql .= " AND nama_ruangan LIKE :nama";
+            $params[':nama'] = '%' . $filters['nama_ruangan'] . '%';
         }
 
         if (!empty($filters['jenis_ruangan'])) {
@@ -81,17 +119,36 @@ class Room extends DbModel {
             $params[':jenis'] = '%' . $filters['jenis_ruangan'] . '%';
         }
 
-        if (!empty($filters['nama_ruangan'])) {
-            $sql .= " AND nama_ruangan LIKE :nama";
-            $params[':nama'] = '%' . $filters['nama_ruangan'] . '%';
+        if (!empty($filters['kapasitas_min'])) {
+            $sql .= " AND kapasitas_min <= :kapasitas_min";
+            $params[':kapasitas_min'] = (int)$filters['kapasitas_min'];
         }
 
-        $sql .= " ORDER BY nama_ruangan ASC";
-
-        $stmt = App::$app->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        if (!empty($filters['kapasitas_max'])) {
+            $sql .= " AND kapasitas_max >= :kapasitas_max";
+            $params[':kapasitas_max'] = (int)$filters['kapasitas_max'];
         }
+
+        if (!empty($filters['status_ruangan'])) {
+            $sql .= " AND status_ruangan = :status";
+            $params[':status'] = $filters['status_ruangan'];
+        } elseif (!empty($options['only_available'])) {
+            $sql .= " AND status_ruangan = 'available'";
+        }
+
+        return [$sql, $params];
+    }
+
+    public function isAvailable(): bool {
+        return $this->status_ruangan === 'available';
+    }
+
+    public static function getAvailableRooms(): array {
+        $stmt = App::$app->db->prepare("
+            SELECT * FROM ruangan
+            WHERE status_ruangan = 'available'
+            ORDER BY nama_ruangan ASC
+        ");
         $stmt->execute();
 
         return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
@@ -114,8 +171,8 @@ class Room extends DbModel {
         $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
         $files = glob($pattern, GLOB_BRACE) ?: [];
         sort($files);
-        $photos = [];
 
+        $photos = [];
         foreach ($files as $file) {
             $mime = match (strtolower(pathinfo($file, PATHINFO_EXTENSION))) {
                 'jpg', 'jpeg' => 'image/jpeg',
@@ -157,22 +214,26 @@ class Room extends DbModel {
         while ($added < $days) {
             $date = date('Y-m-d', strtotime("+{$offset} days"));
             $offset++;
+
             $day = (int)date('N', strtotime($date));
             if ($day === 6 || $day === 7) {
                 continue;
             }
+
             $calendar[$date] = [];
             $added++;
         }
 
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-            $calendar[$row['tanggal']][] = $row;
+            if (isset($calendar[$row['tanggal']])) {
+                $calendar[$row['tanggal']][] = $row;
+            }
         }
 
         return $calendar;
     }
 
-    private function slugify(string $name): string
+    public function slugify(string $name): string
     {
         $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $name);
         return trim($slug, '_');

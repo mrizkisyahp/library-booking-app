@@ -111,6 +111,8 @@ $users = $resourceStats['users'];
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Room</th>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date & Time</th>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Feedback</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -144,6 +146,21 @@ $users = $resourceStats['users'];
                       <?= htmlspecialchars($statusLabel) ?>
                     </span>
                   </td>
+                  <td class="px-6 py-4 text-sm">
+                    <?php if (!empty($booking['feedback_id'])): ?>
+                      <a href="/admin/feedback/detail?id=<?= (int)$booking['feedback_id'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
+                        Lihat Feedback
+                      </a>
+                    <?php else: ?>
+                      <span class="text-gray-400 text-sm">Tidak ada</span>
+                    <?php endif; ?>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
+                  <a href="/admin/bookings/detail?id=<?= (int)$booking['id_booking'] ?>"
+                     class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    Detail
+                  </a>
+                </td>
                 </tr>
               <?php endforeach; ?>
             </tbody>

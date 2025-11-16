@@ -5,7 +5,19 @@ use App\Models\User;
 /** @var Room[] $rooms */
 /** @var array $filters */
 /** @var User $user */
+
+$roomTypes = [
+  'Audio Visual',
+  'Telekonferensi',
+  'Kreasi dan Rekreasi',
+  'Baca Kelompok',
+  'Koleksi Bahasa Prancis',
+  'Bimbingan & Konseling',
+  'Ruang Rapat',
+];
+
 ?>
+
 
 <div class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
   <div class="max-w-7xl mx-auto px-6 py-12">
@@ -56,7 +68,14 @@ use App\Models\User;
             </svg>
             Jenis Ruangan
           </label>
-          <input type="text" name="jenis_ruangan" value="<?= htmlspecialchars($filters['jenis_ruangan'] ?? '') ?>" placeholder="Misal: Meeting Room" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+          <select name="jenis_ruangan" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+            <option value="">Semua Jenis</option>
+            <?php foreach ($roomTypes as $type): ?>
+              <option value="<?= htmlspecialchars($type) ?>" <?= ($filters['jenis_ruangan'] ?? '') === $type ? 'selected' : '' ?>>
+                <?= htmlspecialchars($type) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
         </div>
       </div>
 

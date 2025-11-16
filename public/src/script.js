@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    closePopUp.addEventListener('click', () => {
+    closePopUp.addEventListener('click', () => {    
         const content = imagePopUp.querySelector('div');
         content.classList.remove('opacity-100', 'scale-100');
         content.classList.add('opacity-0', 'scale-95');

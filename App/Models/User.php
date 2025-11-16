@@ -9,7 +9,9 @@ class User extends DbModel {
     public const SCENARIO_REGISTER = 'register';
     public const SCENARIO_LOGIN = 'login';
     public const SCENARIO_UPDATE = 'update';
-
+    public const SCENARIO_VERIFY_OTP = 'verify_otp';
+    public const SCENARIO_RESET_REQUEST = 'reset_request';
+    public const SCENARIO_RESET_PASSWORD = 'reset_password';
     public ?int $id_user = null;
     public string $nama = '';
     public ?string $nim = null;
@@ -17,12 +19,18 @@ class User extends DbModel {
     public string $email = '';
     public string $password = '';
     public string $confirm_password = '';
+    public string $code = '';
+    public string $new_password = '';
+    public string $confirm_new_password = '';
     public ?int $id_role = null;
+    public ?string $nama_role = null;
     public ?string $kubaca_img = null;
     public int $peringatan = 0;
     public string $status = 'pending';
     public ?string $jurusan = null;
     public ?string $nomor_hp = null;
+    public ?string $suspensi_terakhir = null;
+    public ?string $masa_aktif = null;
     public ?string $created_at = null;
     public ?string $updated_at = null;
     public string $identifier = '';
@@ -48,7 +56,21 @@ class User extends DbModel {
                 'identifier' => [self::RULE_REQUIRED],
                 'password' => [self::RULE_REQUIRED],
             ];
-        } else if ($this->scenario === self::SCENARIO_REGISTER || $this->scenario === self::SCENARIO_UPDATE) {
+        } elseif ($this->scenario === self::SCENARIO_VERIFY_OTP) {
+            return [
+                'code' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 6], [self::RULE_MAX, 'max' => 6]],
+            ];
+        } elseif ($this->scenario === self::SCENARIO_RESET_REQUEST) {
+            return [
+                'email' => [self::RULE_REQUIRED, self::RULE_EMAIL],
+            ];
+        } elseif ($this->scenario === self::SCENARIO_RESET_PASSWORD) {
+            return [
+                'code' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 6], [self::RULE_MAX, 'max' => 6]],
+                'new_password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]],
+                'confirm_new_password' => [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'new_password']],
+            ];
+        } elseif ($this->scenario === self::SCENARIO_REGISTER || $this->scenario === self::SCENARIO_UPDATE) {
             $rules = [
                 'nama' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
                 'email' => [
@@ -129,36 +151,66 @@ class User extends DbModel {
         return (string)$this->id_role === '3';
     }
 
+    public static function search(array $filters = []): array {
+    [$sql, $params] = self::buildQuery($filters);
 
-    public static function isLoggedIn(): bool {
-        return isset($_SESSION['user_id']);
+    $stmt = App::$app->db->prepare($sql . " ORDER BY users.id_user DESC");
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->execute();
+
+    return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+}
+
+    public static function findPaginated(int $page, int $perPage, array $filters = []) {
+    $offset = ($page - 1) * $perPage;
+    [$baseSql, $params] = self::buildQuery($filters);
+
+    $sql = $baseSql . " ORDER BY users.id_user DESC LIMIT :limit OFFSET :offset";
+
+    $stmt = App::$app->db->prepare($sql);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+}
+
+private static function buildQuery(array $filters): array {
+    $sql = "
+        SELECT users.*, role.nama_role
+        FROM users
+        LEFT JOIN role ON users.id_role = role.id_role
+        WHERE 1=1
+    ";
+    $params = [];
+
+    if (!empty($filters['keyword'])) {
+        $sql .= " AND (
+            users.nama LIKE :keyword OR
+            users.email LIKE :keyword OR
+            users.nim LIKE :keyword OR
+            users.nip LIKE :keyword
+        )";
+        $params[':keyword'] = '%' . $filters['keyword'] . '%';
     }
 
-    public static function getCurrentUser(): ?User {
-        if (self::isLoggedIn()) {
-            return self::findOne(['id_user' => $_SESSION['user_id']]);
-        }
-        return null;
+    if (!empty($filters['role'])) {
+        $sql .= " AND users.id_role = :role";
+        $params[':role'] = (int)$filters['role'];
     }
 
-    public static function findPaginated(int $page, int $perPage) {
-        $offset = ($page - 1) * $perPage;
-
-        $db = App::$app->db;
-
-        $stmt = $db->prepare("
-         select users.*, role.nama_role from users 
-         left join role on users.id_role = role.id_role
-         order by users.id_user desc 
-         limit :limit offset :offset
-        ");
-
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    if (!empty($filters['status'])) {
+        $sql .= " AND users.status = :status";
+        $params[':status'] = $filters['status'];
     }
+
+    return [$sql, $params];
+}
 
     public static function count(): int {
         $db = App::$app->db;
@@ -188,41 +240,4 @@ class User extends DbModel {
         return $stmt->fetchColumn();
     }
 
-    public function login(): bool
-    {
-        $user = User::findOne(['email' => $this->identifier]);
-
-        if (!$user) {
-            $user = User::findOne(['nim' => $this->identifier]);
-        }
-
-        if (!$user) {
-            $user = User::findOne(['nip' => $this->identifier]);
-        }
-
-        if (!$user) {
-            $this->addError('identifier', 'User not found');
-            return false;
-        }
-
-        if (!password_verify($this->password, $user->password)) {
-            $this->addError('password', 'Password is incorrect');
-            return false;
-        }
-
-        if ($user->status === 'suspended') {
-            $this->addError('identifier', 'Your account has been suspended. Please contact support.');
-            return false;
-        }
-        
-        if ($user->status === 'pending') {
-            $this->addError('identifier', 'Your account is pending verification. Please check your email.');
-            return false;
-        }
-
-        App::$app->auth->login($user);
-        App::$app->user = App::$app->auth->getUser();
-
-        return true;
-    }
 }

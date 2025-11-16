@@ -7,10 +7,8 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\App;
 use App\Models\User;
-use App\Models\PasswordResetForm;
-use App\Core\Services\EmailService;
-use App\Core\Services\CacheService;
-use App\Core\Services\Logger;
+use App\Core\Csrf;
+use App\Core\Services\PasswordService;
 
 class PasswordController extends Controller
 {
@@ -19,30 +17,32 @@ class PasswordController extends Controller
         $this->setLayout('auth');
         $this->setTitle('Forgot Password | Library Booking App');
 
-        $model = new PasswordResetForm();
+        $model = new User();
+        $model->setScenario(User::SCENARIO_RESET_REQUEST);
 
         if ($request->isPost()) {
+            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+                App::$app->session->setFlash('error', 'Invalid CSRF token.');
+                return $this->render('ResetPassword/Forgot', ['model' => $model]);
+            }
+
             $model->loadData($request->getBody());
-            $model->mode = 'request';
             
             if (!$model->validate()) {
                 return $this->render('ResetPassword/Forgot', ['model' => $model]);
             }
 
-            $user = User::findOne(['email' => trim($model->email)]);
-            if (!$user) {
-                App::$app->session->setFlash('error', 'Email not found.');
-                return $this->render('ResetPassword/Forgot', ['model' => $model]);
+            $passwordService = new PasswordService(App::$app->session);
+            $result = $passwordService->requestReset($model);
+
+            if ($result['success']) {
+                App::$app->session->setFlash('success', $result['message']);
+                $response->redirect('/reset');
+                return;
             }
 
-            $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            CacheService::set('reset_otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
-            EmailService::sendVerificationCode($user, $otp, 'reset_password');
-
-            App::$app->session->set('reset_user_id', $user->id_user);
-            App::$app->session->setFlash('success', 'Reset code sent to your email.');
-            $response->redirect('/reset');
-            return;
+            App::$app->session->setFlash('error', $result['message']);
+            return $this->render('ResetPassword/Forgot', ['model' => $model]);
         }
 
         return $this->render('ResetPassword/Forgot', ['model' => $model]);
@@ -53,7 +53,8 @@ class PasswordController extends Controller
         $this->setLayout('auth');
         $this->setTitle('Reset Password | Library Booking App');
 
-        $model = new PasswordResetForm();
+        $model = new User();
+        $model->setScenario(User::SCENARIO_RESET_PASSWORD);
 
         $userId = App::$app->session->get('reset_user_id');
         if (!$userId) {
@@ -62,37 +63,30 @@ class PasswordController extends Controller
             return;
         }
 
-        $user = User::findOne(['id_user' => $userId]);
-        if (!$user) {
-            App::$app->session->setFlash('error', 'User not found.');
-            $response->redirect('/forgot');
-            return;
-        }
-
         if ($request->isPost()) {
+            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+                App::$app->session->setFlash('error', 'Invalid CSRF token.');
+                return $this->render('ResetPassword/Reset', ['model' => $model]);
+            }
+
             $model->loadData($request->getBody());
-            $model->mode = 'reset';
             
             if (!$model->validate()) {
                 return $this->render('ResetPassword/Reset', ['model' => $model]);
             }
 
-            $cachedHash = CacheService::get('reset_otp_' . $userId);
-            if (!$cachedHash || !password_verify(trim($model->code), $cachedHash)) {
-                App::$app->session->setFlash('error', 'Invalid or expired code.');
-                return $this->render('ResetPassword/Reset', ['model' => $model]);
+            $passwordService = new PasswordService(App::$app->session);
+            $model->id_user = (int)$userId;
+            $result = $passwordService->resetWithOtp($model);
+
+            if ($result['success']) {
+                App::$app->session->setFlash('success', $result['message']);
+                $response->redirect('/login');
+                return;
             }
 
-            $hash = password_hash($model->password, PASSWORD_DEFAULT);
-            $user->password = $hash;
-            $user->save();
-
-            CacheService::delete('reset_otp_' . $userId);
-            App::$app->session->remove('reset_user_id');
-            Logger::auth('password reset', $user->id_user, "Password reset via email");
-            App::$app->session->setFlash('success', 'Password reset successful!');
-            $response->redirect('/login');
-            return;
+            App::$app->session->setFlash('error', $result['message']);
+            return $this->render('ResetPassword/Reset', ['model' => $model]);
         }
 
         return $this->render('ResetPassword/Reset', ['model' => $model]);

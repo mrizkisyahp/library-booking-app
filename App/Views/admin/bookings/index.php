@@ -43,6 +43,7 @@ $statusColors = [
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal & Waktu</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Feedback</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
@@ -64,39 +65,18 @@ $statusColors = [
                     <?= htmlspecialchars(ucfirst($booking['status'])) ?>
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <?php if ($booking['status'] === 'pending'): ?>
-                    <form action="/admin/bookings/verify" method="post" class="inline-block">
-                      <?= Csrf::field() ?>
-                      <input type="hidden" name="booking_id" value="<?= (int)$booking['id_booking'] ?>">
-                      <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Konfirmasi
-                      </button>
-                    </form>
-                  <?php elseif ($booking['status'] === 'verified'): ?>
-                    <a href="/checkin" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                      Check-in
-                    </a>
-                  <?php elseif ($booking['status'] === 'active'): ?>
-                    <form action="/admin/bookings/complete" method="post" class="inline-block">
-                      <?= Csrf::field() ?>
-                      <input type="hidden" name="booking_id" value="<?= (int)$booking['id_booking'] ?>">
-                      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                        Selesaikan
-                      </button>
-                    </form>
+                <td class="px-6 py-4 text-sm">
+                  <?php if (!empty($booking['feedback_id'])): ?>
+                    <a href="/admin/feedback/detail?id=<?= (int)$booking['feedback_id'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">Lihat Feedback</a>
                   <?php else: ?>
-                    <span class="text-gray-400">—</span>
+                    <span class="text-gray-400 text-sm">Tidak ada</span>
                   <?php endif; ?>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
+                  <a href="/admin/bookings/detail?id=<?= (int)$booking['id_booking'] ?>"
+                     class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    Detail
+                  </a>
                 </td>
               </tr>
             <?php endforeach; ?>

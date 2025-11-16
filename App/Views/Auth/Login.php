@@ -34,7 +34,11 @@ use App\Core\Csrf;
 
       <div class="mt-9">
         <form action="/login" method="post">
-          <?= Csrf::field() ?>
+          <?= Csrf::field() 
+            // debug this field()
+
+            
+          ?>
 
           <div class="mt-2">
             <div class="mb-4">
@@ -75,7 +79,7 @@ use App\Core\Csrf;
               </div>
             </div>
 
-            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="0x4AAAAAAB7hTzPz5mNjJs1V"
+            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= $_ENV['TURNSTILE_SITE']; ?>"
               data-theme="light" data-size="normal" data-callback="onSuccess"></div>
             <div class="mt-6">
               <button type="submit"

@@ -15,7 +15,7 @@ class m0002_create_users_table
             password VARCHAR(255) NOT NULL,
             kubaca_img VARCHAR(255) NULL,
             peringatan TINYINT UNSIGNED NOT NULL DEFAULT 0,
-            status ENUM('active', 'pending kubaca', 'rejected', 'suspended') NOT NULL DEFAULT 'pending',
+            status ENUM('active', 'pending kubaca', 'rejected', 'suspended') NOT NULL DEFAULT 'pending kubaca',
             jurusan VARCHAR(100) NULL,
             nomor_hp VARCHAR(20) NULL,
             suspensi_terakhir DATE NULL,

@@ -11,10 +11,10 @@ use App\Controllers\AdminDashboardController;
 use App\Controllers\UserRoomController;
 use App\Controllers\UserBookingController;
 use App\Controllers\AdminBookingController;
-use App\Controllers\FeedbackController;
-use App\Controllers\AdminCheckinController;
+use App\Controllers\UserFeedbackController;
 use App\Controllers\AdminUserController;
-use App\Models\User;
+use App\Controllers\AdminRoomController;
+use App\Controllers\AdminFeedbackController;
 
 // Auth routes
 $app->router->get('/', [AuthController::class, 'login']);
@@ -46,25 +46,40 @@ $app->router->post('/bookings/draft', [UserBookingController::class, 'createDraf
 $app->router->post('/bookings/submit', [UserBookingController::class, 'submitDraft']);
 $app->router->get('/rooms/show', [UserRoomController::class, 'show']);
 $app->router->post('/bookings/member', [UserBookingController::class, 'addMember']);
-$app->router->get('/feedback/create', [FeedbackController::class, 'create']);
-$app->router->post('/feedback', [FeedbackController::class, 'store']);
+$app->router->get('/feedback/create', [UserFeedbackController::class, 'create']);
+$app->router->post('/feedback', [UserFeedbackController::class, 'store']);
 $app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm']);
 $app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink']);
-
-// Check-in routes
-$app->router->get('/checkin', [AdminCheckinController::class, 'index']);
-$app->router->post('/checkin', [AdminCheckinController::class, 'verify']);
 
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index']);
 $app->router->get('/admin/bookings', [AdminBookingController::class, 'index']);
+$app->router->get('/admin/bookings/detail', [AdminBookingController::class, 'detail']);
 $app->router->post('/admin/bookings/verify', [AdminBookingController::class, 'verify']);
 $app->router->post('/admin/bookings/complete', [AdminBookingController::class, 'complete']);
+$app->router->post('/admin/bookings/activate', [AdminBookingController::class, 'activate']);
+$app->router->post('/admin/bookings/cancel', [AdminBookingController::class, 'cancel']);
 $app->router->get('/admin/users', [AdminUserController::class, 'index']);
 $app->router->get('/admin/users/create', [AdminUserController::class, 'create']);
 $app->router->post('/admin/users', [AdminUserController::class, 'store']);
 $app->router->get('/admin/users/edit', [AdminUserController::class, 'edit']);
+$app->router->get('/admin/users/show', [AdminUserController::class, 'show']);
 $app->router->post('/admin/users/update', [AdminUserController::class, 'update']);
 $app->router->post('/admin/users/delete', [AdminUserController::class, 'delete']);
+$app->router->post('/admin/users/suspend', [AdminUserController::class, 'suspend']);
+$app->router->post('/admin/users/unsuspend', [AdminUserController::class, 'unsuspend']);
+$app->router->post('/admin/users/reset-password', [AdminUserController::class, 'resetPassword']);
 $app->router->post('/admin/users/approve-kubaca', [AdminUserController::class, 'approveKubaca']);
 $app->router->post('/admin/users/reject-kubaca', [AdminUserController::class, 'rejectKubaca']);
+$app->router->get('/admin/rooms', [AdminRoomController::class, 'index']);
+$app->router->get('/admin/rooms/create', [AdminRoomController::class, 'create']);
+$app->router->post('/admin/rooms', [AdminRoomController::class, 'store']);
+$app->router->get('/admin/rooms/edit', [AdminRoomController::class, 'edit']);
+$app->router->get('/admin/rooms/show', [AdminRoomController::class, 'show']);
+$app->router->post('/admin/rooms/update', [AdminRoomController::class, 'update']);
+$app->router->post('/admin/rooms/delete', [AdminRoomController::class, 'delete']);
+$app->router->post('/admin/rooms/activate', [AdminRoomController::class, 'activate']);
+$app->router->post('/admin/rooms/deactivate', [AdminRoomController::class, 'deactivate']);
+$app->router->get('/admin/bookings/detail', [AdminBookingController::class, 'detail']);
+$app->router->get('/admin/feedback', [AdminFeedbackController::class, 'index']);
+$app->router->get('/admin/feedback/detail', [AdminFeedbackController::class, 'detail']);

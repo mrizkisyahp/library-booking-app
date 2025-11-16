@@ -269,9 +269,6 @@ use App\Models\Room;
             <?php endforeach; ?>
           </select>
         </div>
-      </form>
-    <?php endif; ?>
-
       <?php if ($user->isDosen()): ?>
         <div class="border-t pt-6 space-y-6">
           <h4 class="font-semibold text-slate-800 text-lg">Informasi Tambahan (Dosen/Pegawai)</h4>
@@ -303,5 +300,6 @@ use App\Models\Room;
         </button>
       </div>
     </form>
+    <?php endif; ?>
   </div>
 </div>

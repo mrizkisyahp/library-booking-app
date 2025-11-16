@@ -3,160 +3,133 @@
 namespace App\Controllers;
 
 use App\Core\App;
+use App\Core\Controller;
+use App\Core\Csrf;
+use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\Controller;
-use App\Core\Middleware\AdminMiddleware;
+use App\Core\Services\AdminUserService;
 use App\Models\User;
-use App\Core\Services\Logger;
-use App\Models\Role;
-use App\Core\Services\FileUploaderService;
-use App\Core\Csrf;
 
-class AdminUserController extends Controller {
-    protected ?User $currentUser = null;
+class AdminUserController extends Controller
+{
+    private AdminUserService $service;
+    private ?User $currentUser = null;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->registerMiddleware(new AdminMiddleware());
+        $this->service = new AdminUserService();
         $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
-    public function index() {
+    public function index()
+    {
         $this->setLayout('main');
         $this->setTitle('Admin User Management | Library Booking App');
 
-        $perPage = 20;
-        $page = (int)($_GET['page'] ?? 1);
-        $page = max(1, $page);
+        $request = App::$app->request;
+        $query = $request->getBody();
+        $filters = [
+            'keyword' => $query['keyword'] ?? null,
+            'role' => $query['role'] ?? null,
+            'status' => $query['status'] ?? null,
+            'page' => (int)($query['page'] ?? ($_GET['page'] ?? 1)),
+            'perPage' => 20,
+        ];
 
-        $users = User::findPaginated($page, $perPage);
-        // echo '<pre>';
-        // print_r($users);
-        // echo '</pre>';
-        // exit;
+        $result = $this->service->listUsers($filters);
+        $data = $result['data'] ?? [];
+
+        $stats = $data['stats'] ?? [];
+
         return $this->render('Admin/Users/Index', [
-            'users' => $users,
-            'currentPage' => $page,
-            'perPage' => $perPage,
-            'totalUsers' => User::count(),
-            'totalActive' => User::countActive(),
-            'totalPending' => User::countPending(),
-            'totalSuspended' => User::countSuspended()
+            'users' => $data['users'] ?? [],
+            'filters' => $data['filters'] ?? $filters,
+            'stats' => $stats,
+            'currentPage' => $data['currentPage'] ?? $filters['page'],
+            'perPage' => $data['perPage'] ?? $filters['perPage'],
+            'totalUsers' => $stats['total'] ?? count($data['users'] ?? []),
+            'roles' => $this->service->getRoles(),
+            'statuses' => $this->service->getStatusOptions(),
         ]);
     }
 
-    public function create() {
+    public function create()
+    {
         $this->setLayout('main');
-        $this->setTitle('Admin: Create New User | Library Booking App');
+        $this->setTitle('Create User | Library Booking App');
 
-        $roles = Role::getAllRoleName();
         $model = new User();
-        $model->status = 'active';
+        $model->status = 'pending verification';
+
         return $this->render('Admin/Users/Create', [
-            'roles' => $roles,
-            'model' => $model
+            'model' => $model,
+            'roles' => $this->service->getRoles(),
+            'statuses' => $this->service->getStatusOptions(),
         ]);
     }
 
-    public function store(Request $request, Response $response) {
-        $user = new User();
-        $user->setScenario(User::SCENARIO_REGISTER);
-
-        if ($request->isPost()) {
-            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-                App::$app->session->setFlash('error', 'Invalid CSRF token.');
-                return $this->render('Admin/Users/Create', ['model' => $user]);
-            }
-        }
-        
-        $postData = $request->getBody();
-        $plainPassword = $postData['password'];
-        
-        $user->loadData($postData);
-        
-        $roleName = $postData['role'];
-        $user->id_role = Role::getIdByName($roleName);
-        
-        if (empty($plainPassword)) {
-            $plainPassword = 'password123';
-        }
-        
-        $user->password = $plainPassword;
-        $user->confirm_password = $plainPassword;
-
-        if (empty($user->status)) {
-            $user->status = 'active';
-        }
-
-        if ($user->validate()) {
-            $user->password = password_hash($plainPassword, PASSWORD_DEFAULT);
-            
-            if ($user->save()) {
-                if (!empty($_FILES['foto_kubaca']) && $_FILES['foto_kubaca']['error'] === UPLOAD_ERR_OK) {
-
-                    $uploadResult = FileUploaderService::upload(
-                    $_FILES['foto_kubaca'],
-                    App::$ROOT_DIR . '/public/uploads/kubaca/',
-                    ['image/jpeg', 'image/png', 'image/webp'],
-                    2,
-                    'kubaca_' . $user->id_user
-                );
-
-                if ($uploadResult['success']) {
-
-                    // Update DB with filename
-                    $stmt = App::$app->db->prepare("
-                        UPDATE users SET kubaca_img = :img WHERE id_user = :id
-                    ");
-                    $stmt->bindValue(':img', $uploadResult['filename']);
-                    $stmt->bindValue(':id', $user->id_user, \PDO::PARAM_INT);
-                    $stmt->execute();
-
-                    // Keep in model
-                    $user->kubaca_img = $uploadResult['filename'];
-                } else {
-                    App::$app->session->setFlash('error', $uploadResult['error']);
-                }
-            }
-                Logger::auth('created_by_admin', $user->id_user, "Email: {$user->email}, Role: {$roleName}, Status: {$user->status}");
-                App::$app->session->setFlash('success', 'User created successfully!');
-                $response->redirect('/admin/users');
-                return;
-            }
-        }
-
-        $this->setLayout('main');
-        $roles = Role::getAllRoleName();
-        return $this->render('Admin/Users/Create', [
-            'model' => $user,
-            'roles' => $roles
-        ]);
-    }
-
-    public function edit(Request $request, Response $response) {
-        $this->setLayout('main');
-        $this->setTitle('Edit User | Library Booking App');
-
-        $id_user = (int)($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
-        if ($id_user <= 0) {
-            App::$app->session->setFlash('error', 'Invalid user ID.');
+    public function store(Request $request, Response $response)
+    {
+        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+            App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
             return;
         }
 
-        $model = User::findOne(['id_user' => $id_user]);
-        if (!$model) {
+        $result = $this->service->createUser($request->getBody(), $this->currentUser?->id_user);
+        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
+
+        if ($result['success']) {
+            $response->redirect('/admin/users');
+            return;
+        }
+
+        $this->setLayout('main');
+        return $this->render('Admin/Users/Create', [
+            'model' => $result['data']['model'] ?? new User(),
+            'roles' => $this->service->getRoles(),
+            'statuses' => $this->service->getStatusOptions(),
+        ]);
+    }
+
+    public function edit(Request $request, Response $response)
+    {
+        $this->setLayout('main');
+        $this->setTitle('Edit User | Library Booking App');
+
+        $id = (int)($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
+        $user = $this->service->getUserById($id);
+        if (!$user) {
             App::$app->session->setFlash('error', 'User not found.');
             $response->redirect('/admin/users');
             return;
         }
 
-        $roles = Role::getAllRoleName();
-
         return $this->render('Admin/Users/Edit', [
-            'model' => $model,
-            'roles' => $roles,
-            'kubacaPreview' => $model->kubaca_img ? '/uploads/kubaca/' . $model->kubaca_img : null,
+            'model' => $user,
+            'roles' => $this->service->getRoles(),
+            'statuses' => $this->service->getStatusOptions(),
+        ]);
+    }
+
+    public function show(Request $request, Response $response)
+    {
+        $this->setLayout('main');
+        $this->setTitle('User Detail | Library Booking App');
+
+        $id = (int)($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
+        $user = $this->service->getUserById($id);
+        if (!$user) {
+            App::$app->session->setFlash('error', 'User not found.');
+            $response->redirect('/admin/users');
+            return;
+        }
+
+        return $this->render('Admin/Users/Show', [
+            'user' => $user,
+            'statuses' => $this->service->getStatusOptions(),
         ]);
     }
 
@@ -170,74 +143,25 @@ class AdminUserController extends Controller {
 
         $body = $request->getBody();
         $id = (int)($body['id_user'] ?? 0);
-        $user = $id > 0 ? User::findOne(['id_user' => $id]) : null;
-        if (!$user) {
-            App::$app->session->setFlash('error', 'User not found.');
+        $result = $this->service->updateUser($id, $body, $this->currentUser?->id_user);
+
+        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
+
+        if ($result['success']) {
             $response->redirect('/admin/users');
             return;
         }
 
-        $user->setScenario(User::SCENARIO_UPDATE);
-        $roleName = $body['role'] ?? null;
-        $body['id_role'] = $roleName ? Role::getIdByName($roleName) : $user->id_role;
-
-        $newPassword = trim($body['password'] ?? '');
-        unset($body['password'], $body['confirm_password']);
-        $user->loadData($body);
-
-        if ($newPassword !== '') {
-            $user->password = $newPassword;
-            $user->confirm_password = $newPassword;
-        } else {
-            $user->password = $user->confirm_password = '';
-        }
-
-        $uploadError = null;
-        if ($user->validate()) {
-            if ($newPassword !== '') {
-                $user->password = password_hash($newPassword, PASSWORD_DEFAULT);
-            }
-
-            if (!empty($_FILES['foto_kubaca']) && $_FILES['foto_kubaca']['error'] === UPLOAD_ERR_OK) {
-                $upload = FileUploaderService::upload(
-                    $_FILES['foto_kubaca'],
-                    App::$ROOT_DIR . '/public/uploads/kubaca/',
-                    ['image/jpeg', 'image/png', 'image/webp'],
-                    2,
-                    'kubaca_' . $user->id_user
-                );
-
-                if ($upload['success']) {
-                    $user->kubaca_img = $upload['filename'];
-                } else {
-                    $uploadError = $upload['error'];
-                }
-            }
-
-            if (!$uploadError && $user->save()) {
-                Logger::auth('updated_by_admin', $user->id_user, "Email: {$user->email}, Role: {$roleName}, Status: {$user->status}");
-                App::$app->session->setFlash('success', 'User updated successfully.');
-                $response->redirect('/admin/users');
-                return;
-            }
-        }
-
-        if ($uploadError) {
-            App::$app->session->setFlash('error', $uploadError);
-        }
-
-        $roles = Role::getAllRoleName();
         $this->setLayout('main');
-        $this->setTitle('Edit User | Library Booking App');
-
         return $this->render('Admin/Users/Edit', [
-            'model' => $user,
-            'roles' => $roles,
-            'kubacaPreview' => $user->kubaca_img ? '/uploads/kubaca/' . $user->kubaca_img : null,
+            'model' => $result['data']['model'] ?? $this->service->getUserById($id),
+            'roles' => $this->service->getRoles(),
+            'statuses' => $this->service->getStatusOptions(),
         ]);
     }
 
-    public function delete(Request $request, Response $response) {
+    public function delete(Request $request, Response $response)
+    {
         if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
@@ -245,44 +169,44 @@ class AdminUserController extends Controller {
         }
 
         $id = (int)($request->getBody()['id_user'] ?? 0);
-        if ($id <= 0) {
-            App::$app->session->setFlash('error', 'Invalid user ID.');
-            $response->redirect('/admin/users');
-            return;
-        }
-
-        if ($this->currentUser && (int)$this->currentUser->id_user === $id) {
-            App::$app->session->setFlash('error', 'You cannot delete your own account.');
-            $response->redirect('/admin/users');
-            return;
-        }
-
-        $user = User::findOne(['id_user' => $id]);
-        if (!$user) {
-            App::$app->session->setFlash('error', 'User not found.');
-            $response->redirect('/admin/users');
-            return;
-        }
-
-        if ($user->delete()) {
-            Logger::auth('deleted_by_admin', $user->id_user, "Email: {$user->email}");
-            App::$app->session->setFlash('success', 'User deleted successfully.');
-        } else {
-            App::$app->session->setFlash('error', 'Failed to delete user.');
-        }
-
+        $result = $this->service->deleteUser($id, $this->currentUser?->id_user);
+        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/users');
     }
 
-    public function approveKubaca(Request $request, Response $response) {
-        $this->handleKubacaAction($request, $response, 'approved');
+    public function suspend(Request $request, Response $response)
+    {
+        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->suspendUser($id, $this->currentUser?->id_user));
     }
 
-    public function rejectKubaca(Request $request, Response $response) {
-        $this->handleKubacaAction($request, $response, 'rejected');
+    public function unsuspend(Request $request, Response $response)
+    {
+        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->unsuspendUser($id, $this->currentUser?->id_user));
     }
 
-    private function handleKubacaAction(Request $request, Response $response, string $targetStatus): void {
+    public function resetPassword(Request $request, Response $response)
+    {
+        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->resetPassword($id, $this->currentUser?->id_user));
+    }
+
+    public function approveKubaca(Request $request, Response $response)
+    {
+        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->approveKubaca($id, $this->currentUser?->id_user));
+    }
+
+    public function rejectKubaca(Request $request, Response $response)
+    {
+        $body = $request->getBody();
+        $reason = $body['reason'] ?? null;
+        $this->handleQuickAction(
+            $request,
+            $response,
+            fn (int $id) => $this->service->rejectKubaca($id, $reason, $this->currentUser?->id_user)
+        );
+    }
+
+    private function handleQuickAction(Request $request, Response $response, callable $action): void
+    {
         if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
@@ -290,33 +214,8 @@ class AdminUserController extends Controller {
         }
 
         $id = (int)($request->getBody()['id_user'] ?? 0);
-        if ($id <= 0) {
-            App::$app->session->setFlash('error', 'Invalid user ID.');
-            $response->redirect('/admin/users');
-            return;
-        }
-         
-        $user = User::findOne(['id_user' => $id]);
-        if (!$user) {
-            App::$app->session->setFlash('error', 'User not found.');
-            $response->redirect('/admin/users');
-            return;
-        }
-
-        if (!$user->kubaca_img) {
-            App::$app->session->setFlash('error', 'User has no KuBaca upload.');
-            $response->redirect('/admin/users');
-            return;
-        }
-
-        $user->status = $targetStatus === 'approved' ? 'active' : 'rejected';
-        if ($user->save()) {
-            Logger::auth($targetStatus === 'approved' ? 'kubaca_approved' : 'kubaca_rejected', $user->id_user, "Admin {$this->currentUser?->email} updated status.");
-            App::$app->session->setFlash('success', $targetStatus === 'approved' ? 'KuBaca approved.' : 'KuBaca rejected.');
-        } else {
-            App::$app->session->setFlash('error', 'Failed to update status.');
-        }
-
+        $result = $action($id);
+        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/users');
     }
 }
