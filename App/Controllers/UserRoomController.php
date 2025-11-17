@@ -6,11 +6,8 @@ use App\Core\App;
 use App\Core\Controller;
 use App\Core\Response;
 use App\Core\Request;
-use App\Core\Services\Logger;
-use App\Core\Services\EmailService;
 use App\Core\Middleware\AuthMiddleware;
 use App\Models\Room;
-use App\Models\Role;
 use App\Models\User;
 
 class UserRoomController extends Controller {

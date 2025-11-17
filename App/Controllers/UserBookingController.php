@@ -9,7 +9,7 @@ use App\Core\Middleware\BookingMiddleware;
 use App\Core\Request;
 use App\Core\Response;
 use App\Models\User;
-use App\Core\Services\BookingService;
+use App\Core\Services\UserBookingService;
 
 class UserBookingController extends Controller {
     protected ?User $currentUser = null;
@@ -37,7 +37,7 @@ class UserBookingController extends Controller {
             return;
         }
 
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         $result = $bookingService->createDraft($user, $request->getBody());
 
         if ($result['success'] ?? false) {
@@ -54,7 +54,7 @@ class UserBookingController extends Controller {
         // Booking::expireStaleDrafts();
         $user = $this->currentUser;
         $bookingId = (int)($request->getBody()['booking_id']);
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         $result = $bookingService->submitDraft($bookingId, (int)$user->id_user);
 
         if ($result['success'] ?? false) {
@@ -78,7 +78,7 @@ class UserBookingController extends Controller {
         $body = $request->getBody();
         $bookingId = (int)($body['id'] ?? $body['booking_id'] ?? 0);
 
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         $result = $bookingService->getDraftViewData((int)$user->id_user, $bookingId);
 
         if (!$result['success']) {
@@ -105,7 +105,7 @@ class UserBookingController extends Controller {
 
         $bookingId = (int)$request->getBody()['booking_id'];
         $memberEmail = trim($request->getBody()['member_email']);
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         $result = $bookingService->addMember($bookingId, (int)$user->id_user, $memberEmail);
 
         if ($result['success'] ?? false) {
@@ -150,7 +150,7 @@ class UserBookingController extends Controller {
             return;
         }
         
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         $result = $bookingService->joinViaInviteToken((int)$user->id_user, $token);
 
         App::$app->session->setFlash($result['success'] ? 'success' : (($result['info'] ?? false) ? 'info' : 'error'), $result['message'] ?? '');

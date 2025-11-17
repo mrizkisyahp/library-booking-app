@@ -114,3 +114,39 @@ $roomTypes = [
       </table>
     <?php endif; ?>
   </section>
+
+
+<!-- Pagination -->
+<div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
+  <div class="flex items-center justify-between">
+    <p class="text-sm text-slate-600">
+      Showing <span class="font-semibold"><?= (($currentPage - 1) * $perPage) + 1 ?></span>
+      to <span class="font-semibold"><?= min($currentPage * $perPage, $totalRooms) ?></span>
+      of <span class="font-semibold"><?= $totalRooms ?></span> results
+    </p>
+
+    <div class="flex gap-2">
+      <?php if ($currentPage > 1): ?>
+        <a href="/admin/rooms?page=<?= $currentPage - 1 ?>"
+           class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+          Previous
+        </a>
+      <?php endif; ?>
+
+      <?php for ($i = 1; $i <= ceil($totalRooms / $perPage); $i++): ?>
+        <a href="/admin/rooms?page=<?= $i ?>"
+           class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                  <?= $i === $currentPage ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
+          <?= $i ?>
+        </a>
+      <?php endfor; ?>
+
+      <?php if ($currentPage < ceil($totalRooms / $perPage)): ?>
+        <a href="/admin/rooms?page=<?= $currentPage + 1 ?>"
+           class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+          Next
+        </a>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>

@@ -7,6 +7,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\App;
 use App\Models\User;
+use App\Core\Services\VerifyService;
 
 class VerifyController extends Controller {
     public function verify(Request $request, Response $response) {
@@ -22,7 +23,7 @@ class VerifyController extends Controller {
 
         $model = new User();
         $model->setScenario(User::SCENARIO_VERIFY_OTP);
-        $authService = App::$app->auth;
+        $verifyService = new VerifyService(App::$app->session);
 
         if ($request->isPost()) {
             $model->loadData($request->getBody());
@@ -32,7 +33,7 @@ class VerifyController extends Controller {
             }
 
             $model->id_user = (int)$userId;
-            $result = $authService->verifyOtp($model);
+            $result = $verifyService->verifyOtp($model);
 
             if (($result['success'] ?? false) === true) {
                 App::$app->session->setFlash('success', $result['message'] ?? 'Account verified! You can now login.');
@@ -56,8 +57,8 @@ class VerifyController extends Controller {
             return;
         }
 
-        $authService = App::$app->auth;
-        $result = $authService->resendOtp((int)$userId);
+        $verifyService = new VerifyService(App::$app->session);
+        $result = $verifyService->resendOtp((int)$userId);
 
         if (($result['success'] ?? false) === true) {
             App::$app->session->setFlash('success', $result['message'] ?? 'Verification code sent to your email.');

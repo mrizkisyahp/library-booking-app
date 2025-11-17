@@ -19,6 +19,9 @@ class Booking extends DbModel {
     public ?string $invite_token = null;
     public ?string $created_at = null;
     public ?string $updated_at = null;
+    public ?string $nama_ruangan = null;
+    public ?int $id_feedback = null;
+    public ?string $nama = null;
 
     public static function tableName(): string {
         return 'booking';
@@ -103,4 +106,78 @@ class Booking extends DbModel {
         return $members;
     }
 
+    public static function search(array $filters = []): array {
+        [$sql, $params] = self::buildQuery($filters);
+
+        $stmt = App::$app->db->prepare($sql . ' ORDER BY booking.id_booking DESC');
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    }
+
+    public static function findPaginated(int $page, int $perPage, array $filters = []) {
+        $offset = ($page - 1) * $perPage;
+        [$baseSql, $params] = self::buildQuery($filters);
+
+        $sql = $baseSql . " ORDER by booking.id_booking DESC LIMIT :limit OFFSET :offset";
+        
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    }
+
+    private static function buildQuery(array $filters): array {
+        $sql = "
+            SELECT booking.*, users.nama, ruangan.nama_ruangan, id_feedback 
+            FROM booking
+            LEFT JOIN users ON booking.user_id = users.id_user
+            LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan
+            LEFT JOIN feedback ON booking.id_booking = feedback.booking_id
+            WHERE 1=1
+        ";
+        $params = [];
+
+        if (!empty($filters['keyword'])) {
+            $sql .= " AND (
+                users.nama LIKE :keyword OR
+                ruangan.nama_ruangan LIKE :keyword OR
+                booking.tanggal_booking LIKE :keyword OR
+                booking.tanggal_penggunaan_ruang LIKE :keyword OR
+                booking.waktu_mulai LIKE :keyword OR
+                booking.waktu_selesai LIKE :keyword OR
+                booking.tujuan LIKE :keyword
+            )";
+            $params[':keyword'] = '%' . $filters['keyword'] . '%';
+        }
+
+        if (!empty($filters['status'])) {
+            $sql .= " AND booking.status = :status";
+            $params[':status'] = $filters['status'];
+        }
+
+        return [$sql, $params];
+    }
+
+    public static function count(array $filters = []): int {
+        [$baseSql, $params] = self::buildQuery($filters);
+        $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
+
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+
+        return (int)$stmt->fetchColumn();
+    }
 }

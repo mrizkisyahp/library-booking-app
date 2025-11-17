@@ -40,10 +40,16 @@ $statusColors = [
         <table class="w-full">
           <thead class="bg-linear-to-r from-emerald-50 to-teal-50">
             <tr>
+<<<<<<< HEAD
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal & Waktu
               </th>
+=======
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal & Waktu</th>
+>>>>>>> 36bb850c7e9d94293ace170585547de4e5da26d6
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Feedback</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
@@ -53,32 +59,30 @@ $statusColors = [
             <?php foreach ($bookings as $booking): ?>
               <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  #<?= htmlspecialchars($booking['user_id']) ?>
+                  <?= htmlspecialchars($booking->nama) ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  #<?= htmlspecialchars($booking['ruangan_id']) ?>
+                  <?= htmlspecialchars($booking->nama_ruangan) ?>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-700">
-                  <div class="font-medium"><?= htmlspecialchars($booking['tanggal_penggunaan_ruang']) ?></div>
-                  <div class="text-gray-500"><?= htmlspecialchars($booking['waktu_mulai']) ?></div>
+                  <div class="font-medium"><?= htmlspecialchars($booking->tanggal_penggunaan_ruang) ?></div>
+                  <div class="text-gray-500"><?= htmlspecialchars($booking->waktu_mulai) ?> - <?= htmlspecialchars($booking->waktu_selesai) ?></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $statusColors[$booking['status']] ?? 'bg-gray-100 text-gray-800' ?>">
-                    <?= htmlspecialchars(ucfirst($booking['status'])) ?>
+                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' ?>">
+                    <?= htmlspecialchars(ucfirst($booking->status)) ?>
                   </span>
                 </td>
                 <td class="px-6 py-4 text-sm">
-                  <?php if (!empty($booking['feedback_id'])): ?>
-                    <a href="/admin/feedback/detail?id=<?= (int) $booking['feedback_id'] ?>"
-                      class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">Lihat Feedback</a>
+                  <?php if (!empty($booking->id_feedback)) : ?>
+                    <a href="/admin/feedback/detail?id=<?= (int)$booking->id_feedback ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">Lihat Feedback</a>
                   <?php else: ?>
                     <span class="text-gray-400 text-sm">Tidak ada</span>
                   <?php endif; ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
-                  <a href="/admin/bookings/detail?id=<?= (int) $booking['id_booking'] ?>"
-                    class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                  <a href="/admin/bookings/detail?id=<?= (int)$booking->id_booking ?>"
+                     class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                     Detail
                   </a>
                 </td>
@@ -89,4 +93,39 @@ $statusColors = [
       </div>
     </div>
   <?php endif; ?>
+</div>
+
+<!-- Pagination -->
+<div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
+  <div class="flex items-center justify-between">
+    <p class="text-sm text-slate-600">
+      Showing <span class="font-semibold"><?= (($currentPage - 1) * $perPage) + 1 ?></span>
+      to <span class="font-semibold"><?= min($currentPage * $perPage, $totalBookings) ?></span>
+      of <span class="font-semibold"><?= $totalBookings ?></span> results
+    </p>
+
+    <div class="flex gap-2">
+      <?php if ($currentPage > 1): ?>
+        <a href="/admin/bookings?page=<?= $currentPage - 1 ?>"
+           class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+          Previous
+        </a>
+      <?php endif; ?>
+
+      <?php for ($i = 1; $i <= ceil($totalBookings / $perPage); $i++): ?>
+        <a href="/admin/bookings?page=<?= $i ?>"
+           class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                  <?= $i === $currentPage ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
+          <?= $i ?>
+        </a>
+      <?php endfor; ?>
+
+      <?php if ($currentPage < ceil($totalBookings / $perPage)): ?>
+        <a href="/admin/bookings?page=<?= $currentPage + 1 ?>"
+           class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+          Next
+        </a>
+      <?php endif; ?>
+    </div>
+  </div>
 </div>

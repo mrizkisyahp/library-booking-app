@@ -34,12 +34,7 @@ use App\Core\Csrf;
 
       <div class="mt-9">
         <form action="/login" method="post">
-          <?= Csrf::field() 
-            // debug this field()
-
-            
-          ?>
-
+          <?= Csrf::field() ?>
           <div class="mt-2">
             <div class="mb-4">
               <label

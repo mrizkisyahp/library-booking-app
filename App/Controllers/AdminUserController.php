@@ -40,7 +40,6 @@ class AdminUserController extends Controller
 
         $result = $this->service->listUsers($filters);
         $data = $result['data'] ?? [];
-
         $stats = $data['stats'] ?? [];
 
         return $this->render('Admin/Users/Index', [

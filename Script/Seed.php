@@ -1,12 +1,12 @@
 <?php
 
 define('ROOT_DIR', __DIR__);
-require_once ROOT_DIR . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(ROOT_DIR);
 $dotenv->load();
 
-require_once ROOT_DIR . '/Bootstrap/App.php';
+require_once __DIR__ . '/../Bootstrap/App.php';
 
 $config = [
     'userClass' => \App\Models\User::class,
