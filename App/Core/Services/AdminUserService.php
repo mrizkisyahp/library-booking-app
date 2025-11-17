@@ -8,7 +8,7 @@ use App\Models\User;
 
 class AdminUserService
 {
-    private const DEFAULT_PER_PAGE = 20;
+    private const PER_PAGE = 20;
 
     private const ALLOWED_STATUSES = [
         'pending verification',
@@ -21,7 +21,7 @@ class AdminUserService
     public function listUsers(array $filters = []): array
     {
         $page = max(1, (int)($filters['page'] ?? 1));
-        $perPage = (int)($filters['perPage'] ?? self::DEFAULT_PER_PAGE);
+        $perPage = (int)($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
             'keyword' => $filters['keyword'] ?? null,

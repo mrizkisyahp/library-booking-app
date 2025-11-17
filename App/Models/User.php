@@ -212,11 +212,18 @@ private static function buildQuery(array $filters): array {
     return [$sql, $params];
 }
 
-    public static function count(): int {
-        $db = App::$app->db;
-        $stmt = $db->prepare("SELECT COUNT(*) AS COUNT FROM users");
+    public static function count(array $filters = []): int
+    {
+        [$baseSql, $params] = self::buildQuery($filters);
+        $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
+
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
         $stmt->execute();
-        return $stmt->fetchColumn();
+
+        return (int)$stmt->fetchColumn();
     }
 
     public static function countActive(): int {

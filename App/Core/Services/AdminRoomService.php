@@ -10,6 +10,7 @@ class AdminRoomService
     private const PER_PAGE = 20;
     private const STATUS_AVAILABLE = 'available';
     private const STATUS_UNAVAILABLE = 'unavailable';
+    private const STATUS_ADMINONLY = 'adminOnly';
     private const ACTIVE_BOOKING_STATUSES = ['pending', 'verified', 'active'];
 
     public function listRooms(array $filters = []): array
@@ -42,7 +43,7 @@ class AdminRoomService
 
     public function getStatusOptions(): array
     {
-        return [self::STATUS_AVAILABLE, self::STATUS_UNAVAILABLE];
+        return [self::STATUS_AVAILABLE, self::STATUS_UNAVAILABLE, self::STATUS_ADMINONLY];
     }
 
     public function getRoomById(int $id): ?Room

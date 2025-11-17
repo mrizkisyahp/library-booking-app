@@ -20,7 +20,7 @@ class BookingExpirationService
         $stmt->execute();
         $drafts = $stmt->fetchAll(\PDO::FETCH_CLASS, Booking::class);
 
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         $now = new DateTimeImmutable();
         $expired = [];
 

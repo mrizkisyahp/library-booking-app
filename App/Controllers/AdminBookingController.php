@@ -7,7 +7,7 @@ use App\Core\Controller;
 use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\Services\BookingService;
+use App\Core\Services\AdminBookingService;
 use App\Models\User;
 
 class AdminBookingController extends Controller {
@@ -18,14 +18,26 @@ class AdminBookingController extends Controller {
     }
 
     public function index() {
-        $service = new BookingService();
         $this->setLayout('main');
         $this->setTitle('Manajemen Booking | Library Booking App');
 
-        $bookings = $service->listAllBookings();
+        $query = App::$app->request->getBody();
+        $filters = [
+            'keyword' => $query['keyword'] ?? null,
+            'page' => (int)($query['page'] ?? ($_GET['page'] ?? 1)),
+        ];
+
+        $service = new AdminBookingService();
+        $result = $service->listAllBookings($filters);
+        $data = $result['data'] ?? [];
 
         return $this->render('Admin/Bookings/Index', [
-            'bookings' => $bookings,
+            'bookings' => $data['bookings'] ?? [],
+            'filters' => $filters,
+            'statusOptions' => $data['statusOptions'] ?? $service->getStatusOptions(),
+            'totalBookings' => $data['total'] ?? 0,
+            'currentPage' => $data['currentPage'] ?? $filters['page'],
+            'perPage' => $data['perPage'] ?? 20,
         ]);
     }
 
@@ -38,7 +50,7 @@ class AdminBookingController extends Controller {
             return;
         }
 
-        $service = new BookingService();
+        $service = new AdminBookingService();
         $result = $service->getAdminBookingDetail($bookingId);
         if (!$result['success']) {
             App::$app->session->setFlash('error', $result['message'] ?? 'Booking tidak dapat ditampilkan.');
@@ -56,7 +68,7 @@ class AdminBookingController extends Controller {
         $admin = $this->currentUser;
         $id_booking = (int)($request->getBody()['booking_id']);
 
-        $service = new BookingService();
+        $service = new AdminBookingService();
         $result = $service->verifyBooking($id_booking, (int)$admin->id_user);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
@@ -67,7 +79,7 @@ class AdminBookingController extends Controller {
         $admin = $this->currentUser;
         $id_booking = (int)($request->getBody()['booking_id']);
 
-        $service = new BookingService();
+        $service = new AdminBookingService();
         $result = $service->markBookingCompleted($id_booking, (int)$admin->id_user);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
@@ -85,7 +97,7 @@ class AdminBookingController extends Controller {
         $bookingId = (int)($body['booking_id'] ?? 0);
         $code = $body['checkin_code'] ?? '';
 
-        $service = new BookingService();
+        $service = new AdminBookingService();
         $result = $service->activateBooking($bookingId, $code, (int)($this->currentUser?->id_user ?? 0));
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
@@ -103,7 +115,7 @@ class AdminBookingController extends Controller {
         $bookingId = (int)($body['booking_id'] ?? 0);
         $reason = trim($body['reason'] ?? '');
 
-        $service = new BookingService();
+        $service = new AdminBookingService();
         $result = $service->cancelBooking($bookingId, (int)($this->currentUser?->id_user ?? 0), $reason ?: null);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');

@@ -18,7 +18,6 @@ class AdminRoomController extends Controller
     public function __construct()
     {
         $this->registerMiddleware(new AdminMiddleware());
-        $this->service = new AdminRoomService();
     }
 
     public function index()
@@ -36,14 +35,15 @@ class AdminRoomController extends Controller
             'page' => (int)($query['page'] ?? ($_GET['page'] ?? 1)),
         ];
 
-        $result = $this->service->listRooms($filters);
+        $service = new AdminRoomService();
+        $result = $service->listRooms($filters);
         $data = $result['data'] ?? [];
 
         return $this->render('Admin/Rooms/Index', [
             'rooms' => $data['rooms'] ?? [],
             'filters' => $filters,
-            'statusOptions' => $data['statusOptions'] ?? $this->service->getStatusOptions(),
-            'total' => $data['total'] ?? 0,
+            'statusOptions' => $data['statusOptions'] ?? $service->getStatusOptions(),
+            'totalRooms' => $data['total'] ?? 0,
             'currentPage' => $data['currentPage'] ?? $filters['page'],
             'perPage' => $data['perPage'] ?? 20,
         ]);
@@ -54,9 +54,11 @@ class AdminRoomController extends Controller
         $this->setLayout('main');
         $this->setTitle('Create Room | Library Booking App');
 
+        $service = new AdminRoomService();
+
         return $this->render('Admin/Rooms/Create', [
             'room' => new Room(),
-            'statusOptions' => $this->service->getStatusOptions(),
+            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
@@ -68,7 +70,8 @@ class AdminRoomController extends Controller
             return;
         }
 
-        $result = $this->service->createRoom($request->getBody());
+        $service = new AdminRoomService();
+        $result = $service->createRoom($request->getBody());
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
 
         if ($result['success']) {
@@ -79,7 +82,7 @@ class AdminRoomController extends Controller
         $this->setLayout('main');
         return $this->render('Admin/Rooms/Create', [
             'room' => $result['data']['room'] ?? new Room(),
-            'statusOptions' => $this->service->getStatusOptions(),
+            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
@@ -89,7 +92,8 @@ class AdminRoomController extends Controller
         $this->setTitle('Edit Room | Library Booking App');
 
         $id = (int)($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
-        $room = $this->service->getRoomById($id);
+        $service = new AdminRoomService();
+        $room = $service->getRoomById($id);
         if (!$room) {
             App::$app->session->setFlash('error', 'Room not found.');
             $response->redirect('/admin/rooms');
@@ -98,7 +102,7 @@ class AdminRoomController extends Controller
 
         return $this->render('Admin/Rooms/Edit', [
             'room' => $room,
-            'statusOptions' => $this->service->getStatusOptions(),
+            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
@@ -112,7 +116,8 @@ class AdminRoomController extends Controller
 
         $body = $request->getBody();
         $id = (int)($body['id_ruangan'] ?? 0);
-        $result = $this->service->updateRoom($id, $body);
+        $service = new AdminRoomService();
+        $result = $service->updateRoom($id, $body);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
 
@@ -123,8 +128,8 @@ class AdminRoomController extends Controller
 
         $this->setLayout('main');
         return $this->render('Admin/Rooms/Edit', [
-            'room' => $result['data']['room'] ?? $this->service->getRoomById($id),
-            'statusOptions' => $this->service->getStatusOptions(),
+            'room' => $result['data']['room'] ?? $service->getRoomById($id),
+            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
@@ -137,7 +142,8 @@ class AdminRoomController extends Controller
         }
 
         $id = (int)($request->getBody()['id_ruangan'] ?? 0);
-        $result = $this->service->deleteRoom($id);
+        $service = new AdminRoomService();
+        $result = $service->deleteRoom($id);
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/rooms');
     }
@@ -158,7 +164,8 @@ class AdminRoomController extends Controller
         $this->setTitle('Room Detail | Library Booking App');
 
         $id = (int)($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
-        $room = $this->service->getRoomById($id);
+        $service = new AdminRoomService();
+        $room = $service->getRoomById($id);
         if (!$room) {
             App::$app->session->setFlash('error', 'Room not found.');
             $response->redirect('/admin/rooms');
@@ -167,7 +174,7 @@ class AdminRoomController extends Controller
 
         return $this->render('Admin/Rooms/Show', [
             'room' => $room,
-            'statusOptions' => $this->service->getStatusOptions(),
+            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
@@ -180,7 +187,8 @@ class AdminRoomController extends Controller
         }
 
         $id = (int)($request->getBody()['id_ruangan'] ?? 0);
-        $result = $this->service->{$method}($id);
+        $service = new AdminRoomService();
+        $result = $service->{$method}($id);
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/rooms');
     }

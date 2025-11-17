@@ -8,7 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Booking;
 use App\Models\User;
-use App\Core\Services\BookingService;
+use App\Core\Services\UserBookingService;
 
 class BookingMiddleware extends Middleware
 {
@@ -51,7 +51,7 @@ class BookingMiddleware extends Middleware
             return false;
         }
 
-        $bookingService = new BookingService();
+        $bookingService = new UserBookingService();
         if (!$bookingService->userCanAccessBooking($booking, (int)$currentUser->id_user)) {
             App::$app->session->setFlash('error', 'Anda tidak memiliki akses ke booking ini.');
             $response->redirect('/dashboard');
