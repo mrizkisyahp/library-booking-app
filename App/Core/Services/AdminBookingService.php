@@ -15,14 +15,11 @@ class AdminBookingService {
         $perPage = (int)($filters['perPage'] ?? self::perPage);
 
         $queryFilters = [
-            'nama_ruangan' => $filters['keyword'] ?? null,
-            'jenis_ruangan' => $filters['jenis_ruangan'] ?? null,
-            'status_ruangan' => $filters['status_ruangan'] ?? null,
+            'keyword' => $filters['keyword'] ?? null,
+            'status' => $filters['status'] ?? null,
         ];
 
-        $bookings = Booking::findPaginated($page, $perPage, $queryFilters, [
-            'only_available' => false,
-        ]);
+        $bookings = Booking::findPaginated($page, $perPage, $queryFilters);
 
         return [
             'success' => true,
@@ -35,18 +32,14 @@ class AdminBookingService {
                 'statusOptions' => $this->getStatusOptions(),
             ],
         ];
+    }
 
-        // $sql = "
-        //     SELECT b.*, u.nama, r.nama_ruangan, id_feedback
-        //     from booking b
-        //     left join users u on b.user_id = u.id_user
-        //     left join ruangan r on b.ruangan_id = r.id_ruangan
-        //     left join feedback fb on b.id_booking = fb.booking_id
-        //     order by b.created_at desc
-        // ";
+    public function getBookingById(int $id): ?Booking {
+        if ($id <= 0) {
+            return null;
+        }
 
-        // $stmt = App::$app->db->pdo->query($sql);
-        // return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return Booking::findOne(['id_booking' => $id]);
     }
 
     public function getStatusOptions(): array {
@@ -63,7 +56,7 @@ class AdminBookingService {
     }
 
     public function getAdminBookingDetail(int $bookingId): array {
-        $booking = Booking::findOne(['id_booking' => $bookingId]);
+        $booking = $this->getBookingById($bookingId);
         if (!$booking) {
             return [
                 'success' => false,
@@ -95,7 +88,7 @@ class AdminBookingService {
 
     public function verifyBooking(int $bookingId, int $adminId): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = $this->getBookingById($bookingId);
 
         if (!$booking || $booking->status !== 'pending') {
             return [
@@ -150,7 +143,7 @@ class AdminBookingService {
 
     public function markBookingCompleted(int $bookingId, int $adminId): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = $this->getBookingById($bookingId);
 
         if (!$booking || $booking->status !== 'active') {
             return [
@@ -199,7 +192,7 @@ class AdminBookingService {
 
     public function activateBooking(int $bookingId, string $code, int $adminId): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = $this->getBookingById($bookingId);
         if (!$booking || $booking->status !== 'verified') {
             return [
                 'success' => false,
@@ -249,7 +242,7 @@ class AdminBookingService {
 
     public function cancelBooking(int $bookingId, int $adminId, ?string $reason = null): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = $this->getBookingById($bookingId);
         if (!$booking) {
             return [
                 'success' => false,
@@ -301,7 +294,7 @@ class AdminBookingService {
     {
         do {
             $code = strtoupper(bin2hex(random_bytes(3)));
-            $exists = Booking::findOne(['checkin_code' => $code]);
+            $exists = $this->getBookingById($code);
         } while ($exists);
 
         return $code;
