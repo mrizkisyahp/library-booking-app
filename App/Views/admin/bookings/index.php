@@ -38,27 +38,20 @@ $statusColors = [
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
       <div class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-linear-to-r from-emerald-50 to-teal-50">
-            <tr>
-<<<<<<< HEAD
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User ID</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan ID</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal & Waktu
-              </th>
-=======
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ruangan</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal & Waktu</th>
->>>>>>> 36bb850c7e9d94293ace170585547de4e5da26d6
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Feedback</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
+          <thead class="bg-linear-to-r from-emerald-100 to-teal-50">
+            <tr class=" *:px-6 *:py-4  *:text-left *:text-xs *:font-bold *:text-gray-800 *:uppercase *:tracking-wider *:whitespace-nowrap">
+              <th class="">User</th>
+              <th class="">Ruangan</th>
+              <th class="">Tanggal & Waktu</th>
+              <th class="">Status</th>
+              <th class="">Feedback</th>
+              <th class="">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             <?php foreach ($bookings as $booking): ?>
               <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
                   <?= htmlspecialchars($booking->nama) ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -69,13 +62,13 @@ $statusColors = [
                   <div class="text-gray-500"><?= htmlspecialchars($booking->waktu_mulai) ?> - <?= htmlspecialchars($booking->waktu_selesai) ?></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' ?>">
+                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow <?= $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' ?>">
                     <?= htmlspecialchars(ucfirst($booking->status)) ?>
                   </span>
                 </td>
                 <td class="px-6 py-4 text-sm">
                   <?php if (!empty($booking->id_feedback)) : ?>
-                    <a href="/admin/feedback/detail?id=<?= (int)$booking->id_feedback ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">Lihat Feedback</a>
+                    <a href="/admin/feedback/detail?id=<?= (int)$booking->id_feedback ?>" class="text-emerald-600 hover:text-emerald-700 hover:underline font-semibold text-sm">Lihat Feedback</a>
                   <?php else: ?>
                     <span class="text-gray-400 text-sm">Tidak ada</span>
                   <?php endif; ?>
@@ -114,7 +107,7 @@ $statusColors = [
 
       <?php for ($i = 1; $i <= ceil($totalBookings / $perPage); $i++): ?>
         <a href="/admin/bookings?page=<?= $i ?>"
-           class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
+           class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
                   <?= $i === $currentPage ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
           <?= $i ?>
         </a>
