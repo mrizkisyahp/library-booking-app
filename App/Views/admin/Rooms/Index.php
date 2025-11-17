@@ -28,12 +28,14 @@ $roomTypes = [
     <p style="color: red;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
+
+
   <section>
     <h2>Filters</h2>
     <form method="get" action="/admin/rooms">
       <label>
         Keyword
-        <input type="text" name="nama_ruangan" value="<?= htmlspecialchars($filters['nama_ruangan'] ?? '') ?>">
+        <input type="text" name="keyword" value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
       </label>
       <label>
         Room Type

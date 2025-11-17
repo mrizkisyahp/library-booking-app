@@ -1,7 +1,9 @@
 <?php
 
+use App\Core\App;
+use App\Models\Booking;
 use App\Core\Csrf;
-/** @var array $bookings */
+/** @var Booking[] $bookings */
 
 // Status badge colors
 $statusColors = [
@@ -21,7 +23,31 @@ $statusColors = [
   <div class="mb-8">
     <h2 class="text-3xl font-bold text-gray-900 mb-2">Manajemen Booking</h2>
     <p class="text-gray-600">Kelola dan verifikasi booking ruangan</p>
+    <p><a href="/admin/bookings/create" class="text-emerald-600 hover:text-emerald-700 hover:underline font-semibold text-sm">Tambah Booking</a></p>
   </div>
+
+  <section>
+  <h2>Filters</h2>
+  <form method="get" action="/admin/bookings">
+    <label>
+      Keyword
+      <input type="text" name="keyword" value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
+    </label>
+    <label>
+      Status
+      <select name="status">
+        <option value="">All</option>
+        <?php foreach ($statusOptions as $value => $label): ?>
+          <option value="<?= htmlspecialchars($value) ?>" <?= (($filters['status'] ?? '') === $value) ? 'selected' : '' ?>>
+            <?= htmlspecialchars($label) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+    <button type="submit">Apply</button>
+    <a href="/admin/bookings">Reset</a>
+  </form>
+</section>
 
   <?php if (empty($bookings)): ?>
     <!-- Empty State -->
@@ -78,6 +104,17 @@ $statusColors = [
                      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                     Detail
                   </a>
+                  <a href="/admin/bookings/edit?id=<?= (int)$booking->id_booking ?>"
+                     class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    Edit
+                  </a>
+                  <form action="/admin/bookings/delete" method="POST" class="inline">
+                    <?= Csrf::field() ?>
+                    <input type="hidden" name="id_booking" value="<?= (int)$booking->id_booking ?>">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg font-medium text-red-700 hover:bg-red-50 transition-colors">
+                      Hapus
+                    </button>
+                  </form>
                 </td>
               </tr>
             <?php endforeach; ?>

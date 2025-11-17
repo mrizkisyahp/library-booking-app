@@ -32,6 +32,7 @@ try {
         ['id_role' => 1, 'nama_role' => 'admin'],
         ['id_role' => 2, 'nama_role' => 'dosen'],
         ['id_role' => 3, 'nama_role' => 'mahasiswa'],
+        ['id_role' => 4, 'nama_role' => 'tendik'],
     ];
 
     $stmt = $db->pdo->prepare("

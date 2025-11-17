@@ -83,3 +83,9 @@ $app->router->post('/admin/rooms/deactivate', [AdminRoomController::class, 'deac
 $app->router->get('/admin/bookings/detail', [AdminBookingController::class, 'detail']);
 $app->router->get('/admin/feedback', [AdminFeedbackController::class, 'index']);
 $app->router->get('/admin/feedback/detail', [AdminFeedbackController::class, 'detail']);
+$app->router->get('/admin/bookings', [AdminBookingController::class, 'index']);
+$app->router->get('/admin/bookings/create', [AdminBookingController::class, 'create']);
+$app->router->post('/admin/bookings/store', [AdminBookingController::class, 'store']);
+$app->router->get('/admin/bookings/edit', [AdminBookingController::class, 'edit']);
+$app->router->post('/admin/bookings/update', [AdminBookingController::class, 'update']);
+$app->router->post('/admin/bookings/delete', [AdminBookingController::class, 'delete']);

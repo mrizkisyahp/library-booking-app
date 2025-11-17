@@ -109,6 +109,13 @@ class Room extends DbModel {
         $sql = "SELECT * FROM ruangan WHERE 1=1";
         $params = [];
 
+        if (!empty($filters['keyword'])) {
+            $sql .= " AND (
+                nama_ruangan LIKE :keyword
+            )";
+            $params[':keyword'] = '%' . $filters['keyword'] . '%';
+        }
+
         if (!empty($filters['nama_ruangan'])) {
             $sql .= " AND nama_ruangan LIKE :nama";
             $params[':nama'] = '%' . $filters['nama_ruangan'] . '%';

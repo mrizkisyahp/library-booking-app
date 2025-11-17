@@ -19,7 +19,7 @@ class AdminRoomService
         $perPage = (int)($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
-            'nama_ruangan' => $filters['keyword'] ?? null,
+            'keyword' => $filters['keyword'] ?? null,
             'jenis_ruangan' => $filters['jenis_ruangan'] ?? null,
             'status_ruangan' => $filters['status_ruangan'] ?? null,
         ];

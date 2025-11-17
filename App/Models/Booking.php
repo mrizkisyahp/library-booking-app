@@ -150,12 +150,11 @@ class Booking extends DbModel {
         if (!empty($filters['keyword'])) {
             $sql .= " AND (
                 users.nama LIKE :keyword OR
-                ruangan.nama_ruangan LIKE :keyword OR
-                booking.tanggal_booking LIKE :keyword OR
-                booking.tanggal_penggunaan_ruang LIKE :keyword OR
-                booking.waktu_mulai LIKE :keyword OR
-                booking.waktu_selesai LIKE :keyword OR
-                booking.tujuan LIKE :keyword
+                ruangan.nama_ruangan LIKE :keyword
+                -- booking.tanggal_booking LIKE :keyword OR
+                -- booking.tanggal_penggunaan_ruang LIKE :keyword OR
+                -- booking.waktu_mulai LIKE :keyword OR
+                -- booking.waktu_selesai LIKE :keyword OR
             )";
             $params[':keyword'] = '%' . $filters['keyword'] . '%';
         }

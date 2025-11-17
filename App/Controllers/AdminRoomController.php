@@ -20,19 +20,16 @@ class AdminRoomController extends Controller
         $this->registerMiddleware(new AdminMiddleware());
     }
 
-    public function index()
+    public function index(Request $request, Response $response)
     {
         $this->setLayout('main');
         $this->setTitle('Admin Room Management | Library Booking App');
 
-        $query = App::$app->request->getBody();
         $filters = [
-            'nama_ruangan' => $query['nama_ruangan'] ?? null,
-            'jenis_ruangan' => $query['jenis_ruangan'] ?? null,
-            'status_ruangan' => $query['status_ruangan'] ?? null,
-            'kapasitas_min' => $query['kapasitas_min'] ?? null,
-            'kapasitas_max' => $query['kapasitas_max'] ?? null,
-            'page' => (int)($query['page'] ?? ($_GET['page'] ?? 1)),
+            'keyword' => $request->getBody()['keyword'] ?? null,
+            'jenis_ruangan' => $request->getBody()['jenis_ruangan'] ?? null,
+            'status_ruangan' => $request->getBody()['status_ruangan'] ?? null,
+            'page' => (int)($request->getBody()['page'] ?? 1),
         ];
 
         $service = new AdminRoomService();

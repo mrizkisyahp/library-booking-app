@@ -3,16 +3,17 @@
 namespace App\Core\Services;
 
 use App\Core\App;
+use App\Core\Services\BookingValidator;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\User;
 
 class AdminBookingService {
-    private const perPage = 20;
+    private const PER_PAGE = 20;
 
     public function listAllBookings(array $filters = []): array {
         $page = max(1, (int)($filters['page'] ?? 1));
-        $perPage = (int)($filters['perPage'] ?? self::perPage);
+        $perPage = (int)($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
             'keyword' => $filters['keyword'] ?? null,
@@ -52,6 +53,156 @@ class AdminBookingService {
             'cancelled' => 'Cancelled',
             'expired' => 'Expired',
             'no_show' => 'No Show',
+        ];
+    }
+
+    public function createBooking(array $input): array {
+
+        $user = User::findOne(['id_user' => (int)($input['user_id'] ?? 0)]);
+        $room = Room::findOne(['id_ruangan' => (int)($input['ruangan_id'] ?? 0)]);
+        if (!$user || !$room) {
+            return [
+                'success' => false,
+                'message' => 'PIC dan ruangan wajib dipilih.',
+                'data' => [
+                    'errors' => array_filter([
+                        'user_id' => $user ? null : 'PIC wajib dipilih',
+                        'ruangan_id' => $room ? null : 'Ruangan wajib dipilih',
+                    ]),
+                    'payload' => $input,
+                ],
+            ];
+        }
+
+        $validation = BookingValidator::validate($input, $room);
+        if (!($validation['valid'] ?? false)) {
+            return [
+                'success' => false,
+                'message' => 'Gagal menyimpan booking. Periksa kembali data yang diisi.',
+                'data' => [
+                    'errors' => $validation['errors'] ?? [],
+                    'payload' => $input,
+                ],
+            ];
+        }
+
+        $booking = new Booking();
+        $booking->user_id = (int)$user->id_user;
+        $booking->ruangan_id = (int)$room->id_ruangan;
+        $booking->tanggal_booking = date('Y-m-d H:i:s');
+        $booking->tanggal_penggunaan_ruang = $input['tanggal_penggunaan_ruang'];
+        $booking->waktu_mulai = $input['waktu_mulai'];
+        $booking->waktu_selesai = $input['waktu_selesai'];
+        $booking->tujuan = $input['tujuan'];
+        $booking->status = 'verified';
+        
+        if (!$booking->save()) {
+            return [
+                'success' => false,
+                'message' => 'Gagal menyimpan booking',
+                'data' => null,
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Booking berhasil dibuat.',
+            'data' => ['booking' => $booking],
+        ];
+    }
+
+    public function updateBooking(int $id, array $input): array {
+        $booking = $this->getBookingById($id);
+        if (!$booking) {
+            return [
+                'success' => false,
+                'message' => 'Booking tidak ditemukan.',
+                'data' => null,
+            ];
+        }
+
+        $user = User::findOne(['id_user' => (int)($input['user_id'] ?? 0)]);
+        $room = Room::findOne(['id_ruangan' => (int)($input['ruangan_id'] ?? 0)]);
+        if (!$user || !$room) {
+            return [
+                'success' => false,
+                'message' => 'PIC dan ruangan wajib dipilih.',
+                'data' => [
+                    'errors' => array_filter([
+                        'user_id' => $user ? null : 'PIC wajib dipilih',
+                        'ruangan_id' => $room ? null : 'Ruangan wajib dipilih',
+                    ]),
+                    'payload' => $input,
+                ],
+            ];
+        }
+
+        $validation = BookingValidator::validateAdmin($input, $room);   
+        if (!($validation['valid'] ?? false)) {
+            return [
+                'success' => false,
+                'message' => 'Gagal memperbarui booking. Periksa kembali data yang diisi.',
+                'data' => [
+                    'errors' => $validation['errors'] ?? [],
+                    'payload' => $input,
+                ],
+            ];
+        }
+
+        $booking->user_id = (int)$user->id_user;
+        $booking->ruangan_id = (int)$room->id_ruangan;
+        $booking->tanggal_penggunaan_ruang = $input['tanggal_penggunaan_ruang'];
+        $booking->waktu_mulai = $input['waktu_mulai'];
+        $booking->waktu_selesai = $input['waktu_selesai'];
+        $booking->tujuan = $input['tujuan'];
+        $booking->status = $input['status'];
+
+        if (!$booking->save()) {
+            return [
+                'success' => false,
+                'message' => 'Gagal memperbarui booking',
+                'data' => null,
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Booking berhasil diperbarui.',
+            'data' => ['booking' => $booking],
+        ];
+    }
+
+    public function deleteBooking(int $id): array {
+        $booking = $this->getBookingById($id);
+        if (!$booking) {
+            return [
+                'success' => false,
+                'message' => 'Booking tidak ditemukan.',
+                'data' => null,
+            ];
+        }
+
+        if (!$booking->delete()) {
+            return [
+                'success' => false,
+                'message' => 'Gagal menghapus booking.',
+                'data' => null,
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Booking berhasil dihapus.',
+            'data' => null,
+        ];
+    }
+
+    public function getFormSelections(): array
+    {
+        return [
+            'users' => User::search(),
+            'rooms' => Room::search(),
+            'statusOptions' => $this->getStatusOptions(),
         ];
     }
 
