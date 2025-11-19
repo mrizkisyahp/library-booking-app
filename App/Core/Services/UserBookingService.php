@@ -39,7 +39,7 @@ class UserBookingService
             return [
                 'success' => false,
                 'message' => 'Anda sudah create booking/join booking yang akan datang. Selesaikan terlebih dahulu sebelum membuat yang baru.',
-                'redirect' => '/dashboard',
+                'redirect' => '/rooms',
             ];
         }
 
@@ -48,7 +48,7 @@ class UserBookingService
             return [
                 'success' => false,
                 'message' => 'Silakan isi feedback untuk booking sebelumnya sebelum membuat booking baru.',
-                'redirect' => '/dashboard',
+                'redirect' => '/rooms',
             ];
         }
 

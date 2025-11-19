@@ -205,6 +205,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
         <?php endif; ?>
 
         <div class="pt-4 border-t border-slate-200">
+          <?php if ($booking->status !== 'draft'): ?>
           <form action="/admin/bookings/cancel" method="post" class="space-y-3">
             <?= Csrf::field() ?>
             <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
@@ -216,6 +217,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
               Batalkan Booking
             </button>
           </form>
+          <?php endif; ?>
         </div>
 
         <a href="/admin/bookings" class="inline-flex items-center justify-center w-full border border-slate-300 text-slate-700 font-semibold py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors">

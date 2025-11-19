@@ -40,6 +40,12 @@ class UserBookingController extends Controller {
         $bookingService = new UserBookingService();
         $result = $bookingService->createDraft($user, $request->getBody());
 
+        // $debug = $result;
+        
+        // echo '<pre>';
+        // print_r($debug);
+        // echo '</pre>';
+        // exit;
         if ($result['success'] ?? false) {
             App::$app->session->setFlash('success', $result['message'] ?? 'Draft booking berhasil dibuat.');
             $response->redirect($result['redirect'] ?? '/dashboard');
