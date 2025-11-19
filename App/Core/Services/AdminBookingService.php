@@ -45,7 +45,6 @@ class AdminBookingService {
 
     public function getStatusOptions(): array {
         return [
-            'draft' => 'Draft',
             'pending' => 'Pending',
             'verified' => 'Verified',
             'active' => 'Active',

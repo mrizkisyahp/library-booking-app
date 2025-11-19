@@ -1,3 +1,4 @@
+// Image Pop-up
 document.addEventListener('DOMContentLoaded', () => {
     const imagePopUp = document.getElementById('imagePopUp');
     const popUpImage = document.getElementById('popUpImage');
@@ -43,3 +44,108 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Dropdown filters
+document.addEventListener('DOMContentLoaded', () => {
+    const dropdownButton = document.getElementById('dropdownButton');
+    const dropdown = document.getElementById('dropdown');
+    const options = dropdown.querySelectorAll('li');
+    const hiddenInput = document.getElementById('statusSelected');
+    const buttonText = dropdownButton.querySelector('span');
+
+    dropdownButton.addEventListener('click', () => {
+        const isOpen = !dropdown.classList.contains('hidden');
+        if (isOpen) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    })
+
+    function openDropdown() {
+        dropdown.classList.remove('hidden');
+        setTimeout(() => {
+            dropdown.classList.remove('opacity-0', 'scale-95');
+            dropdown.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+
+    function closeDropdown() {
+        dropdown.classList.add('opacity-0', 'scale-95');
+        dropdown.classList.remove('opacity-100', 'scale-100');
+        setTimeout(() => dropdown.classList.add('hidden'), 150);
+    }
+
+    options.forEach(li => {
+        li.addEventListener('click', () => {
+            const value = li.getAttribute('data-value');
+
+            hiddenInput.value = value;
+
+            buttonText.textContent = li.textContent;
+
+            options.forEach(o => o.classList.remove('bg-gray-300'));
+            li.classList.add('bg-gray-300');
+
+            closeDropdown();
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && !dropdownButton.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+});
+
+// Dropdown filters 2
+document.addEventListener('DOMContentLoaded', () => {
+    const dropdownButton = document.getElementById('dropdownButton2');
+    const dropdown = document.getElementById('dropdown2');
+    const options = dropdown.querySelectorAll('li');
+    const hiddenInput = document.getElementById('statusSelected2');
+    const buttonText = dropdownButton.querySelector('span');
+
+    dropdownButton.addEventListener('click', () => {
+        const isOpen = !dropdown.classList.contains('hidden');
+        if (isOpen) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    })
+
+    function openDropdown() {
+        dropdown.classList.remove('hidden');
+        setTimeout(() => {
+            dropdown.classList.remove('opacity-0', 'scale-95');
+            dropdown.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+
+    function closeDropdown() {
+        dropdown.classList.add('opacity-0', 'scale-95');
+        dropdown.classList.remove('opacity-100', 'scale-100');
+        setTimeout(() => dropdown.classList.add('hidden'), 150);
+    }
+
+    options.forEach(li => {
+        li.addEventListener('click', () => {
+            const value = li.getAttribute('data-value');
+
+            hiddenInput.value = value;
+
+            buttonText.textContent = li.textContent;
+
+            options.forEach(o => o.classList.remove('bg-gray-300'));
+            li.classList.add('bg-gray-300');
+
+            closeDropdown();
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && !dropdownButton.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+});

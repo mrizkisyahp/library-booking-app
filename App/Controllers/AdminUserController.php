@@ -42,6 +42,12 @@ class AdminUserController extends Controller
         $data = $result['data'] ?? [];
         $stats = $data['stats'] ?? [];
 
+        // echo '<pre>';
+        // print_r($result);
+        // print_r($data);
+        // print_r($stats);
+        // echo '</pre>';
+
         return $this->render('Admin/Users/Index', [
             'users' => $data['users'] ?? [],
             'filters' => $data['filters'] ?? $filters,
