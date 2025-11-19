@@ -211,9 +211,13 @@ $statusColors = [
 
         <div class="flex items-center gap-8 text-sm">
           <button type="submit"
-            class="cursor-pointer px-4 py-2 border-2 border-emerald-300 rounded-lg font-medium text-emerald-700 hover:bg-emerald-50 transition-colors">Terapkan</button>
+            class="cursor-pointer px-4 py-2 border-2 border-emerald-600 rounded-lg font-medium text-emerald-50 bg-emerald-600 hover:bg-emerald-700 tracking-wider transition-all focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            Terapkan
+          </button>
           <a href="/admin/rooms"
-            class="cursor-pointer px-4 py-2 border-2 border-rose-300 rounded-lg font-medium text-rose-700 hover:bg-rose-50 transition-colors">Bersihkan</a>
+            class="cursor-pointer px-4 py-2 border-2 border-zinc-300 rounded-lg font-medium text-zinc-700 hover:bg-zinc-50 transition-all tracking-wider focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2">
+            Bersihkan
+          </a>
         </div>
 
       </div>

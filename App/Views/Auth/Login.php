@@ -16,19 +16,16 @@ use App\Core\Csrf;
         <h2 class="text-2xl font-semibold capitalize">Masuk</h2>
       </div>
 
+      <!-- Flash Messages -->
       <?php if ($m = App::$app->session->getFlash('success')): ?>
-        <div>
-          <p>
-            <?= htmlspecialchars($m) ?>
-          </p>
+        <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
+          <?= htmlspecialchars($$m) ?>
         </div>
       <?php endif; ?>
 
       <?php if ($m = App::$app->session->getFlash('error')): ?>
-        <div>
-          <p>
-            <?= htmlspecialchars($m) ?>
-          </p>
+        <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
+          <?= htmlspecialchars($$m) ?>
         </div>
       <?php endif; ?>
 
@@ -44,7 +41,7 @@ use App\Core\Csrf;
                 value="<?= htmlspecialchars($model->identifier ?? '') ?>"
                 class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 placeholder-gray-400 <?= $model->hasError('identifier') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
               <?php if ($model->hasError('identifier')): ?>
-                <p class="mt-1 text-sm text-red-600"> 
+                <p class="mt-1 text-sm text-red-600">
                   <?= htmlspecialchars($model->getFirstError('identifier')) ?>
                 </p>
               <?php endif; ?>
@@ -65,7 +62,8 @@ use App\Core\Csrf;
 
             <div class="flex justify-between items-center mx-6">
               <div class="flex items-center gap-2">
-                <input id="remember" name="remember" type="checkbox" value="1" class="size-4 accent-primary checked:bg-emerald-600 transition-colors cursor-pointer">
+                <input id="remember" name="remember" type="checkbox" value="1"
+                  class="size-4 accent-primary checked:bg-emerald-600 transition-colors cursor-pointer">
                 <label for="remember" class="text-sm capitalize">ingat saya</label>
               </div>
 

@@ -62,8 +62,14 @@ $feedback = $feedback ?? [];
           Sampai Tanggal
           <input type="date" name="date_end" value="<?= htmlspecialchars($filters['date_end'] ?? '') ?>">
         </label>
-        <button type="submit">Terapkan</button>
-        <a href="/admin/feedback">Reset</a>
+        <button type="submit"
+          class="cursor-pointer px-4 py-2 border-2 border-emerald-600 rounded-lg font-medium text-emerald-50 bg-emerald-600 hover:bg-emerald-700 tracking-wider transition-all focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Terapkan</button>
+        Terapkan
+        </button>
+        <a href="/admin/feedback"
+          class="cursor-pointer px-4 py-2 border-2 border-zinc-300 rounded-lg font-medium text-zinc-700 hover:bg-zinc-50 transition-all tracking-wider focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2">
+          Bersihkan
+        </a>
       </fieldset>
     </form>
   </section>

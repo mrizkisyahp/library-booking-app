@@ -192,9 +192,13 @@ $statuses = $statuses ?? [];
 
         <div class="flex items-center gap-8 text-sm">
           <button type="submit"
-            class="cursor-pointer px-4 py-2 border-2 border-emerald-300 rounded-lg font-medium text-emerald-700 hover:bg-emerald-50 transition-colors">Terapkan</button>
+            class="cursor-pointer px-4 py-2 border-2 border-emerald-600 rounded-lg font-medium text-emerald-50 bg-emerald-600 hover:bg-emerald-700 tracking-wider transition-all focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            Terapkan
+          </button>
           <a href="/admin/users"
-            class="cursor-pointer px-4 py-2 border-2 border-rose-300 rounded-lg font-medium text-rose-700 hover:bg-rose-50 transition-colors">Bersihkan</a>
+            class="cursor-pointer px-4 py-2 border-2 border-zinc-300 rounded-lg font-medium text-zinc-700 hover:bg-zinc-50 transition-all tracking-wider focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2">
+            Bersihkan
+          </a>
         </div>
 
       </div>
@@ -270,7 +274,8 @@ $statuses = $statuses ?? [];
                   <small>HP: <?= htmlspecialchars($user->nomor_hp ?? '-') ?></small>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  <?= htmlspecialchars($user->nama_role ?? 'Unknown') ?></td>
+                  <?= htmlspecialchars($user->nama_role ?? 'Unknown') ?>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                   <?php if ($user->nim): ?>
                     NIM: <?= htmlspecialchars($user->nim) ?><br>
@@ -284,11 +289,28 @@ $statuses = $statuses ?? [];
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><?= htmlspecialchars($user->jurusan ?? '-') ?>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  <?= htmlspecialchars((string) ($user->peringatan ?? 0)) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                  <?= htmlspecialchars((string) ($user->peringatan ?? 0)) ?>
+                </td>
                 <!-- Foto Kubaca -->
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  <?php if ($user->kubaca_img): ?>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700 ">
+                  <div class="hover:text-emerald-700 ">
+                    <a href="/admin/users/show?id=<?= $user->id_user ?>" class="flex items-center gap-4 accent-primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-view-icon lucide-view">
+                        <path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2" />
+                        <path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2" />
+                        <circle cx="12" cy="12" r="1" />
+                        <path
+                          d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0" />
+                      </svg>
+                      Detail
+                    </a>
+                  </div>
+
+
+                  <!-- <?php if ($user->kubaca_img): ?>
                     <button
                       class="view-button text-emerald-600 hover:text-emerald-700 text-sm font-semibold flex items-center"
                       data-img="uploads/kubaca/<?= htmlspecialchars($user->kubaca_img) ?>"
@@ -304,7 +326,7 @@ $statuses = $statuses ?? [];
                     </button>
                   <?php else: ?>
                     <span class="text-xs text-slate-400">Missing</span>
-                  <?php endif; ?>
+                  <?php endif; ?> -->
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><?= htmlspecialchars($user->status) ?></td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
