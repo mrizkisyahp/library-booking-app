@@ -295,7 +295,7 @@ $statusColors = [
                     Hapus
                   </button>
                 </form>
-                <?php if ($room->status_ruangan === 'available'): ?>
+                <?php if ($room->status_ruangan !== 'unavailable' ): ?>
                   <form method="post" action="/admin/rooms/deactivate" class="inline">
                     <?= Csrf::field() ?>
                     <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">

@@ -50,6 +50,7 @@ $app->router->get('/feedback/create', [UserFeedbackController::class, 'create'])
 $app->router->post('/feedback', [UserFeedbackController::class, 'store']);
 $app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm']);
 $app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink']);
+$app->router->get('/my-bookings', [UserBookingController::class, 'showMyBooking']);
 
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index']);
