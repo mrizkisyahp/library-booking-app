@@ -16,15 +16,14 @@ class AdminFeedbackController extends Controller
     public function __construct()
     {
         $this->registerMiddleware(new AdminMiddleware());
-        $this->service = new AdminFeedbackService();
     }
 
-    public function index(): string
+    public function index(Request $request, Response $response): ?string
     {
         $this->setLayout('main');
         $this->setTitle('Feedback Pengguna | Library Booking App');
 
-        $params = App::$app->request->getBody();
+        $params = $request->getBody();
         $filters = [
             'nama_ruangan' => $params['nama_ruangan'] ?? '',
             'nama_user' => $params['nama_user'] ?? '',
@@ -32,7 +31,15 @@ class AdminFeedbackController extends Controller
             'rating' => $params['rating'] ?? '',
         ];
 
-        $result = $this->service->listFeedback($filters);
+        $service = new AdminFeedbackService();
+        $result = $service->listFeedback($filters);
+
+        if (!$result['success']) {
+            App::$app->session->setFlash('error', $result['message'] ?? 'Feedback tidak ditemukan.');
+            $response->redirect('/admin/feedback');
+            return null;
+        }
+
         $data = $result['data'];
 
         return $this->render('Admin/Feedback/Index', [
@@ -56,13 +63,16 @@ class AdminFeedbackController extends Controller
             return null;
         }
 
-        $result = $this->service->getFeedbackDetail($id);
+        $service = new AdminFeedbackService();
+        $result = $service->getFeedbackDetail($id);
+        $data = $result['data'];
+
         if (!$result['success']) {
             App::$app->session->setFlash('error', $result['message'] ?? 'Feedback tidak ditemukan.');
             $response->redirect('/admin/feedback');
             return null;
         }
 
-        return $this->render('Admin/Feedback/Detail', $result['data']);
+        return $this->render('Admin/Feedback/Detail', $data);
     }
 }
