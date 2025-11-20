@@ -10,7 +10,6 @@ $feedback = $feedback ?? [];
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Feedback Pengguna</h1>
       <p class="text-gray-600">Monitor seluruh feedback yang diberikan oleh pengguna</p>
     </div>
-
   </div>
 
   <section class="bg-white shadow rounded-lg p-6 mb-8 border border-gray-100">
@@ -30,47 +29,93 @@ $feedback = $feedback ?? [];
       </svg>
       Pencarian & Filter
     </h2>
-    <form method="get" action="/admin/feedback">
-      <fieldset>
-        <label>
-          Booking ID
-          <input type="number" name="booking_id" value="<?= htmlspecialchars($filters['booking_id'] ?? '') ?>">
-        </label>
-        <label>
-          User ID
-          <input type="number" name="user_id" value="<?= htmlspecialchars($filters['user_id'] ?? '') ?>">
-        </label>
-        <label>
-          Room ID
-          <input type="number" name="room_id" value="<?= htmlspecialchars($filters['room_id'] ?? '') ?>">
-        </label>
-        <label>
-          Rating Min
-          <input type="number" name="rating_min" min="1" max="5"
-            value="<?= htmlspecialchars($filters['rating_min'] ?? '') ?>">
-        </label>
-        <label>
-          Rating Max
-          <input type="number" name="rating_max" min="1" max="5"
-            value="<?= htmlspecialchars($filters['rating_max'] ?? '') ?>">
-        </label>
-        <label>
-          Dari Tanggal
-          <input type="date" name="date_start" value="<?= htmlspecialchars($filters['date_start'] ?? '') ?>">
-        </label>
-        <label>
-          Sampai Tanggal
-          <input type="date" name="date_end" value="<?= htmlspecialchars($filters['date_end'] ?? '') ?>">
-        </label>
-        <button type="submit"
-          class="cursor-pointer px-4 py-2 border-2 border-emerald-600 rounded-lg font-medium text-emerald-50 bg-emerald-600 hover:bg-emerald-700 tracking-wider transition-all focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Terapkan</button>
-        Terapkan
-        </button>
-        <a href="/admin/feedback"
-          class="cursor-pointer px-4 py-2 border-2 border-zinc-300 rounded-lg font-medium text-zinc-700 hover:bg-zinc-50 transition-all tracking-wider focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2">
-          Bersihkan
-        </a>
-      </fieldset>
+    <form method="get" action="/admin/feedback"
+      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-4 w-full">
+      <div class="flex flex-col gap-4 w-full">
+        <div class="flex gap-6 justify-between w-full">
+          <label class="flex flex-col md:flex-row items-center capitalize">
+            <div class="items-center gap-4 hidden md:flex w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-search-icon lucide-search size-5">
+                <path d="m21 21-4.34-4.34" />
+                <circle cx="11" cy="11" r="8" />
+              </svg>
+              <span class="text-sm">Booking ID:</span>
+            </div>
+            <input type="number" name="booking_id"
+              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['booking_id'] ?? '') ?>" placeholder="#ID">
+          </label>
+          <label class="flex flex-col md:flex-row items-center capitalize">
+            <div class="items-center gap-4 hidden md:flex w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-search-icon lucide-search size-5">
+                <path d="m21 21-4.34-4.34" />
+                <circle cx="11" cy="11" r="8" />
+              </svg>
+              <span class="text-sm">User ID:</span>
+            </div>
+            <input type="number" name="user_id"
+              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['user_id'] ?? '') ?>" placeholder="#ID">
+          </label>
+          <label class="flex flex-col md:flex-row items-center capitalize">
+            <div class="items-center gap-4 hidden md:flex w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-search-icon lucide-search size-5">
+                <path d="m21 21-4.34-4.34" />
+                <circle cx="11" cy="11" r="8" />
+              </svg>
+              <span class="text-sm">Room ID:</span>
+            </div>
+            <input
+              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              type="number" name="room_id" value="<?= htmlspecialchars($filters['room_id'] ?? '') ?>" placeholder="#ID">
+          </label>
+        </div>
+        <div class="flex gap-6 justify-between w-full">
+          <label class="flex flex-col md:flex-row items-center capitalize gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-star-icon lucide-square-star"><path d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            Rating Min
+            <input type="number" name="rating_min" min="1" max="5"
+              class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['rating_min'] ?? '') ?>">
+          </label>
+          <label class="flex flex-col md:flex-row items-center capitalize gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-star-icon lucide-square-star"><path d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            Rating Max
+            <input type="number" name="rating_max" min="1" max="5"
+              class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['rating_max'] ?? '') ?>">
+          </label class="flex flex-col md:flex-row items-center capitalize">
+          <label>
+            Dari Tanggal
+            <input type="date" name="date_start" 
+            class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+            value="<?= htmlspecialchars($filters['date_start'] ?? '') ?>">
+          </label>
+          <label>
+            Sampai Tanggal
+            <input type="date" name="date_end" 
+            class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+            value="<?= htmlspecialchars($filters['date_end'] ?? '') ?>">
+          </label>
+        </div>
+        <div>
+          <button type="submit"
+            class="cursor-pointer px-4 py-2 border-2 border-emerald-600 rounded-lg font-medium text-emerald-50 bg-emerald-600 hover:bg-emerald-700 tracking-wider transition-all focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            Terapkan
+          </button>
+
+          <a href="/admin/feedback"
+            class="cursor-pointer px-4 py-2 border-2 border-zinc-300 rounded-lg font-medium text-zinc-700 hover:bg-zinc-50 transition-all tracking-wider focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2">
+            Bersihkan
+          </a>
+        </div>
+      </div>
     </form>
   </section>
 

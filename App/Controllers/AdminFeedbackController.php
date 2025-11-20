@@ -27,6 +27,11 @@ class AdminFeedbackController extends Controller
         $filters = $request->getBody();
         $result = $this->service->listFeedback($filters);
 
+        // echo '<pre>';
+        // print_r($result);
+        // print_r($filters);
+        // echo '</pre>';
+
         return $this->render('Admin/Feedback/Index', [
             'feedback' => $result['feedback'] ?? [],
             'filters' => $result['filters'] ?? [],

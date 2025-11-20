@@ -19,13 +19,13 @@ use App\Core\Csrf;
       <!-- Flash Messages -->
       <?php if ($m = App::$app->session->getFlash('success')): ?>
         <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
-          <?= htmlspecialchars($$m) ?>
+          <?= htmlspecialchars($m) ?>
         </div>
       <?php endif; ?>
 
       <?php if ($m = App::$app->session->getFlash('error')): ?>
         <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
-          <?= htmlspecialchars($$m) ?>
+          <?= htmlspecialchars($m) ?>
         </div>
       <?php endif; ?>
 
