@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Core\DbModel;
 use App\Core\App;
 
-class Booking extends DbModel {
+class Booking extends DbModel
+{
     public ?int $id_booking = null;
     public ?int $user_id = null;
     public ?int $ruangan_id = null;
@@ -23,15 +24,18 @@ class Booking extends DbModel {
     public ?int $id_feedback = null;
     public ?string $nama = null;
 
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return 'booking';
     }
 
-    public static function primaryKey(): string {
+    public static function primaryKey(): string
+    {
         return 'id_booking';
     }
 
-    public function attributes(): array {
+    public function attributes(): array
+    {
         return [
             'user_id',
             'ruangan_id',
@@ -46,7 +50,8 @@ class Booking extends DbModel {
         ];
     }
 
-    public function rules(): array {
+    public function rules(): array
+    {
         return [];
     }
 
@@ -66,7 +71,7 @@ class Booking extends DbModel {
             WHERE ab.booking_id = :id
             ORDER BY u.nama ASC
         ");
-        
+
         $stmt->bindValue(':id', $this->id_booking, \PDO::PARAM_INT);
         $stmt->execute();
 
@@ -75,7 +80,7 @@ class Booking extends DbModel {
         $ownerIncluded = false;
 
         foreach ($members as $m) {
-            if ((int)$m['id_user'] === (int)$this->user_id) {
+            if ((int) $m['id_user'] === (int) $this->user_id) {
                 $ownerIncluded = true;
                 break;
             }
@@ -98,15 +103,16 @@ class Booking extends DbModel {
 
         usort($members, function ($a, $b) {
             if ($a['is_owner'] === $b['is_owner']) {
-                return strcmp($a['nama'], $b['nama']); 
+                return strcmp($a['nama'], $b['nama']);
             }
-            return $a['is_owner'] ? -1 : 1; 
+            return $a['is_owner'] ? -1 : 1;
         });
 
         return $members;
     }
 
-    public static function search(array $filters = []): array {
+    public static function search(array $filters = []): array
+    {
         [$sql, $params] = self::buildQuery($filters);
 
         $stmt = App::$app->db->prepare($sql . ' ORDER BY booking.id_booking DESC');
@@ -118,12 +124,13 @@ class Booking extends DbModel {
         return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
     }
 
-    public static function findPaginated(int $page, int $perPage, array $filters = []) {
+    public static function findPaginated(int $page, int $perPage, array $filters = [])
+    {
         $offset = ($page - 1) * $perPage;
         [$baseSql, $params] = self::buildQuery($filters);
 
         $sql = $baseSql . " ORDER by booking.id_booking DESC LIMIT :limit OFFSET :offset";
-        
+
         $stmt = App::$app->db->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
@@ -136,7 +143,62 @@ class Booking extends DbModel {
         return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
     }
 
-    private static function buildQuery(array $filters): array {
+    public static function findPaginatedMyBooking(int $userid, int $page, int $PerPage, array $filters = [])
+    {
+        $offset = ($page - 1) * $PerPage;
+        [$baseSql, $params] = self::buildQueryMyBooking($userid, $filters);
+
+        $sql = $baseSql . " ORDER by booking.id_booking DESC LIMIT :limit OFFSET :offset";
+
+        $stmt = App::$app->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->bindValue(':limit', $PerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    }
+
+    private static function buildQueryMyBooking(int $userid, array $filters): array
+    {
+        $sql = "
+            SELECT booking.*, users.nama, ruangan.nama_ruangan, id_feedback 
+            FROM booking
+            LEFT JOIN users ON booking.user_id = users.id_user
+            LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan
+            LEFT JOIN feedback ON booking.id_booking = feedback.booking_id
+            WHERE booking.user_id = :user_id
+        ";
+        $params = [
+            ':user_id' => $userid
+        ];
+
+        if (!empty($filters['keyword'])) {
+            $sql .= " AND (
+                users.nama LIKE :keyword OR
+                ruangan.nama_ruangan LIKE :keyword
+            )";
+            $params[':keyword'] = '%' . $filters['keyword'] . '%';
+        }
+
+        if (!empty($filters['status'])) {
+            $sql .= " AND booking.status = :status";
+            $params[':status'] = $filters['status'];
+        }
+
+        if (!empty($filters['tanggal_penggunaan_ruang'])) {
+            $sql .= " AND booking.tanggal_penggunaan_ruang = :tanggal_penggunaan_ruang";
+            $params[':tanggal_penggunaan_ruang'] = $filters['tanggal_penggunaan_ruang'];
+        }
+
+        return [$sql, $params];
+    }
+
+    private static function buildQuery(array $filters): array
+    {
         $sql = "
             SELECT booking.*, users.nama, ruangan.nama_ruangan, id_feedback 
             FROM booking
@@ -167,7 +229,8 @@ class Booking extends DbModel {
         return [$sql, $params];
     }
 
-    public static function count(array $filters = []): int {
+    public static function count(array $filters = []): int
+    {
         [$baseSql, $params] = self::buildQuery($filters);
         $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
 
@@ -177,6 +240,6 @@ class Booking extends DbModel {
         }
         $stmt->execute();
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 }

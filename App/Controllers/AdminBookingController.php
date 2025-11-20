@@ -23,24 +23,23 @@ class AdminBookingController extends Controller {
         $this->setLayout('main');
         $this->setTitle('Manajemen Booking | Library Booking App');
 
-        $query = App::$app->request->getBody();
+        $params = App::$app->request->getBody();
         $filters = [
-            'keyword' => $query['keyword'] ?? null,
-            'status' => $query['status'] ?? null,
-            'page' => (int)($query['page'] ?? ($_GET['page'] ?? 1)),
+            'keyword' => $params['keyword'] ?? null,
+            'status' => $params['status'] ?? null,
+            'page' => (int)($params['page'] ?? ($_GET['page'] ?? 1)),
         ];
 
         $service = new AdminBookingService();
         $result = $service->listAllBookings($filters);
-        $data = $result['data'] ?? [];
 
         return $this->render('Admin/Bookings/Index', [
-            'bookings' => $data['bookings'] ?? [],
+            'bookings' => $result['data']['bookings'] ?? [],
             'filters' => $filters,
-            'statusOptions' => $data['statusOptions'] ?? $service->getStatusOptions(),
-            'totalBookings' => $data['total'] ?? 0,
-            'currentPage' => $data['currentPage'] ?? $filters['page'],
-            'perPage' => $data['perPage'] ?? 20,
+            'statusOptions' => $result['data']['statusOptions'] ?? $service->getStatusOptions(),
+            'totalBookings' => $result['data']['total'] ?? 0,
+            'currentPage' => $result['data']['currentPage'] ?? $filters['page'],
+            'perPage' => $result['data']['perPage'] ?? 20,
         ]);
     }
 
@@ -49,7 +48,6 @@ class AdminBookingController extends Controller {
         $this->setTitle('Create Booking | Library Booking App');
 
         $service = new AdminBookingService();
-
         $options = $service->getFormSelections();
 
         return $this->render('Admin/Bookings/Create', [

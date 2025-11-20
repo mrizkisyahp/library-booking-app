@@ -11,9 +11,11 @@ use App\Core\Response;
 use App\Models\User;
 use App\Core\Services\UserBookingService;
 
-class UserBookingController extends Controller {
+class UserBookingController extends Controller
+{
     protected ?User $currentUser = null;
-    public function __construct() {
+    public function __construct()
+    {
         $this->registerMiddleware(new AuthMiddleware());
         $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
 
@@ -24,7 +26,8 @@ class UserBookingController extends Controller {
         ]));
     }
 
-    public function createDraft(Request $request, Response $response) {
+    public function createDraft(Request $request, Response $response)
+    {
         // Booking::expireStaleDrafts();
         if (!$request->isPost()) {
             $response->redirect('/rooms');
@@ -41,7 +44,7 @@ class UserBookingController extends Controller {
         $result = $bookingService->createDraft($user, $request->getBody());
 
         // $debug = $result;
-        
+
         // echo '<pre>';
         // print_r($debug);
         // echo '</pre>';
@@ -56,12 +59,13 @@ class UserBookingController extends Controller {
         $response->redirect($result['redirect'] ?? '/rooms');
     }
 
-    public function submitDraft(Request $request, Response $response) {
+    public function submitDraft(Request $request, Response $response)
+    {
         // Booking::expireStaleDrafts();
         $user = $this->currentUser;
-        $bookingId = (int)($request->getBody()['booking_id']);
+        $bookingId = (int) ($request->getBody()['booking_id']);
         $bookingService = new UserBookingService();
-        $result = $bookingService->submitDraft($bookingId, (int)$user->id_user);
+        $result = $bookingService->submitDraft($bookingId, (int) $user->id_user);
 
         if ($result['success'] ?? false) {
             App::$app->session->setFlash('success', $result['message'] ?? 'Booking dikirim ke admin.');
@@ -74,7 +78,8 @@ class UserBookingController extends Controller {
         $response->redirect($redirect);
     }
 
-    public function showDraft(Request $request, Response $response) {
+    public function showDraft(Request $request, Response $response)
+    {
         // Booking::expireStaleDrafts();
         $user = $this->currentUser;
         if (!$user instanceof User) {
@@ -82,10 +87,10 @@ class UserBookingController extends Controller {
             return;
         }
         $body = $request->getBody();
-        $bookingId = (int)($body['id'] ?? $body['booking_id'] ?? 0);
+        $bookingId = (int) ($body['id'] ?? $body['booking_id'] ?? 0);
 
         $bookingService = new UserBookingService();
-        $result = $bookingService->getDraftViewData((int)$user->id_user, $bookingId);
+        $result = $bookingService->getDraftViewData((int) $user->id_user, $bookingId);
 
         if (!$result['success']) {
             App::$app->session->setFlash('error', $result['message'] ?? 'Draft tidak tersedia');
@@ -101,7 +106,8 @@ class UserBookingController extends Controller {
         return $this->render('User/Bookings/Draft', $data);
     }
 
-    public function addMember(Request $request, Response $response) {
+    public function addMember(Request $request, Response $response)
+    {
         // Booking::expireStaleDrafts();
         $user = $this->currentUser;
         if (!$request->isPost()) {
@@ -109,10 +115,10 @@ class UserBookingController extends Controller {
             return;
         }
 
-        $bookingId = (int)$request->getBody()['booking_id'];
+        $bookingId = (int) $request->getBody()['booking_id'];
         $memberEmail = trim($request->getBody()['member_email']);
         $bookingService = new UserBookingService();
-        $result = $bookingService->addMember($bookingId, (int)$user->id_user, $memberEmail);
+        $result = $bookingService->addMember($bookingId, (int) $user->id_user, $memberEmail);
 
         if ($result['success'] ?? false) {
             App::$app->session->setFlash('success', $result['message'] ?? 'Anggota ditambahkan.');
@@ -139,7 +145,8 @@ class UserBookingController extends Controller {
         ]);
     }
 
-    public function joinByLink(Request $request, Response $response) {
+    public function joinByLink(Request $request, Response $response)
+    {
         // Booking::expireStaleDrafts();
 
         $user = $this->currentUser;
@@ -149,15 +156,15 @@ class UserBookingController extends Controller {
         }
 
         $body = $request->getBody();
-        $token = trim((string)$body['invite_token'] ?? '');
+        $token = trim((string) $body['invite_token'] ?? '');
         if ($token === '') {
             App::$app->session->setFlash('error', 'Link tidak boleh kosong');
             $response->redirect('/bookings/join');
             return;
         }
-        
+
         $bookingService = new UserBookingService();
-        $result = $bookingService->joinViaInviteToken((int)$user->id_user, $token);
+        $result = $bookingService->joinViaInviteToken((int) $user->id_user, $token);
 
         App::$app->session->setFlash($result['success'] ? 'success' : (($result['info'] ?? false) ? 'info' : 'error'), $result['message'] ?? '');
 
@@ -174,16 +181,42 @@ class UserBookingController extends Controller {
         $response->redirect('/bookings/join');
     }
 
-    public function showMyBooking(Request $request, Response $response) {
+    public function showMyBooking(Request $request, Response $response)
+    {
+        $this->setLayout('main');
+        $this->setTitle('My Bookings | Library Booking App');
+
         $user = $this->currentUser;
         if (!$user instanceof User) {
             $response->redirect('/login');
             return;
         }
 
-        $this->setLayout('main');
-        $this->setTitle('My Bookings | Library Booking App');
+        $params = App::$app->request->getBody();
+        $filters = [
+            'keyword' => $params['keyword'] ?? null,
+            'tanggal_penggunaan_ruang' => $params['tanggal_penggunaan_ruang'] ?? null,
+            'status' => $params['status'] ?? null,
+            'page' => (int) ($params['page'] ?? ($_GET['page'] ?? 1)),
+        ];
 
-        return $this->render('User/Bookings/Index');
+        $bookingService = new UserBookingService();
+        $result = $bookingService->getMyBookings((int) $user->id_user, $filters);
+
+        if (!$result['success']) {
+            App::$app->session->setFlash('error', $result['message'] ?? 'Gagal memuat data booking');
+            $response->redirect('/dashboard');
+            return;
+        }
+
+        $data = $result['data'] ?? [];
+
+        return $this->render('User/Bookings/Index', [
+            'bookings' => $data,
+            'filters' => $filters,
+            'currentPage' => $data['currentPage'],
+            'perPage' => $data['perPage'],
+            'total' => $data['total'],
+        ]);
     }
 }
