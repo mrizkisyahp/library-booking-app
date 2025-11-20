@@ -79,7 +79,7 @@ $roomTypes = [
         </div>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex gap-3 items-center justify-end">
         <button type="submit" class="bg-primary text-white px-8 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl">
           <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -97,7 +97,7 @@ $roomTypes = [
     <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?> 
       <!-- Overlay Blocking Message -->
       <div class="relative mb-8">
-        <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl shadow-xl border-2 border-amber-200 p-8 relative overflow-hidden">
+        <div class="bg-linear-to-br from-amber-50 to-orange-50 rounded-2xl shadow-xl border-2 border-amber-200 p-8 relative overflow-hidden">
           <!-- Decorative background pattern -->
           <div class="absolute inset-0 opacity-5">
             <div class="absolute transform rotate-12 -right-10 -top-10">

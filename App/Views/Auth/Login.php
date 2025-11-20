@@ -13,7 +13,7 @@ use App\Core\Csrf;
     </div>
     <div class="container w-fit mx-auto align-middle px-12 py-4 bg-gray-100 rounded-md shadow border border-gray-300">
       <div class="text-left py-2">
-        <h2 class="text-2xl font-semibold capitalize">Masuk</h2>
+        <h2 class="text-4xl font-semibold capitalize">Masuk</h2>
       </div>
 
       <!-- Flash Messages -->
@@ -29,7 +29,7 @@ use App\Core\Csrf;
         </div>
       <?php endif; ?>
 
-      <div class="mt-9">
+      <div class="mt-6">
         <form action="/login" method="post">
           <?= Csrf::field() ?>
           <div class="mt-2">

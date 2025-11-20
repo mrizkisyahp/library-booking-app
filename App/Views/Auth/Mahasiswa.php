@@ -12,7 +12,7 @@ use App\Core\Csrf;
 
     <div class="container w-fit mx-auto align-middle px-12 py-6 bg-gray-100 rounded-md shadow border border-gray-300">
       <div class="text-left py-2">
-        <h2 class="text-2xl font-semibold capitalize">Registrasi Mahasiswa</h2>
+        <h2 class="text-4xl font-semibold capitalize">Registrasi Mahasiswa</h2>
       </div>
 
       <?php if ($m = App::$app->session->getFlash('success')): ?>
