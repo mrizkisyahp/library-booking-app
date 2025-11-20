@@ -37,6 +37,11 @@ class BookingValidator
             $errors[] = 'Waktu mulai harus minimal 15 menit setelah waktu sekarang.';
         }
 
+        $occupied = Room::isRoomOccupied($room->id_ruangan, $dateAt, $startAt, $endAt);
+        if ($occupied) {
+            $errors[] = 'Ruangan sudah dipesan pada tanggal dan waktu yang sama.';
+        }
+
         if ($dateAt < $today) {
             // error_log('Tanggal Hari ini : ' . $dateAt . 'Tanggal Sekarang : ' . $now);
             $errors[] = 'Booking hanya bisa dibuat maksimal 7 hari ke depan';

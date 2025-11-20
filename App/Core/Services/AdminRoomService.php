@@ -138,7 +138,12 @@ class AdminRoomService
 
     public function activateRoom(int $id): array
     {
-        return $this->changeStatus($id, self::STATUS_AVAILABLE, 'Room activated.');
+        $room = $this->getRoomById($id);
+        if ($room->nama_ruangan === 'Ruang Rapat') {
+            return $this->changeStatus($id, self::STATUS_ADMINONLY, 'Room activated.');
+        } else {
+            return $this->changeStatus($id, self::STATUS_AVAILABLE, 'Room activated.');
+        }
     }
 
     public function deactivateRoom(int $id): array
@@ -177,8 +182,13 @@ class AdminRoomService
         $room->deskripsi_ruangan = trim((string)($data['deskripsi_ruangan'] ?? $room->deskripsi_ruangan));
 
         $status = strtolower(trim((string)($data['status_ruangan'] ?? $room->status_ruangan)));
+        error_log($status);
         if (!in_array($status, $this->getStatusOptions(), true)) {
-            $status = self::STATUS_AVAILABLE;
+            if ($status === 'adminonly') {
+                $status = self::STATUS_ADMINONLY;
+            } else {
+                $status = self::STATUS_AVAILABLE;
+            }
         }
         $room->status_ruangan = $status;
     }

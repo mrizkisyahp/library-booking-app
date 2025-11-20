@@ -204,10 +204,11 @@ class Room extends DbModel {
     {
         $start = date('Y-m-d');
         $stmt = App::$app->db->prepare("
-            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status
+            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status 
             FROM booking
             WHERE ruangan_id = :room
               AND tanggal_penggunaan_ruang BETWEEN :start AND :end
+              AND status NOT IN ('draft', 'cancelled', 'noshow')
             ORDER BY tanggal_penggunaan_ruang ASC, waktu_mulai ASC
         ");
         $stmt->bindValue(':room', $this->id_ruangan, \PDO::PARAM_INT);
@@ -244,5 +245,20 @@ class Room extends DbModel {
     {
         $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $name);
         return trim($slug, '_');
+    }
+
+    public function isRoomOccupied(int $roomId, int $dateAt, int $startAt, int $endAt): bool
+    {
+        $stmt = App::$app->db->prepare("
+            SELECT * FROM booking WHERE ruangan_id = :room AND tanggal_penggunaan_ruang = :date AND waktu_mulai <= :end AND waktu_selesai >= :start
+            AND status NOT IN ('draft', 'cancelled', 'noshow', 'pending')
+        ");
+        $stmt->bindValue(':room', $roomId, \PDO::PARAM_INT);
+        $stmt->bindValue(':date', $dateAt, \PDO::PARAM_INT);
+        $stmt->bindValue(':start', $startAt, \PDO::PARAM_INT);
+        $stmt->bindValue(':end', $endAt, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
     }
 }

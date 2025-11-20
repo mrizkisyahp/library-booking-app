@@ -173,4 +173,17 @@ class UserBookingController extends Controller {
 
         $response->redirect('/bookings/join');
     }
+
+    public function showMyBooking(Request $request, Response $response) {
+        $user = $this->currentUser;
+        if (!$user instanceof User) {
+            $response->redirect('/login');
+            return;
+        }
+
+        $this->setLayout('main');
+        $this->setTitle('My Bookings | Library Booking App');
+
+        return $this->render('User/Bookings/Index');
+    }
 }
