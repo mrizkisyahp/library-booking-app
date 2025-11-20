@@ -37,10 +37,10 @@ class BookingValidator
             $errors[] = 'Waktu mulai harus minimal 15 menit setelah waktu sekarang.';
         }
 
-        $occupied = Room::isRoomOccupied($room->id_ruangan, $dateAt, $startAt, $endAt);
-        if ($occupied) {
-            $errors[] = 'Ruangan sudah dipesan pada tanggal dan waktu yang sama.';
-        }
+        // $occupied = Room::isRoomOccupied($room->id_ruangan, $dateAt, $startAt, $endAt);
+        // if ($occupied) {
+        //     $errors[] = 'Ruangan sudah dipesan pada tanggal dan waktu yang sama.';
+        // }
 
         if ($dateAt < $today) {
             // error_log('Tanggal Hari ini : ' . $dateAt . 'Tanggal Sekarang : ' . $now);
@@ -68,8 +68,8 @@ class BookingValidator
         if ($startAt > strtotime(date('Y-m-d', $maxDate) . ' 23:59:59')) {
             $errors[] = 'Booking hanya bisa dibuat untuk 7 hari ke depan.';
         }
-        
-        $dayOfWeek = (int)date('N', strtotime($date));
+
+        $dayOfWeek = (int) date('N', strtotime($date));
         if ($dayOfWeek === 6 || $dayOfWeek === 7) {
             $errors[] = 'Booking tidak tersedia pada hari Sabtu dan Minggu.';
         }
@@ -149,8 +149,8 @@ class BookingValidator
         if ($startAt > strtotime(date('Y-m-d', $maxDate) . ' 23:59:59')) {
             $errors[] = 'Booking hanya bisa dibuat untuk 7 hari ke depan.';
         }
-        
-        $dayOfWeek = (int)date('N', strtotime($date));
+
+        $dayOfWeek = (int) date('N', strtotime($date));
         if ($dayOfWeek === 6 || $dayOfWeek === 7) {
             $errors[] = 'Booking tidak tersedia pada hari Sabtu dan Minggu.';
         }

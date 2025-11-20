@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Core\App;
 use App\Core\DbModel;
 
-class Room extends DbModel {
+class Room extends DbModel
+{
     public ?int $id_ruangan = null;
     public string $nama_ruangan = '';
     public ?int $kapasitas_min = null;
@@ -16,15 +17,18 @@ class Room extends DbModel {
     public ?string $created_at = null;
     public ?string $updated_at = null;
 
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return 'ruangan';
     }
 
-    public static function primaryKey(): string {
+    public static function primaryKey(): string
+    {
         return 'id_ruangan';
     }
 
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3], [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_ruangan]],
             'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
@@ -34,7 +38,8 @@ class Room extends DbModel {
         ];
     }
 
-    public function attributes(): array {
+    public function attributes(): array
+    {
         return [
             'id_ruangan',
             'nama_ruangan',
@@ -97,7 +102,7 @@ class Room extends DbModel {
         }
         $stmt->execute();
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     private static function buildQuery(array $filters, array $options = []): array
@@ -128,12 +133,12 @@ class Room extends DbModel {
 
         if (!empty($filters['kapasitas_min'])) {
             $sql .= " AND kapasitas_min <= :kapasitas_min";
-            $params[':kapasitas_min'] = (int)$filters['kapasitas_min'];
+            $params[':kapasitas_min'] = (int) $filters['kapasitas_min'];
         }
 
         if (!empty($filters['kapasitas_max'])) {
             $sql .= " AND kapasitas_max >= :kapasitas_max";
-            $params[':kapasitas_max'] = (int)$filters['kapasitas_max'];
+            $params[':kapasitas_max'] = (int) $filters['kapasitas_max'];
         }
 
         if (!empty($filters['status_ruangan'])) {
@@ -146,11 +151,13 @@ class Room extends DbModel {
         return [$sql, $params];
     }
 
-    public function isAvailable(): bool {
+    public function isAvailable(): bool
+    {
         return $this->status_ruangan === 'available';
     }
 
-    public static function getAvailableRooms(): array {
+    public static function getAvailableRooms(): array
+    {
         $stmt = App::$app->db->prepare("
             SELECT * FROM ruangan
             WHERE status_ruangan = 'available'
@@ -223,7 +230,7 @@ class Room extends DbModel {
             $date = date('Y-m-d', strtotime("+{$offset} days"));
             $offset++;
 
-            $day = (int)date('N', strtotime($date));
+            $day = (int) date('N', strtotime($date));
             if ($day === 6 || $day === 7) {
                 continue;
             }
@@ -247,18 +254,18 @@ class Room extends DbModel {
         return trim($slug, '_');
     }
 
-    public function isRoomOccupied(int $roomId, int $dateAt, int $startAt, int $endAt): bool
-    {
-        $stmt = App::$app->db->prepare("
-            SELECT * FROM booking WHERE ruangan_id = :room AND tanggal_penggunaan_ruang = :date AND waktu_mulai <= :end AND waktu_selesai >= :start
-            AND status NOT IN ('draft', 'cancelled', 'noshow', 'pending')
-        ");
-        $stmt->bindValue(':room', $roomId, \PDO::PARAM_INT);
-        $stmt->bindValue(':date', $dateAt, \PDO::PARAM_INT);
-        $stmt->bindValue(':start', $startAt, \PDO::PARAM_INT);
-        $stmt->bindValue(':end', $endAt, \PDO::PARAM_INT);
-        $stmt->execute();
+    // public function isRoomOccupied(int $roomId, int $dateAt, int $startAt, int $endAt): bool
+    // {
+    //     $stmt = App::$app->db->prepare("
+    //         SELECT * FROM booking WHERE ruangan_id = :room AND tanggal_penggunaan_ruang = :date AND waktu_mulai <= :end AND waktu_selesai >= :start
+    //         AND status NOT IN ('draft', 'cancelled', 'noshow', 'pending')
+    //     ");
+    //     $stmt->bindValue(':room', $roomId, \PDO::PARAM_INT);
+    //     $stmt->bindValue(':date', $dateAt, \PDO::PARAM_INT);
+    //     $stmt->bindValue(':start', $startAt, \PDO::PARAM_INT);
+    //     $stmt->bindValue(':end', $endAt, \PDO::PARAM_INT);
+    //     $stmt->execute();
 
-        return $stmt->rowCount() > 0;
-    }
+    //     return $stmt->rowCount() > 0;
+    // }
 }

@@ -14,9 +14,10 @@ use App\Core\Services\FeedbackService;
 
 class UserBookingService
 {
+    private const PER_PAGE = 10;
     public function createDraft(User $user, array $data): array
     {
-        $roomId = (int)($data['ruangan_id'] ?? 0);
+        $roomId = (int) ($data['ruangan_id'] ?? 0);
         $room = Room::findOne(['id_ruangan' => $roomId]);
         if (!$room) {
             return [
@@ -35,7 +36,7 @@ class UserBookingService
             ];
         }
 
-        if ($this->userHasActiveParticipation((int)$user->id_user)) {
+        if ($this->userHasActiveParticipation((int) $user->id_user)) {
             return [
                 'success' => false,
                 'message' => 'Anda sudah create booking/join booking yang akan datang. Selesaikan terlebih dahulu sebelum membuat yang baru.',
@@ -44,7 +45,7 @@ class UserBookingService
         }
 
         $feedbackService = new FeedbackService();
-        if ($feedbackService->userHasPendingFeedback((int)$user->id_user)) {
+        if ($feedbackService->userHasPendingFeedback((int) $user->id_user)) {
             return [
                 'success' => false,
                 'message' => 'Silakan isi feedback untuk booking sebelumnya sebelum membuat booking baru.',
@@ -63,7 +64,7 @@ class UserBookingService
         }
 
         $booking = new Booking();
-        $booking->user_id = (int)$user->id_user;
+        $booking->user_id = (int) $user->id_user;
         $booking->ruangan_id = $roomId;
         $booking->tanggal_booking = date('Y-m-d H:i:s');
         $booking->tanggal_penggunaan_ruang = $usageDate;
@@ -115,7 +116,7 @@ class UserBookingService
             ]);
         }
 
-        Logger::booking('draft created', (int)$user->id_user, $booking->id_booking, [
+        Logger::booking('draft created', (int) $user->id_user, $booking->id_booking, [
             'room_id' => $roomId,
             'usage_date' => $usageDate,
             'time' => ($data['waktu_mulai'] ?? '') . ' - ' . ($data['waktu_selesai'] ?? ''),
@@ -220,7 +221,7 @@ class UserBookingService
             ];
         }
 
-        if ((int)$member->id_user === (int)$booking->user_id) {
+        if ((int) $member->id_user === (int) $booking->user_id) {
             return [
                 'success' => false,
                 'fatal' => false,
@@ -228,7 +229,7 @@ class UserBookingService
             ];
         }
 
-        if ($this->userHasActiveParticipation((int)$member->id_user)) {
+        if ($this->userHasActiveParticipation((int) $member->id_user)) {
             return [
                 'success' => false,
                 'fatal' => false,
@@ -236,7 +237,7 @@ class UserBookingService
             ];
         }
 
-        if ((int)$booking->user_id !== $currentUserId) {
+        if ((int) $booking->user_id !== $currentUserId) {
             return [
                 'success' => false,
                 'fatal' => true,
@@ -335,7 +336,7 @@ class UserBookingService
             ];
         }
 
-        if ((int)$booking->user_id === $userId) {
+        if ((int) $booking->user_id === $userId) {
             return [
                 'success' => false,
                 'fatal' => false,
@@ -347,10 +348,10 @@ class UserBookingService
         if (!$user || $user->status !== 'active') {
             return [
                 'success' => false,
-                'fatal'   => false,
+                'fatal' => false,
                 'message' => 'Wajib verifikasi kubaca terlebih dahulu.',
             ];
-        }   
+        }
 
         $alreadyMember = App::$app->db->prepare("
             SELECT 1 FROM anggota_booking WHERE booking_id = :booking AND user_id = :user LIMIT 1
@@ -412,7 +413,7 @@ class UserBookingService
 
     public function userCanAccessBooking(Booking $booking, int $userId): bool
     {
-        if ((int)$booking->user_id === $userId) {
+        if ((int) $booking->user_id === $userId) {
             return true;
         }
 
@@ -423,7 +424,7 @@ class UserBookingService
         $stmt->bindValue(':user', $userId, \PDO::PARAM_INT);
         $stmt->execute();
 
-        return (bool)$stmt->fetchColumn();
+        return (bool) $stmt->fetchColumn();
     }
 
     public function userHasActiveParticipation(int $userId): bool
@@ -436,19 +437,19 @@ class UserBookingService
         ");
         $stmt->bindValue(':user', $userId, \PDO::PARAM_INT);
         $stmt->execute();
-        return (int)$stmt->fetchColumn() > 0;
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     public function getMinimumMembersRequired(Booking $booking): int
     {
         $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
-        return $room && $room->kapasitas_min ? (int)$room->kapasitas_min : 0;
+        return $room && $room->kapasitas_min ? (int) $room->kapasitas_min : 0;
     }
 
     public function getMaximumMembersRequired(Booking $booking): int
     {
         $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
-        return $room && $room->kapasitas_max ? (int)$room->kapasitas_max : 0;
+        return $room && $room->kapasitas_max ? (int) $room->kapasitas_max : 0;
     }
 
     public function getMemberCount(Booking $booking): int
@@ -460,7 +461,7 @@ class UserBookingService
         ");
         $membersStmt->bindValue(':id', $booking->id_booking, \PDO::PARAM_INT);
         $membersStmt->execute();
-        $members = (int)$membersStmt->fetchColumn();
+        $members = (int) $membersStmt->fetchColumn();
 
         $picStmt = $db->prepare("
             SELECT 1 FROM anggota_booking WHERE booking_id = :id AND user_id = :pic LIMIT 1
@@ -468,7 +469,7 @@ class UserBookingService
         $picStmt->bindValue(':id', $booking->id_booking, \PDO::PARAM_INT);
         $picStmt->bindValue(':pic', $booking->user_id, \PDO::PARAM_INT);
         $picStmt->execute();
-        $picAlreadyCounted = (bool)$picStmt->fetchColumn();
+        $picAlreadyCounted = (bool) $picStmt->fetchColumn();
 
         return $picAlreadyCounted ? $members : $members + 1;
     }
@@ -497,5 +498,30 @@ class UserBookingService
         $meetsMax = $maxRequired <= 0 || $currentCount <= $maxRequired;
 
         return $meetsMin && $meetsMax;
+    }
+
+    public function getMyBookings(int $userid, array $filters = []): array
+    {
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
+
+        $queryFilters = [
+            'keyword' => $filters['keyword'] ?? null,
+            'tanggal_penggunaan_ruang' => $filters['tanggal_penggunaan_ruang'] ?? null,
+            'status' => $filters['status'] ?? null,
+        ];
+
+        $bookings = Booking::findPaginatedMyBooking($userid, $page, $perPage, $queryFilters) ?: [];
+
+        return [
+            'success' => true,
+            'data' => [
+                'mybooking' => $bookings,
+                'filters' => $queryFilters,
+                'currentPage' => $page,
+                'perPage' => $perPage,
+                'total' => Booking::count($queryFilters),
+            ]
+        ];
     }
 }

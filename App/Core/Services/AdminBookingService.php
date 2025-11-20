@@ -8,12 +8,14 @@ use App\Models\Booking;
 use App\Models\Room;
 use App\Models\User;
 
-class AdminBookingService {
+class AdminBookingService
+{
     private const PER_PAGE = 20;
 
-    public function listAllBookings(array $filters = []): array {
-        $page = max(1, (int)($filters['page'] ?? 1));
-        $perPage = (int)($filters['perPage'] ?? self::PER_PAGE);
+    public function listAllBookings(array $filters = []): array
+    {
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
             'keyword' => $filters['keyword'] ?? null,
@@ -35,7 +37,8 @@ class AdminBookingService {
         ];
     }
 
-    public function getBookingById(int $id): ?Booking {
+    public function getBookingById(int $id): ?Booking
+    {
         if ($id <= 0) {
             return null;
         }
@@ -43,7 +46,8 @@ class AdminBookingService {
         return Booking::findOne(['id_booking' => $id]);
     }
 
-    public function getStatusOptions(): array {
+    public function getStatusOptions(): array
+    {
         return [
             'pending' => 'Pending',
             'verified' => 'Verified',
@@ -55,10 +59,11 @@ class AdminBookingService {
         ];
     }
 
-    public function createBooking(array $input): array {
+    public function createBooking(array $input): array
+    {
 
-        $user = User::findOne(['id_user' => (int)($input['user_id'] ?? 0)]);
-        $room = Room::findOne(['id_ruangan' => (int)($input['ruangan_id'] ?? 0)]);
+        $user = User::findOne(['id_user' => (int) ($input['user_id'] ?? 0)]);
+        $room = Room::findOne(['id_ruangan' => (int) ($input['ruangan_id'] ?? 0)]);
         if (!$user || !$room) {
             return [
                 'success' => false,
@@ -86,15 +91,15 @@ class AdminBookingService {
         }
 
         $booking = new Booking();
-        $booking->user_id = (int)$user->id_user;
-        $booking->ruangan_id = (int)$room->id_ruangan;
+        $booking->user_id = (int) $user->id_user;
+        $booking->ruangan_id = (int) $room->id_ruangan;
         $booking->tanggal_booking = date('Y-m-d H:i:s');
         $booking->tanggal_penggunaan_ruang = $input['tanggal_penggunaan_ruang'];
         $booking->waktu_mulai = $input['waktu_mulai'];
         $booking->waktu_selesai = $input['waktu_selesai'];
         $booking->tujuan = $input['tujuan'];
         $booking->status = 'verified';
-        
+
         if (!$booking->save()) {
             return [
                 'success' => false,
@@ -110,7 +115,8 @@ class AdminBookingService {
         ];
     }
 
-    public function updateBooking(int $id, array $input): array {
+    public function updateBooking(int $id, array $input): array
+    {
         $booking = $this->getBookingById($id);
         if (!$booking) {
             return [
@@ -120,8 +126,8 @@ class AdminBookingService {
             ];
         }
 
-        $user = User::findOne(['id_user' => (int)($input['user_id'] ?? 0)]);
-        $room = Room::findOne(['id_ruangan' => (int)($input['ruangan_id'] ?? 0)]);
+        $user = User::findOne(['id_user' => (int) ($input['user_id'] ?? 0)]);
+        $room = Room::findOne(['id_ruangan' => (int) ($input['ruangan_id'] ?? 0)]);
         if (!$user || !$room) {
             return [
                 'success' => false,
@@ -136,7 +142,7 @@ class AdminBookingService {
             ];
         }
 
-        $validation = BookingValidator::validateAdmin($input, $room);   
+        $validation = BookingValidator::validateAdmin($input, $room);
         if (!($validation['valid'] ?? false)) {
             return [
                 'success' => false,
@@ -148,8 +154,8 @@ class AdminBookingService {
             ];
         }
 
-        $booking->user_id = (int)$user->id_user;
-        $booking->ruangan_id = (int)$room->id_ruangan;
+        $booking->user_id = (int) $user->id_user;
+        $booking->ruangan_id = (int) $room->id_ruangan;
         $booking->tanggal_penggunaan_ruang = $input['tanggal_penggunaan_ruang'];
         $booking->waktu_mulai = $input['waktu_mulai'];
         $booking->waktu_selesai = $input['waktu_selesai'];
@@ -171,7 +177,8 @@ class AdminBookingService {
         ];
     }
 
-    public function deleteBooking(int $id): array {
+    public function deleteBooking(int $id): array
+    {
         $booking = $this->getBookingById($id);
         if (!$booking) {
             return [
@@ -205,7 +212,8 @@ class AdminBookingService {
         ];
     }
 
-    public function getAdminBookingDetail(int $bookingId): array {
+    public function getAdminBookingDetail(int $bookingId): array
+    {
         $booking = $this->getBookingById($bookingId);
         if (!$booking) {
             return [
@@ -351,7 +359,7 @@ class AdminBookingService {
         }
 
         $code = strtoupper(trim($code));
-        if ($code === '' || strtoupper((string)$booking->checkin_code) !== $code) {
+        if ($code === '' || strtoupper((string) $booking->checkin_code) !== $code) {
             return [
                 'success' => false,
                 'message' => 'Kode check-in tidak sesuai.',
@@ -444,7 +452,7 @@ class AdminBookingService {
     {
         do {
             $code = strtoupper(bin2hex(random_bytes(3)));
-            $exists = $this->getBookingById($code);
+            $exists = (int) $this->getBookingById($code);
         } while ($exists);
 
         return $code;
