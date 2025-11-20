@@ -128,14 +128,14 @@ $statuses = $statuses ?? [];
                   <?php foreach ($roles as $role): ?>
                     <?php $value = (string) ($role['nama_role'] ?? ''); ?>
                     <li class="px-4 py-2 rounded cursor-pointer hover:bg-gray-200 transition
-                      <?php if (($filters['nama_role'] ?? '') === $value): ?> bg-gray-300 <?php endif; ?>"
+                      <?php if (($filters['role'] ?? '') === $value): ?> bg-gray-300 <?php endif; ?>"
                       data-value="<?= htmlspecialchars($value) ?>">
                       <?= htmlspecialchars($value) ?>
                     </li>
                   <?php endforeach; ?>
                 </ul>
               </div>
-              <input type="hidden" id="statusSelected" name="nama_role" value="<?= $filters['nama_role'] ?? '' ?>">
+              <input type="hidden" id="statusSelected" name="role" value="<?= $filters['role'] ?? '' ?>">
             </div>
           </label>
 

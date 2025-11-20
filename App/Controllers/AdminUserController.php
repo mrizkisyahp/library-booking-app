@@ -34,7 +34,7 @@ class AdminUserController extends Controller
             'keyword' => $query['keyword'] ?? null,
             'role' => $query['role'] ?? null,
             'status' => $query['status'] ?? null,
-            'page' => (int)($query['page'] ?? ($_GET['page'] ?? 1)),
+            'page' => (int) ($query['page'] ?? ($_GET['page'] ?? 1)),
             'perPage' => 20,
         ];
 
@@ -46,6 +46,8 @@ class AdminUserController extends Controller
         // print_r($result);
         // print_r($data);
         // print_r($stats);
+        // print_r($filters);
+        // print_r($data['filters']);
         // echo '</pre>';
 
         return $this->render('Admin/Users/Index', [
@@ -104,7 +106,7 @@ class AdminUserController extends Controller
         $this->setLayout('main');
         $this->setTitle('Edit User | Library Booking App');
 
-        $id = (int)($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
+        $id = (int) ($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
         $user = $this->service->getUserById($id);
         if (!$user) {
             App::$app->session->setFlash('error', 'User not found.');
@@ -124,7 +126,7 @@ class AdminUserController extends Controller
         $this->setLayout('main');
         $this->setTitle('User Detail | Library Booking App');
 
-        $id = (int)($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
+        $id = (int) ($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
         $user = $this->service->getUserById($id);
         if (!$user) {
             App::$app->session->setFlash('error', 'User not found.');
@@ -147,7 +149,7 @@ class AdminUserController extends Controller
         }
 
         $body = $request->getBody();
-        $id = (int)($body['id_user'] ?? 0);
+        $id = (int) ($body['id_user'] ?? 0);
         $result = $this->service->updateUser($id, $body, $this->currentUser?->id_user);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
@@ -173,7 +175,7 @@ class AdminUserController extends Controller
             return;
         }
 
-        $id = (int)($request->getBody()['id_user'] ?? 0);
+        $id = (int) ($request->getBody()['id_user'] ?? 0);
         $result = $this->service->deleteUser($id, $this->currentUser?->id_user);
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/users');
@@ -181,22 +183,22 @@ class AdminUserController extends Controller
 
     public function suspend(Request $request, Response $response)
     {
-        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->suspendUser($id, $this->currentUser?->id_user));
+        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->suspendUser($id, $this->currentUser?->id_user));
     }
 
     public function unsuspend(Request $request, Response $response)
     {
-        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->unsuspendUser($id, $this->currentUser?->id_user));
+        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->unsuspendUser($id, $this->currentUser?->id_user));
     }
 
     public function resetPassword(Request $request, Response $response)
     {
-        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->resetPassword($id, $this->currentUser?->id_user));
+        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->resetPassword($id, $this->currentUser?->id_user));
     }
 
     public function approveKubaca(Request $request, Response $response)
     {
-        $this->handleQuickAction($request, $response, fn (int $id) => $this->service->approveKubaca($id, $this->currentUser?->id_user));
+        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->approveKubaca($id, $this->currentUser?->id_user));
     }
 
     public function rejectKubaca(Request $request, Response $response)
@@ -206,7 +208,7 @@ class AdminUserController extends Controller
         $this->handleQuickAction(
             $request,
             $response,
-            fn (int $id) => $this->service->rejectKubaca($id, $reason, $this->currentUser?->id_user)
+            fn(int $id) => $this->service->rejectKubaca($id, $reason, $this->currentUser?->id_user)
         );
     }
 
@@ -218,7 +220,7 @@ class AdminUserController extends Controller
             return;
         }
 
-        $id = (int)($request->getBody()['id_user'] ?? 0);
+        $id = (int) ($request->getBody()['id_user'] ?? 0);
         $result = $action($id);
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/users');
