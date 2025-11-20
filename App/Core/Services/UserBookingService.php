@@ -14,7 +14,7 @@ use App\Core\Services\FeedbackService;
 
 class UserBookingService
 {
-    private const PER_PAGE = 10;
+    private const PER_PAGE = 20;
     public function createDraft(User $user, array $data): array
     {
         $roomId = (int) ($data['ruangan_id'] ?? 0);
