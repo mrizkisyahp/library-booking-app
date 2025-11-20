@@ -10,93 +10,30 @@ use App\Models\User;
 
 class AdminFeedbackService
 {
+    private const PER_PAGE = 20;
     public function listFeedback(array $filters = []): array
     {
-        $db = App::$app->db;
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
 
-        $sql = "
-            SELECT
-                f.*,
-                u.nama AS user_name,
-                b.id_booking,
-                b.tanggal_penggunaan_ruang,
-                b.waktu_mulai,
-                r.nama_ruangan
-            FROM feedback f
-            JOIN booking b ON b.id_booking = f.booking_id
-            LEFT JOIN users u ON u.id_user = f.user_id
-            LEFT JOIN ruangan r ON r.id_ruangan = b.ruangan_id
-            WHERE 1=1
-        ";
-
-        $params = [];
-        $cleanFilters = [
-            'booking_id' => null,
-            'user_id' => null,
-            'room_id' => null,
-            'rating_min' => null,
-            'rating_max' => null,
-            'date_start' => null,
-            'date_end' => null,
+        $queryFilters = [
+            'keyword' => $filters['keyword'] ?? null,
+            'status' => $filters['status'] ?? null,
+            'tanggal_penggunaan_ruang' => $filters['tanggal_penggunaan_ruang'] ?? null,
+            'rating' => $filters['rating'] ?? null,
         ];
 
-        if (!empty($filters['booking_id'])) {
-            $sql .= " AND f.booking_id = :booking_id";
-            $params[':booking_id'] = (int)$filters['booking_id'];
-            $cleanFilters['booking_id'] = (int)$filters['booking_id'];
-        }
-
-        if (!empty($filters['user_id'])) {
-            $sql .= " AND f.user_id = :user_id";
-            $params[':user_id'] = (int)$filters['user_id'];
-            $cleanFilters['user_id'] = (int)$filters['user_id'];
-        }
-
-        if (!empty($filters['room_id'])) {
-            $sql .= " AND b.ruangan_id = :room_id";
-            $params[':room_id'] = (int)$filters['room_id'];
-            $cleanFilters['room_id'] = (int)$filters['room_id'];
-        }
-
-        if (!empty($filters['rating_min'])) {
-            $sql .= " AND f.rating >= :rating_min";
-            $params[':rating_min'] = (int)$filters['rating_min'];
-            $cleanFilters['rating_min'] = (int)$filters['rating_min'];
-        }
-
-        if (!empty($filters['rating_max'])) {
-            $sql .= " AND f.rating <= :rating_max";
-            $params[':rating_max'] = (int)$filters['rating_max'];
-            $cleanFilters['rating_max'] = (int)$filters['rating_max'];
-        }
-
-        if (!empty($filters['date_start'])) {
-            $sql .= " AND DATE(f.created_at) >= :date_start";
-            $params[':date_start'] = $filters['date_start'];
-            $cleanFilters['date_start'] = $filters['date_start'];
-        }
-
-        if (!empty($filters['date_end'])) {
-            $sql .= " AND DATE(f.created_at) <= :date_end";
-            $params[':date_end'] = $filters['date_end'];
-            $cleanFilters['date_end'] = $filters['date_end'];
-        }
-
-        $sql .= " ORDER BY f.created_at DESC";
-
-        $stmt = $db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $paramType = is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR;
-            $stmt->bindValue($key, $value, $paramType);
-        }
-        $stmt->execute();
-
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $feedback = Feedback::findPaginated($page, $perPage, $queryFilters);
 
         return [
             'success' => true,
-            'feedback' => $rows,
-            'filters' => $cleanFilters,
+            'data' => [
+                'feedback' => $feedback,
+                'filters' => $queryFilters,
+                'currentPage' => $page,
+                'perPage' => $perPage,
+                'total' => Feedback::count($queryFilters),
+            ],
         ];
     }
 

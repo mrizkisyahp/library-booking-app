@@ -3,6 +3,11 @@ use App\Core\Csrf;
 
 $filters = $filters ?? [];
 $feedback = $feedback ?? [];
+
+echo '<pre>';
+print_r($feedback);
+print_r($filters);
+echo '</pre>';
 ?>
 <div class="p-6">
   <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
@@ -78,14 +83,26 @@ $feedback = $feedback ?? [];
         </div>
         <div class="flex gap-6 justify-between w-full">
           <label class="flex flex-col md:flex-row items-center capitalize gap-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-star-icon lucide-square-star"><path d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-square-star-icon lucide-square-star">
+              <path
+                d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+            </svg>
             Rating Min
             <input type="number" name="rating_min" min="1" max="5"
               class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
               value="<?= htmlspecialchars($filters['rating_min'] ?? '') ?>">
           </label>
           <label class="flex flex-col md:flex-row items-center capitalize gap-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-star-icon lucide-square-star"><path d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-square-star-icon lucide-square-star">
+              <path
+                d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+            </svg>
             Rating Max
             <input type="number" name="rating_max" min="1" max="5"
               class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
@@ -93,15 +110,15 @@ $feedback = $feedback ?? [];
           </label class="flex flex-col md:flex-row items-center capitalize">
           <label>
             Dari Tanggal
-            <input type="date" name="date_start" 
-            class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-            value="<?= htmlspecialchars($filters['date_start'] ?? '') ?>">
+            <input type="date" name="date_start"
+              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['date_start'] ?? '') ?>">
           </label>
           <label>
             Sampai Tanggal
-            <input type="date" name="date_end" 
-            class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-            value="<?= htmlspecialchars($filters['date_end'] ?? '') ?>">
+            <input type="date" name="date_end"
+              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['date_end'] ?? '') ?>">
           </label>
         </div>
         <div>
@@ -137,7 +154,6 @@ $feedback = $feedback ?? [];
             <tr
               class=" *:px-6 *:py-3  *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
               <th scope="col">User</th>
-              <th scope="col">Booking</th>
               <th scope="col">Ruangan</th>
               <th scope="col">Rating</th>
               <th scope="col">Tanggal</th>
@@ -148,22 +164,19 @@ $feedback = $feedback ?? [];
             <?php foreach ($feedback as $row): ?>
               <tr class="hover:bg-gray-200 odd:bg-gray-50 even:bg-gray-100 transition-colors border-b border-gray-200">
                 <th scope="row" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <?= htmlspecialchars($row['user_name'] ?? '-') ?>
+                  <?= htmlspecialchars($row->nama ?? '-') ?>
                 </th>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                  #<?= htmlspecialchars((string) $row['booking_id']) ?>
+                  <?= htmlspecialchars($row->nama_ruangan ?? '-') ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                  <?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>
+                  <?= htmlspecialchars((string) $row->rating) ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                  <?= htmlspecialchars((string) $row['rating']) ?>
+                  <?= htmlspecialchars($row->created_at ?? '-') ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                  <?= htmlspecialchars($row['created_at'] ?? '-') ?>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                  <a href="/admin/feedback/detail?id=<?= (int) $row['id_feedback'] ?>">Detail</a>
+                  <a href="/admin/feedback/detail?id=<?= (int) $row->id_feedback ?>">Detail</a>
                 </td>
               </tr>
             <?php endforeach; ?>
