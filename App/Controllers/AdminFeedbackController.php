@@ -19,22 +19,28 @@ class AdminFeedbackController extends Controller
         $this->service = new AdminFeedbackService();
     }
 
-    public function index(Request $request): string
+    public function index(): string
     {
         $this->setLayout('main');
         $this->setTitle('Feedback Pengguna | Library Booking App');
 
-        $filters = $request->getBody();
-        $result = $this->service->listFeedback($filters);
+        $params = App::$app->request->getBody();
+        $filters = [
+            'nama_ruangan' => $params['nama_ruangan'] ?? '',
+            'nama_user' => $params['nama_user'] ?? '',
+            'tanggal_penggunaan_ruang' => $params['tanggal_penggunaan_ruang'] ?? '',
+            'rating' => $params['rating'] ?? '',
+        ];
 
-        // echo '<pre>';
-        // print_r($result);
-        // print_r($filters);
-        // echo '</pre>';
+        $result = $this->service->listFeedback($filters);
+        $data = $result['data'];
 
         return $this->render('Admin/Feedback/Index', [
-            'feedback' => $result['feedback'] ?? [],
-            'filters' => $result['filters'] ?? [],
+            'feedback' => $data['feedback'] ?? [],
+            'filters' => $data['filters'] ?? [],
+            'currentPage' => $data['currentPage'],
+            'perPage' => $data['perPage'],
+            'total' => $data['total'],
         ]);
     }
 
@@ -43,7 +49,7 @@ class AdminFeedbackController extends Controller
         $this->setLayout('main');
         $this->setTitle('Detail Feedback | Library Booking App');
 
-        $id = (int)($request->getBody()['id'] ?? 0);
+        $id = (int) ($request->getBody()['id'] ?? 0);
         if ($id <= 0) {
             App::$app->session->setFlash('error', 'ID feedback tidak valid.');
             $response->redirect('/admin/feedback');
