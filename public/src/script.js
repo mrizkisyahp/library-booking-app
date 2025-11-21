@@ -149,3 +149,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// toggle password visibility
+function togglePassword(id) {
+    const input = document.getElementById(id);
+    const eyeOpen = document.getElementById(`eyesopen-${id}`);
+    const eyeClosed = document.getElementById(`eyesclosed-${id}`);
+
+    if (input.type === "password") {
+      input.type = "text";
+      eyeOpen.classList.add("hidden");
+      eyeClosed.classList.remove("hidden");
+    } else {
+      input.type = "password";
+      eyeOpen.classList.remove("hidden");
+      eyeClosed.classList.add("hidden");
+    }
+  }

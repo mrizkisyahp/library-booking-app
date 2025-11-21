@@ -9,7 +9,7 @@ use App\Core\Csrf;
 <div class="mb-8">
   <h2 class="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
   <p class="text-gray-600 mt-2">Kelola sistem booking ruangan perpustakaan</p>
-  
+
 </div>
 
 <?php
@@ -130,9 +130,9 @@ $users = $resourceStats['users'];
               ?>
               <?php foreach ($recentBookings as $booking): ?>
                 <?php
-                  $statusKey = strtolower($booking['status']);
-                  $badgeClass = $statusBadges[$statusKey] ?? 'bg-gray-100 text-gray-800';
-                  $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
+                $statusKey = strtolower($booking['status']);
+                $badgeClass = $statusBadges[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($booking['user_name']) ?></td>
@@ -148,7 +148,8 @@ $users = $resourceStats['users'];
                   </td>
                   <td class="px-6 py-4 text-sm">
                     <?php if (!empty($booking['feedback_id'])): ?>
-                      <a href="/admin/feedback/detail?id=<?= (int)$booking['feedback_id'] ?>" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
+                      <a href="/admin/feedback/detail?id=<?= (int) $booking['feedback_id'] ?>"
+                        class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
                         Lihat Feedback
                       </a>
                     <?php else: ?>
@@ -156,11 +157,11 @@ $users = $resourceStats['users'];
                     <?php endif; ?>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
-                  <a href="/admin/bookings/detail?id=<?= (int)$booking['id_booking'] ?>"
-                     class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                    Detail
-                  </a>
-                </td>
+                    <a href="/admin/bookings/detail?id=<?= (int) $booking['id_booking'] ?>"
+                      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Detail
+                    </a>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -190,9 +191,10 @@ $users = $resourceStats['users'];
               $totalBookingsRoom = array_sum(array_column($roomUsage, 'booking_count'));
               foreach ($roomUsage as $usage):
                 $usagePercentage = $totalBookingsRoom > 0 ? round(($usage['booking_count'] / $totalBookingsRoom) * 100, 2) : 0;
-              ?>
+                ?>
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><?= htmlspecialchars($usage['nama_ruangan']) ?></td>
+                  <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    <?= htmlspecialchars($usage['nama_ruangan']) ?></td>
                   <td class="px-6 py-4 text-gray-700"><?= $usage['booking_count'] ?></td>
                   <td class="px-6 py-4 text-gray-900">
                     <div class="flex items-center">
@@ -218,9 +220,11 @@ $users = $resourceStats['users'];
       </h2>
       <ul class="space-y-3">
         <li>
-          <a href="/admin/bookings" class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">
+          <a href="/admin/bookings"
+            class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">
             <svg class="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <span class="font-medium group-hover:underline">Manage Bookings</span>
           </a>
@@ -228,7 +232,8 @@ $users = $resourceStats['users'];
         <li>
           <a href="/admin/rooms" class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">
             <svg class="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <span class="font-medium group-hover:underline">Manage Rooms</span>
           </a>
@@ -236,15 +241,18 @@ $users = $resourceStats['users'];
         <li>
           <a href="/admin/users" class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">
             <svg class="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             <span class="font-medium group-hover:underline">Manage Users</span>
           </a>
         </li>
         <li>
-          <a href="/admin/reports" class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">
+          <a href="/admin/reports"
+            class="flex items-center text-gray-700 hover:text-emerald-600 transition-colors group">
             <svg class="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span class="font-medium group-hover:underline">Generate Reports</span>
           </a>
@@ -255,7 +263,8 @@ $users = $resourceStats['users'];
     <div class="bg-white rounded-2xl shadow-lg p-6">
       <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
         <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
         </svg>
         Join Booking
       </h2>
@@ -264,14 +273,31 @@ $users = $resourceStats['users'];
         <?= Csrf::field() ?>
         <div>
           <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
-                 class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                 placeholder="Masukkan code..." required>
+            class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            placeholder="Masukkan code..." required>
         </div>
         <button type="submit"
-                class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow">
+          class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
           Gabung
         </button>
       </form>
     </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-message-square-icon lucide-message-square mr-2 text-emerald-600">
+          <path
+            d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />
+        </svg> Feedback Booking
+      </h2>
+      <p class="text-sm text-slate-600 mb-4">Monitor pengalaman pengguna setelah meminjam ruangan.</p>
+      <div class="space-y-3">
+        <a href="/admin/feedback"
+          class="block text-center w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow capitalize cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+          Lihat feedback
+        </a>
+      </div>
+    </div>
   </div>
-</div>

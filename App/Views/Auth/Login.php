@@ -47,12 +47,40 @@ use App\Core\Csrf;
               <?php endif; ?>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-4 relative">
               <label
                 class="block text-sm font-medium <?= $model->hasError('password') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
                 for="password">Password</label>
+
               <input id="password" type="password" name="password" placeholder="Enter your password" value=""
-                class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 placeholder-gray-400 <?= $model->hasError('password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+                class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 placeholder-gray-400 
+                <?= $model->hasError('password')
+                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+
+              <button type="button"
+                class="absolute right-3 items-center top-12 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                onclick="togglePassword('password')">
+
+                <svg id="eyesopen-password" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-eye-icon lucide-eye text-emerald-600">
+                  <path
+                    d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+
+                <svg id="eyesclosed-password" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-eye-closed-icon lucide-eye-closed hidden text-emerald-600">
+                  <path d="m15 18-.722-3.25" />
+                  <path d="M2 8a10.645 10.645 0 0 0 20 0" />
+                  <path d="m20 15-1.726-2.05" />
+                  <path d="m4 15 1.726-2.05" />
+                  <path d="m9 18 .722-3.25" />
+                </svg>
+              </button>
+
               <?php if ($model->hasError('password')): ?>
                 <p class="mt-1 text-sm text-red-600">
                   <?= htmlspecialchars($model->getFirstError('password')) ?>

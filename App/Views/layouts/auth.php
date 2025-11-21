@@ -14,3 +14,4 @@ use App\Core\App;
     {{content}}
 </body>
 </html>
+<script src="src/script.js"></script>

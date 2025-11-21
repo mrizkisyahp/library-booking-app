@@ -13,7 +13,7 @@ use App\Models\Room;
         <path d="M6 8L2 12L6 16" />
         <path d="M2 12H22" />
       </svg>
-      <a href="/admin/feedback">Kembali ke daftar</a>
+      <a href="/admin/rooms">Kembali ke daftar</a>
     </div>
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Detail Ruangan</h1>
     <!-- empty div -->
