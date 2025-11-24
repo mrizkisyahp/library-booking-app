@@ -238,7 +238,7 @@ $statusColors = [
     <!-- Rooms Table -->
     <div class="bg-white rounded-md shadow-md overflow-x-auto border border-gray-200">
       <table class="w-full text-sm text-left">
-        <thead class="bg-linear-to-r bg-primary">
+        <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
           <tr
             class=" *:px-6 *:py-3  *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
             <th scope="col">ID</th>

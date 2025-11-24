@@ -6,21 +6,15 @@ use App\Models\User;
 
 ?>
 
-<body>
-  <div class="p-6">
-  <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
-    <div class="flex gap-4 items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-        class="lucide lucide-move-left-icon lucide-move-left">
-        <path d="M6 8L2 12L6 16" />
-        <path d="M2 12H22" />
+<div class="max-w-5xl mx-auto space-y-6">
+  <div class="mb-2">
+    <a href="/admin/users" class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-semibold group">
+      <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none"
+        stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
-      <a href="/admin/users">Kembali ke daftar</a>
-    </div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Detail User</h1>
-    <!-- empty div -->
-    <div></div>
+      Kembali ke daftar user
+    </a>
   </div>
 
     <!-- Flash Messages -->

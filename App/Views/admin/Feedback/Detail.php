@@ -43,7 +43,7 @@ $members = $members ?? [];
         <h2 class="text-xl font-bold text-slate-800 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-file-icon lucide-file mr-2">
+            class="lucide lucide-file-icon lucide-file mr-2 text-emerald-600">
             <path
               d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
             <path d="M14 2v5a1 1 0 0 0 1 1h5" />
@@ -106,7 +106,12 @@ $members = $members ?? [];
             <div class="p-4 bg-slate-50 rounded-xl">
               <p class="text-xs font-semibold text-slate-500 uppercase">Rating Ruangan</p>
               <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star-icon lucide-star size-4"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-star-icon lucide-star size-4 text-emerald-600">
+                  <path
+                    d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+                </svg>
                 <p class="text-lg font-bold text-slate-800">
                   <?= htmlspecialchars((string) ($feedback['rating'] ?? '-')) ?>
                 </p>
@@ -120,40 +125,42 @@ $members = $members ?? [];
 
   <section class="bg-white shadow rounded-lg p-6 mb-8 border border-gray-100">
     <?php if (empty($members)): ?>
-<!-- Empty State -->
-    <div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
-      <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak Ada Anggota Tercatat</h3>
-      <p class="text-gray-600">Mungkin terjadi kesalahan saat pencatatan, silakan hubungi admin.</p>
-    </div>    <?php else: ?>
-    <div class="bg-white rounded-md shadow-md overflow-x-auto border border-gray-200">
-      <table class="w-full text-sm text-left">
-        <thead class="bg-linear-to-r bg-primary">
-          <tr
-            class=" *:px-6 *:py-3  *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
-            <th scope="col">Nama</th>
-            <th scope="col">Email</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <?php foreach ($members as $member): ?>
-            <tr class="hover:bg-gray-200 odd:bg-gray-50 even:bg-gray-100 transition-colors border-b border-gray-200">
-                            <th scope="row" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
-                <?= htmlspecialchars($member['nama'] ?? '-') ?>
-              </th>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                <?= htmlspecialchars($member['email'] ?? '-') ?></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                <?= !empty($member['is_owner']) ? 'PIC' : 'Anggota' ?></td>
+      <!-- Empty State -->
+      <div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak Ada Anggota Tercatat</h3>
+        <p class="text-gray-600">Mungkin terjadi kesalahan saat pencatatan, silakan hubungi admin.</p>
+      </div> <?php else: ?>
+      <div class="bg-white rounded-md shadow-md overflow-x-auto border border-gray-200">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
+            <tr
+              class=" *:px-6 *:py-3  *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
+              <th scope="col">Nama</th>
+              <th scope="col">Email</th>
+              <th scope="col">Status</th>
             </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    <?php endif; ?>
-  </div>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <?php foreach ($members as $member): ?>
+              <tr class="hover:bg-gray-200 odd:bg-gray-50 even:bg-gray-100 transition-colors border-b border-gray-200">
+                <th scope="row" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
+                  <?= htmlspecialchars($member['nama'] ?? '-') ?>
+                </th>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <?= htmlspecialchars($member['email'] ?? '-') ?>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <?= !empty($member['is_owner']) ? 'PIC' : 'Anggota' ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      <?php endif; ?>
+    </div>
   </section>
 </div>

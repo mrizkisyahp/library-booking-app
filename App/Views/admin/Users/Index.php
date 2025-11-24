@@ -208,25 +208,25 @@ $statuses = $statuses ?? [];
   <section class="mb-12">
     <h2 class="text-2xl font-semibold">Summary</h2>
     <div class="mt-4 flex justify-between items-center px-8 gap-4 md:gap-8">
-      <p class="p-6 bg-gray-200 border-l-2 border-gray-400 rounded-xl shadow class flex flex-col grow">
+      <p class="p-6 bg-linear-to-br from-emerald-50 to-emerald-100 border-l-2 border-emerald-400 rounded-xl shadow class flex flex-col grow">
         Total Users:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['total'] ?? count($users))) ?>
         </span>
       </p>
-      <p class="p-6 bg-gray-200 border-l-2 border-gray-400 rounded-xl shadow class flex flex-col grow">
+      <p class="p-6 bg-linear-to-br from-sky-50 to-sky-100 border-l-2 border-sky-400 rounded-xl shadow class flex flex-col grow">
         Active:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['active'] ?? 0)) ?>
         </span>
       </p>
-      <p class="p-6 bg-gray-200 border-l-2 border-gray-400 rounded-xl shadow class flex flex-col grow">
+      <p class="p-6 bg-linear-to-br from-yellow-50 to-yellow-100 border-l-2 border-yellow-400 rounded-xl shadow class flex flex-col grow">
         Pending KuBaca:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['pending'] ?? 0)) ?>
         </span>
       </p>
-      <p class="p-6 bg-gray-200 border-l-2 border-gray-400 rounded-xl shadow class flex flex-col grow">
+      <p class="p-6 bg-linear-to-br from-rose-50 to-rose-100 border-l-2 border-rose-400 rounded-xl shadow class flex flex-col grow">
         Suspended:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['suspended'] ?? 0)) ?>
@@ -249,7 +249,7 @@ $statuses = $statuses ?? [];
     <?php else: ?>
       <div class="bg-white rounded-md shadow-md overflow-x-auto border border-gray-200">
         <table class="w-full text-sm text-left">
-          <thead class="bg-linear-to-r bg-primary">
+          <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
             <tr
               class=" *:px-6 *:py-3  *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
               <th scope="col">ID</th>

@@ -115,7 +115,7 @@ use App\Core\App;
       <?php else: ?>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="bg-slate-50">
+            <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
               <tr>
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Ruangan</th>
                 <th class="px-4 py-3 text-left font-semibold text-slate-700">Tanggal & Waktu</th>
