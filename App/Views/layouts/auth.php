@@ -15,3 +15,4 @@ use App\Core\App;
 </body>
 </html>
 <script src="src/script.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

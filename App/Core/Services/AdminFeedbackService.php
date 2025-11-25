@@ -18,7 +18,6 @@ class AdminFeedbackService
 
         $queryFilters = [
             'keyword' => $filters['keyword'] ?? null,
-            'status' => $filters['status'] ?? null,
             'tanggal_penggunaan_ruang' => $filters['tanggal_penggunaan_ruang'] ?? null,
             'rating' => $filters['rating'] ?? null,
         ];

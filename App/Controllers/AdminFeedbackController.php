@@ -25,8 +25,7 @@ class AdminFeedbackController extends Controller
 
         $params = $request->getBody();
         $filters = [
-            'nama_ruangan' => $params['nama_ruangan'] ?? '',
-            'nama_user' => $params['nama_user'] ?? '',
+            ';keyword' => $params['keyword'] ?? '',
             'tanggal_penggunaan_ruang' => $params['tanggal_penggunaan_ruang'] ?? '',
             'rating' => $params['rating'] ?? '',
         ];

@@ -4,10 +4,10 @@ use App\Core\Csrf;
 $filters = $filters ?? [];
 $feedback = $feedback ?? [];
 
-echo '<pre>';
-print_r($feedback);
-print_r($filters);
-echo '</pre>';
+// echo '<pre>';
+// print_r($feedback);
+// print_r($filters);
+// echo '</pre>';
 ?>
 <div class="p-6">
   <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
@@ -37,8 +37,8 @@ echo '</pre>';
     <form method="get" action="/admin/feedback"
       class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-4 w-full">
       <div class="flex flex-col gap-4 w-full">
-        <div class="flex gap-6 justify-between w-full">
-          <label class="flex flex-col md:flex-row items-center capitalize">
+        <div class="flex gap-6 justify-start w-full">
+          <label class="flex flex-col md:flex-row items-center gap-4 capitalize">
             <div class="items-center gap-4 hidden md:flex w-full">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -46,80 +46,36 @@ echo '</pre>';
                 <path d="m21 21-4.34-4.34" />
                 <circle cx="11" cy="11" r="8" />
               </svg>
-              <span class="text-sm">Booking ID:</span>
+              <span class="text-sm">Kata kunci</span>
             </div>
-            <input type="number" name="booking_id"
+            <input type="text" name="keyword"
               class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['booking_id'] ?? '') ?>" placeholder="#ID">
+              value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>" placeholder="Kata Kunci">
           </label>
-          <label class="flex flex-col md:flex-row items-center capitalize">
-            <div class="items-center gap-4 hidden md:flex w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-search-icon lucide-search size-5">
-                <path d="m21 21-4.34-4.34" />
-                <circle cx="11" cy="11" r="8" />
-              </svg>
-              <span class="text-sm">User ID:</span>
-            </div>
-            <input type="number" name="user_id"
-              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['user_id'] ?? '') ?>" placeholder="#ID">
+          <label class="flex flex-col md:flex-row items-center capitalize gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-square-star-icon lucide-square-star">
+              <path
+                d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+            </svg>
+            Rating
+            <input type="number" name="rating" min="1" max="5"
+              class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              value="<?= htmlspecialchars($filters['rating'] ?? '') ?>">
           </label>
-          <label class="flex flex-col md:flex-row items-center capitalize">
-            <div class="items-center gap-4 hidden md:flex w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-search-icon lucide-search size-5">
-                <path d="m21 21-4.34-4.34" />
-                <circle cx="11" cy="11" r="8" />
-              </svg>
-              <span class="text-sm">Room ID:</span>
+          <label class="flex flex-col md:flex-row items-center capitalize gap-4">
+            <div class=" text-nowrap">
+              Tanggal Penggunaan
             </div>
-            <input
+            <input type="date" name="tanggal_penggunaan_ruang"
               class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              type="number" name="room_id" value="<?= htmlspecialchars($filters['room_id'] ?? '') ?>" placeholder="#ID">
+              value="<?= htmlspecialchars($filters['tanggal_penggunaan_ruang'] ?? '') ?>">
           </label>
         </div>
-        <div class="flex gap-6 justify-between w-full">
-          <label class="flex flex-col md:flex-row items-center capitalize gap-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-square-star-icon lucide-square-star">
-              <path
-                d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-            </svg>
-            Rating Min
-            <input type="number" name="rating_min" min="1" max="5"
-              class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['rating_min'] ?? '') ?>">
-          </label>
-          <label class="flex flex-col md:flex-row items-center capitalize gap-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-square-star-icon lucide-square-star">
-              <path
-                d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-            </svg>
-            Rating Max
-            <input type="number" name="rating_max" min="1" max="5"
-              class="w-fit flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['rating_max'] ?? '') ?>">
-          </label class="flex flex-col md:flex-row items-center capitalize">
-          <label>
-            Dari Tanggal
-            <input type="date" name="date_start"
-              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['date_start'] ?? '') ?>">
-          </label>
-          <label>
-            Sampai Tanggal
-            <input type="date" name="date_end"
-              class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['date_end'] ?? '') ?>">
-          </label>
+
+        <div class="flex gap-6 w-full">
         </div>
         <div>
           <button type="submit"

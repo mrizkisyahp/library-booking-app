@@ -99,7 +99,7 @@ $statusColors = [
               <ul class="p-2 text-sm font-medium space-y-1" aria-labelledby="dropdownButton">
                 <?php foreach ($statusOptions as $value => $label): ?>
                   <li class="px-4 py-2 rounded cursor-pointer hover:bg-gray-200 transition
-                    <?php if (($filters['status'] ?? '') === $value): ?> bg-gra-300 <?php endif; ?>"
+                    <?php if (($filters['status'] ?? '') === $value): ?> bg-gray-300 <?php endif; ?>"
                     data-value="<?= htmlspecialchars($value) ?>">
                     <?= htmlspecialchars($label) ?>
                   </li>

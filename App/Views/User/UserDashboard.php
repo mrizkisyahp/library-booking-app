@@ -116,18 +116,18 @@ use App\Core\App;
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
-              <tr>
-                <th class="px-4 py-3 text-left font-semibold text-slate-700">Ruangan</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-700">Tanggal & Waktu</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-700">Status</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-700">Peran</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-700">Kode Check-in</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-700">Aksi</th>
+              <tr class="*:px-4 *:py-3 *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
+                <th>Ruangan</th>
+                <th>Tanggal & Waktu</th>
+                <th>Status</th>
+                <th>Peran</th>
+                <th>Kode Check-in</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
               <?php foreach ($bookings as $booking): ?>
-                <tr class="hover:bg-slate-50 transition-colors">
+              <tr class="hover:bg-gray-200 odd:bg-gray-50 even:bg-gray-100 transition-colors border-b border-gray-200">
                   <td class="px-4 py-4 font-medium text-slate-800">
                     <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
                   </td>

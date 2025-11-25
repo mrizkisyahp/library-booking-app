@@ -251,7 +251,7 @@ $statuses = $statuses ?? [];
         <table class="w-full text-sm text-left">
           <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
             <tr
-              class=" *:px-6 *:py-3  *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
+              class="*:px-4 *:py-3 *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
               <th scope="col">ID</th>
               <th scope="col">Name & Email</th>
               <th scope="col">Role</th>

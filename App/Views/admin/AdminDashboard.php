@@ -135,7 +135,7 @@ $users = $resourceStats['users'];
                 $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($booking['user_name']) ?></td>
+                  <td class="px-6 py-4 text-sm text-gray-900 capitalize"><?= htmlspecialchars($booking['user_name']) ?></td>
                   <td class="px-6 py-4 text-sm text-gray-700"><?= htmlspecialchars($booking['room_title']) ?></td>
                   <td class="px-6 py-4 text-sm text-gray-700">
                     <?= htmlspecialchars($booking['tanggal_penggunaan_ruang']) ?>

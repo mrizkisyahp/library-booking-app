@@ -31,60 +31,20 @@ use App\Core\Csrf;
         <form action="/register/mahasiswa" method="post">
           <?= Csrf::field() ?>
 
-          <div class="mb-4">
-            <label for="nama"
-              class="block text-sm font-medium <?= $model->hasError('nama') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
-              Nama Lengkap
-            </label>
-            <input id="nama" type="text" name="nama" value="<?= htmlspecialchars($model->nama ?? '') ?>"
-              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nama') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-            <?php if ($model->hasError('nama')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nama')) ?></p>
-            <?php endif; ?>
-          </div>
+          <div id="step1" class="space-y-4">
 
-          <div class="mb-4">
-            <label for="nim"
-              class="block text-sm font-medium <?= $model->hasError('nim') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
-              NIM (10 digits)
-            </label>
-            <input id="nim" type="text" name="nim" value="<?= htmlspecialchars($model->nim ?? '') ?>"
-              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nim') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-            <?php if ($model->hasError('nim')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nim')) ?></p>
-            <?php endif; ?>
-          </div>
+            <div class="mb-4">
+              <label for="nim"
+                class="block text-sm font-medium <?= $model->hasError('nim') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+                NIM (10 digits)
+              </label>
+              <input id="nim" type="text" name="nim" value="<?= htmlspecialchars($model->nim ?? '') ?>"
+                class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nim') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+              <?php if ($model->hasError('nim')): ?>
+                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nim')) ?></p>
+              <?php endif; ?>
+            </div>
 
-          <div class="mb-4">
-            <?php
-            $Jurusan = [
-              'Teknik Elektro',
-              'Teknik Mesin',
-              'Teknik Sipil',
-              'Akuntansi',
-              'Administrasi Niaga',
-              'Teknik Grafika dan Penerbitan',
-            ];
-            ?>
-            <label for="jurusan"
-              class="block text-sm font-medium <?= $model->hasError('jurusan') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
-              Jurusan
-            </label>
-            <select id="jurusan" name="jurusan"
-              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focu:ring-2 <?= $model->hasError('jurusan') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">
-              <option value="Teknik Informatika dan Komputer">Teknik Informatika dan Komputer</option>
-              <?php foreach ($Jurusan as $option): ?>
-                <option value="<?= htmlspecialchars($option) ?>" <?= ($model->jurusan ?? '') === $option ? 'selected' : '' ?>>
-                  <?= htmlspecialchars($option) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-            <?php if ($model->hasError('jurusan')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('jurusan')) ?></p>
-            <?php endif; ?>
-          </div>
-
-          <div class="mb-4">
             <label for="email"
               class="block text-sm font-medium <?= $model->hasError('email') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
               Email PNJ
@@ -94,7 +54,59 @@ use App\Core\Csrf;
             <?php if ($model->hasError('email')): ?>
               <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('email')) ?></p>
             <?php endif; ?>
+
+            <button type="button" onclick="nextStep()"
+              class="w-full px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 active:bg-emerald-800 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer">
+              Berikutnya
+            </button>
           </div>
+      </div>
+
+      <div id="step2" class="space-y-4 hidden">
+        <div class="mb-4">
+          <label for="nama"
+            class="block text-sm font-medium <?= $model->hasError('nama') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+            Nama Lengkap
+          </label>
+          <input id="nama" type="text" name="nama" value="<?= htmlspecialchars($model->nama ?? '') ?>"
+            class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nama') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+          <?php if ($model->hasError('nama')): ?>
+            <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nama')) ?></p>
+          <?php endif; ?>
+        </div>
+
+
+        <div class="mb-4">
+          <?php
+          $Jurusan = [
+            'Teknik Elektro',
+            'Teknik Mesin',
+            'Teknik Sipil',
+            'Akuntansi',
+            'Administrasi Niaga',
+            'Teknik Grafika dan Penerbitan',
+          ];
+          ?>
+          <label for="jurusan"
+            class="block text-sm font-medium <?= $model->hasError('jurusan') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+            Jurusan
+          </label>
+          <select id="jurusan" name="jurusan"
+            class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focu:ring-2 <?= $model->hasError('jurusan') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">
+            <option value="Teknik Informatika dan Komputer">Teknik Informatika dan Komputer</option>
+            <?php foreach ($Jurusan as $option): ?>
+              <option value="<?= htmlspecialchars($option) ?>" <?= ($model->jurusan ?? '') === $option ? 'selected' : '' ?>>
+                <?= htmlspecialchars($option) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <?php if ($model->hasError('jurusan')): ?>
+            <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('jurusan')) ?></p>
+          <?php endif; ?>
+        </div>
+
+        <div class="mb-4">
+
 
           <div class="mb-4">
             <label for="nomor_hp"
@@ -118,7 +130,8 @@ use App\Core\Csrf;
             <?= $model->hasError('password')
               ? 'border-red-500 focus-within:ring-red-500'
               : 'border-gray-300 focus-within:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all'
-              ?>"> <input id="password" type="password" name="password" value="" class="w-full outline-none bg-transparent" />
+              ?>"> <input id="password" type="password" name="password" value=""
+                class="w-full outline-none bg-transparent" />
 
               <button type="button" onclick="togglePassword('password')">
 
@@ -189,12 +202,18 @@ use App\Core\Csrf;
           <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= $_ENV['TURNSTILE_SITE']; ?>"
             data-theme="light" data-size="normal" data-callback="onSuccess"></div>
 
-          <div class="mt-6">
+          <div class="flex items-center gap-3 mt-6">
+            <button type="button" onclick="prevStep()"
+              class="px-8 py-2 w-full bg-gray-300 text-gray-700 capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-gray-400 hover:ring-2 hover:ring-gray-500 hover:ring-offset-2 active:bg-gray-400 active:ring-2 active:ring-gray-500 active:ring-offset-2 transition-all pointer-cursor">
+              Sebelumnya
+            </button>
+
             <button type="submit"
               class="px-8 py-2 w-full bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all">
-              Daftar Sekarang
+              Daftar
             </button>
           </div>
+        </div>
         </form>
 
         <div class="mt-6 text-center text-sm">
@@ -209,5 +228,3 @@ use App\Core\Csrf;
     </div>
   </div>
 </div>
-
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
