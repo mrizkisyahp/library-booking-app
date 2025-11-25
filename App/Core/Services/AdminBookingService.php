@@ -452,7 +452,7 @@ class AdminBookingService
     {
         do {
             $code = strtoupper(bin2hex(random_bytes(3)));
-            $exists = (int) $this->getBookingById($code);
+            $exists = Booking::findOne(['checkin_code' => $code]);
         } while ($exists);
 
         return $code;
