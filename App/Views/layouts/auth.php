@@ -10,7 +10,7 @@ use App\Core\App;
     <base href="<?= App::getBaseUrl() ?>/" />
     <link rel="stylesheet" href="css/output.css">
 </head>
-<body class="min-h-dvh bg-primary">
+<body class="min-h-dvh bg-primary font-sans">
     {{content}}
 </body>
 </html>

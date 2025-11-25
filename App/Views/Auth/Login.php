@@ -13,7 +13,7 @@ use App\Core\Csrf;
     </div>
     <div class="container w-fit mx-auto align-middle px-12 py-4 bg-gray-100 rounded-md shadow border border-gray-300">
       <div class="text-left py-2">
-        <h2 class="text-4xl font-semibold capitalize">Masuk</h2>
+        <h2 class="text-4xl font-bold capitalize">Masuk</h2>
       </div>
 
       <!-- Flash Messages -->
@@ -36,8 +36,8 @@ use App\Core\Csrf;
             <div class="mb-4">
               <label
                 class="block text-regular font-medium <?= $model->hasError('identifier') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
-                for="identifier">Email/NIP/NIM</label>
-              <input id="identifier" type="text" name="identifier" placeholder="Enter your email, NIP, or NIM"
+                for="identifier">Email atau Nomor Induk</label>
+              <input id="identifier" type="text" name="identifier" placeholder="Masukkan Email atau Nomor Induk"
                 value="<?= htmlspecialchars($model->identifier ?? '') ?>"
                 class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 placeholder-gray-400 <?= $model->hasError('identifier') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
               <?php if ($model->hasError('identifier')): ?>
@@ -50,9 +50,9 @@ use App\Core\Csrf;
             <div class="mb-4 relative">
               <label
                 class="block text-sm font-medium <?= $model->hasError('password') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
-                for="password">Password</label>
+                for="password">Kata Sandi</label>
 
-              <input id="password" type="password" name="password" placeholder="Enter your password" value=""
+              <input id="password" type="password" name="password" placeholder="Masukkan Kata Sandi" value=""
                 class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 placeholder-gray-400 
                 <?= $model->hasError('password')
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
@@ -114,8 +114,9 @@ use App\Core\Csrf;
         <div class="mt-6 text-center text-sm">
           <p class="font-medium md:font-normal">Belum Punya Akun?</p>
           <div>
-            <a href="/register" class="italic capitalize text-gray-700 hover:underline active:underline">Daftar di
-              sini</a>
+            <a href="/register" class="italic capitalize text-gray-700 hover:underline active:underline">
+              Daftar Sekarang!
+            </a>
           </div>
         </div>
       </div>

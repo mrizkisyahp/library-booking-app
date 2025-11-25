@@ -1,5 +1,13 @@
 @import "tailwindcss";
+@import "./font.css";
 
 @theme {
     --color-primary: #064E3B;
+    --font-sans: "Plus Jakarta Sans", sans-serif;
+}
+
+@layer base {
+  html {
+    @apply font-sans;
+  }
 }
