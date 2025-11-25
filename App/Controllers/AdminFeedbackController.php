@@ -23,11 +23,11 @@ class AdminFeedbackController extends Controller
         $this->setLayout('main');
         $this->setTitle('Feedback Pengguna | Library Booking App');
 
-        $params = $request->getBody();
         $filters = [
-            ';keyword' => $params['keyword'] ?? '',
-            'tanggal_penggunaan_ruang' => $params['tanggal_penggunaan_ruang'] ?? '',
-            'rating' => $params['rating'] ?? '',
+            'keyword' => $request->getBody()['keyword'] ?? null,
+            'tanggal_penggunaan_ruang' => $request->getBody()['tanggal_penggunaan_ruang'] ?? null,
+            'rating' => $request->getBody()['rating'] ?? null,
+            'page' => (int) ($request->getBody()['page'] ?? 1),
         ];
 
         $service = new AdminFeedbackService();

@@ -17,9 +17,9 @@ class AdminFeedbackService
         $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
-            'keyword' => $filters['keyword'] ?? null,
-            'tanggal_penggunaan_ruang' => $filters['tanggal_penggunaan_ruang'] ?? null,
-            'rating' => $filters['rating'] ?? null,
+            'keyword' => $filters['keyword'],
+            'tanggal_penggunaan_ruang' => $filters['tanggal_penggunaan_ruang'],
+            'rating' => $filters['rating'],
         ];
 
         $feedback = Feedback::findPaginated($page, $perPage, $queryFilters);

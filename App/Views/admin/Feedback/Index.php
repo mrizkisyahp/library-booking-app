@@ -129,7 +129,7 @@ $feedback = $feedback ?? [];
                   <?= htmlspecialchars((string) $row->rating) ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                  <?= htmlspecialchars($row->created_at ?? '-') ?>
+                  <?= htmlspecialchars($row->tanggal_penggunaan_ruang ?? '-') ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
                   <a href="/admin/feedback/detail?id=<?= (int) $row->id_feedback ?>">Detail</a>

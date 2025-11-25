@@ -10,7 +10,7 @@ class Feedback extends DbModel
     public ?int $id_feedback = null;
     public ?int $booking_id = null;
     public ?int $user_id = null;
-    public string $nama_ruangan = '';
+    public ?string $nama_ruangan = null;
     public ?int $rating = null;
     public string $nama = '';
     public string $tanggal_booking = '';
@@ -79,28 +79,25 @@ class Feedback extends DbModel
         LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan";
 
         $params = [];
+        $conditions = [];
 
         if (!empty($filters['keyword'])) {
-            $sql .= " AND (
-                users.nama LIKE :keyword OR
-                ruangan.nama_ruangan LIKE :keyword
-            )";
+            $conditions[] = "(users.nama LIKE :keyword OR ruangan.nama_ruangan LIKE :keyword)";
             $params[':keyword'] = '%' . $filters['keyword'] . '%';
         }
 
-        if (!empty($filters['status'])) {
-            $sql .= " AND booking.status = :status";
-            $params[':status'] = $filters['status'];
-        }
-
         if (!empty($filters['tanggal_penggunaan_ruang'])) {
-            $sql .= " AND booking.tanggal_penggunaan_ruang = :tanggal_penggunaan_ruang";
+            $conditions[] = "booking.tanggal_penggunaan_ruang = :tanggal_penggunaan_ruang";
             $params[':tanggal_penggunaan_ruang'] = $filters['tanggal_penggunaan_ruang'];
         }
 
         if (!empty($filters['rating'])) {
-            $sql .= " AND feedback.rating = :rating";
+            $conditions[] = "feedback.rating = :rating";
             $params[':rating'] = $filters['rating'];
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
         }
 
         return [$sql, $params];
