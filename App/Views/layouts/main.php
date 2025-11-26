@@ -20,14 +20,15 @@ $user = App::$app->user;
     <header class="hidden md:flex fixed w-full bg-primary text-white shadow-lg top-0 left-0 right-0 z-50">
         <div class="w-full mx-auto px-8 py-4 flex justify-between items-center">
             <!-- Logo -->
-                <a <?php if (App::$app->auth->isGuest()): ?> href="/" <?php else: ?> 
+            <a class="text-2xl font-bold hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0"
+                <?php if (App::$app->auth->isGuest()): ?> href="/" <?php else: ?> 
                     <?php if ($user && $user->isAdmin()): ?>
                         href="/admin" 
                     <?php else: ?>
                          href="/dashboard"
                     <?php endif; ?>
                 <?php endif; ?>
-                class="text-2xl font-bold hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0">
+                >
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -90,7 +91,7 @@ $user = App::$app->user;
 
     <!-- Main Content -->
     <main class="pt-12 md:pt-24 pb-12 min-h-screen">
-        <div class="max-w-7xl mx-auto px-6">
+        <div class="max-w-7xl mx-auto px-6 bg-primary">
             <!-- Flash Messages -->
             <?php if ($m = App::$app->session->getFlash('success')): ?>
                 <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
@@ -173,121 +174,124 @@ $user = App::$app->user;
     <?php endif; ?>
 
     <!-- mobile Navigation -->
-     <header class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 shadow-lg z-50 md:hidden">
+    <header
+        class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-50 md:hidden">
         <div>Logo</div>
-        <div>Notif</div>
-     </header>
-    <nav class="fixed left-0 bottom-0 right-0 bg-primary text-white md:hidden z-50 rounded-t-[32px] py-3 shadow-xl">
-    <div class="flex items-center justify-around w-full px-4">
+        <div>
+            <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon lucide-bell size-6"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+            </a>
+        </div>
+    </header>
+    <nav class="fixed left-0 bottom-0 right-0 bg-primary text-white md:hidden z-50 rounded-t-4xl py-3 shadow-xl">
+        <div class="flex items-center justify-around w-full px-4">
 
-        <?php
-        $active = $_SERVER['REQUEST_URI'];
+            <?php
+            $active = $_SERVER['REQUEST_URI'];
 
-        if (App::$app->auth->isGuest()) {
-            $url = '/';
-        } else {
-            $url = $user && $user->isAdmin() ? '/admin' : '/dashboard';
-        }
+            if (App::$app->auth->isGuest()) {
+                $url = '/';
+            } else {
+                $url = $user && $user->isAdmin() ? '/admin' : '/dashboard';
+            }
 
-        function isActiveClass($current, $target)
-        {
-            return $current === $target
-                ? "bg-emerald-800/60 border-2 border-white/30 rounded-2xl px-4 py-2"
-                : "opacity-70 hover:opacity-100 transition px-4 py-2";
-        }
-        ?>
+            function isActiveClass($current, $target)
+            {
+                return $current === $target
+                    ? "bg-emerald-800/60 border-2 border-white/30 rounded-2xl px-4 py-2"
+                    : "opacity-70 hover:opacity-100 transition px-4 py-2";
+            }
+            ?>
 
-        <!-- beranda -->
-        <a href="<?= $url ?>"
-           class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, $url) ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-house size-6">
-                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-                <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            </svg>
-            <span>Beranda</span>
-        </a>
-
-        <?php if ($user && $user->isAdmin()): ?>
-
-            <!-- manajemen all -->
-            <a href="/admin/bookings"
-               class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/admin/bookings") ?>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round"
-                     class="lucide lucide-square-chart-gantt size-6">
-                     <rect width="18" height="18" x="3" y="3" rx="2"/>
-                     <path d="M9 8h7"/>
-                     <path d="M8 12h6"/>
-                     <path d="M11 16h5"/>
+            <!-- beranda -->
+            <a href="<?= $url ?>"
+                class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, $url) ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-house size-6">
+                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                    <path
+                        d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 </svg>
-                <span>Manajemen</span>
+                <span>Beranda</span>
             </a>
 
-            <!-- laporan/report -->
-            <a href="/reports"
-               class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/reports") ?>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                     stroke="currentColor" stroke-width="2"
-                     fill="none" stroke-linecap="round" stroke-linejoin="round"
-                     class="lucide lucide-door-open size-6">
-                     <path d="M11 20H2"/>
-                     <path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/>
-                     <path d="M11 4H8a2 2 0 0 0-2 2v14"/>
-                     <path d="M14 12h.01"/>
-                     <path d="M22 20h-3"/>
+            <?php if ($user && $user->isAdmin()): ?>
+
+                <!-- manajemen all -->
+                <a href="/admin/bookings"
+                    class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/admin/bookings") ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-square-chart-gantt size-6">
+                        <rect width="18" height="18" x="3" y="3" rx="2" />
+                        <path d="M9 8h7" />
+                        <path d="M8 12h6" />
+                        <path d="M11 16h5" />
+                    </svg>
+                    <span>Manajemen</span>
+                </a>
+
+                <!-- laporan/report -->
+                <a href="/reports"
+                    class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/reports") ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" stroke="currentColor" stroke-width="2"
+                        fill="none" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-door-open size-6">
+                        <path d="M11 20H2" />
+                        <path
+                            d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z" />
+                        <path d="M11 4H8a2 2 0 0 0-2 2v14" />
+                        <path d="M14 12h.01" />
+                        <path d="M22 20h-3" />
+                    </svg>
+                    <span>Laporan</span>
+                </a>
+
+            <?php else: ?>
+
+                <!-- Cari ruangan -->
+                <a href="/my-bookings" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/my-bookings") ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-search-icon lucide-search size-6">
+                        <path d="m21 21-4.34-4.34" />
+                        <circle cx="11" cy="11" r="8" />
+                    </svg>
+                    <span>Cari</span>
+                </a>
+
+                <!-- buking -->
+                <a href="/rooms" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/rooms") ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-book-open-text-icon lucide-book-open-text size-6">
+                        <path d="M12 7v14" />
+                        <path d="M16 12h2" />
+                        <path d="M16 8h2" />
+                        <path
+                            d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+                        <path d="M6 12h2" />
+                        <path d="M6 8h2" />
+                    </svg>
+                    <span>Booking</span>
+                </a>
+
+            <?php endif; ?>
+
+            <!-- profil -->
+            <a href="/profile"
+                class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/profile") ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-user-round-icon lucide-user-round size-6">
+                    <circle cx="12" cy="8" r="5" />
+                    <path d="M20 21a8 8 0 0 0-16 0" />
                 </svg>
-                <span>Laporan</span>
+                <span>Profil</span>
             </a>
 
-        <?php else: ?>
-
-            <!-- search room -->
-            <a href="/my-bookings"
-               class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/my-bookings") ?>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     class="lucide lucide-search size-6">
-                     <circle cx="11" cy="11" r="8"/>
-                     <path d="m21 21-4.3-4.3"/>
-                </svg>
-                <span>Cari</span>
-            </a>
-
-            <!-- buking -->
-            <a href="/rooms"
-               class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/rooms") ?>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     class="lucide lucide-door-open size-6">
-                    <path d="M11 20H2"/>
-                    <path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/>
-                    <path d="M11 4H8a2 2 0 0 0-2 2v14"/>
-                    <path d="M14 12h.01"/>
-                    <path d="M22 20h-3"/>
-                </svg>
-                <span>Booking</span>
-            </a>
-
-        <?php endif; ?>
-
-        <!-- profil -->
-        <a href="/profile"
-           class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/profile") ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                 fill="none" stroke="currentColor" stroke-width="2"
-                 class="lucide lucide-user size-6">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span>Profil</span>
-        </a>
-
-    </div>
-</nav>
+        </div>
+    </nav>
 </body>
 
 </html>

@@ -37,13 +37,13 @@ use App\Core\App;
 <?php endif; ?>
 
 <!-- Welcome Header -->
-<div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
-  <div class="flex items-center justify-between">
+<div class="rounded-2xl p-4 mb-6">
+  <div class="flex items-center justify-between mt-6">
     <div>
-      <h1 class="text-3xl font-bold text-slate-800 mb-2">
-        Selamat Datang, <span class="text-emerald-600"><?= htmlspecialchars($user->nama) ?></span>! 👋
+      <h1 class="text-4xl font-bold text-white mb-2">
+        Selamat Datang, <span class="text-emerald-200 capitalize"><?= htmlspecialchars($user->nama) ?></span>! 👋
       </h1>
-      <p class="text-slate-600">Kelola booking ruangan Anda dengan mudah</p>
+      <p class="text-white">Kelola booking ruangan Anda dengan mudah</p>
     </div>
     <div class="hidden md:block">
       <svg class="w-24 h-24 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ use App\Core\App;
   <!-- Main Content -->
   <div class="lg:col-span-2 space-y-6">
     <!-- Statistics -->
-    <div class="bg-white rounded-2xl shadow-lg p-8">
+    <div class="bg-white rounded-t-4xl shadow-lg p-8">
       <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
         <svg class="w-7 h-7 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -77,12 +77,12 @@ use App\Core\App;
         ];
       ?>
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
+        <div class="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
           <p class="text-xs font-semibold text-blue-600 mb-1">Total</p>
           <p class="text-3xl font-bold text-blue-700"><?= $stats['totalBookings'] ?? 0 ?></p>
         </div>
         <?php foreach ($statusCards as $statusKey => $config): ?>
-          <div class="bg-gradient-to-br <?= $config['class'] ?> rounded-xl p-4 border-2">
+          <div class="bg-linear-to-br <?= $config['class'] ?> rounded-xl p-4 border-2">
             <p class="text-xs font-semibold text-slate-600 mb-1"><?= $config['label'] ?></p>
             <p class="text-3xl font-bold text-slate-800"><?= $stats['statusCounts'][$statusKey] ?? 0 ?></p>
           </div>
