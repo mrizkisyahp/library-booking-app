@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./font.css";
+@import "./styles/font.css";
 
 @theme {
     --color-primary: #064E3B;
