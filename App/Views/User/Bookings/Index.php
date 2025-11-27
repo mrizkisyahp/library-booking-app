@@ -9,16 +9,16 @@ $currentUser = App::$app->user instanceof User ? App::$app->user : null;
 
 ?>
 
-echo '<pre>';
+<!-- echo '<pre>';
 print_r($bookings);
-echo '</pre>';
+echo '</pre>'; -->
 
 <div class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
   <div class="max-w-7xl mx-auto px-6 py-12">
     <!-- Header -->
     <div class="mb-8">
-      <h2 class="text-4xl font-bold text-slate-800 mb-2">Cari Ruangan</h2>
-      <p class="text-slate-600">Cari ruangan yang sesuai dengan kebutuhan Anda</p>
+      <h2 class="text-4xl font-bold text-slate-800 mb-2">Riwayat Booking</h2>
+      <p class="text-slate-600">Monitor seluruh riwayat ruangan yang pernah digunakan</p>
     </div>
 
     <!-- Filter Form -->

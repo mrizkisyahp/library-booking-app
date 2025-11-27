@@ -174,7 +174,7 @@ $roomTypes = [
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative">
               <!-- Blocked Overlay for rejected/pending users -->
               <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?>
-                <div class="absolute top-4 right-4 z-10">
+                <div class="absolute top-4 right-4 z-0">
                   <div class="bg-slate-900/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

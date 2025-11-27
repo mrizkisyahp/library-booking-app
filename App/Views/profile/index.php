@@ -176,7 +176,7 @@ use App\Core\Csrf;
                 <?= Csrf::field() ?>
                 <button type="submit"
                     class="flex md:hidden items-center w-full text-lg gap-4 justify-center px-8 py-4 rounded-lg hover:bg-rose-700 bg-primary shadow-md text-white transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:bg-rose-600 focus:ring-rose-500 focus:ring-offset-2">
-                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">  
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>

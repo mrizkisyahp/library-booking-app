@@ -1,6 +1,6 @@
 <?php
 
-define('ROOT_DIR', __DIR__);
+define('ROOT_DIR', dirname(__DIR__));
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(ROOT_DIR);
@@ -48,9 +48,9 @@ try {
     $log->info('Role table seeded successfully!');
 
     $users = [              
-    ['id_user' => 1, 'id_role' => 1, 'nama' => 'admin', 'nip' => '123456789012345678', 'nim' => null, 'email' => 'admin@pnj.ac.id', 'password' => password_hash('admin', PASSWORD_DEFAULT), 'status' => 'pending kubaca', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456789', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
-    ['id_user' => 2, 'id_role' => 2, 'nama' => 'dosen', 'nip' => '987654321098765432', 'nim' => null, 'email' => 'dosen@pnj.ac.id', 'password' => password_hash('dosen', PASSWORD_DEFAULT), 'status' => 'pending kubaca', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456789', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
-    ['id_user' => 3, 'id_role' => 3, 'nama' => 'mahasiswa', 'nip' => null, 'nim' => '1234567890', 'email' => 'mahasiswa@stu.pnj.ac.id', 'password' => password_hash('mahasiswa', PASSWORD_DEFAULT), 'status' => 'pending kubaca', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456789', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
+    ['id_user' => 1, 'id_role' => 1, 'nama' => 'admin', 'nip' => '123456789012345678', 'nim' => null, 'email' => 'admin@pnj.ac.id', 'password' => password_hash('admin', PASSWORD_DEFAULT), 'status' => 'active', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456789', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
+    ['id_user' => 2, 'id_role' => 2, 'nama' => 'dosen', 'nip' => '987654321098765432', 'nim' => null, 'email' => 'dosen@pnj.ac.id', 'password' => password_hash('dosen', PASSWORD_DEFAULT), 'status' => 'active', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456789', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
+    ['id_user' => 3, 'id_role' => 3, 'nama' => 'mahasiswa', 'nip' => null, 'nim' => '1234567890', 'email' => 'mahasiswa@stu.pnj.ac.id', 'password' => password_hash('mahasiswa', PASSWORD_DEFAULT), 'status' => 'active', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456789', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
 
     ['id_user' => 4, 'id_role' => 2, 'nama' => 'Dr. Budi Santoso, M.Kom', 'nip' => '198012345678901234', 'nim' => null, 'email' => 'budi.santoso@pnj.ac.id', 'password' => password_hash('password123', PASSWORD_DEFAULT), 'status' => 'active', 'jurusan' => 'Teknik Informatika', 'nomor_hp' => '08123456790', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
     ['id_user' => 5, 'id_role' => 2, 'nama' => 'Dr. Ani Lestari, M.T', 'nip' => '198112345678901235', 'nim' => null, 'email' => 'ani.lestari@pnj.ac.id', 'password' => password_hash('password123', PASSWORD_DEFAULT), 'status' => 'active', 'jurusan' => 'Sistem Informasi', 'nomor_hp' => '08123456791', 'suspensi_terakhir' => null, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
