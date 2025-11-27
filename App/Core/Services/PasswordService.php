@@ -20,7 +20,7 @@ class PasswordService
     public function requestReset(User $model): array
     {
         $email = trim($model->email);
-        $user = User::findOne(['email' => $email]);
+        $user = User::Query()->where('email', $email)->first();
 
         if (!$user) {
             return [
@@ -29,7 +29,7 @@ class PasswordService
             ];
         }
 
-        $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         CacheService::set('reset_otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
         EmailService::sendVerificationCode($user, $otp, 'reset_password');
 
@@ -45,8 +45,8 @@ class PasswordService
 
     public function resetWithOtp(User $model): array
     {
-        $userId = (int)($model->id_user ?? 0);
-        $user = $userId ? User::findOne(['id_user' => $userId]) : null;
+        $userId = (int) ($model->id_user ?? 0);
+        $user = $userId ? User::Query()->where('id_user', $userId)->first() : null;
         if (!$user) {
             $this->session->remove('reset_user_id');
             return [

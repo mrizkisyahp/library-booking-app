@@ -65,13 +65,13 @@ class BookingExpirationService
             $booking->status = 'expired';
             $booking->save();
 
-            $pic = User::findOne(['id_user' => $booking->user_id]);
+            $pic = User::Query()->where('id_user', $booking->user_id)->first();
             if ($pic instanceof User) {
-                $pic->peringatan = (int)$pic->peringatan + 1;
+                $pic->peringatan = (int) $pic->peringatan + 1;
                 $pic->save();
             }
 
-            Logger::booking('expired', (int)$booking->user_id, (int)$booking->id_booking, [
+            Logger::booking('expired', (int) $booking->user_id, (int) $booking->id_booking, [
                 'reason' => $reason,
             ]);
 

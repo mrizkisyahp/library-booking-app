@@ -82,15 +82,15 @@ class AuthService
         }
 
         $payload = http_build_query([
-            'secret'   => $secret,
+            'secret' => $secret,
             'response' => $token,
             'remoteip' => $remoteIp,
         ]);
 
         $context = stream_context_create([
             'http' => [
-                'method'  => 'POST',
-                'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
                 'content' => $payload,
             ],
         ]);
@@ -114,14 +114,14 @@ class AuthService
     public function processLogin(User $loginModel): bool
     {
         $identifier = trim($loginModel->identifier);
-        $user = User::findOne(['email' => $identifier]);
+        $user = User::Query()->where('email', $identifier)->first();
 
         if (!$user) {
-            $user = User::findOne(['nim' => $identifier]);
+            $user = User::Query()->where('nim', $identifier)->first();
         }
 
         if (!$user) {
-            $user = User::findOne(['nip' => $identifier]);
+            $user = User::Query()->where('nip', $identifier)->first();
         }
 
         if (!$user) {
@@ -163,7 +163,7 @@ class AuthService
             return false;
         }
 
-        $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         CacheService::set('otp_' . $user->id_user, password_hash($otp, PASSWORD_DEFAULT), 900);
 
         $this->session->set('user_id_pending', $user->id_user);

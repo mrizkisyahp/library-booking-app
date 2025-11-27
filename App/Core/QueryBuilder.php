@@ -18,6 +18,7 @@ class QueryBuilder
     protected array $groupBys = [];
     protected array $havings = [];
     protected ?string $modelClass = null;
+    protected array $eagerLoad = [];
 
     public function __construct(PDO $pdo)
     {
@@ -98,6 +99,33 @@ class QueryBuilder
         }
 
         return $instance;
+    }
+
+    protected function loadRelations(array $models): array
+    {
+        if (empty($this->eagerLoad) || empty($models)) {
+            return $models;
+        }
+
+        foreach ($this->eagerLoad as $relation) {
+            foreach ($models as $model) {
+                if (method_exists($model, $relation)) {
+                    $model->load($relation);
+                }
+            }
+        }
+
+        return $models;
+    }
+
+    public function with(string|array $relations): static
+    {
+        if (is_string($relations)) {
+            $relations = [$relations];
+        }
+
+        $this->eagerLoad = array_merge($this->eagerLoad, $relations);
+        return $this;
     }
 
     public function setModel(string $modelClass): static
@@ -467,7 +495,8 @@ class QueryBuilder
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if ($this->modelClass !== null) {
-            return array_map(fn($row) => $this->hydrate($row), $results);
+            $models = array_map(fn($row) => $this->hydrate($row), $results);
+            return $this->loadRelations($models);
         }
 
         return $results;
@@ -484,5 +513,15 @@ class QueryBuilder
         }
 
         return $this->hydrate($result);
+    }
+
+    public function getModelClass(): string
+    {
+        return $this->modelClass;
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
     }
 }

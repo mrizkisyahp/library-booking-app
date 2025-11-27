@@ -18,7 +18,7 @@ class UserBookingService
     public function createDraft(User $user, array $data): array
     {
         $roomId = (int) ($data['ruangan_id'] ?? 0);
-        $room = Room::findOne(['id_ruangan' => $roomId]);
+        $room = Room::Query()->where('id_ruangan', $roomId)->first();
         if (!$room) {
             return [
                 'success' => false,
@@ -86,9 +86,9 @@ class UserBookingService
             ];
         }
 
-        $pic = User::findOne(['id_user' => $booking->user_id]);
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
         if ($pic instanceof User) {
-            $roomInfo = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+            $roomInfo = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
             $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
             $subject = 'Created Booking Draft | Library Booking App';
             $emailBody = "
@@ -135,7 +135,7 @@ class UserBookingService
     {
         do {
             $token = strtoupper(bin2hex(random_bytes(3)));
-            $exists = Booking::findOne(['invite_token' => $token]);
+            $exists = Booking::Query()->where('invite_token', $token)->first();
         } while ($exists);
 
         return $token;
@@ -143,7 +143,7 @@ class UserBookingService
 
     public function submitDraft(int $bookingId, int $currentUserId): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
 
         if (!$booking || $booking->status !== 'draft') {
             return [
@@ -203,7 +203,7 @@ class UserBookingService
 
     public function addMember(int $bookingId, int $currentUserId, string $memberEmail): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
         if (!$booking || $booking->status !== 'draft') {
             return [
                 'success' => false,
@@ -212,7 +212,7 @@ class UserBookingService
             ];
         }
 
-        $member = User::findOne(['email' => $memberEmail]);
+        $member = User::Query()->where('email', $memberEmail)->first();
         if (!$member) {
             return [
                 'success' => false,
@@ -273,8 +273,8 @@ class UserBookingService
         $booking->save();
 
         $memberLink = ($_ENV['APP_URL']) . "/bookings/join?code={$inviteToken}";
-        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
-        $pic = User::findOne(['id_user' => $booking->user_id]);
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
 
         if ($pic instanceof User) {
             $subject = 'Booking Link Invitation | Library Booking App';
@@ -327,7 +327,7 @@ class UserBookingService
             ];
         }
 
-        $booking = Booking::findOne(['invite_token' => $token]);
+        $booking = Booking::Query()->where('invite_token', $token)->first();
         if (!$booking || $booking->status !== 'draft') {
             return [
                 'success' => false,
@@ -344,7 +344,7 @@ class UserBookingService
             ];
         }
 
-        $user = User::findOne(['id_user' => $userId]);
+        $user = User::Query()->where('id_user', $userId)->first();
         if (!$user || $user->status !== 'active') {
             return [
                 'success' => false,
@@ -382,7 +382,7 @@ class UserBookingService
 
     public function getDraftViewData(int $currentUserId, int $bookingId): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
 
         if (!$booking || $booking->status !== 'draft') {
             return [
@@ -442,13 +442,13 @@ class UserBookingService
 
     public function getMinimumMembersRequired(Booking $booking): int
     {
-        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
         return $room && $room->kapasitas_min ? (int) $room->kapasitas_min : 0;
     }
 
     public function getMaximumMembersRequired(Booking $booking): int
     {
-        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
         return $room && $room->kapasitas_max ? (int) $room->kapasitas_max : 0;
     }
 

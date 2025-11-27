@@ -50,6 +50,26 @@ class Booking extends DbModel
         ];
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id_user');
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class, 'ruangan_id', 'id_ruangan');
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(User::class, 'anggota_booking', 'booking_id', 'user_id', 'id_booking');
+    }
+
+    public function feedback()
+    {
+        return $this->hasOne(Feedback::class, 'booking_id', 'id_booking');
+    }
+
     public function rules(): array
     {
         return [];
@@ -87,7 +107,7 @@ class Booking extends DbModel
         }
 
         if (!$ownerIncluded) {
-            $pic = User::findOne(['id_user' => $this->user_id]);
+            $pic = User::Query()->where('id_user', $this->user_id)->first();
             if ($pic) {
                 $members[] = [
                     'id_anggota' => null,

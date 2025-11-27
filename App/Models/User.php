@@ -52,6 +52,21 @@ class User extends DbModel
         $this->scenario = $scenario;
     }
 
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'user_id', 'id_user');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'id_role', 'id_role');
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'user_id', 'id_user');
+    }
+
     public function rules(): array
     {
         if ($this->scenario === self::SCENARIO_LOGIN) {

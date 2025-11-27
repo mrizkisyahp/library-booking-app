@@ -13,7 +13,7 @@
 - [x] Response: helpers (`json/view/redirect/back/abort/status/headers/download`) with AJAX-friendly payloads.
 - [x] Validation: Validator + ValidationException + rule set.
 - [x] QueryBuilder: fluent queries + pagination + DbModel integration.
-- [ ] Models: timestamps + soft deletes + default scope + restore helpers.
+- [x] Models: timestamps + soft deletes + default scope + restore helpers.
 - [ ] Events: dispatcher + model lifecycle events.
 - [ ] Queue worker: dispatch helper + CLI worker.
 - [ ] Helpers: global functions + DI container wiring.
@@ -72,18 +72,18 @@
    - [x] `paginate()` - pagination with metadata (items, total, perPage, currentPage, lastPage, next/prev URLs)
    
    **Model Layer (Mandatory):**
-   - [ ] BaseModel with `tableName()`, `primaryKey()`
-   - [ ] `save()` - insert or update
-   - [ ] `update()` - update existing record
-   - [ ] `delete()` - delete record
+   - [x] BaseModel with `tableName()`, `primaryKey()`
+   - [x] `save()` - insert or update
+   - [x] `update()` - update existing record
+   - [x] `delete()` - delete record
    
    **Relationship Helpers (Mandatory):**
-   - [ ] `belongsTo()` - inverse one-to-many
-   - [ ] `hasMany()` - one-to-many
-   - [ ] `hasOne()` - one-to-one
-   - [ ] `belongsToMany()` - many-to-many
-   - [ ] `with()` - eager loading
-   - [ ] `load()` - lazy loading
+   - [x] `belongsTo()` - inverse one-to-many
+   - [x] `hasMany()` - one-to-many
+   - [x] `hasOne()` - one-to-one
+   - [x] `belongsToMany()` - many-to-many
+   - [x] `with()` - eager loading
+   - [x] `load()` - lazy loading
    
    **Optional (Recommended):**
    - [x] `chunk()` - process large datasets in chunks
