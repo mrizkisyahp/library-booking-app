@@ -6,7 +6,17 @@
 use App\Core\Csrf;
 use Carbon\Carbon;
 use App\Core\App;
+Carbon::setLocale('id');
 
+function formatWaktu($waktu)
+{
+  return Carbon::parse($waktu)->format('H:i') . ' WIB';
+}
+
+function formatTanggal($tanggal)
+{
+  return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
+}
 ?>
 
 <!-- Pending Feedback Warning -->
@@ -46,7 +56,8 @@ use App\Core\App;
   <div class="flex items-center justify-between mt-6 px-6">
     <div>
       <h1 class="text-4xl font-bold text-white md:text-black mb-2">
-        Selamat Datang, <span class="text-emerald-100 md:text-emerald-800 capitalize"><?= htmlspecialchars($user->nama) ?></span>! 👋
+        Selamat Datang, <span
+          class="text-emerald-100 md:text-emerald-800 capitalize"><?= htmlspecialchars($user->nama) ?></span>! 👋
       </h1>
       <p class="text-white md:text-black">Kelola booking ruangan Anda dengan mudah</p>
     </div>
@@ -128,40 +139,6 @@ use App\Core\App;
                     <?= htmlspecialchars($statusLabel) ?>
                   </div>
 
-                  <?php
-                  $hari = [
-                    'Sunday' => 'Minggu',
-                    'Monday' => 'Senin',
-                    'Tuesday' => 'Selasa',
-                    'Wednesday' => 'Rabu',
-                    'Thursday' => 'Kamis',
-                    'Friday' => 'Jumat',
-                    'Saturday' => 'Sabtu'
-                  ];
-
-                  $bulan = [
-                    'January' => 'Januari',
-                    'February' => 'Februari',
-                    'March' => 'Maret',
-                    'April' => 'April',
-                    'May' => 'Mei',
-                    'June' => 'Juni',
-                    'July' => 'Juli',
-                    'August' => 'Agustus',
-                    'September' => 'September',
-                    'October' => 'Oktober',
-                    'November' => 'November',
-                    'December' => 'Desember'
-                  ];
-
-                  $date = new DateTime($booking['tanggal_penggunaan_ruang']);
-
-                  $formatTanggal =
-                    $hari[$date->format('l')] . ', ' .
-                    $date->format('d') . ' ' .
-                    $bulan[$date->format('F')] . ' ' .
-                    $date->format('Y');
-                  ?>
                   <p class="mb-4 flex gap-2 items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -177,16 +154,9 @@ use App\Core\App;
                       <path d="M12 18h.01" />
                       <path d="M16 18h.01" />
                     </svg>
-                    <?= htmlspecialchars($formatTanggal) ?>
+                    <?= htmlspecialchars(formatTanggal($booking['tanggal_penggunaan_ruang'])) ?>
                   </p>
 
-                  <?php
-                  function formatWaktu($waktu)
-                  {
-                    $dateTime = new DateTime($waktu);
-                    return $dateTime->format('H:i') . " WIB";
-                  }
-                  ?>
                   <p class="mb-4 flex gap-2 items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -239,7 +209,7 @@ use App\Core\App;
 
   </div>
   <div>
-    
+
   </div>
 
 </div>
