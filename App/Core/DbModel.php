@@ -12,17 +12,23 @@ abstract class DbModel extends Model
     abstract public function attributes(): array;
     abstract public static function primaryKey(): string;
 
+    public static function newQuery(): QueryBuilder
+    {
+        $qb = new QueryBuilder(App::$app->db->pdo);
+        return $qb->table(static::tableName())->setModel(static::class);
+    }
+
     public function save(): bool
     {
-        
-    $primaryKey = static::primaryKey();
-    if (!empty($this->{$primaryKey})) {
-        $fields = [];
-        foreach ($this->attributes() as $attribute) {
-            $fields[$attribute] = $this->{$attribute};
+
+        $primaryKey = static::primaryKey();
+        if (!empty($this->{$primaryKey})) {
+            $fields = [];
+            foreach ($this->attributes() as $attribute) {
+                $fields[$attribute] = $this->{$attribute};
+            }
+            return $this->update($fields);
         }
-        return $this->update($fields);
-    }
 
         $tableName = $this->tableName();
         $attributes = $this->attributes();
@@ -38,7 +44,7 @@ abstract class DbModel extends Model
         }
 
         $statement->execute();
-        $this->{static::primaryKey()} = (int)App::$app->db->pdo->lastInsertId();
+        $this->{static::primaryKey()} = (int) App::$app->db->pdo->lastInsertId();
         return true;
     }
 
@@ -61,7 +67,7 @@ abstract class DbModel extends Model
 
         $statement->execute();
         $data = $statement->fetch(\PDO::FETCH_ASSOC);
-        
+
         // DEBUG: Check what the database actually returned
         // error_log('Database result: ' . print_r($data, true));
         // error_log('Available properties: ' . print_r(get_class_vars(static::class), true));
@@ -80,7 +86,7 @@ abstract class DbModel extends Model
                 // error_log("Property '$key' does not exist in model");
             }
         }
-        
+
         return $instance;
     }
 

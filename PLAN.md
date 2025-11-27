@@ -12,7 +12,7 @@
 - [x] Request: input/query helpers, AJAX detection, `$request->validate()` hook.
 - [x] Response: helpers (`json/view/redirect/back/abort/status/headers/download`) with AJAX-friendly payloads.
 - [x] Validation: Validator + ValidationException + rule set.
-- [ ] QueryBuilder: fluent queries + pagination + DbModel integration.
+- [x] QueryBuilder: fluent queries + pagination + DbModel integration.
 - [ ] Models: timestamps + soft deletes + default scope + restore helpers.
 - [ ] Events: dispatcher + model lifecycle events.
 - [ ] Queue worker: dispatch helper + CLI worker.
@@ -54,22 +54,22 @@
    - [x] `whereRaw()` - raw WHERE clause
    - [x] `join()` - INNER JOIN
    - [x] `leftJoin()` - LEFT JOIN
-   - [ ] `orderBy()` - ORDER BY clause
-   - [ ] `groupBy()` - GROUP BY clause
-   - [ ] `having()` - HAVING clause
-   - [ ] `limit()` - LIMIT clause
-   - [ ] `offset()` - OFFSET clause
-   - [ ] `insert()` - INSERT query
-   - [ ] `update()` - UPDATE query
-   - [ ] `delete()` - DELETE query
+   - [x] `orderBy()` - ORDER BY clause
+   - [x] `groupBy()` - GROUP BY clause
+   - [x] `having()` - HAVING clause
+   - [x] `limit()` - LIMIT clause
+   - [x] `offset()` - OFFSET clause
+   - [x] `insert()` - INSERT query
+   - [x] `update()` - UPDATE query
+   - [x] `delete()` - DELETE query
    - [x] `get()` - execute and fetch all results
    - [x] `first()` - execute and fetch first result
-   - [ ] `find()` - find by primary key
-   - [ ] `findOrFail()` - find or throw exception
-   - [ ] `exists()` - check if records exist
-   - [ ] `count()` - count records
-   - [ ] `raw()` - raw SQL execution
-   - [ ] `paginate()` - pagination with metadata (items, total, perPage, currentPage, lastPage, next/prev URLs)
+   - [x] `find()` - find by primary key
+   - [x] `findOrFail()` - find or throw exception
+   - [x] `exists()` - check if records exist
+   - [x] `count()` - count records
+   - [x] `raw()` - raw SQL execution
+   - [x] `paginate()` - pagination with metadata (items, total, perPage, currentPage, lastPage, next/prev URLs)
    
    **Model Layer (Mandatory):**
    - [ ] BaseModel with `tableName()`, `primaryKey()`
@@ -86,11 +86,11 @@
    - [ ] `load()` - lazy loading
    
    **Optional (Recommended):**
-   - [ ] `chunk()` - process large datasets in chunks
+   - [x] `chunk()` - process large datasets in chunks
    
    **Integration:**
-   - Integrate with `DbModel` via `$this->newQuery()` and hydration helpers.
-   - Support transactions: `beginTransaction()`, `commit()`, `rollback()`.
+   - [x] Integrate with `DbModel` via `$this->newQuery()` and hydration helpers.
+   - [x] Support transactions: `beginTransaction()`, `commit()`, `rollback()`.
 
 6) Helpers
    - Create `App/helpers.php` (autoload via Composer files).
