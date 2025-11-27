@@ -1,6 +1,5 @@
 <?php
 use App\Core\App;
-use App\Core\Csrf;
 /** @var \App\Models\User $user */
 ?>
 
@@ -74,7 +73,7 @@ use App\Core\Csrf;
                         </div>
                     </div>
                     <form action="/upload-kubaca" method="post" enctype="multipart/form-data" class="space-y-6">
-                        <?= Csrf::field() ?>
+                        <?= csrf_field() ?>
                         <div>
                             <label for="kubaca_img" class="block text-sm font-semibold text-gray-700 mb-2">
                                 New KuBaca Image
@@ -109,7 +108,7 @@ use App\Core\Csrf;
                         </div>
                     </div>
                     <form action="/upload-kubaca" method="post" enctype="multipart/form-data" class="space-y-6">
-                        <?= Csrf::field() ?>
+                        <?= csrf_field() ?>
                         <div>
                             <label for="kubaca_img" class="block text-sm font-semibold text-gray-700 mb-2">
                                 KuBaca Image
@@ -173,7 +172,7 @@ use App\Core\Csrf;
             <!-- Empty -->
         <?php else: ?>
             <form action="/logout" method="post">
-                <?= Csrf::field() ?>
+                <?= csrf_field() ?>
                 <button type="submit"
                     class="flex md:hidden items-center w-full text-lg gap-4 justify-center px-8 py-4 rounded-lg hover:bg-rose-700 bg-primary shadow-md text-white transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:bg-rose-600 focus:ring-rose-500 focus:ring-offset-2">
                     <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

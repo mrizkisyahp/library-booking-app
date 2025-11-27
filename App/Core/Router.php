@@ -182,7 +182,8 @@ class Router
                 return "Controller class not found: {$controllerClass}";
             }
 
-            $controller = new $controllerClass();
+            // Use container to resolve controller with dependencies
+            $controller = App::$app->container->make($controllerClass);
             App::$app->controller = $controller;
             App::$app->controller->action = $action;
 

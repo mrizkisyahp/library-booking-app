@@ -21,13 +21,9 @@ class PasswordController extends Controller
         $model->setScenario(User::SCENARIO_RESET_REQUEST);
 
         if ($request->isPost()) {
-            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-                App::$app->session->setFlash('error', 'Invalid CSRF token.');
-                return $this->render('ResetPassword/Forgot', ['model' => $model]);
-            }
 
             $model->loadData($request->getBody());
-            
+
             if (!$model->validate()) {
                 return $this->render('ResetPassword/Forgot', ['model' => $model]);
             }
@@ -64,19 +60,15 @@ class PasswordController extends Controller
         }
 
         if ($request->isPost()) {
-            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-                App::$app->session->setFlash('error', 'Invalid CSRF token.');
-                return $this->render('ResetPassword/Reset', ['model' => $model]);
-            }
 
             $model->loadData($request->getBody());
-            
+
             if (!$model->validate()) {
                 return $this->render('ResetPassword/Reset', ['model' => $model]);
             }
 
             $passwordService = new PasswordService(App::$app->session);
-            $model->id_user = (int)$userId;
+            $model->id_user = (int) $userId;
             $result = $passwordService->resetWithOtp($model);
 
             if ($result['success']) {

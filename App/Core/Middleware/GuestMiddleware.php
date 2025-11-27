@@ -18,14 +18,14 @@ class GuestMiddleware extends Middleware
 
     public function handle(Request $request, Response $response): bool
     {
-        $action = App::$app->controller->action ?? '';
-        
+        $action = app()->controller->action ?? '';
+
         if (in_array($action, $this->except, true)) {
             return true;
         }
 
-        if (!App::$app->auth->isGuest()) {
-            $response->redirect('/dashboard');
+        if (!guest()) {
+            redirect('/dashboard');
             return false;
         }
         return true;

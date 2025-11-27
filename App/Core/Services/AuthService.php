@@ -32,7 +32,7 @@ class AuthService
         }
 
         $primaryKey = $this->userClass::primaryKey();
-        $user = $this->userClass::findOne([$primaryKey => $primaryValue]);
+        $user = $this->userClass::Query()->where($primaryKey, $primaryValue)->first();
 
         if ($user instanceof DbModel) {
             $this->user = $user;

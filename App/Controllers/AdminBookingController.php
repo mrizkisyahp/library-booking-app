@@ -12,14 +12,17 @@ use App\Core\Services\AdminBookingService;
 use App\Models\Booking;
 use App\Models\User;
 
-class AdminBookingController extends Controller {
+class AdminBookingController extends Controller
+{
     protected ?User $currentUser = null;
-    public function __construct() {
+    public function __construct()
+    {
         $this->registerMiddleware(new AdminMiddleware());
         $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
-    public function index() {
+    public function index()
+    {
         $this->setLayout('main');
         $this->setTitle('Manajemen Booking | Library Booking App');
 
@@ -27,7 +30,7 @@ class AdminBookingController extends Controller {
         $filters = [
             'keyword' => $params['keyword'] ?? null,
             'status' => $params['status'] ?? null,
-            'page' => (int)($params['page'] ?? ($_GET['page'] ?? 1)),
+            'page' => (int) ($params['page'] ?? ($_GET['page'] ?? 1)),
         ];
 
         $service = new AdminBookingService();
@@ -43,7 +46,8 @@ class AdminBookingController extends Controller {
         ]);
     }
 
-    public function create() {
+    public function create()
+    {
         $this->setLayout('main');
         $this->setTitle('Create Booking | Library Booking App');
 
@@ -59,8 +63,9 @@ class AdminBookingController extends Controller {
         ]);
     }
 
-    public function store(Request $request, Response $response) {
-        if (!$request->isPost() || !Csrf::validateToken($request->getBody()['csrf_token'] ?? '')) {
+    public function store(Request $request, Response $response)
+    {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'CSRF token tidak valid.');
             $response->redirect('/admin/bookings');
             return;
@@ -93,11 +98,12 @@ class AdminBookingController extends Controller {
         ]);
     }
 
-    public function edit(Request $request, Response $response) {
+    public function edit(Request $request, Response $response)
+    {
         $this->setLayout('main');
         $this->setTitle('Edit Booking | Library Booking App');
 
-        $bookingId = (int)($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
+        $bookingId = (int) ($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
         $service = new AdminBookingService();
         $booking = $service->getBookingById($bookingId);
 
@@ -118,14 +124,15 @@ class AdminBookingController extends Controller {
         ]);
     }
 
-    public function update(Request $request, Response $response) {
-        if (!$request->isPost() || !Csrf::validateToken($request->getBody()['csrf_token'] ?? '')) {
+    public function update(Request $request, Response $response)
+    {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'CSRF token tidak valid.');
             $response->redirect('/admin/bookings');
             return;
         }
 
-        $bookingId = (int)($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
+        $bookingId = (int) ($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
         $service = new AdminBookingService();
         $result = $service->updateBooking($bookingId, $request->getBody());
 
@@ -151,14 +158,15 @@ class AdminBookingController extends Controller {
         ]);
     }
 
-    public function delete(Request $request, Response $response) {
-        if (!$request->isPost() || !Csrf::validateToken($request->getBody()['csrf_token'] ?? '')) {
+    public function delete(Request $request, Response $response)
+    {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'CSRF token tidak valid.');
             $response->redirect('/admin/bookings');
             return;
         }
 
-        $bookingId = (int)($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
+        $bookingId = (int) ($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
         $service = new AdminBookingService();
         $result = $service->deleteBooking($bookingId);
 
@@ -168,7 +176,7 @@ class AdminBookingController extends Controller {
 
     public function detail(Request $request, Response $response)
     {
-        $bookingId = (int)($request->getBody()['id'] ?? $request->getBody()['id_booking'] ?? 0);
+        $bookingId = (int) ($request->getBody()['id'] ?? $request->getBody()['id_booking'] ?? 0);
         if ($bookingId <= 0) {
             App::$app->session->setFlash('error', 'ID booking tidak valid.');
             $response->redirect('/admin/bookings');
@@ -189,23 +197,25 @@ class AdminBookingController extends Controller {
         return $this->render('Admin/Bookings/Detail', $result['data']);
     }
 
-    public function verify(Request $request, Response $response) {
+    public function verify(Request $request, Response $response)
+    {
         $admin = $this->currentUser;
-        $id_booking = (int)($request->getBody()['booking_id']);
+        $id_booking = (int) ($request->getBody()['booking_id']);
 
         $service = new AdminBookingService();
-        $result = $service->verifyBooking($id_booking, (int)$admin->id_user);
+        $result = $service->verifyBooking($id_booking, (int) $admin->id_user);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/bookings');
     }
 
-    public function complete(Request $request, Response $response) {
+    public function complete(Request $request, Response $response)
+    {
         $admin = $this->currentUser;
-        $id_booking = (int)($request->getBody()['booking_id']);
+        $id_booking = (int) ($request->getBody()['booking_id']);
 
         $service = new AdminBookingService();
-        $result = $service->markBookingCompleted($id_booking, (int)$admin->id_user);
+        $result = $service->markBookingCompleted($id_booking, (int) $admin->id_user);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/bookings');
@@ -219,11 +229,11 @@ class AdminBookingController extends Controller {
         }
 
         $body = $request->getBody();
-        $bookingId = (int)($body['booking_id'] ?? 0);
+        $bookingId = (int) ($body['booking_id'] ?? 0);
         $code = $body['checkin_code'] ?? '';
 
         $service = new AdminBookingService();
-        $result = $service->activateBooking($bookingId, $code, (int)($this->currentUser?->id_user ?? 0));
+        $result = $service->activateBooking($bookingId, $code, (int) ($this->currentUser?->id_user ?? 0));
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/bookings');
@@ -237,11 +247,11 @@ class AdminBookingController extends Controller {
         }
 
         $body = $request->getBody();
-        $bookingId = (int)($body['booking_id'] ?? 0);
+        $bookingId = (int) ($body['booking_id'] ?? 0);
         $reason = trim($body['reason'] ?? '');
 
         $service = new AdminBookingService();
-        $result = $service->cancelBooking($bookingId, (int)($this->currentUser?->id_user ?? 0), $reason ?: null);
+        $result = $service->cancelBooking($bookingId, (int) ($this->currentUser?->id_user ?? 0), $reason ?: null);
 
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
         $response->redirect('/admin/bookings');

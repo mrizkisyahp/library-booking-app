@@ -79,7 +79,7 @@ class AdminUserController extends Controller
 
     public function store(Request $request, Response $response)
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
             return;
@@ -142,7 +142,7 @@ class AdminUserController extends Controller
 
     public function update(Request $request, Response $response)
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
             return;
@@ -169,7 +169,7 @@ class AdminUserController extends Controller
 
     public function delete(Request $request, Response $response)
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
             return;
@@ -214,7 +214,7 @@ class AdminUserController extends Controller
 
     private function handleQuickAction(Request $request, Response $response, callable $action): void
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/users');
             return;

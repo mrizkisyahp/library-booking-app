@@ -73,7 +73,7 @@ $user = App::$app->user;
                         Profile
                     </a>
                     <form action="/logout" method="post">
-                        <?= Csrf::field() ?>
+                       <?= csrf_field() ?>
                         <button type="submit"
                             class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-emerald-700 active:bg-rose-600 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:bg-rose-600 focus:ring-rose-500 focus:ring-offset-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -187,3 +187,64 @@ if (!function_exists('asset')) {
         return url($path);
     }
 }
+
+if (!function_exists('csrf_token')) {
+    /**
+     * Get CSRF token
+     */
+    function csrf_token(): string
+    {
+        $token = session('_token');
+
+        if (!$token) {
+            $token = bin2hex(random_bytes(32));
+            session()->set('_token', $token);
+        }
+
+        return $token;
+    }
+}
+
+if (!function_exists('csrf_field')) {
+    function csrf_field(): string
+    {
+        $token = csrf_token();
+        return '<input type="hidden" name="_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+    }
+}
+
+if (!function_exists('dispatch')) {
+    /**
+     * Dispatch a job to the queue
+     */
+    function dispatch(\App\Core\Queue\QueueJob $job): string
+    {
+        return \App\Core\Queue\Queue::push($job);
+    }
+}
+
+if (!function_exists('container')) {
+    /**
+     * Get the container instance or resolve a service
+     */
+    function container(?string $abstract = null): mixed
+    {
+        $container = app()->container;
+
+        if ($abstract === null) {
+            return $container;
+        }
+
+        return $container->make($abstract);
+    }
+}
+
+if (!function_exists('resolve')) {
+    /**
+     * Resolve a service from the container
+     */
+    function resolve(string $abstract): mixed
+    {
+        return app()->container->make($abstract);
+    }
+}

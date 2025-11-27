@@ -149,27 +149,27 @@ use App\Models\User;
         <div class="flex flex-col gap-4 items-center justify-around mt-6">
           <div class="flex items-center justify-around gap-4">
             <form method="post" action="/admin/users/delete" onsubmit="return confirm('Delete user ini?');">
-              <?= Csrf::field() ?>
+              <?= csrf_field() ?>
               <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
               <button type="submit"
                 class="px-8 py-2 font-medium bg-red-200 rounded-lg border border-red-400 text-red-900 hover:bg-red-400 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer">
                 Delete User
               </button>
             </form>
-  
+
             <form method="post" action="/admin/users/reset-password"
               onsubmit="return confirm('Reset Password Akun ini?');">
-              <?= Csrf::field() ?>
+              <?= csrf_field() ?>
               <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
               <button type="submit"
                 class="px-8 py-2 font-medium bg-sky-200 rounded-lg border border-sky-400 text-sky-900 hover:bg-sky-400 transition-all focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 cursor-pointer">
                 Reset Password
               </button>
             </form>
-  
+
             <?php if ($user->status !== 'suspended'): ?>
               <form method="post" action="/admin/users/suspend">
-                <?= Csrf::field() ?>
+                <?= csrf_field() ?>
                 <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                 <button type="submit"
                   class="px-8 py-2 font-medium bg-yellow-200 rounded-lg border border-yellow-400 text-yellow-900 hover:bg-yellow-400 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 cursor-pointer">
@@ -177,9 +177,9 @@ use App\Models\User;
                 </button>
               </form>
             <?php else: ?>
-  
+
               <form method="post" action="/admin/users/unsuspend">
-                <?= Csrf::field() ?>
+                <?= csrf_field() ?>
                 <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                 <button type="submit"
                   class="px-8 py-2 font-medium bg-emerald-200 rounded-lg border border-emerald-400 text-emerald-900 hover:bg-emerald-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer">
@@ -192,26 +192,24 @@ use App\Models\User;
           <div class="flex items-start justify-around gap-4">
 
             <form method="post" action="/admin/users/approve-kubaca" onsubmit="return confirm('Terima bukti KuBaca?');">
-              <?= Csrf::field() ?>
+              <?= csrf_field() ?>
               <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
               <button type="submit"
                 class="px-8 py-2 font-medium bg-green-200 rounded-lg border border-green-400 text-green-900 hover:bg-green-400 transition-all focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 cursor-pointer">
                 Approve KuBaca
               </button>
             </form>
-  
+
             <div>
               <form method="post" action="/admin/users/reject-kubaca" onsubmit="return confirm('Tolak bukti KuBaca?');"
                 class="flex flex-col-reverse gap-2 border border-gray-400 rounded-lg ">
-                <?= Csrf::field() ?>
+                <?= csrf_field() ?>
                 <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                 <label class="px-4 flex flex-col">
                   Alasan (opsional)
-                  <input type="text" name="reason"
-                  class="border border-gray-400 rounded-lg p-4 text-wrap mt-2"
-                  />
+                  <input type="text" name="reason" class="border border-gray-400 rounded-lg p-4 text-wrap mt-2" />
                 </label>
-    
+
                 <button type="submit"
                   class="px-8 py-2 font-medium bg-red-200 rounded-lg border border-red-400 text-red-900 hover:bg-red-400 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer">
                   Reject KuBaca

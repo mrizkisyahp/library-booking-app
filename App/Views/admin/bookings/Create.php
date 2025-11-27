@@ -30,7 +30,7 @@ $old = $old ?? [];
 <?php endif; ?>
 
 <form method="post" action="/admin/bookings/store">
-  <?= Csrf::field() ?>
+  <?= csrf_field() ?>
   <input type="hidden" name="status" value="verified">
 
   <label>
@@ -38,7 +38,7 @@ $old = $old ?? [];
     <select name="user_id" required>
       <option value="">Select User</option>
       <?php foreach ($users as $user): ?>
-        <option value="<?= (int)$user->id_user ?>" <?= ((string)($old['user_id'] ?? '') === (string)$user->id_user) ? 'selected' : '' ?>>
+        <option value="<?= (int) $user->id_user ?>" <?= ((string) ($old['user_id'] ?? '') === (string) $user->id_user) ? 'selected' : '' ?>>
           <?= htmlspecialchars($user->nama) ?> (<?= htmlspecialchars($user->email) ?>)
         </option>
       <?php endforeach; ?>
@@ -50,7 +50,7 @@ $old = $old ?? [];
     <select name="ruangan_id" required>
       <option value="">Select Room</option>
       <?php foreach ($rooms as $room): ?>
-        <option value="<?= (int)$room->id_ruangan ?>" <?= ((string)($old['ruangan_id'] ?? '') === (string)$room->id_ruangan) ? 'selected' : '' ?>>
+        <option value="<?= (int) $room->id_ruangan ?>" <?= ((string) ($old['ruangan_id'] ?? '') === (string) $room->id_ruangan) ? 'selected' : '' ?>>
           <?= htmlspecialchars($room->nama_ruangan) ?>
         </option>
       <?php endforeach; ?>
@@ -59,7 +59,8 @@ $old = $old ?? [];
 
   <label>
     Date
-    <input type="date" name="tanggal_penggunaan_ruang" value="<?= htmlspecialchars($old['tanggal_penggunaan_ruang'] ?? '') ?>" required>
+    <input type="date" name="tanggal_penggunaan_ruang"
+      value="<?= htmlspecialchars($old['tanggal_penggunaan_ruang'] ?? '') ?>" required>
   </label>
 
   <label>

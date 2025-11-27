@@ -23,6 +23,7 @@ class App
     public ?Controller $controller = null;
     public ?DbModel $user;
     public AuthService $auth;
+    public Container $container;
     public static function getBaseUrl(): string
     {
         $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
@@ -34,6 +35,9 @@ class App
         $this->userClass = $config['userClass'] ?? User::class;
         self::$ROOT_DIR = $rootPath;
         self::$app = $this;
+
+        // Initialize Container
+        $this->container = new Container();
 
         $this->request = new Request();
         $this->response = new Response();
@@ -48,6 +52,15 @@ class App
         $this->auth = new AuthService($this->session, $this->userClass);
         $this->auth->bootstrap();
         $this->user = $this->auth->getUser();
+
+        // Register core bindings
+        $this->container->singleton(Container::class, fn() => $this->container);
+        $this->container->singleton(Request::class, fn() => $this->request);
+        $this->container->singleton(Response::class, fn() => $this->response);
+        $this->container->singleton(Session::class, fn() => $this->session);
+        $this->container->singleton(Database::class, fn() => $this->db);
+        $this->container->singleton(Router::class, fn() => $this->router);
+        $this->container->singleton(AuthService::class, fn() => $this->auth);
     }
 
     public function run(): void

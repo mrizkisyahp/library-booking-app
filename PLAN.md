@@ -15,8 +15,8 @@
 - [x] QueryBuilder: fluent queries + pagination + DbModel integration.
 - [x] Models: timestamps + soft deletes + default scope + restore helpers.
 - [x] Events: dispatcher + model lifecycle events.
-- [ ] Queue worker: dispatch helper + CLI worker.
-- [x] Helpers: global functions + DI container wiring.
+- [x] Queue worker: dispatch helper + CLI worker.
+- [x] Helpers: global functions + DI container wiring (✓ Container class, auto-wiring, bindings, singletons).
 - [x] Error handling/middleware: validation redirect handling + CSRF/auth/admin middleware; flash persistence improvements.
 - [ ] DB migration note: plan for MySQL → PostgreSQL later.
 
