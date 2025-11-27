@@ -4,6 +4,7 @@ namespace App\Core\Validator;
 
 use App\Core\App;
 use App\Core\Exceptions\ValidationException;
+use App\Core\QueryBuilder;
 use PDO;
 
 class Validator
@@ -27,6 +28,11 @@ class Validator
         }
 
         if (!empty($errors)) {
+            foreach ($data as $key => $value) {
+                if (!is_array($value)) {
+                    flash('old_' . $key, $value);
+                }
+            }
             throw new ValidationException($errors);
         }
 
@@ -139,13 +145,39 @@ class Validator
 
     private function validateExists(string $field, $value, array $params): ?string
     {
-        // after query builder implement this
-        return false;
+        if (empty($params[0]) || empty($params[1])) {
+            return null;
+        }
+
+        $table = $params[0];
+        $column = $params[1] ?? $field;
+
+        $qb = new QueryBuilder(App::$app->db->pdo);
+        $count = $qb->table($table)->where($column, $value)->count();
+
+        return $count > 0 ? null : "{$field} does not exist.";
     }
 
     private function validateUnique(string $field, $value, array $params): ?string
     {
-        // after query builder implement this
-        return false;
+        if (empty($params[0])) {
+            return null;
+        }
+
+        $table = $params[0];
+        $column = $params[1] ?? $field;
+        $exceptId = $params[2] ?? null;
+
+        $qb = new QueryBuilder(App::$app->db->pdo);
+        $query = $qb->table($table)->where($column, $value);
+
+        if ($exceptId) {
+            $primaryKey = $params[3] ?? 'id';
+            $query->where($primaryKey, '!=', $exceptId);
+        }
+
+        $count = $query->count();
+
+        return $count === 0 ? null : "The {$field} has already been taken.";
     }
 }

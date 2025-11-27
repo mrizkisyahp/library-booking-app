@@ -6,6 +6,7 @@ use App\Core\Relations\BelongsTo;
 use App\Core\Relations\HasMany;
 use App\Core\Relations\HasOne;
 use App\Core\Relations\BelongsToMany;
+use App\Core\Event;
 use App\Core\Relations\Relation;
 
 abstract class DbModel extends Model
@@ -37,9 +38,10 @@ abstract class DbModel extends Model
     {
         $primaryKey = static::primaryKey();
         $now = date('Y-m-d H:i:s');
+        $isNew = empty($this->{$primaryKey});
 
         // update if found primary key
-        if (!empty($this->{$primaryKey})) {
+        if (!$isNew) {
             if ($this->timestamps) {
                 $this->updated_at = $now;
             }
@@ -48,10 +50,21 @@ abstract class DbModel extends Model
             foreach ($this->attributes() as $attribute) {
                 $fields[$attribute] = $this->{$attribute};
             }
-            return static::Query()->where($primaryKey, $this->{$primaryKey})->update($fields) > 0;
+            $result = static::Query()->where($primaryKey, $this->{$primaryKey})->update($fields) > 0;
+
+            if ($result) {
+                Event::dispatch(static::tableName() . '.updated', $this);
+            }
+
+            return $result;
         }
 
         // insert if not
+        if ($this->timestamps) {
+            $this->created_at = $now;
+            $this->updated_at = $now;
+        }
+
         $data = [];
         foreach ($this->attributes() as $attribute) {
             $data[$attribute] = $this->{$attribute};
@@ -61,6 +74,7 @@ abstract class DbModel extends Model
 
         if ($inserted) {
             $this->{$primaryKey} = (int) App::$app->db->pdo->lastInsertId();
+            Event::dispatch(static::tableName() . '.created', $this);
         }
 
         return $inserted;
@@ -72,10 +86,22 @@ abstract class DbModel extends Model
 
         if ($this->softDeletes) {
             $this->deleted_at = date('Y-m-d H:i:s');
-            return $this->save();
+            $result = $this->save();
+
+            if ($result) {
+                Event::dispatch(static::tableName() . '.deleted', $this);
+            }
+
+            return $result;
         }
 
-        return static::Query()->where($primaryKey, $this->{$primaryKey})->delete() > 0;
+        $result = static::Query()->where($primaryKey, $this->{$primaryKey})->delete() > 0;
+
+        if ($result) {
+            Event::dispatch(static::tableName() . '.deleted', $this);
+        }
+
+        return $result;
     }
 
     public static function withTrashed(): QueryBuilder
@@ -96,7 +122,13 @@ abstract class DbModel extends Model
         }
 
         $this->deleted_at = null;
-        return $this->save();
+        $result = $this->save();
+
+        if ($result) {
+            Event::dispatch(static::tableName() . '.restored', $this);
+        }
+
+        return $result;
     }
 
     public function forceDelete(): bool

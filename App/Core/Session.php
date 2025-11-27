@@ -64,9 +64,9 @@ class Session
         }
     }
 
-    public function getFlash(string $key): string|false
+    public function getFlash(string $key, $default = null): string|false
     {
-        return $_SESSION[self::FLASH_KEY][$key]['value'] ?? false;
+        return $_SESSION[self::FLASH_KEY][$key]['value'] ?? $default;
     }
 
     public function __destruct()
@@ -87,9 +87,9 @@ class Session
         $_SESSION[$key] = $value;
     }
 
-    public function get($key)
+    public function get($key, $default = null)
     {
-        return $_SESSION[$key] ?? false;
+        return $_SESSION[$key] ?? $default;
     }
 
     public function remove($key): void

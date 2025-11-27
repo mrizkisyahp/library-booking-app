@@ -14,10 +14,10 @@
 - [x] Validation: Validator + ValidationException + rule set.
 - [x] QueryBuilder: fluent queries + pagination + DbModel integration.
 - [x] Models: timestamps + soft deletes + default scope + restore helpers.
-- [ ] Events: dispatcher + model lifecycle events.
+- [x] Events: dispatcher + model lifecycle events.
 - [ ] Queue worker: dispatch helper + CLI worker.
-- [ ] Helpers: global functions + DI container wiring.
-- [ ] Error handling/middleware: validation redirect handling + CSRF/auth/admin middleware; flash persistence improvements.
+- [x] Helpers: global functions + DI container wiring.
+- [x] Error handling/middleware: validation redirect handling + CSRF/auth/admin middleware; flash persistence improvements.
 - [ ] DB migration note: plan for MySQL → PostgreSQL later.
 
 ## Work Breakdown
