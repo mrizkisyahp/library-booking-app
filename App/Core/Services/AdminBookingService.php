@@ -43,7 +43,7 @@ class AdminBookingService
             return null;
         }
 
-        return Booking::findOne(['id_booking' => $id]);
+        return Booking::Query()->where('id_booking', $id)->first();
     }
 
     public function getStatusOptions(): array
@@ -62,8 +62,8 @@ class AdminBookingService
     public function createBooking(array $input): array
     {
 
-        $user = User::findOne(['id_user' => (int) ($input['user_id'] ?? 0)]);
-        $room = Room::findOne(['id_ruangan' => (int) ($input['ruangan_id'] ?? 0)]);
+        $user = User::Query()->where('id_user', (int) ($input['user_id'] ?? 0))->first();
+        $room = Room::Query()->where('id_ruangan', (int) ($input['ruangan_id'] ?? 0))->first();
         if (!$user || !$room) {
             return [
                 'success' => false,
@@ -126,8 +126,8 @@ class AdminBookingService
             ];
         }
 
-        $user = User::findOne(['id_user' => (int) ($input['user_id'] ?? 0)]);
-        $room = Room::findOne(['id_ruangan' => (int) ($input['ruangan_id'] ?? 0)]);
+        $user = User::Query()->where('id_user', (int) ($input['user_id'] ?? 0))->first();
+        $room = Room::Query()->where('id_ruangan', (int) ($input['ruangan_id'] ?? 0))->first();
         if (!$user || !$room) {
             return [
                 'success' => false,
@@ -229,8 +229,8 @@ class AdminBookingService
         //     ];
         // }
 
-        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
-        $pic = User::findOne(['id_user' => $booking->user_id]);
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
         $members = $booking->getMembers();
 
         return [
@@ -262,9 +262,9 @@ class AdminBookingService
         $booking->status = 'verified';
         $booking->save();
 
-        $pic = User::findOne(['id_user' => $booking->user_id]);
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
         if ($pic instanceof User) {
-            $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+            $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
             $subject = 'Booking Draft Approved | Library Booking App';
             $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
             $emailBody = "
@@ -313,9 +313,9 @@ class AdminBookingService
         $booking->status = 'completed';
         $booking->save();
 
-        $pic = User::findOne(['id_user' => $booking->user_id]);
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
         if ($pic instanceof User) {
-            $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+            $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
             $subject = 'Booking Selesai - Mohon Feedback Anda | Library Booking App';
             $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
 
@@ -374,8 +374,8 @@ class AdminBookingService
             ];
         }
 
-        $pic = User::findOne(['id_user' => $booking->user_id]);
-        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
         if ($pic instanceof User && $room instanceof Room) {
             $subject = 'Check-in Berhasil | Library Booking App';
             $bookingDate = date('d M Y', strtotime($booking->tanggal_penggunaan_ruang));
@@ -423,8 +423,8 @@ class AdminBookingService
             ];
         }
 
-        $pic = User::findOne(['id_user' => $booking->user_id]);
-        $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
         if ($pic instanceof User && $room instanceof Room) {
             $subject = 'Booking Dibatalkan | Library Booking App';
             $body = "
@@ -452,7 +452,7 @@ class AdminBookingService
     {
         do {
             $code = strtoupper(bin2hex(random_bytes(3)));
-            $exists = Booking::findOne(['checkin_code' => $code]);
+            $exists = Booking::Query()->where('checkin_code', $code)->first();
         } while ($exists);
 
         return $code;

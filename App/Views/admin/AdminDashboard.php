@@ -194,7 +194,8 @@ $users = $resourceStats['users'];
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                    <?= htmlspecialchars($usage['nama_ruangan']) ?></td>
+                    <?= htmlspecialchars($usage['nama_ruangan']) ?>
+                  </td>
                   <td class="px-6 py-4 text-gray-700"><?= $usage['booking_count'] ?></td>
                   <td class="px-6 py-4 text-gray-900">
                     <div class="flex items-center">
@@ -270,7 +271,7 @@ $users = $resourceStats['users'];
       </h2>
       <p class="text-sm text-slate-600 mb-4">Punya token undangan? Gabung ke booking.</p>
       <form method="post" action="/bookings/join" class="space-y-3">
-        <?= Csrf::field() ?>
+        <?= csrf_field() ?>
         <div>
           <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
             class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"

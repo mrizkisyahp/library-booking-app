@@ -12,7 +12,7 @@ class Session
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
                 || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 
-            $lifetime = (int)($_ENV['SESSION_LIFETIME'] ?? 7200);
+            $lifetime = (int) ($_ENV['SESSION_LIFETIME'] ?? 7200);
 
             session_set_cookie_params([
                 'lifetime' => $lifetime,
@@ -35,7 +35,7 @@ class Session
         $_SESSION[self::FLASH_KEY] = $flashMessages;
     }
 
-    public function setFlash(string $key, string $message): void
+    public function setFlash(string $key, $message): void
     {
         $_SESSION[self::FLASH_KEY][$key] = [
             'remove' => false,
@@ -43,9 +43,30 @@ class Session
         ];
     }
 
-    public function getFlash(string $key): string|false
+    public function flash(string $key, $value): void
     {
-        return $_SESSION[self::FLASH_KEY][$key]['value'] ?? false;
+        $this->setFlash($key, $value);
+    }
+
+    public function getFlashData(): array
+    {
+        return $_SESSION[self::FLASH_KEY] ?? [];
+    }
+
+    public function keep(array $keys): void
+    {
+        if (!isset($_SESSION[self::FLASH_KEY]))
+            return;
+        foreach ($keys as $key) {
+            if (isset($_SESSION[self::FLASH_KEY][$key])) {
+                $_SESSION[self::FLASH_KEY][$key]['remove'] = false;
+            }
+        }
+    }
+
+    public function getFlash(string $key, $default = false): string|false
+    {
+        return $_SESSION[self::FLASH_KEY][$key]['value'] ?? $default;
     }
 
     public function __destruct()
@@ -66,9 +87,9 @@ class Session
         $_SESSION[$key] = $value;
     }
 
-    public function get($key)
+    public function get($key, $default = null)
     {
-        return $_SESSION[$key] ?? false;
+        return $_SESSION[$key] ?? $default;
     }
 
     public function remove($key): void

@@ -66,10 +66,10 @@ class AdminFeedbackService
             ];
         }
 
-        $booking = Booking::findOne(['id_booking' => $detail['booking_id']]);
-        $room = $booking ? Room::findOne(['id_ruangan' => $booking->ruangan_id]) : null;
-        $pic = $booking ? User::findOne(['id_user' => $booking->user_id]) : null;
-        $feedbackUser = isset($detail['user_id']) ? User::findOne(['id_user' => $detail['user_id']]) : null;
+        $booking = Booking::Query()->where('id_booking', $detail['booking_id'])->first();
+        $room = $booking ? Room::Query()->where('id_ruangan', $booking->ruangan_id)->first() : null;
+        $pic = $booking ? User::Query()->where('id_user', $booking->user_id)->first() : null;
+        $feedbackUser = isset($detail['user_id']) ? User::Query()->where('id_user', $detail['user_id'])->first() : null;
         $members = $booking ? $booking->getMembers() : [];
 
         return [

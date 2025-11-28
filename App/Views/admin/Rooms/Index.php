@@ -288,16 +288,16 @@ $statusColors = [
                   Edit
                 </a>
                 <form method="post" action="/admin/rooms/delete" class="inline">
-                  <?= Csrf::field() ?>
+                  <?= csrf_field() ?>
                   <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">
                   <button type="submit" onclick="return confirm('Hapus ruangan ini?')"
                     class="inline-flex items-center px-4 py-2 bg-red-200 rounded-lg font-medium text-red-900 hover:bg-red-400 transition-colors cursor-pointer border-2 border-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-sm">
                     Hapus
                   </button>
                 </form>
-                <?php if ($room->status_ruangan !== 'unavailable' ): ?>
+                <?php if ($room->status_ruangan !== 'unavailable'): ?>
                   <form method="post" action="/admin/rooms/deactivate" class="inline">
-                    <?= Csrf::field() ?>
+                    <?= csrf_field() ?>
                     <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">
                     <button type="submit"
                       class="inline-flex items-center px-4 py-2 bg-yellow-200 rounded-lg font-medium text-yellow-900 hover:bg-yellow-400 transition-colors cursor-pointer border-2 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 text-sm">
@@ -306,7 +306,7 @@ $statusColors = [
                   </form>
                 <?php else: ?>
                   <form method="post" action="/admin/rooms/activate" class="inline">
-                    <?= Csrf::field() ?>
+                    <?= csrf_field() ?>
                     <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">
                     <button type="submit"
                       class="inline-flex items-center px-4 py-2 bg-emerald-200 rounded-lg font-medium text-emerald-900 hover:bg-emerald-400 transition-colors cursor-pointer border-2 border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 text-sm">

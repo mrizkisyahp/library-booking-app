@@ -25,7 +25,7 @@ use App\Core\Csrf;
 
       <div class="mt-6">
         <form action="/forgot" method="post">
-          <?= Csrf::field() ?>
+          <?= csrf_field() ?>
 
           <div>
 

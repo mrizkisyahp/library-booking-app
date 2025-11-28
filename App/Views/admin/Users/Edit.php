@@ -23,30 +23,30 @@ $statuses = $statuses ?? [];
   <section>
     <h2>Quick Actions</h2>
     <form method="post" action="/admin/users/reset-password">
-      <?= Csrf::field() ?>
+      <?= csrf_field() ?>
       <input type="hidden" name="id_user" value="<?= $model->id_user ?>">
       <button type="submit">Reset Password</button>
     </form>
     <?php if ($model->status !== 'suspended'): ?>
       <form method="post" action="/admin/users/suspend">
-        <?= Csrf::field() ?>
+        <?= csrf_field() ?>
         <input type="hidden" name="id_user" value="<?= $model->id_user ?>">
         <button type="submit">Suspend User</button>
       </form>
     <?php else: ?>
       <form method="post" action="/admin/users/unsuspend">
-        <?= Csrf::field() ?>
+        <?= csrf_field() ?>
         <input type="hidden" name="id_user" value="<?= $model->id_user ?>">
         <button type="submit">Unsuspend User</button>
       </form>
     <?php endif; ?>
     <form method="post" action="/admin/users/approve-kubaca">
-      <?= Csrf::field() ?>
+      <?= csrf_field() ?>
       <input type="hidden" name="id_user" value="<?= $model->id_user ?>">
       <button type="submit">Approve KuBaca</button>
     </form>
     <form method="post" action="/admin/users/reject-kubaca">
-      <?= Csrf::field() ?>
+      <?= csrf_field() ?>
       <input type="hidden" name="id_user" value="<?= $model->id_user ?>">
       <label>
         Reason (optional)
@@ -59,7 +59,7 @@ $statuses = $statuses ?? [];
   <hr>
 
   <form action="/admin/users/update" method="post">
-    <?= Csrf::field() ?>
+    <?= csrf_field() ?>
     <input type="hidden" name="id_user" value="<?= $model->id_user ?>">
 
     <fieldset>
@@ -123,8 +123,8 @@ $statuses = $statuses ?? [];
         <select name="id_role">
           <option value="">Select role</option>
           <?php foreach ($roles as $role): ?>
-            <?php $value = (string)($role['id_role'] ?? ''); ?>
-            <option value="<?= htmlspecialchars($value) ?>" <?= (string)($model->id_role ?? '') === $value ? 'selected' : '' ?>>
+            <?php $value = (string) ($role['id_role'] ?? ''); ?>
+            <option value="<?= htmlspecialchars($value) ?>" <?= (string) ($model->id_role ?? '') === $value ? 'selected' : '' ?>>
               <?= htmlspecialchars($role['nama_role'] ?? 'Role') ?>
             </option>
           <?php endforeach; ?>
@@ -147,7 +147,8 @@ $statuses = $statuses ?? [];
 
       <label>
         Peringatan
-        <input type="number" name="peringatan" min="0" value="<?= htmlspecialchars((string)($model->peringatan ?? 0)) ?>">
+        <input type="number" name="peringatan" min="0"
+          value="<?= htmlspecialchars((string) ($model->peringatan ?? 0)) ?>">
       </label>
     </fieldset>
 
@@ -179,4 +180,3 @@ $statuses = $statuses ?? [];
 
     <button type="submit">Save Changes</button>
   </form>
-

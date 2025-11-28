@@ -27,17 +27,6 @@ class Room extends DbModel
         return 'id_ruangan';
     }
 
-    public function rules(): array
-    {
-        return [
-            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3], [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_ruangan]],
-            'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
-            'kapasitas_max' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
-            'jenis_ruangan' => [self::RULE_REQUIRED],
-            'deskripsi_ruangan' => [self::RULE_REQUIRED],
-        ];
-    }
-
     public function attributes(): array
     {
         return [
@@ -52,6 +41,28 @@ class Room extends DbModel
             'updated_at',
         ];
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'ruangan_id', 'id_ruangan');
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'room_id', 'id_ruangan');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3], [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_ruangan]],
+            'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
+            'kapasitas_max' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
+            'jenis_ruangan' => [self::RULE_REQUIRED],
+            'deskripsi_ruangan' => [self::RULE_REQUIRED],
+        ];
+    }
+
 
     public static function search(array $filters = []): array
     {

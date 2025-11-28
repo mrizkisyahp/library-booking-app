@@ -1,0 +1,10 @@
+{
+    "id": "job_692858fe282409.91067289",
+    "job": "App\\Jobs\\ExampleJob",
+    "data": {
+        "name": "Alice"
+    },
+    "attempts": 0,
+    "max_retries": 2,
+    "created_at": 1764251902
+}

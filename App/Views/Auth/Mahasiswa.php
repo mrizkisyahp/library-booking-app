@@ -29,7 +29,7 @@ use App\Core\Csrf;
 
       <div class="mt-6">
         <form action="/register/mahasiswa" method="post">
-          <?= Csrf::field() ?>
+          <?= csrf_field() ?>
 
           <div id="step1" class="space-y-4">
 

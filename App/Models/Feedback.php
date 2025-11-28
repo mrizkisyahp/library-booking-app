@@ -45,6 +45,21 @@ class Feedback extends DbModel
         ];
     }
 
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class, 'booking_id', 'id_booking');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id_user');
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class, 'room_id', 'id_ruangan');
+    }
+
     public function rules(): array
     {
         return [];

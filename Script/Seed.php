@@ -12,7 +12,7 @@ $config = [
     'userClass' => \App\Models\User::class,
     'database' => [
         'host' => $_ENV['DB_HOST'],
-        'port' => (int)($_ENV['DB_PORT']),
+        'port' => (int) ($_ENV['DB_PORT']),
         'name' => $_ENV['DB_NAME'],
         'user' => $_ENV['DB_USER'],
         'pass' => $_ENV['DB_PASS'],
@@ -166,7 +166,7 @@ try {
     //         status = VALUES(status),
     //         updated_at = VALUES(updated_at)
     // ");
-    
+
     // foreach ($bookings as $booking) {
     //     $stmt->execute($booking);
     // }
