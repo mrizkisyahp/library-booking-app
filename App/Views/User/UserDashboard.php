@@ -4,7 +4,19 @@
 /** @var array $pendingFeedbacks */
 /** @var \App\Models\User $user */
 use App\Core\Csrf;
+use Carbon\Carbon;
 use App\Core\App;
+Carbon::setLocale('id');
+
+function formatWaktu($waktu)
+{
+  return Carbon::parse($waktu)->format('H:i') . ' WIB';
+}
+
+function formatTanggal($tanggal)
+{
+  return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
+}
 ?>
 
 <!-- Pending Feedback Warning -->
@@ -40,13 +52,14 @@ use App\Core\App;
 <?php endif; ?>
 
 <!-- Welcome Header -->
-<div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
-  <div class="flex items-center justify-between">
+<div class="rounded-2xl p-4 mb-6">
+  <div class="flex items-center justify-between mt-6 px-6">
     <div>
-      <h1 class="text-3xl font-bold text-slate-800 mb-2">
-        Selamat Datang, <span class="text-emerald-600"><?= htmlspecialchars($user->nama) ?></span>! 👋
+      <h1 class="text-4xl font-bold text-white md:text-black mb-2">
+        Selamat Datang, <span
+          class="text-emerald-100 md:text-emerald-800 capitalize"><?= htmlspecialchars($user->nama) ?></span>! 👋
       </h1>
-      <p class="text-slate-600">Kelola booking ruangan Anda dengan mudah</p>
+      <p class="text-white md:text-black">Kelola booking ruangan Anda dengan mudah</p>
     </div>
     <div class="hidden md:block">
       <svg class="w-24 h-24 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,95 +104,95 @@ use App\Core\App;
             <p class="text-xs font-semibold text-slate-600 mb-1"><?= $config['label'] ?></p>
             <p class="text-3xl font-bold text-slate-800"><?= $stats['statusCounts'][$statusKey] ?? 0 ?></p>
           </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
 
-    <!-- Recent Bookings -->
-    <div class="bg-white rounded-2xl shadow-lg p-8">
-      <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-        <svg class="w-7 h-7 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Booking Terbaru
-      </h2>
-
-      <?php if (empty($bookings)): ?>
-        <div class="text-center py-12">
-          <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          <p class="text-slate-600 mb-4">Belum ada booking. Mulai booking ruangan sekarang!</p>
           <a href="/rooms"
-            class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular mb-4 shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
+            <!-- <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg> -->
             Cari Ruangan
           </a>
-        </div>
-      <?php else: ?>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
-              <tr
-                class="*:px-4 *:py-3 *:text-left *:text-regular *:font-semibold *:text-gray-50 *:capitalize *:tracking-wider *:whitespace-nowrap">
-                <th>Ruangan</th>
-                <th>Tanggal & Waktu</th>
-                <th>Status</th>
-                <th>Peran</th>
-                <th>Kode Check-in</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200">
-              <?php foreach ($bookings as $booking): ?>
-                <tr class="hover:bg-gray-200 odd:bg-gray-50 even:bg-gray-100 transition-colors border-b border-gray-200">
-                  <td class="px-4 py-4 font-medium text-slate-800">
-                    <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
-                  </td>
-                  <td class="px-4 py-4 text-slate-600">
-                    <?= htmlspecialchars($booking['tanggal_penggunaan_ruang']) ?><br>
-                    <span class="text-xs text-slate-500"><?= htmlspecialchars($booking['waktu_mulai']) ?></span>
-                  </td>
-                  <td class="px-4 py-4">
-                    <?php
-                    $statusColors = [
-                      'draft' => 'bg-gray-100 text-gray-800',
-                      'pending' => 'bg-yellow-100 text-yellow-800',
-                      'verified' => 'bg-blue-100 text-blue-800',
-                      'active' => 'bg-emerald-100 text-emerald-800',
-                      'completed' => 'bg-green-100 text-green-800',
-                      'cancelled' => 'bg-red-100 text-red-800',
-                      'expired' => 'bg-slate-100 text-slate-700',
-                      'no_show' => 'bg-orange-100 text-orange-800',
-                    ];
-                    $statusKey = strtolower($booking['status']);
-                    $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
-                    $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
-                    ?>
-                    <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold <?= $statusColor ?>">
-                      <?= htmlspecialchars($statusLabel) ?>
-                    </span>
-                  </td>
-                  <td class="px-4 py-4 text-slate-600">
-                    <?= htmlspecialchars($booking['role']) ?>
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <?php if ($statusKey === 'verified' && !empty($booking['checkin_code'])): ?>
-                      <span
-                        class="font-mono font-bold text-emerald-600 text-lg"><?= htmlspecialchars($booking['checkin_code']) ?></span>
-                    <?php else: ?>
-                      <span class="text-slate-400">—</span>
-                    <?php endif; ?>
-                  </td>
-                  <td class="px-4 py-4">
+
+          <a href="/"
+            class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
+            Masukkan Kode Undangan
+          </a>
+        <?php else: ?>
+          <?php foreach ($bookings as $booking): ?>
+            <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
+              <div class="flex flex-col justify-start p-6">
+                <p class="font-bold text-2xl mb-4">
+                  <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
+                </p>
+                <div class="w-full">
+                  <?php
+                  $statusColors = [
+                    'draft' => 'bg-gray-300 text-gray-800',
+                    'pending' => 'bg-yellow-300 text-yellow-800',
+                    'verified' => 'bg-blue-100 text-blue-800',
+                    'active' => 'bg-emerald-100 text-emerald-800',
+                    'completed' => 'bg-green-100 text-green-800',
+                    'cancelled' => 'bg-red-100 text-red-800',
+                    'expired' => 'bg-slate-100 text-slate-700',
+                    'no_show' => 'bg-orange-100 text-orange-800',
+                  ];
+                  $statusKey = strtolower($booking['status']);
+                  $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                  $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
+                  ?>
+                  <div class="px-4 py-2 mb-4 rounded-4xl font-regular tracking-wide <?= $statusColor ?>">
+                    Status:
+                    <?= htmlspecialchars($statusLabel) ?>
+                  </div>
+
+                  <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-calendar-days-icon lucide-calendar-days size-4">
+                      <path d="M8 2v4" />
+                      <path d="M16 2v4" />
+                      <rect width="18" height="18" x="3" y="4" rx="2" />
+                      <path d="M3 10h18" />
+                      <path d="M8 14h.01" />
+                      <path d="M12 14h.01" />
+                      <path d="M16 14h.01" />
+                      <path d="M8 18h.01" />
+                      <path d="M12 18h.01" />
+                      <path d="M16 18h.01" />
+                    </svg>
+                    <?= htmlspecialchars(formatTanggal($booking['tanggal_penggunaan_ruang'])) ?>
+                  </p>
+
+                  <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-clock3-icon lucide-clock-3 size-4">
+                      <path d="M12 6v6h4" />
+                      <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <?= htmlspecialchars(formatWaktu($booking['waktu_mulai'])) ?>
+                  </p>
+
+                  <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-users-round-icon lucide-users-round size-4">
+                      <path d="M18 21a8 8 0 0 0-16 0" />
+                      <circle cx="10" cy="8" r="5" />
+                      <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                    </svg>
+                    <!-- <?= (int) $currentMembers ?> /
+                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                      · Min <?= (int) $requiredMembers ?>
+                    <?php endif; ?> -->
+                    1/6 peserta . Min 1
+                  </p>
+
+                  <div class="w-full">
                     <?php if ($statusKey === 'draft'): ?>
                       <a href="/bookings/draft?id=<?= (int) $booking['id_booking'] ?>"
-                        class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
+                        class="inline-block bg-emerald-600 hover:bg-emerald-700 font-semibold text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                         Lihat Draft
                       </a>
                     <?php elseif ($booking['role'] === 'PIC' && $statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
@@ -188,25 +201,14 @@ use App\Core\App;
                         Isi Feedback
                       </a>
                     <?php else: ?>
-                      <span class="text-slate-400">—</span>
+                      <span class="inline-block text-slate-400 w-full px-4 py-2 rounded-xl text-center">—</span>
                     <?php endif; ?>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-        <div class="mt-6 text-center">
-          <a href="/my-bookings" class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-semibold">
-            Lihat Semua Booking
-            <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </a>
-        </div>
-      <?php endif; ?>
-    </div>
-  </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        <?php endif ?>
 
   <!-- Sidebar -->
   <div class="space-y-6">

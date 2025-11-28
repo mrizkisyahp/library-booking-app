@@ -3,6 +3,8 @@
 namespace App\Core\Services;
 
 use App\Core\App;
+use App\Models\Booking;
+use App\Models\Room;
 use App\Models\User;
 use App\Models\Role;
 use App\Core\Services\FeedbackService;
@@ -103,4 +105,54 @@ class UserDashboardService
 
         return $warnings;
     }
+
+//     public function getMinimumMembersRequired(?Booking $booking): int
+//     {
+//         $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+//         return $room && $room->kapasitas_min ? (int) $room->kapasitas_min : 0;
+//     }
+
+//     public function getMaximumMembersRequired(?Booking $booking): int
+//     {
+//         $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
+//         return $room && $room->kapasitas_max ? (int) $room->kapasitas_max : 0;
+//     }
+
+//     public function getMemberCount(?Booking $booking): int
+//     {
+//         $db = App::$app->db;
+
+//         $membersStmt = $db->prepare("
+//             SELECT COUNT(*) FROM anggota_booking WHERE booking_id = :id
+//         ");
+//         $membersStmt->bindValue(':id', $booking->id_booking, \PDO::PARAM_INT);
+//         $membersStmt->execute();
+//         $members = (int) $membersStmt->fetchColumn();
+
+//         $picStmt = $db->prepare("
+//             SELECT 1 FROM anggota_booking WHERE booking_id = :id AND user_id = :pic LIMIT 1
+//         ");
+//         $picStmt->bindValue(':id', $booking->id_booking, \PDO::PARAM_INT);
+//         $picStmt->bindValue(':pic', $booking->user_id, \PDO::PARAM_INT);
+//         $picStmt->execute();
+//         $picAlreadyCounted = (bool) $picStmt->fetchColumn();
+
+//         return $picAlreadyCounted ? $members : $members + 1;
+//     }
+
+// public function meetsMemberRequirement(?Booking $booking): bool
+//     {
+//         $minRequired = $this->getMinimumMembersRequired($booking) ?? null;
+//         $maxRequired = $this->getMaximumMembersRequired($booking) ?? null;
+//         $currentCount = $this->getMemberCount($booking) ?? null;
+
+//         if ($minRequired <= 0 && $maxRequired <= 0) {
+//             return true;
+//         }
+
+//         $meetsMin = $minRequired <= 0 || $currentCount >= $minRequired;
+//         $meetsMax = $maxRequired <= 0 || $currentCount <= $maxRequired;
+
+//         return $meetsMin && $meetsMax;
+//     }
 }

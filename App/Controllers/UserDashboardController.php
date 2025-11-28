@@ -7,6 +7,7 @@ use App\Core\Controller;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Services\UserDashboardService;
 use App\Models\User;
+use App\Models\Booking;
 
 class UserDashboardController extends Controller
 {
@@ -38,6 +39,12 @@ class UserDashboardController extends Controller
         $picBookings = $dashboardService->getPicBookings($userId);
         $memberBookings = $dashboardService->getAnggotaBookings($userId);
         $pendingFeedbacks = $dashboardService->getPendingFeedbacks($userId);
+        $booking = Booking::findOne(['id_booking']);
+
+        // echo '<pre>';
+        // print_r($booking);
+        // echo '</pre>';
+        // exit;
 
         $bookings = array_merge($picBookings, $memberBookings);
         usort($bookings, static function ($a, $b) {
@@ -49,6 +56,11 @@ class UserDashboardController extends Controller
             'stats' => $stats,
             'bookings' => $bookings,
             'pendingFeedbacks' => $pendingFeedbacks,
+            // 'canSubmit' => $dashboardService->meetsMemberRequirement($booking) ?? null,
+            // 'requiredMembers' => $dashboardService->getMinimumMembersRequired($booking) ?? null,
+            // 'maximumMembers' => $dashboardService->getMaximumMembersRequired($booking) ?? null,
+            // 'currentMembers' => $dashboardService->getMemberCount($booking) ?? null,
+
         ]);
     }
 }
