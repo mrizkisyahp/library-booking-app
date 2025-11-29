@@ -17,7 +17,7 @@ $user = App::$app->user;
 
 <body class="min-h-screen bg-slate-100">
     <!-- sidebar 😭 -->
-    <aside class="hidden md:flex group flex-col justify-between fixed left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-20 hover:w-72 z-10">
+    <aside class="hidden md:flex group flex-col justify-between fixed left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10">
         <ul class="flex flex-col mt-10 space-y-4">
             <!-- sidebar items -->
             <!-- Logo -->
@@ -171,13 +171,13 @@ $user = App::$app->user;
                         </span>
                     </a>
                 </li>
-                <li class="w-full mx-2 px-2 space-x-3">
-                    <form action="/logout" method="post" class="w-full cursor pointer">
+                <li class="flex items-center mx-2 px-2 space-x-3 cursor-pointer">
+                    <form action="/logout" method="post" class="w-full ">
                         <?= Csrf::field() ?>
                         <button type="submit"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
-                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
+                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0 cursor-pointer">
                                 Logout
                             </span>
                         </button>
@@ -285,6 +285,12 @@ $user = App::$app->user;
 
             <?php
             $active = $_SERVER['REQUEST_URI'];
+            $currentPageQuery = basename($active);
+            $currentPage = explode('?', $currentPageQuery)[0];
+            // echo "<pre>";
+            // print_r($currentPage);
+            // echo '</pre>';
+            // exit;
 
             if (App::$app->auth->isGuest()) {
                 $url = '/';
@@ -347,7 +353,7 @@ $user = App::$app->user;
             <?php else: ?>
 
                 <!-- Cari ruangan -->
-                <a href="/rooms" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/my-bookings") ?>">
+                <a href="/rooms" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/rooms") ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-search-icon lucide-search size-6">
@@ -358,7 +364,7 @@ $user = App::$app->user;
                 </a>
 
                 <!-- buking -->
-                <a href="/my-bookings" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/rooms") ?>">
+                <a href="/my-bookings" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/my-bookings") ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="lucide lucide-book-open-text-icon lucide-book-open-text size-6">
