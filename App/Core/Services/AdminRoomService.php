@@ -15,8 +15,8 @@ class AdminRoomService
 
     public function listRooms(array $filters = []): array
     {
-        $page = max(1, (int)($filters['page'] ?? 1));
-        $perPage = (int)($filters['perPage'] ?? self::PER_PAGE);
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
             'keyword' => $filters['keyword'] ?? null,
@@ -52,7 +52,7 @@ class AdminRoomService
             return null;
         }
 
-        return Room::findOne(['id_ruangan' => $id]);
+        return Room::Query()->where('id_ruangan', $id)->first();
     }
 
     public function createRoom(array $data): array
@@ -175,13 +175,13 @@ class AdminRoomService
 
     private function mapData(Room $room, array $data): void
     {
-        $room->nama_ruangan = trim((string)($data['nama_ruangan'] ?? $room->nama_ruangan));
+        $room->nama_ruangan = trim((string) ($data['nama_ruangan'] ?? $room->nama_ruangan));
         $room->kapasitas_min = $this->toInt($data['kapasitas_min'] ?? $room->kapasitas_min);
         $room->kapasitas_max = $this->toInt($data['kapasitas_max'] ?? $room->kapasitas_max);
-        $room->jenis_ruangan = trim((string)($data['jenis_ruangan'] ?? $room->jenis_ruangan));
-        $room->deskripsi_ruangan = trim((string)($data['deskripsi_ruangan'] ?? $room->deskripsi_ruangan));
+        $room->jenis_ruangan = trim((string) ($data['jenis_ruangan'] ?? $room->jenis_ruangan));
+        $room->deskripsi_ruangan = trim((string) ($data['deskripsi_ruangan'] ?? $room->deskripsi_ruangan));
 
-        $status = strtolower(trim((string)($data['status_ruangan'] ?? $room->status_ruangan)));
+        $status = strtolower(trim((string) ($data['status_ruangan'] ?? $room->status_ruangan)));
         error_log($status);
         if (!in_array($status, $this->getStatusOptions(), true)) {
             if ($status === 'adminonly') {
@@ -232,8 +232,8 @@ class AdminRoomService
             $isValid = false;
         }
 
-        $existing = Room::findOne(['nama_ruangan' => $room->nama_ruangan]);
-        if ($existing && (int)$existing->id_ruangan !== (int)$roomId) {
+        $existing = Room::Query()->where('nama_ruangan', $room->nama_ruangan)->first();
+        if ($existing && (int) $existing->id_ruangan !== (int) $roomId) {
             $room->addError('nama_ruangan', 'Room name already exists.');
             $isValid = false;
         }
@@ -247,7 +247,7 @@ class AdminRoomService
             return null;
         }
 
-        return (int)$value;
+        return (int) $value;
     }
 
     private function hasActiveBookings(int $roomId): bool
@@ -264,6 +264,6 @@ class AdminRoomService
         }
 
         $stmt->execute();
-        return (int)$stmt->fetchColumn() > 0;
+        return (int) $stmt->fetchColumn() > 0;
     }
 }

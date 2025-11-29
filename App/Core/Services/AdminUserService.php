@@ -20,8 +20,8 @@ class AdminUserService
 
     public function listUsers(array $filters = []): array
     {
-        $page = max(1, (int)($filters['page'] ?? 1));
-        $perPage = (int)($filters['perPage'] ?? self::PER_PAGE);
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
 
         $queryFilters = [
             'keyword' => $filters['keyword'] ?? null,
@@ -64,7 +64,7 @@ class AdminUserService
             return null;
         }
 
-        return User::findOne(['id_user' => $id]);
+        return User::Query()->where('id_user', $id)->first();
     }
 
     public function createUser(array $data, ?int $adminId = null): array
@@ -82,8 +82,8 @@ class AdminUserService
             ];
         }
 
-        $user->status = $this->sanitizeStatus($data['status'] ?? null, (int)$user->id_role);
-        $user->peringatan = isset($data['peringatan']) ? (int)$data['peringatan'] : 0;
+        $user->status = $this->sanitizeStatus($data['status'] ?? null, (int) $user->id_role);
+        $user->peringatan = isset($data['peringatan']) ? (int) $data['peringatan'] : 0;
 
         $plainPassword = trim($data['password'] ?? '');
         $confirmPassword = trim($data['confirm_password'] ?? '');
@@ -158,8 +158,8 @@ class AdminUserService
             ];
         }
 
-        $user->status = $this->sanitizeStatus($data['status'] ?? $user->status, (int)$user->id_role);
-        $user->peringatan = isset($data['peringatan']) ? (int)$data['peringatan'] : $user->peringatan;
+        $user->status = $this->sanitizeStatus($data['status'] ?? $user->status, (int) $user->id_role);
+        $user->peringatan = isset($data['peringatan']) ? (int) $data['peringatan'] : $user->peringatan;
 
         $newPassword = trim($data['password'] ?? '');
         if ($newPassword !== '') {
@@ -211,11 +211,11 @@ class AdminUserService
             return ['success' => false, 'message' => 'User not found.'];
         }
 
-        if ($adminId && (int)$user->id_user === (int)$adminId) {
+        if ($adminId && (int) $user->id_user === (int) $adminId) {
             return ['success' => false, 'message' => 'You cannot delete your own account.'];
         }
 
-        if ((int)$user->id_role === 1 && $this->countAdmins() <= 1) {
+        if ((int) $user->id_role === 1 && $this->countAdmins() <= 1) {
             return ['success' => false, 'message' => 'At least one admin must remain in the system.'];
         }
 
@@ -341,7 +341,7 @@ class AdminUserService
         }
 
         $user->status = 'rejected';
-        $user->peringatan = max(0, (int)$user->peringatan) + 1;
+        $user->peringatan = max(0, (int) $user->peringatan) + 1;
 
         if (!$user->save()) {
             return ['success' => false, 'message' => 'Failed to reject KuBaca.'];
@@ -372,12 +372,12 @@ class AdminUserService
     private function resolveRoleId(array $data, ?int $fallback = null): ?int
     {
         if (!empty($data['id_role'])) {
-            return (int)$data['id_role'];
+            return (int) $data['id_role'];
         }
 
         if (!empty($data['role'])) {
             if (is_numeric($data['role'])) {
-                return (int)$data['role'];
+                return (int) $data['role'];
             }
 
             return Role::getIdByName($data['role']);
@@ -404,7 +404,7 @@ class AdminUserService
     {
         $stmt = App::$app->db->prepare('SELECT COUNT(*) FROM users WHERE id_role = 1');
         $stmt->execute();
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     private function generateRandomPassword(int $length = 12): string

@@ -29,7 +29,7 @@ class AdminRoomController extends Controller
             'keyword' => $request->getBody()['keyword'] ?? null,
             'jenis_ruangan' => $request->getBody()['jenis_ruangan'] ?? null,
             'status_ruangan' => $request->getBody()['status_ruangan'] ?? null,
-            'page' => (int)($request->getBody()['page'] ?? 1),
+            'page' => (int) ($request->getBody()['page'] ?? 1),
         ];
 
         $service = new AdminRoomService();
@@ -61,7 +61,7 @@ class AdminRoomController extends Controller
 
     public function store(Request $request, Response $response)
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/rooms');
             return;
@@ -88,7 +88,7 @@ class AdminRoomController extends Controller
         $this->setLayout('main');
         $this->setTitle('Edit Room | Library Booking App');
 
-        $id = (int)($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
+        $id = (int) ($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
         $service = new AdminRoomService();
         $room = $service->getRoomById($id);
         if (!$room) {
@@ -105,14 +105,14 @@ class AdminRoomController extends Controller
 
     public function update(Request $request, Response $response)
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/rooms');
             return;
         }
 
         $body = $request->getBody();
-        $id = (int)($body['id_ruangan'] ?? 0);
+        $id = (int) ($body['id_ruangan'] ?? 0);
         $service = new AdminRoomService();
         $result = $service->updateRoom($id, $body);
 
@@ -132,13 +132,13 @@ class AdminRoomController extends Controller
 
     public function delete(Request $request, Response $response)
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/rooms');
             return;
         }
 
-        $id = (int)($request->getBody()['id_ruangan'] ?? 0);
+        $id = (int) ($request->getBody()['id_ruangan'] ?? 0);
         $service = new AdminRoomService();
         $result = $service->deleteRoom($id);
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
@@ -160,7 +160,7 @@ class AdminRoomController extends Controller
         $this->setLayout('main');
         $this->setTitle('Room Detail | Library Booking App');
 
-        $id = (int)($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
+        $id = (int) ($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
         $service = new AdminRoomService();
         $room = $service->getRoomById($id);
         if (!$room) {
@@ -177,13 +177,13 @@ class AdminRoomController extends Controller
 
     private function handleStatusAction(Request $request, Response $response, string $method): void
     {
-        if (!$request->isPost() || !Csrf::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!$request->isPost()) {
             App::$app->session->setFlash('error', 'Invalid request.');
             $response->redirect('/admin/rooms');
             return;
         }
 
-        $id = (int)($request->getBody()['id_ruangan'] ?? 0);
+        $id = (int) ($request->getBody()['id_ruangan'] ?? 0);
         $service = new AdminRoomService();
         $result = $service->{$method}($id);
         App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');

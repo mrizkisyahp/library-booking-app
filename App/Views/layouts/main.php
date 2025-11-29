@@ -170,10 +170,8 @@ $user = App::$app->user;
                             Profil
                         </span>
                     </a>
-                </li>
-                <li class="flex items-center mx-2 px-2 space-x-3 cursor-pointer">
-                    <form action="/logout" method="post" class="w-full ">
-                        <?= Csrf::field() ?>
+                    <form action="/logout" method="post">
+                        <?= csrf_field() ?>
                         <button type="submit"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>

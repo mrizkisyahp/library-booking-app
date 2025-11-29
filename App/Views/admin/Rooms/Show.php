@@ -107,37 +107,33 @@ use App\Models\Room;
           <div class="flex items-center justify-around mt-6">
             <p>
               <a href="/admin/rooms/edit?id=<?= $room->id_ruangan ?>"
-                class="px-8 py-2 font-medium bg-orange-200 rounded-lg border border-orange-400 text-orange-900 hover:bg-orange-400 transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 cursor-pointer"
-                >
+                class="px-8 py-2 font-medium bg-orange-200 rounded-lg border border-orange-400 text-orange-900 hover:bg-orange-400 transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 cursor-pointer">
                 Edit Room
               </a>
             </p>
             <form method="post" action="/admin/rooms/delete" onsubmit="return confirm('Delete this room?');">
-              <?= Csrf::field() ?>
+              <?= csrf_field() ?>
               <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">
               <button type="submit"
-              class="px-8 py-2 font-medium bg-red-200 rounded-lg border border-red-400 text-red-900 hover:bg-red-400 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer"
-              >
+                class="px-8 py-2 font-medium bg-red-200 rounded-lg border border-red-400 text-red-900 hover:bg-red-400 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer">
                 Delete Room
               </button>
             </form>
             <?php if ($room->status_ruangan === 'available'): ?>
               <form method="post" action="/admin/rooms/deactivate">
-                <?= Csrf::field() ?>
+                <?= csrf_field() ?>
                 <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">
                 <button type="submit"
-                class="px-8 py-2 font-medium bg-yellow-200 rounded-lg border border-yellow-400 text-yellow-900 hover:bg-yellow-400 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 cursor-pointer"
-                >
+                  class="px-8 py-2 font-medium bg-yellow-200 rounded-lg border border-yellow-400 text-yellow-900 hover:bg-yellow-400 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 cursor-pointer">
                   Deactivate Room
                 </button>
               </form>
             <?php else: ?>
               <form method="post" action="/admin/rooms/activate">
-                <?= Csrf::field() ?>
+                <?= csrf_field() ?>
                 <input type="hidden" name="id_ruangan" value="<?= $room->id_ruangan ?>">
                 <button type="submit"
-                  class="px-8 py-2 font-medium bg-emerald-200 rounded-lg border border-emerald-400 text-emerald-900 hover:bg-emerald-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer"
-                >
+                  class="px-8 py-2 font-medium bg-emerald-200 rounded-lg border border-emerald-400 text-emerald-900 hover:bg-emerald-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer">
                   Activate Room
                 </button>
               </form>

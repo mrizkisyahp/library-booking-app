@@ -8,7 +8,8 @@ use App\Core\Services\CacheService;
 use App\Core\Services\EmailService;
 use App\Core\Services\Logger;
 
-class VerifyService {
+class VerifyService
+{
     private Session $session;
 
     public function __construct(Session $session)
@@ -18,7 +19,7 @@ class VerifyService {
 
     public function verifyOtp(User $model): array
     {
-        $userId = (int)($model->id_user ?? 0);
+        $userId = (int) ($model->id_user ?? 0);
         if ($userId <= 0) {
             return [
                 'success' => false,
@@ -43,7 +44,7 @@ class VerifyService {
             ];
         }
 
-        $user = User::findOne(['id_user' => $userId]);
+        $user = User::Query()->where('id_user', $userId)->first();
         if (!$user) {
             CacheService::delete($cacheKey);
             $this->session->remove('user_id_pending');
@@ -75,7 +76,7 @@ class VerifyService {
 
     public function resendOtp(int $userId): array
     {
-        $user = User::findOne(['id_user' => $userId]);
+        $user = User::Query()->where('id_user', $userId)->first();
         if (!$user) {
             return [
                 'success' => false,
@@ -93,7 +94,7 @@ class VerifyService {
 
         $this->session->set('last_resend_time', time());
 
-        $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         CacheService::set('otp_' . $userId, password_hash($otp, PASSWORD_DEFAULT), 900);
         EmailService::sendVerificationCode($user, $otp, 'register');
 

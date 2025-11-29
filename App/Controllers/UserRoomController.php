@@ -10,19 +10,22 @@ use App\Core\Middleware\AuthMiddleware;
 use App\Models\Room;
 use App\Models\User;
 
-class UserRoomController extends Controller {
+class UserRoomController extends Controller
+{
     protected ?User $currentUser = null;
-    public function __construct() {
+    public function __construct()
+    {
         $this->registerMiddleware(new AuthMiddleware());
         $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
-    public function index(Request $request, Response $response) {
+    public function index(Request $request, Response $response)
+    {
         $this->setLayout('main');
         $this->setTitle('Room | Library Booking App');
 
         $perPage = 20;
-        $page = (int)($_GET['page'] ?? 1);
+        $page = (int) ($_GET['page'] ?? 1);
         $page = max(1, $page);
 
         $filters = [
@@ -60,15 +63,16 @@ class UserRoomController extends Controller {
         ]);
     }
 
-    public function show(Request $request, Response $response) {
+    public function show(Request $request, Response $response)
+    {
 
-        $id_ruangan = (int)($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
+        $id_ruangan = (int) ($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
         if ($id_ruangan <= 0) {
             $response->redirect('/rooms');
             return;
         }
 
-        $room = Room::findOne(['id_ruangan' => $id_ruangan]);
+        $room = Room::Query()->where('id_ruangan', $id_ruangan)->first();
         if (!$room) {
             $response->redirect('/rooms');
             return;

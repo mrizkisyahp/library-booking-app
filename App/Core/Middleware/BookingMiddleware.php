@@ -30,7 +30,7 @@ class BookingMiddleware extends Middleware
         }
 
         $body = $request->getBody();
-        $bookingId = (int)($body['booking_id'] ?? $body['id'] ?? $body['booking'] ?? 0);
+        $bookingId = (int) ($body['booking_id'] ?? $body['id'] ?? $body['booking'] ?? 0);
 
         if ($bookingId <= 0) {
             App::$app->session->setFlash('error', 'Booking tidak ditemukan.');
@@ -38,7 +38,7 @@ class BookingMiddleware extends Middleware
             return false;
         }
 
-        $booking = Booking::findOne($bookingId);
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
         if (!$booking) {
             App::$app->session->setFlash('error', 'Booking tidak ditemukan.');
             $response->redirect('/dashboard');
@@ -52,7 +52,7 @@ class BookingMiddleware extends Middleware
         }
 
         $bookingService = new UserBookingService();
-        if (!$bookingService->userCanAccessBooking($booking, (int)$currentUser->id_user)) {
+        if (!$bookingService->userCanAccessBooking($booking, (int) $currentUser->id_user)) {
             App::$app->session->setFlash('error', 'Anda tidak memiliki akses ke booking ini.');
             $response->redirect('/dashboard');
             return false;

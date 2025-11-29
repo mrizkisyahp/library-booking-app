@@ -12,7 +12,7 @@ class FeedbackService
 {
     public function getFeedbackForm(int $bookingId, int $userId): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
 
         if (!$booking || $booking->user_id !== $userId || $booking->status !== 'completed') {
             return [
@@ -22,7 +22,7 @@ class FeedbackService
             ];
         }
 
-        if (Feedback::findOne(['booking_id' => $bookingId])) {
+        if (Feedback::Query()->where('booking_id', $bookingId)->first()) {
             return [
                 'success' => false,
                 'message' => 'Feedback untuk booking ini sudah dikirim.',
@@ -40,7 +40,7 @@ class FeedbackService
 
     public function submitFeedback(int $bookingId, int $userId, array $input): array
     {
-        $booking = Booking::findOne($bookingId);
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
         if (!$booking || $booking->user_id !== $userId || $booking->status !== 'completed') {
             return [
                 'success' => false,
@@ -49,7 +49,7 @@ class FeedbackService
             ];
         }
 
-        if (Feedback::findOne(['booking_id' => $bookingId])) {
+        if (Feedback::Query()->where('booking_id', $bookingId)->first()) {
             return [
                 'success' => false,
                 'message' => 'Feedback untuk booking ini sudah dikirim.',
@@ -57,8 +57,8 @@ class FeedbackService
             ];
         }
 
-        $serviceRating = (int)($input['service_rating'] ?? 0);
-        $roomRating = (int)($input['room_rating'] ?? 0);
+        $serviceRating = (int) ($input['service_rating'] ?? 0);
+        $roomRating = (int) ($input['room_rating'] ?? 0);
 
         if ($serviceRating < 1 || $serviceRating > 5 || $roomRating < 1 || $roomRating > 5) {
             return [
@@ -112,7 +112,7 @@ class FeedbackService
         ");
         $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
         $stmt->execute();
-        return (int)$stmt->fetchColumn() > 0;
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     public function getPendingFeedbackBookings(int $userId): array
@@ -135,7 +135,7 @@ class FeedbackService
 
     public function getFeedbackForBooking(int $bookingId): ?Feedback
     {
-        return Feedback::findOne(['booking_id' => $bookingId]);
+        return Feedback::Query()->where('booking_id', $bookingId)->first();
     }
 
     public function getAdminFeedbackList(): array

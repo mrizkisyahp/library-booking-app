@@ -208,25 +208,29 @@ $statuses = $statuses ?? [];
   <section class="mb-12">
     <h2 class="text-2xl font-semibold">Summary</h2>
     <div class="mt-4 flex justify-between items-center px-8 gap-4 md:gap-8">
-      <p class="p-6 bg-linear-to-br from-emerald-50 to-emerald-100 border-l-2 border-emerald-400 rounded-xl shadow class flex flex-col grow">
+      <p
+        class="p-6 bg-linear-to-br from-emerald-50 to-emerald-100 border-l-2 border-emerald-400 rounded-xl shadow class flex flex-col grow">
         Total Users:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['total'] ?? count($users))) ?>
         </span>
       </p>
-      <p class="p-6 bg-linear-to-br from-sky-50 to-sky-100 border-l-2 border-sky-400 rounded-xl shadow class flex flex-col grow">
+      <p
+        class="p-6 bg-linear-to-br from-sky-50 to-sky-100 border-l-2 border-sky-400 rounded-xl shadow class flex flex-col grow">
         Active:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['active'] ?? 0)) ?>
         </span>
       </p>
-      <p class="p-6 bg-linear-to-br from-yellow-50 to-yellow-100 border-l-2 border-yellow-400 rounded-xl shadow class flex flex-col grow">
+      <p
+        class="p-6 bg-linear-to-br from-yellow-50 to-yellow-100 border-l-2 border-yellow-400 rounded-xl shadow class flex flex-col grow">
         Pending KuBaca:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['pending'] ?? 0)) ?>
         </span>
       </p>
-      <p class="p-6 bg-linear-to-br from-rose-50 to-rose-100 border-l-2 border-rose-400 rounded-xl shadow class flex flex-col grow">
+      <p
+        class="p-6 bg-linear-to-br from-rose-50 to-rose-100 border-l-2 border-rose-400 rounded-xl shadow class flex flex-col grow">
         Suspended:
         <span class="text-4xl font-bold">
           <?= htmlspecialchars((string) ($stats['suspended'] ?? 0)) ?>
@@ -335,35 +339,35 @@ $statuses = $statuses ?? [];
                   <a href="/admin/users/edit?id=<?= $user->id_user ?>">Edit</a>
                 </div>
                 <form method="post" action="/admin/users/delete">
-                  <?= Csrf::field() ?>
+                  <?= csrf_field() ?>
                   <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                   <button type="submit" onclick="return confirm('Delete this user?')">Delete</button>
                 </form> -->
                   <?php if ($user->status !== 'suspended'): ?>
                     <form method="post" action="/admin/users/suspend">
-                      <?= Csrf::field() ?>
+                      <?= csrf_field() ?>
                       <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                       <button type="submit">Suspend</button>
                     </form>
                   <?php else: ?>
                     <form method="post" action="/admin/users/unsuspend">
-                      <?= Csrf::field() ?>
+                      <?= csrf_field() ?>
                       <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                       <button type="submit">Unsuspend</button>
                     </form>
                   <?php endif; ?>
                   <!-- <form method="post" action="/admin/users/reset-password">
-                  <?= Csrf::field() ?>
+                  <?= csrf_field() ?>
                   <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                   <button type="submit">Reset Password</button>
                 </form> -->
                   <!-- <form method="post" action="/admin/users/approve-kubaca">
-                  <?= Csrf::field() ?>
+                  <?= csrf_field() ?>
                   <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                   <button type="submit">Approve KuBaca</button>
                 </form> -->
                   <!-- <form method="post" action="/admin/users/reject-kubaca">
-                  <?= Csrf::field() ?>
+                  <?= csrf_field() ?>
                   <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
                   <label>
                     Reason (optional)

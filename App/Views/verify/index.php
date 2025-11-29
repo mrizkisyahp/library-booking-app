@@ -26,7 +26,7 @@ use App\Core\Csrf;
         <?php endif; ?>
 
         <form action="/verify" method="post">
-          <?= Csrf::field() ?>
+          <?= csrf_field() ?>
 
           <div class="mb-4 mt-6">
             <label

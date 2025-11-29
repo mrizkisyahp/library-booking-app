@@ -29,10 +29,6 @@ class AuthController extends Controller
         $this->setTitle('Login | Library Booking App');
 
         if ($request->isPost()) {
-            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-                App::$app->session->setFlash('error', 'Invalid CSRF token.');
-                return $this->render('Auth/Login', ['model' => $loginModel]);
-            }
 
             $token = $_POST['cf-turnstile-response'] ?? null;
             $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
@@ -89,10 +85,6 @@ class AuthController extends Controller
         $this->setLayout('auth');
 
         if ($request->isPost()) {
-            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-                App::$app->session->setFlash('error', 'Invalid CSRF token.');
-                return $this->render('Auth/Mahasiswa', ['model' => $user]);
-            }
 
             $token = $_POST['cf-turnstile-response'] ?? null;
             $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
@@ -139,10 +131,6 @@ class AuthController extends Controller
         $this->setLayout('auth');
 
         if ($request->isPost()) {
-            if (!Csrf::validateToken($_POST['csrf_token'] ?? '')) {
-                App::$app->session->setFlash('error', 'Invalid CSRF token.');
-                return $this->render('Auth/Dosen', ['model' => $user]);
-            }
 
             $token = $_POST['cf-turnstile-response'] ?? null;
             $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
@@ -153,7 +141,7 @@ class AuthController extends Controller
 
             $user->loadData($request->getBody());
             $user->id_role = Role::getIdByName('dosen');
-            
+
             if ($user->validate()) {
                 if ($authService->registerUser($user, 'dosen')) {
                     App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
@@ -184,11 +172,11 @@ class AuthController extends Controller
         $userId = $currentUser instanceof User ? $currentUser->id_user : null;
         App::$app->auth->logout();
         App::$app->user = null;
-        
+
         if ($userId) {
             Logger::auth('logged out', $userId);
         }
-        
+
         $response->redirect('/');
     }
 

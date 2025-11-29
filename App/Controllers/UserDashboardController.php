@@ -39,7 +39,6 @@ class UserDashboardController extends Controller
         $picBookings = $dashboardService->getPicBookings($userId);
         $memberBookings = $dashboardService->getAnggotaBookings($userId);
         $pendingFeedbacks = $dashboardService->getPendingFeedbacks($userId);
-        $booking = Booking::findOne(['id_booking']);
 
         // echo '<pre>';
         // print_r($booking);

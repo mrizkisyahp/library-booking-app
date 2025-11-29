@@ -21,7 +21,7 @@ $statuses = $statuses ?? [];
   <?php endif; ?>
 
   <form action="/admin/users" method="post">
-    <?= Csrf::field() ?>
+    <?= csrf_field() ?>
     <fieldset>
       <legend>Identity</legend>
       <label>
@@ -83,8 +83,8 @@ $statuses = $statuses ?? [];
         <select name="id_role">
           <option value="">Select role</option>
           <?php foreach ($roles as $role): ?>
-            <?php $value = (string)($role['id_role'] ?? ''); ?>
-            <option value="<?= htmlspecialchars($value) ?>" <?= (string)($model->id_role ?? '') === $value ? 'selected' : '' ?>>
+            <?php $value = (string) ($role['id_role'] ?? ''); ?>
+            <option value="<?= htmlspecialchars($value) ?>" <?= (string) ($model->id_role ?? '') === $value ? 'selected' : '' ?>>
               <?= htmlspecialchars($role['nama_role'] ?? 'Role') ?>
             </option>
           <?php endforeach; ?>
@@ -107,7 +107,8 @@ $statuses = $statuses ?? [];
 
       <label>
         Peringatan
-        <input type="number" name="peringatan" min="0" value="<?= htmlspecialchars((string)($model->peringatan ?? 0)) ?>">
+        <input type="number" name="peringatan" min="0"
+          value="<?= htmlspecialchars((string) ($model->peringatan ?? 0)) ?>">
       </label>
     </fieldset>
 
@@ -132,4 +133,3 @@ $statuses = $statuses ?? [];
 
     <button type="submit">Save User</button>
   </form>
-
