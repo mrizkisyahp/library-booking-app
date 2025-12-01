@@ -1,10 +1,10 @@
 <?php
-/** @var \App\Models\User $model */
+/** @var string $rememberedIdentifier */
+/** @var \App\Core\Validator\Validator|null $validator */
 use App\Core\App;
-use App\Core\Csrf;
-?>
 
-<!-- Disini za buat edit2 - Add your styling here -->
+$validator = $validator ?? null;
+?>
 
 <div class="flex items-center justify-center min-h-dvh mx-4 ">
   <div>
@@ -35,26 +35,26 @@ use App\Core\Csrf;
           <div class="mt-2">
             <div class="mb-4">
               <label
-                class="block text-regular font-medium <?= $model->hasError('identifier') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
+                class="block text-regular font-medium <?= $validator?->hasError('identifier') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
                 for="identifier">Email atau Nomor Induk</label>
               <input id="identifier" type="text" name="identifier" placeholder="Masukkan Email atau Nomor Induk"
-                value="<?= htmlspecialchars($model->identifier ?? '') ?>"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 placeholder-gray-400 <?= $model->hasError('identifier') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-              <?php if ($model->hasError('identifier')): ?>
+                value="<?= htmlspecialchars(old('identifier') ?? $rememberedIdentifier ?? '') ?>"
+                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 placeholder-gray-400 <?= $validator?->hasError('identifier') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+              <?php if ($validator?->hasError('identifier')): ?>
                 <p class="mt-1 text-sm text-red-600">
-                  <?= htmlspecialchars($model->getFirstError('identifier')) ?>
+                  <?= htmlspecialchars($validator->getFirstError('identifier')) ?>
                 </p>
               <?php endif; ?>
             </div>
 
             <div class="mb-4 relative">
               <label
-                class="block text-sm font-medium <?= $model->hasError('password') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
+                class="block text-sm font-medium <?= $validator?->hasError('password') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
                 for="password">Kata Sandi</label>
 
               <input id="password" type="password" name="password" placeholder="Masukkan Kata Sandi" value=""
                 class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 placeholder-gray-400 
-                <?= $model->hasError('password')
+                <?= $validator?->hasError('password')
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                   : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
 
@@ -82,9 +82,9 @@ use App\Core\Csrf;
                 </svg>
               </button>
 
-              <?php if ($model->hasError('password')): ?>
+              <?php if ($validator?->hasError('password')): ?>
                 <p class="mt-1 text-sm text-red-600">
-                  <?= htmlspecialchars($model->getFirstError('password')) ?>
+                  <?= htmlspecialchars($validator->getFirstError('password')) ?>
                 </p>
               <?php endif; ?>
             </div>

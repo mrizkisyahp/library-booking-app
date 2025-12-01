@@ -2,12 +2,16 @@
 
 namespace App\Core\Exceptions;
 
+use App\Core\Validator\Validator;
+
 class ValidationException extends \Exception
 {
     protected array $errors;
+    private Validator $validator;
 
-    public function __construct(array $errors, string $message = 'Validation Failed', int $code = 422)
+    public function __construct(Validator $validator, array $errors, string $message = 'Validation Failed', int $code = 422)
     {
+        $this->validator = $validator;
         parent::__construct($message, $code);
         $this->errors = $errors;
     }
@@ -15,6 +19,21 @@ class ValidationException extends \Exception
     public function errors(): array
     {
         return $this->errors;
+    }
+
+    public function getValidator(): Validator
+    {
+        return $this->validator;
+    }
+
+    public function hasError(string $attribute): bool
+    {
+        return $this->validator->hasError($attribute);
+    }
+
+    public function getFirstError(string $attribute): ?string
+    {
+        return $this->validator->getFirstError($attribute) ?? null;
     }
 
 }

@@ -4,6 +4,8 @@ use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use Carbon\Carbon;
+
 
 if (!function_exists('app')) {
     function app(): App
@@ -61,23 +63,23 @@ if (!function_exists('view')) {
 }
 
 if (!function_exists('auth')) {
-    function auth(): mixed
+    function auth(): \App\Core\Services\AuthService
     {
-        return App::$app->user;
+        return App::$app->auth;
     }
 }
 
 if (!function_exists('user')) {
-    function user(): mixed
+    function user(): ?\App\Models\User
     {
-        return App::$app->user;
+        return App::$app->auth->user();
     }
 }
 
 if (!function_exists('guest')) {
     function guest(): bool
     {
-        return App::$app->user === null;
+        return App::$app->auth->guest();
     }
 }
 
@@ -134,7 +136,7 @@ if (!function_exists('dd')) {
     {
         foreach ($vars as $var) {
             echo '<pre>';
-            var_dump($var);
+            print_r($var);
             echo '</pre>';
         }
         die(1);
@@ -149,7 +151,7 @@ if (!function_exists('dump')) {
     {
         foreach ($vars as $var) {
             echo '<pre>';
-            var_dump($var);
+            print_r($var);
             echo '</pre>';
         }
     }
@@ -246,5 +248,19 @@ if (!function_exists('resolve')) {
     function resolve(string $abstract): mixed
     {
         return app()->container->make($abstract);
+    }
+}
+
+if (!function_exists('formatWaktu')) {
+    function formatWaktu($waktu)
+    {
+        return Carbon::parse($waktu)->format('H:i') . ' WIB';
+    }
+}
+
+if (!function_exists('formatTanggal')) {
+    function formatTanggal($tanggal)
+    {
+        return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
     }
 }

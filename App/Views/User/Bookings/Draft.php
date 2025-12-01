@@ -9,6 +9,8 @@ $currentUser = App::$app->user instanceof User ? App::$app->user : null;
 $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_id;
 
 /** @var Booking $booking */
+
+
 ?>
 
 <div class="max-w-5xl mx-auto">

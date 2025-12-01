@@ -23,10 +23,10 @@ $user = App::$app->user;
             <!-- Logo -->
             <li class="flex items-center mx-2 px-2 space-x-3">
                 <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all"
-                    <?php if (App::$app->auth->isGuest()): ?> 
+                    <?php if (auth()->guest()): ?> 
                         href="/" 
                     <?php else: ?> 
-                        <?php if ($user && $user->isAdmin()): ?>
+                        <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
                             href="/admin" 
                         <?php else: ?>
                             href="/dashboard"
@@ -47,7 +47,7 @@ $user = App::$app->user;
             </li>
             
             <!-- Main navigation 😋-->
-            <?php if (App::$app->auth->isGuest()): ?>
+            <?php if (auth()->guest()): ?>
                 <!-- Guest 🥸 -->
                 <li class="flex items-center mx-2 px-2 space-x-3">
                     <a href="/login"
@@ -69,7 +69,7 @@ $user = App::$app->user;
                 </li>
             <?php else: ?>
                 <!-- User Admin 🧑🏻‍💻 -->
-                <?php if ($user && $user->isAdmin()): ?>
+                <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
                     <li class="flex items-center mx-2 px-2 space-x-3">
                         <a href="/admin/bookings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -154,7 +154,7 @@ $user = App::$app->user;
         </ul>
         <!-- Bagian bawah 🤔 -->
         <ul class="flex flex-col mt-10 space-y-4">
-            <?php if (App::$app->auth->isGuest()): ?>
+            <?php if (auth()->guest()): ?>
                 <!-- Empty -->
             <?php else: ?>
                 <li class="flex items-center mx-2 px-2 space-x-3">
@@ -259,7 +259,7 @@ $user = App::$app->user;
     </footer>
 
     <!-- mobile guest checker -->
-    <?php if (App::$app->auth->isGuest()): ?>
+    <?php if (auth()->guest()): ?>
         <div class="min-h-dvh bg-black/30 backdrop-blur-md z-50">
             <div class="bg-white shadow-lg fixed flex justify-center items-center">
                 <a href="/login">Login</a>
@@ -284,10 +284,10 @@ $user = App::$app->user;
             <?php
             $active = $_SERVER['REQUEST_URI'];
 
-            if (App::$app->auth->isGuest()) {
+            if (auth()->guest()) {
                 $url = '/';
             } else {
-                $url = $user && $user->isAdmin() ? '/admin' : '/dashboard';
+                $url = auth()->check() && auth()->user()->isAdmin() ? '/admin' : '/dashboard';
             }
 
             function isActiveClass($current, $target)
@@ -311,7 +311,7 @@ $user = App::$app->user;
                 <span>Beranda</span>
             </a>
 
-            <?php if ($user && $user->isAdmin()): ?>
+            <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
 
                 <!-- manajemen all -->
                 <a href="/admin/bookings"

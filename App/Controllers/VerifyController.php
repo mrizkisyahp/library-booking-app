@@ -3,69 +3,87 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Exceptions\ValidationException;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\App;
-use App\Models\User;
-use App\Core\Services\VerifyService;
+use App\Core\Session;
+use App\Core\Services\AuthService;
+use App\Core\Services\TurnstileService;
 
-class VerifyController extends Controller {
-    public function verify(Request $request, Response $response) {
+class VerifyController extends Controller
+{
+    public function __construct(
+        private AuthService $auth,
+        private Session $session,
+        private Response $response,
+        private TurnstileService $turnstile
+    ) {
+    }
+
+    public function verify(Request $request)
+    {
         $this->setLayout('auth');
         $this->setTitle('Verify Account | Library Booking App');
 
-        $userId = App::$app->session->get('user_id_pending');
-        if(!$userId) {
-            App::$app->session->setFlash('error', 'No pending verification. Please register again.');
-            $response->redirect('/register');
-            return;
-        }
+        $userId = session('user_id_pending');
 
-        $model = new User();
-        $model->setScenario(User::SCENARIO_VERIFY_OTP);
-        $verifyService = new VerifyService(App::$app->session);
+        if (!$userId) {
+            flash('error', 'No pending verification. Please register again.');
+            return redirect('/register');
+        }
 
         if ($request->isPost()) {
-            $model->loadData($request->getBody());
 
-            if (!$model->validate()) {
-                return $this->render('Verify/Index', ['model' => $model]);
+            $token = $request->input('cf-turnstile-response');
+            $remoteIp = $request->ip();
+
+            if (!$this->turnstile->verify($token, $remoteIp)) {
+                flash('error', 'CAPTCHA verification failed.');
+                return redirect('/verify');
             }
 
-            $model->id_user = (int)$userId;
-            $result = $verifyService->verifyOtp($model);
+            try {
+                $validated = $request->validate([
+                    'code' => ['required', 'string', 'min:6', 'max:6']
+                ]);
 
-            if (($result['success'] ?? false) === true) {
-                App::$app->session->setFlash('success', $result['message'] ?? 'Account verified! You can now login.');
-                $response->redirect('/login');
-                return;
+                $success = $this->auth->completeVerification((int) $userId, $validated['code']);
+
+                if ($success) {
+                    flash('success', 'Account verified! You can now login.');
+                    return redirect('/login');
+                }
+
+            } catch (ValidationException $e) {
+                return view('Verify/index', [
+                    'validator' => $e->getValidator()
+                ]);
             }
 
-            App::$app->session->setFlash('error', $result['message'] ?? 'Verification failed. Please try again.');
-            $response->redirect('/verify');
-            return;
+            flash('error', 'invalid or expired verification code. Please try again.');
+            return redirect('/verify');
         }
 
-        return $this->render('Verify/Index', ['model' => $model]);
+        return view('Verify/index');
     }
 
-    public function resend(Request $request, Response $response) {
-        $userId = App::$app->session->get('user_id_pending');
+    public function resend(Request $request)
+    {
+        $userId = session('user_id_pending');
+
         if (!$userId) {
-            App::$app->session->setFlash('error', 'No Pending Verification, please register again.');
-            $response->redirect('/register');
-            return;
+            flash('error', 'No pending verification. Please register again.');
+            return redirect('/register');
         }
 
-        $verifyService = new VerifyService(App::$app->session);
-        $result = $verifyService->resendOtp((int)$userId);
+        $success = $this->auth->resendVerificationOTP((int) $userId);
 
-        if (($result['success'] ?? false) === true) {
-            App::$app->session->setFlash('success', $result['message'] ?? 'Verification code sent to your email.');
-        } else {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Unable to resend verification code.');
+        if ($success) {
+            flash('success', 'Verification code sent to your email.');
+            return redirect('/verify');
         }
 
-        $response->redirect('/verify');
+        flash('error', 'Please wait 5 minutes before requesting another code.');
+        return redirect('/verify');
     }
 }

@@ -3,18 +3,6 @@
 /** @var array $bookings */
 /** @var array $pendingFeedbacks */
 /** @var \App\Models\User $user */
-use Carbon\Carbon;
-Carbon::setLocale('id');
-
-function formatWaktu($waktu)
-{
-  return Carbon::parse($waktu)->format('H:i') . ' WIB';
-}
-
-function formatTanggal($tanggal)
-{
-  return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
-}
 ?>
 
 <!-- Pending Feedback Warning -->

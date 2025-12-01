@@ -3,9 +3,40 @@
 namespace App\Models;
 
 use App\Core\App;
+use App\Core\DbModel;
 
-class Role
+class Role extends DbModel
 {
+
+    public $id_role;
+    public $nama_role;
+
+    public static function primaryKey(): string
+    {
+        return 'id_role';
+    }
+
+    public static function tableName(): string
+    {
+        return 'role';
+    }
+
+    public function rules(): array
+    {
+        return [
+            'id_role' => ['required', 'integer'],
+            'nama_role' => ['required', 'string', 'max:255'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'id_role',
+            'nama_role',
+        ];
+    }
+
     public static function getIdByName(?string $name): ?int
     {
         if (!$name) {

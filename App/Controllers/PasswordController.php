@@ -3,84 +3,109 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Exceptions\ValidationException;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\App;
-use App\Models\User;
-use App\Core\Csrf;
-use App\Core\Services\PasswordService;
+use App\Core\Session;
+use App\Core\Services\AuthService;
+use App\Core\Services\TurnstileService;
 
 class PasswordController extends Controller
 {
-    public function forgot(Request $request, Response $response)
+    public function __construct(
+        private AuthService $auth,
+        private Session $session,
+        private Response $response,
+        private TurnstileService $turnstile
+    ) {
+    }
+
+    public function forgot(Request $request)
     {
         $this->setLayout('auth');
         $this->setTitle('Forgot Password | Library Booking App');
 
-        $model = new User();
-        $model->setScenario(User::SCENARIO_RESET_REQUEST);
-
         if ($request->isPost()) {
+            $token = $request->input('cf-turnstile-response');
+            $remoteIp = $request->ip();
 
-            $model->loadData($request->getBody());
-
-            if (!$model->validate()) {
-                return $this->render('ResetPassword/Forgot', ['model' => $model]);
+            if (!$this->turnstile->verify($token, $remoteIp)) {
+                flash('error', 'CAPTCHA Verification failed');
+                return redirect('/forgot');
             }
 
-            $passwordService = new PasswordService(App::$app->session);
-            $result = $passwordService->requestReset($model);
+            try {
+                $validated = $request->validate([
+                    'email' => ['required', 'email']
+                ]);
 
-            if ($result['success']) {
-                App::$app->session->setFlash('success', $result['message']);
-                $response->redirect('/reset');
-                return;
+                $success = $this->auth->sendPasswordResetOTP($validated['email']);
+
+                if ($success) {
+                    flash('success', 'Reset code sent to your email.');
+                    return redirect('/reset');
+                }
+
+                flash('error', 'If that email exists, a reset code has been sent.');
+                return redirect('/forgot');
+            } catch (ValidationException $e) {
+                return view('ResetPassword/Forgot', [
+                    'validator' => $e->getValidator()
+                ]);
             }
-
-            App::$app->session->setFlash('error', $result['message']);
-            return $this->render('ResetPassword/Forgot', ['model' => $model]);
         }
 
-        return $this->render('ResetPassword/Forgot', ['model' => $model]);
+        return view('ResetPassword/Forgot');
     }
 
-    public function reset(Request $request, Response $response)
+    public function reset(Request $request)
     {
         $this->setLayout('auth');
         $this->setTitle('Reset Password | Library Booking App');
 
-        $model = new User();
-        $model->setScenario(User::SCENARIO_RESET_PASSWORD);
+        $userId = session('reset_user_id');
 
-        $userId = App::$app->session->get('reset_user_id');
         if (!$userId) {
-            App::$app->session->setFlash('error', 'Session expired.');
-            $response->redirect('/forgot');
-            return;
+            flash('error', 'Session expired, please request a new reset code.');
+            return redirect('/forgot');
         }
 
         if ($request->isPost()) {
+            $token = $request->input('cf-turnstile-response');
+            $remoteIp = $request->ip();
 
-            $model->loadData($request->getBody());
-
-            if (!$model->validate()) {
-                return $this->render('ResetPassword/Reset', ['model' => $model]);
+            if (!$this->turnstile->verify($token, $remoteIp)) {
+                flash('error', 'CAPTCHA verification failed');
+                return redirect('/reset');
             }
 
-            $passwordService = new PasswordService(App::$app->session);
-            $model->id_user = (int) $userId;
-            $result = $passwordService->resetWithOtp($model);
+            try {
+                $validated = $request->validate([
+                    'code' => ['required', 'string', 'min:6', 'max:6'],
+                    'new_password' => ['required', 'min:8'],
+                    'confirm_new_password' => ['required', 'match:new_password']
+                ]);
 
-            if ($result['success']) {
-                App::$app->session->setFlash('success', $result['message']);
-                $response->redirect('/login');
-                return;
+                $success = $this->auth->resetPassword(
+                    (int) $userId,
+                    $validated['code'],
+                    $validated['new_password']
+                );
+
+                if ($success) {
+                    $this->session->remove('reset_user_id');
+                    flash('success', 'Password reset successfully!');
+                    return redirect('/login');
+                }
+
+                flash('error', 'Invalid reset code');
+                return redirect('/reset');
+            } catch (ValidationException $e) {
+                return view('ResetPassword/Reset', [
+                    'validator' => $e->getValidator()
+                ]);
             }
-
-            App::$app->session->setFlash('error', $result['message']);
-            return $this->render('ResetPassword/Reset', ['model' => $model]);
         }
-
-        return $this->render('ResetPassword/Reset', ['model' => $model]);
+        return view('ResetPassword/Reset');
     }
 }

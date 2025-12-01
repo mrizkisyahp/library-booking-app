@@ -1,7 +1,8 @@
 <?php
-/** @var \App\Models\User $model */
+/** @var \App\Core\Validator\Validator|null $validator */
 use App\Core\App;
-use App\Core\Csrf;
+
+$validator = $validator ?? null;
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -30,13 +31,16 @@ use App\Core\Csrf;
           <div>
 
             <div class="mt-9">
-              <input id="email" type="email" name="email" value="<?= htmlspecialchars($model->email ?? '') ?>"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $model->hasError('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
-              <?php if ($model->hasError('email')): ?>
-                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('email')) ?></p>
+              <input id="email" type="email" name="email"
+                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $validator?->hasError('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
+              <?php if ($validator?->hasError('email')): ?>
+                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('email')) ?></p>
               <?php endif; ?>
             </div>
 
+            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= $_ENV['TURNSTILE_SITE']; ?>"
+              data-theme="light" data-size="normal" data-callback="onSuccess"></div>
+            <div class="mt-6"></div>
             <button type="submit"
               class="px-8 py-2 w-full mt-4 bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all">
               Kirim Kode
@@ -58,3 +62,5 @@ use App\Core\Csrf;
     </div>
   </div>
 </div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

@@ -5,10 +5,11 @@ namespace App\Core\Validator;
 use App\Core\App;
 use App\Core\Exceptions\ValidationException;
 use App\Core\QueryBuilder;
-use PDO;
 
 class Validator
 {
+    private array $errors = [];
+
     public function validate(array $data, array $rules, array $messages = []): array
     {
         $errors = [];
@@ -28,12 +29,13 @@ class Validator
         }
 
         if (!empty($errors)) {
+            $this->errors = $errors;
             foreach ($data as $key => $value) {
                 if (!is_array($value)) {
                     flash('old_' . $key, $value);
                 }
             }
-            throw new ValidationException($errors);
+            throw new ValidationException($this, $errors);
         }
 
         return $data;
@@ -122,6 +124,15 @@ class Validator
                 $tsOther = strtotime((string) $otherValue);
                 return ($ts !== false && $tsOther !== false && $ts < $tsOther) ? null : "Must be before {$other}.";
 
+            case 'match':
+                $matchField = $params[0] ?? null;
+                if (!$matchField) {
+                    return null;
+                }
+                $matchValue = $data[$matchField] ?? null;
+                return ($value === $matchValue) ? null : "The {$field} must match {$matchField}.";
+
+
             default:
                 return null;
         }
@@ -138,7 +149,7 @@ class Validator
         $departments = ['akuntansi', 'grafika', 'tik', 'mesin', 'sipil', 'bisnis', 'elektro'];
 
         $valid = in_array($domain, $allowed, true)
-            || preg_match('/^(' . implode('|', $departments) . ')\\.pnj\\.ac\\.id$/', $domain);
+            || preg_match('/^(' . implode('|', $departments) . ')\.pnj\.ac\.id$/', $domain);
 
         return $valid ? null : 'Use a valid PNJ Email';
     }
@@ -179,5 +190,20 @@ class Validator
         $count = $query->count();
 
         return $count === 0 ? null : "The {$field} has already been taken.";
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    public function hasError(string $attribute): bool
+    {
+        return !empty($this->errors[$attribute] ?? []);
+    }
+
+    public function getFirstError(string $attribute): ?string
+    {
+        return $this->errors[$attribute][0] ?? null;
     }
 }

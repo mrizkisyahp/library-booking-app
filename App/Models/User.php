@@ -69,64 +69,6 @@ class User extends DbModel
 
     public function rules(): array
     {
-        if ($this->scenario === self::SCENARIO_LOGIN) {
-            return [
-                'identifier' => [self::RULE_REQUIRED],
-                'password' => [self::RULE_REQUIRED],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_VERIFY_OTP) {
-            return [
-                'code' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 6], [self::RULE_MAX, 'max' => 6]],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_RESET_REQUEST) {
-            return [
-                'email' => [self::RULE_REQUIRED, self::RULE_EMAIL],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_RESET_PASSWORD) {
-            return [
-                'code' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 6], [self::RULE_MAX, 'max' => 6]],
-                'new_password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]],
-                'confirm_new_password' => [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'new_password']],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_REGISTER || $this->scenario === self::SCENARIO_UPDATE) {
-            $rules = [
-                'nama' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
-                'email' => [
-                    self::RULE_REQUIRED,
-                    self::RULE_EMAIL,
-                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
-                ],
-                'jurusan' => [self::RULE_REQUIRED],
-                'nomor_hp' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-                'id_role' => [self::RULE_REQUIRED],
-            ];
-
-            if ($this->scenario === self::SCENARIO_REGISTER || $this->password !== '') {
-                $rules['password'] = [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]];
-                $rules['confirm_password'] = [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'password']];
-            }
-
-            if ((string) $this->id_role === '3') {
-                $rules['nim'] = [
-                    self::RULE_REQUIRED,
-                    self::RULE_NUMBER,
-                    [self::RULE_MIN, 'min' => 10],
-                    [self::RULE_MAX, 'max' => 10],
-                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
-                ];
-            } elseif ((string) $this->id_role === '2') {
-                $rules['nip'] = [
-                    self::RULE_REQUIRED,
-                    self::RULE_NUMBER,
-                    [self::RULE_MIN, 'min' => 18],
-                    [self::RULE_MAX, 'max' => 18],
-                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
-                ];
-            }
-
-            return $rules;
-        }
-
         return [];
     }
 

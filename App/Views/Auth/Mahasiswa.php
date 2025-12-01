@@ -1,7 +1,8 @@
 <?php
-/** @var \App\Models\User $model */
 use App\Core\App;
-use App\Core\Csrf;
+
+/** @var \App\Core\Validator\Validator|null $validator */
+$validator = $validator ?? null;
 ?>
 
 <div class="flex items-center justify-center min-h-dvh mx-4">
@@ -35,24 +36,28 @@ use App\Core\Csrf;
 
             <div class="mb-4">
               <label for="nim"
-                class="block text-sm font-medium <?= $model->hasError('nim') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+                class="block text-sm font-medium <?= $validator?->hasError('nim') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
                 NIM (10 digits)
               </label>
-              <input id="nim" type="text" name="nim" value="<?= htmlspecialchars($model->nim ?? '') ?>"
-                class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nim') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-              <?php if ($model->hasError('nim')): ?>
-                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nim')) ?></p>
+              <input id="nim" type="text" name="nim" value="<?= htmlspecialchars(old('nim') ?? '') ?>"
+                class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $validator?->hasError('nim') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+              <?php if ($validator?->hasError('nim')): ?>
+                <p class="mt-1 text-sm text-red-600">
+                  <?= htmlspecialchars($validator->getFirstError('nim')) ?>
+                </p>
               <?php endif; ?>
             </div>
 
             <label for="email"
-              class="block text-sm font-medium <?= $model->hasError('email') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+              class="block text-sm font-medium <?= $validator?->hasError('email') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
               Email PNJ
             </label>
-            <input id="email" type="email" name="email" value="<?= htmlspecialchars($model->email ?? '') ?>"
-              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-            <?php if ($model->hasError('email')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('email')) ?></p>
+            <input id="email" type="email" name="email" value="<?= htmlspecialchars(old('email') ?? '') ?>"
+              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $validator?->hasError('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+            <?php if ($validator?->hasError('email')): ?>
+              <p class="mt-1 text-sm text-red-600">
+                <?= htmlspecialchars($validator->getFirstError('email')) ?>
+              </p>
             <?php endif; ?>
 
             <button type="button" onclick="nextStep()"
@@ -65,13 +70,15 @@ use App\Core\Csrf;
       <div id="step2" class="space-y-4 hidden">
         <div class="mb-4">
           <label for="nama"
-            class="block text-sm font-medium <?= $model->hasError('nama') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+            class="block text-sm font-medium <?= $validator?->hasError('nama') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
             Nama Lengkap
           </label>
-          <input id="nama" type="text" name="nama" value="<?= htmlspecialchars($model->nama ?? '') ?>"
-            class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nama') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-          <?php if ($model->hasError('nama')): ?>
-            <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nama')) ?></p>
+          <input id="nama" type="text" name="nama" value="<?= htmlspecialchars(old('nama') ?? '') ?>"
+            class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $validator?->hasError('nama') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+          <?php if ($validator?->hasError('nama')): ?>
+            <p class="mt-1 text-sm text-red-600">
+              <?= htmlspecialchars($validator->getFirstError('nama')) ?>
+            </p>
           <?php endif; ?>
         </div>
 
@@ -88,11 +95,11 @@ use App\Core\Csrf;
           ];
           ?>
           <label for="jurusan"
-            class="block text-sm font-medium <?= $model->hasError('jurusan') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+            class="block text-sm font-medium <?= $validator?->hasError('jurusan') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
             Jurusan
           </label>
           <select id="jurusan" name="jurusan"
-            class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focu:ring-2 <?= $model->hasError('jurusan') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">
+            class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focu:ring-2 <?= $validator?->hasError('jurusan') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">
             <option value="Teknik Informatika dan Komputer">Teknik Informatika dan Komputer</option>
             <?php foreach ($Jurusan as $option): ?>
               <option value="<?= htmlspecialchars($option) ?>" <?= ($model->jurusan ?? '') === $option ? 'selected' : '' ?>>
@@ -100,8 +107,10 @@ use App\Core\Csrf;
               </option>
             <?php endforeach; ?>
           </select>
-          <?php if ($model->hasError('jurusan')): ?>
-            <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('jurusan')) ?></p>
+          <?php if ($validator?->hasError('jurusan')): ?>
+            <p class="mt-1 text-sm text-red-600">
+              <?= htmlspecialchars($validator->getFirstError('jurusan')) ?>
+            </p>
           <?php endif; ?>
         </div>
 
@@ -110,24 +119,26 @@ use App\Core\Csrf;
 
           <div class="mb-4">
             <label for="nomor_hp"
-              class="block text-sm font-medium <?= $model->hasError('nomor_hp') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+              class="block text-sm font-medium <?= $validator?->hasError('nomor_hp') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
               Nomor HP
             </label>
-            <input id="nomor_hp" type="tel" name="nomor_hp" value="<?= htmlspecialchars($model->nomor_hp ?? '') ?>"
-              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $model->hasError('nomor_hp') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
-            <?php if ($model->hasError('nomor_hp')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('nomor_hp')) ?></p>
+            <input id="nomor_hp" type="tel" name="nomor_hp" value="<?= htmlspecialchars(old('nomor_hp') ?? '') ?>"
+              class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focus:ring-2 <?= $validator?->hasError('nomor_hp') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
+            <?php if ($validator?->hasError('nomor_hp')): ?>
+              <p class="mt-1 text-sm text-red-600">
+                <?= htmlspecialchars($validator->getFirstError('nomor_hp')) ?>
+              </p>
             <?php endif; ?>
           </div>
 
           <div class="mb-4">
             <label for="password"
-              class="block text-sm font-medium mb-2<?= $model->hasError('password') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+              class="block text-sm font-medium <?= $validator?->hasError('password') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
               Password
             </label>
 
             <div class="flex items-center gap-2 w-full border rounded-lg px-3 py-2 bg-white shadow-sm
-            <?= $model->hasError('password')
+            <?= $validator?->hasError('password')
               ? 'border-red-500 focus-within:ring-red-500'
               : 'border-gray-300 focus-within:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all'
               ?>"> <input id="password" type="password" name="password" value=""
@@ -155,19 +166,21 @@ use App\Core\Csrf;
                 </svg>
               </button>
             </div>
-            <?php if ($model->hasError('password')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('password')) ?></p>
+            <?php if ($validator?->hasError('password')): ?>
+              <p class="mt-1 text-sm text-red-600">
+                <?= htmlspecialchars($validator->getFirstError('password')) ?>
+              </p>
             <?php endif; ?>
           </div>
 
           <div class="mb-4">
             <label for="confirm_password"
-              class="block text-sm font-medium <?= $model->hasError('confirm_password') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
+              class="block text-sm font-medium <?= $validator?->hasError('confirm_password') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
               Konfirmasi Password
             </label>
 
             <div
-              class="flex items-center gap-2 w-full border rounded-lg px-3 py-2 shadow-sm bg-white <?= $model->hasError('confirm_password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">
+              class="flex items-center gap-2 w-full border rounded-lg px-3 py-2 shadow-sm bg-white <?= $validator?->hasError('confirm_password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">
 
               <input id="confirm_password" type="password" name="confirm_password" value=""
                 class="w-full outline-none bg-transparent " />
@@ -194,8 +207,10 @@ use App\Core\Csrf;
                 </svg>
               </button>
             </div>
-            <?php if ($model->hasError('confirm_password')): ?>
-              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('confirm_password')) ?></p>
+            <?php if ($validator?->hasError('confirm_password')): ?>
+              <p class="mt-1 text-sm text-red-600">
+                <?= htmlspecialchars($validator->getFirstError('confirm_password')) ?>
+              </p>
             <?php endif; ?>
 
           </div>

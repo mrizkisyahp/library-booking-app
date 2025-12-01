@@ -8,7 +8,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 
 class EmailService
-{   
+{
 
     private static function configureMailer(): PHPMailer
     {
@@ -19,7 +19,7 @@ class EmailService
         $mail->Username = $_ENV['MAIL_USERNAME'];
         $mail->Password = $_ENV['MAIL_PASSWORD'];
         $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
-        $mail->Port = (int)($_ENV['MAIL_PORT']);
+        $mail->Port = (int) ($_ENV['MAIL_PORT']);
         $mail->isHTML(true);
         return $mail;
     }
@@ -32,7 +32,8 @@ class EmailService
             $fromName = $_ENV['MAIL_FROM_NAME'];
             $mail->setFrom($fromEmail, $fromName);
             $mail->addAddress($to, $toName);
-            if ($ccSelf) $mail->addCC($to);
+            if ($ccSelf)
+                $mail->addCC($to);
 
             $mail->Subject = $subject;
             $mail->Body = $body;
@@ -46,15 +47,15 @@ class EmailService
 
     public static function sendVerificationCode(User $user, string $otp, string $purpose = 'register'): bool
     {
-        $subject = $purpose === 'reset_password'
+        $subject = $purpose === 'reset'
             ? 'Password Reset Request | Library Booking App'
             : 'Account Verification Code | Library Booking App';
 
-        $intro = $purpose === 'reset_password'
-            ? 'Kami menerima permintaan untuk mereset kata sandi akun kamu.'
+        $intro = $purpose === 'reset'
+            ? 'Kami menerima permintaan untuk reset kata sandi akun kamu.'
             : 'Selamat datang! Berikut adalah kode verifikasi akun kamu.';
 
-        $note = $purpose === 'reset_password'
+        $note = $purpose === 'reset'
             ? 'Jika kamu tidak meminta pengaturan ulang kata sandi, abaikan email ini.'
             : 'Jangan bagikan kode ini kepada siapa pun demi keamanan akunmu.';
 

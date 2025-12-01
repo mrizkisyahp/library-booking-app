@@ -122,4 +122,16 @@ class Response
             default => 'Library Booking App',
         };
     }
+
+    public function cookie(string $name, string $value, int $expire = 0, string $path = '/'): void
+    {
+        setcookie($name, $value, [
+            'expires' => $expire > 0 ? time() + $expire : $expire,
+            'path' => $path,
+            'domain' => '',
+            'secure' => !empty($_SERVER['HTTPS'] && $_SERVER['HTTPS'] === 'on'),
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+    }
 }
