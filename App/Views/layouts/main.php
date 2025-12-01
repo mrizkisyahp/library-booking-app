@@ -17,17 +17,17 @@ $user = App::$app->user;
 
 <body class="min-h-screen bg-slate-100">
     <!-- sidebar 😭 -->
-    <aside class="hidden md:flex group flex-col justify-between fixed left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10">
-        <ul class="flex flex-col mt-10 space-y-4">
+    <aside class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10">
+        <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
             <!-- Logo -->
-            <li class="flex items-center mx-2 px-2 space-x-3">
+            <li class="w-full px-3">
                 <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all"
-                    <?php if (App::$app->auth->isGuest()): ?> 
-                        href="/" 
-                    <?php else: ?> 
+                    <?php if (App::$app->auth->isGuest()): ?>
+                        href="/"
+                    <?php else: ?>
                         <?php if ($user && $user->isAdmin()): ?>
-                            href="/admin" 
+                            href="/admin"
                         <?php else: ?>
                             href="/dashboard"
                         <?php endif; ?>
@@ -39,17 +39,17 @@ $user = App::$app->user;
                         <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
                         <path
                             d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    </svg>                    
+                    </svg>
                     <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                         Library Booking App
                     </span>
                 </a>
             </li>
-            
+
             <!-- Main navigation 😋-->
             <?php if (App::$app->auth->isGuest()): ?>
                 <!-- Guest 🥸 -->
-                <li class="flex items-center mx-2 px-2 space-x-3">
+                <li class="w-full px-3">
                     <a href="/login"
                         class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -58,7 +58,7 @@ $user = App::$app->user;
                         </span>
                     </a>
                 </li>
-                <li class="flex items-center mx-2 px-2 space-x-3">
+                <li class="w-full px-3">
                     <a href="/register"
                         class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -70,7 +70,7 @@ $user = App::$app->user;
             <?php else: ?>
                 <!-- User Admin 🧑🏻‍💻 -->
                 <?php if ($user && $user->isAdmin()): ?>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/admin/bookings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -79,7 +79,7 @@ $user = App::$app->user;
                             </span>
                         </a>
                     </li>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/admin/rooms"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -88,7 +88,7 @@ $user = App::$app->user;
                             </span>
                         </a>
                     </li>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/admin/users"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -97,7 +97,7 @@ $user = App::$app->user;
                             </span>
                         </a>
                     </li>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/admin/reports"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -106,7 +106,7 @@ $user = App::$app->user;
                             </span>
                         </a>
                     </li>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/admin/rooms"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
@@ -117,7 +117,7 @@ $user = App::$app->user;
                     </li>
                 <!-- User Biasa 😄 -->
                 <?php else: ?>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/rooms"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -125,13 +125,13 @@ $user = App::$app->user;
                                 class="lucide lucide-search-icon lucide-search size-6 shrink-0">
                                 <path d="m21 21-4.34-4.34" />
                                 <circle cx="11" cy="11" r="8" />
-                            </svg>                            
+                            </svg>
                             <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Cari
                             </span>
                         </a>
                     </li>
-                    <li class="flex items-center mx-2 px-2 space-x-3">
+                    <li class="w-full px-3">
                         <a href="/my-bookings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -143,7 +143,7 @@ $user = App::$app->user;
                             <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
                             <path d="M6 12h2" />
                             <path d="M6 8h2" />
-                        </svg>                            
+                        </svg>
                         <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Booking
                             </span>
@@ -153,11 +153,11 @@ $user = App::$app->user;
             <?php endif; ?>
         </ul>
         <!-- Bagian bawah 🤔 -->
-        <ul class="flex flex-col mt-10 space-y-4">
+        <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <?php if (App::$app->auth->isGuest()): ?>
                 <!-- Empty -->
             <?php else: ?>
-                <li class="flex items-center mx-2 px-2 space-x-3">
+                <li class="mx-2 px-2">
                     <a href="/profile"
                         class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -165,17 +165,19 @@ $user = App::$app->user;
                             class="lucide lucide-user-round-icon lucide-user-round size-6 shrink-0">
                             <circle cx="12" cy="8" r="5" />
                             <path d="M20 21a8 8 0 0 0-16 0" />
-                        </svg>                        
+                        </svg>
                         <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                             Profil
                         </span>
                     </a>
+                </li>
+                <li class="mx-2 px-2">
                     <form action="/logout" method="post">
                         <?= csrf_field() ?>
                         <button type="submit"
-                            class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4">
+                            class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
-                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0 cursor-pointer">
+                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Logout
                             </span>
                         </button>
@@ -187,56 +189,6 @@ $user = App::$app->user;
     <!-- Main Content -->
     <main class="pt-12 md:pt-0 pb-12 min-h-screen">
         <div class="max-w-7xl mx-auto bg-primary md:bg-slate-100">
-            <!-- Flash Messages -->
-            <?php if ($m = App::$app->session->getFlash('success')): ?>
-                <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 text-emerald-500 shrink-0" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-emerald-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($m = App::$app->session->getFlash('error')): ?>
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-red-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($m = App::$app->session->getFlash('warning')): ?>
-                <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <p class="text-yellow-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($m = App::$app->session->getFlash('info')): ?>
-                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-blue-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                    </div>
-                </div>
-            <?php endif; ?>
-
             <!-- Page Content -->
             {{content}}
         </div>
@@ -270,7 +222,7 @@ $user = App::$app->user;
 
     <!-- mobile Navigation -->
     <header
-        class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-50 md:hidden">
+        class="absolute left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-30 md:hidden">
         <div>Logo</div>
         <div>
             <a href="#">

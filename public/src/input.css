@@ -3,11 +3,12 @@
 
 @theme {
     --color-primary: #064E3B;
-    --font-sans: "Plus Jakarta Sans", sans-serif;
+    --font-md-sans: "DM Sans", sans-serif;
+    --font-plus-jakarta-sans: "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {
   html {
-    @apply font-sans;
+    @apply font-md-sans;
   }
 }

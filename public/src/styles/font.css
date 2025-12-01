@@ -3,3 +3,9 @@
   src: url("/fonts/PlusJakartaSans-VariableFont_wght.ttf") format("truetype");
   font-weight: 400;
 }
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("/fonts/DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 400;
+}

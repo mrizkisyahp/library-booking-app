@@ -23,12 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const content = imagePopUp.querySelector('div');
             setTimeout(() => {
                 content.classList.remove('opacity-0', 'scale-95');
-                content.classList.add('opacity-100', 'scale-100');  
+                content.classList.add('opacity-100', 'scale-100');
             }, 200);
         });
     });
 
-    closePopUp.addEventListener('click', () => {    
+    closePopUp.addEventListener('click', () => {
         const content = imagePopUp.querySelector('div');
         content.classList.remove('opacity-100', 'scale-100');
         content.classList.add('opacity-0', 'scale-95');
@@ -176,4 +176,15 @@ function togglePassword(id) {
     function prevStep() {
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
+    }
+
+    // copy text
+    function copyToken() {
+        const text = document.getElementById("inviteToken").textContent.trim();
+        const toast = document.getElementById("copyToast");
+
+        navigator.clipboard.writeText(text).then(() => {
+            toast.style.opacity = 1;
+            setTimeout(() => toast.style.opacity = 0, 1500);
+        });
     }

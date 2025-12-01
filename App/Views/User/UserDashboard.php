@@ -3,8 +3,11 @@
 /** @var array $bookings */
 /** @var array $pendingFeedbacks */
 /** @var \App\Models\User $user */
-use Carbon\Carbon;
-Carbon::setLocale('id');
+use App\Core\App;
+$user = App::$app->user;
+
+    use Carbon\Carbon;
+    Carbon::setLocale('id');
 
 function formatWaktu($waktu)
 {
@@ -19,7 +22,7 @@ function formatTanggal($tanggal)
 
 <!-- Welcome Header -->
 <div class="rounded-2xl p-4 mb-6">
-  <div class="flex items-center justify-between mt-6 px-6">
+  <div class="flex items-center justify-between mt-6 px-6 mb-4">
     <div>
       <h1 class="text-4xl font-bold text-white md:text-black mb-2">
         Selamat Datang, <span class="text-emerald-100 md:text-emerald-800 capitalize"><?= htmlspecialchars($user->nama) ?></span>! 👋
@@ -66,31 +69,12 @@ function formatTanggal($tanggal)
   </div>
 <?php endif; ?>
 
-<!-- Welcome Header -->
-<div class="rounded-2xl p-4 mb-6">
-  <div class="flex items-center justify-between mt-6 px-6">
-    <div>
-      <h1 class="text-4xl font-bold text-white md:text-black mb-2">
-        Selamat Datang, <span
-          class="text-emerald-100 md:text-emerald-800 capitalize"><?= htmlspecialchars($user->nama) ?></span>! 👋
-      </h1>
-      <p class="text-white md:text-black">Kelola booking ruangan Anda dengan mudah</p>
-    </div>
-    <div class="hidden md:block">
-      <!-- <svg class="w-24 h-24 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-      </svg> -->
-    </div>
-  </div>
-</div>
-
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <!-- Main Content -->
   <div class="lg:col-span-2 space-y-6">
     <!-- Statistics -->
     <div class="bg-gray-100 rounded-t-3xl md:rounded-3xl shadow-lg p-6 md:p-0">
-      <div class="bg-white rounded-3xl p-8 mb-6">
+      <div class="bg-white rounded-3xl p-6 mb-6">
         <h2 class="text-4xl font-bold text-slate-800 mb-6 flex items-center">
           <svg class="size-9 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -98,6 +82,56 @@ function formatTanggal($tanggal)
           </svg>
           Booking Saya
         </h2>
+
+        <!-- Flash Messages -->
+            <?php if ($m = App::$app->session->getFlash('success')): ?>
+                <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-emerald-500 shrink-0" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-emerald-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($m = App::$app->session->getFlash('error')): ?>
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-red-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($m = App::$app->session->getFlash('warning')): ?>
+                <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="text-yellow-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($m = App::$app->session->getFlash('info')): ?>
+                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-blue-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
 
         <?php if (empty($bookings)): ?>
           <div class="text-center py-12 rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
@@ -130,11 +164,11 @@ function formatTanggal($tanggal)
           <?php foreach ($bookings as $booking): ?>
             <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
               <div class="flex flex-col justify-start p-6">
-                <p class="font-bold text-2xl mb-4">
+                <p class="font-bold text-2xl mb-2">
                   <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
                 </p>
-                <p>
-                  [JENIS RUANGAN]
+                <p class="mb-2">
+                  ?$room['JENIS_RUANGAN']
                 </p>
                 <div class="w-full">
                   <?php
@@ -152,7 +186,7 @@ function formatTanggal($tanggal)
                   $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
                   $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
                   ?>
-                  <div class="px-4 py-2 mb-4 rounded-3xl font-regular tracking-wide border <?= $statusColor ?>">
+                  <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
                     Status:
                     <?= htmlspecialchars($statusLabel) ?>
                     <!-- 🤡🤡🤡 -->
@@ -169,6 +203,17 @@ function formatTanggal($tanggal)
                       elseif $booking['status'] == 'completed':
                         echo ('(Selesai)');
                     endif; -->
+                    <?php if ($booking['status'] === 'draft'): ?>
+                      (Menunggu Anggota)
+                    <?php elseif ($booking['status'] === 'pending'): ?>
+                      (Menunggu Konfirmasi)
+                    <?php elseif ($booking['status'] === 'verified'): ?>
+                      (Terkonfirmasi)
+                    <?php elseif ($booking['status'] === 'active'): ?>
+                      (Sedang berlangsung)
+                    <?php elseif ($booking['status'] === 'completed'): ?>
+                      (Selesai)
+                    <?php endif ?>
                   </div>
 
                   <p class="mb-4 flex gap-2 items-center">
@@ -212,7 +257,7 @@ function formatTanggal($tanggal)
                     <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
                       · Min <?= (int) $requiredMembers ?>
                     <?php endif; ?> -->
-                    1/6 peserta . Min 1
+                    [1/6 PESERTA . Min 1]
                   </p>
 
                   <div class="w-full">
@@ -234,7 +279,7 @@ function formatTanggal($tanggal)
         <?php endif ?>
 
       </div>
-      
+
       <!-- tambah widget -->
       <div class="mb-6">
         <p class="flex gap-4 w-full border border-4xl border-dashed items-center justify-center rounded-3xl p-8 text-gray-400">
