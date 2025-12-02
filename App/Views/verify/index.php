@@ -52,9 +52,12 @@ $validator = $validator ?? null;
 
         <p class="mt-6 text-center text-sm">
           Tidak mendapatkan kodenya?
-          <a href="/resend" class="italic capitalize text-gray-700 hover:underline active:underline mt-6">
+        <form action="/resend" method="POST">
+          <?= csrf_field() ?>
+          <button type="submit" class="italic capitalize text-gray-700 hover:underline active:underline mt-6">
             Kirim ulang kode
-          </a>
+          </button>
+        </form>
         </p>
 
       </div>

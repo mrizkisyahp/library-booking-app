@@ -3,6 +3,8 @@
 use App\Core\App;
 
 $validator = $validator ?? null;
+$token = $token ?? '';
+$email = $email ?? '';
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -22,20 +24,17 @@ $validator = $validator ?? null;
         <p><?= htmlspecialchars($m) ?></p>
       <?php endif; ?>
 
-      <p>Masukkan kode verifikasi dan atur password barumu.</p>
+      <p>Masukkan password baru untuk akun: <strong><?= htmlspecialchars($email) ?></strong></p>
 
       <div class="mt-6">
-        <form action="/reset" method="post">
+        <form action="/reset-password" method="post">
           <?= csrf_field() ?>
 
           <div>
-            <div class="mt-6">
-              <input id="code" type="text" name="code" placeholder="Kode verifikasi"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $validator?->hasError('code') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
-              <?php if ($validator?->hasError('code')): ?>
-                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('code')) ?></p>
-              <?php endif; ?>
-            </div>
+            <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+            <?php if ($validator?->hasError('token')): ?>
+              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('token')) ?></p>
+            <?php endif; ?>
 
             <div class="mt-6">
               <input id="password" type="password" name="new_password" placeholder="Password baru"
@@ -56,9 +55,6 @@ $validator = $validator ?? null;
               <?php endif; ?>
             </div>
 
-            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= $_ENV['TURNSTILE_SITE']; ?>"
-              data-theme="light" data-size="normal" data-callback="onSuccess"></div>
-            <div class="mt-6"></div>
             <button type="submit"
               class="px-8 py-2 w-full mt-6 bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all">
               Reset Password
@@ -79,5 +75,3 @@ $validator = $validator ?? null;
     </div>
   </div>
 </div>
-
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

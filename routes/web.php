@@ -30,11 +30,11 @@ $app->router->get('/register/dosen', [AuthController::class, 'registerDosen']);
 $app->router->post('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new CsrfMiddleware()]]);
 $app->router->get('/verify', [VerifyController::class, 'verify']);
 $app->router->post('/verify', [VerifyController::class, 'verify'], ['middleware' => [new CsrfMiddleware()]]);
-$app->router->get('/resend', [VerifyController::class, 'resend']);
+$app->router->post('/resend', [VerifyController::class, 'resend'], ['middleware' => [new CsrfMiddleware()]]);
 $app->router->get('/forgot', [PasswordController::class, 'forgot']);
 $app->router->post('/forgot', [PasswordController::class, 'forgot'], ['middleware' => [new CsrfMiddleware()]]);
-$app->router->get('/reset', [PasswordController::class, 'reset']);
-$app->router->post('/reset', [PasswordController::class, 'reset'], ['middleware' => [new CsrfMiddleware()]]);
+$app->router->get('/reset-password', [PasswordController::class, 'reset']);
+$app->router->post('/reset-password', [PasswordController::class, 'reset'], ['middleware' => [new CsrfMiddleware()]]);
 
 // User routes (authenticated)
 $app->router->get('/dashboard', [UserDashboardController::class, 'index'], ['middleware' => [new AuthMiddleware()]]);

@@ -7,6 +7,10 @@ use App\Core\Exceptions\ForbiddenException;
 use App\Core\Exceptions\ValidationException;
 use App\Core\Services\AuthService;
 use App\Core\Services\Logger;
+use App\Core\Repository\UserRepository;
+use App\Core\Services\TurnstileService;
+use App\Core\Services\EmailService;
+use App\Core\Services\CacheService;
 use App\Models\User;
 
 class App
@@ -43,7 +47,6 @@ class App
         $this->request = new Request();
         $this->response = new Response();
         $this->session = new Session();
-        $this->log = new Logger();
         $this->router = new Router($this->request, $this->response);
 
         $dbConfig = $config['database'] ?? [];
@@ -55,37 +58,52 @@ class App
         $this->container->instance(Session::class, $this->session);
         $this->container->instance(Database::class, $this->db);
         $this->container->instance(Router::class, $this->router);
-        $this->container->instance(Logger::class, $this->log);
 
         $this->container->singleton(
-            \App\Core\Repository\UserRepository::class,
-            fn($c) => new \App\Core\Repository\UserRepository($this->db)
+            UserRepository::class,
+            fn($c) => new UserRepository($this->db)
         );
 
         $this->container->singleton(
-            \App\Core\Services\TurnstileService::class,
-            fn($c) => new \App\Core\Services\TurnstileService(
+            TurnstileService::class,
+            fn($c) => new TurnstileService(
                 $_ENV['TURNSTILE_SECRET'] ?? '',
                 filter_var($_ENV['TURNSTILE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN)
             )
         );
 
         $this->container->singleton(
-            \App\Core\Services\CacheService::class
+            CacheService::class,
+            fn($c) => new CacheService(cacheDir: App::$ROOT_DIR . '/Storage/Cache')
         );
 
         $this->container->singleton(
-            \App\Core\Services\EmailService::class
+            Logger::class,
+            fn($c) => new Logger(logDir: App::$ROOT_DIR . '/Storage/Logs')
         );
+
+        $mailConfig = $config['mail'] ?? [];
+        $this->container->singleton(EmailService::class, function () use ($mailConfig) {
+            return new EmailService(
+                host: $mailConfig['host'] ?? 'localhost',
+                username: $mailConfig['username'] ?? '',
+                password: $mailConfig['password'] ?? '',
+                encryption: $mailConfig['encryption'] ?? 'tls',
+                port: (int) ($mailConfig['port'] ?? 587),
+                fromAddress: $mailConfig['from_email'] ?? 'noreply@localhost',
+                fromName: $mailConfig['from_name'] ?? 'Library Booking App'
+            );
+        });
 
         $this->auth = $this->container->make(AuthService::class, [
             'userClass' => $this->userClass
         ]);
 
+        $this->log = $this->container->make(Logger::class);
+
         $this->auth->bootstrap();
         $this->user = $this->auth->user();
 
-        // Register the shared AuthService instance
         $this->container->instance(AuthService::class, $this->auth);
     }
 
@@ -114,7 +132,7 @@ class App
     private function handleNotFoundException(NotFoundException $e): void
     {
         $this->response->setStatusCode(404);
-        Logger::warning('404 Not Found', [
+        $this->log->warning('404 Not Found', [
             'uri' => $this->request->getPath(),
             'method' => $this->request->method()
         ]);
@@ -124,7 +142,7 @@ class App
     private function handleForbiddenException(ForbiddenException $e): void
     {
         $this->response->setStatusCode(403);
-        Logger::warning('403 Forbidden', [
+        $this->log->warning('403 Forbidden', [
             'uri' => $this->request->getPath(),
             'method' => $this->request->method(),
             'user_id' => $this->user?->id_user ?? null
@@ -156,7 +174,7 @@ class App
     private function handleDatabaseException(\PDOException $e): void
     {
         $this->response->setStatusCode(500);
-        Logger::error('Database Error', [
+        $this->log->error('Database Error', [
             'error' => $e->getMessage(),
             'code' => $e->getCode(),
             'uri' => $this->request->getPath()
@@ -171,7 +189,7 @@ class App
     private function handleGeneralException(\Throwable $e): void
     {
         $this->response->setStatusCode(500);
-        Logger::error('Unhandled Exception', [
+        $this->log->error('Unhandled Exception', [
             'error' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),

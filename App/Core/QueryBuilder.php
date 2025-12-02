@@ -524,4 +524,17 @@ class QueryBuilder
     {
         return $this->table;
     }
+
+    public function pluck(string $column): array
+    {
+        $this->select($column);
+        $results = $this->get();
+
+        $values = [];
+        foreach ($results as $row) {
+            $values[] = $row->$column;
+        }
+
+        return $values;
+    }
 }

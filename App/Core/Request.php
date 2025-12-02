@@ -91,12 +91,13 @@ class Request
 
     public function getQuery(): array
     {
-        $query = [];
-        foreach ($_GET as $key => $value) {
-            $query[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-        }
+        // $query = [];
+        // foreach ($_GET as $key => $value) {
+        //     $query[$key] = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        // }
 
-        return $query;
+        // return $query;
+        return $_GET;
     }
 
     public function query(?string $key = null, $default = null)

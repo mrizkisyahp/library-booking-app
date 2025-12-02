@@ -3,7 +3,6 @@
 use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\Session;
 use Carbon\Carbon;
 
 
@@ -262,5 +261,22 @@ if (!function_exists('formatTanggal')) {
     function formatTanggal($tanggal)
     {
         return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
+    }
+}
+
+if (!function_exists('getRemainingAttempts')) {
+    function getRemainingAttempts(string $identifier, string $type = 'login'): int
+    {
+        $cache = app()->container->make(\App\Core\Services\CacheService::class);
+
+        $cacheKey = match ($type) {
+            'login' => 'login_attempts_' . md5($identifier),
+            'verify' => 'verify_attempts_' . $identifier,
+            'reset' => 'reset_attempts_' . $identifier,
+            default => 'login_attempts_' . md5($identifier)
+        };
+
+        $attempts = (int) ($cache->get($cacheKey) ?? 0);
+        return max(0, 5 - $attempts);
     }
 }

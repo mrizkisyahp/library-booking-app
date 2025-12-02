@@ -8,15 +8,14 @@ use App\Core\Response;
 use App\Core\Services\AuthService;
 use App\Core\Services\TurnstileService;
 use App\Core\Services\Logger;
-use App\Models\User;
-use App\Models\Role;
 use App\Core\Exceptions\ValidationException;
 
 class AuthController extends Controller
 {
     public function __construct(
         private AuthService $auth,
-        private TurnstileService $turnstile
+        private TurnstileService $turnstile,
+        private Logger $logger
     ) {
     }
 
@@ -52,7 +51,7 @@ class AuthController extends Controller
                     app()->user = $currentUser;
 
                     if ($currentUser?->id_user) {
-                        Logger::auth('Logged in', $currentUser->id_user, "Email: {$currentUser->email}");
+                        $this->logger->auth('Logged in', $currentUser->id_user, "Email: {$currentUser->email}");
                     }
 
                     flash('success', 'Login successful!');
@@ -68,7 +67,7 @@ class AuthController extends Controller
             flash('error', 'Invalid credentials');
         }
         return view('Auth/Login', [
-            'rememberedIdentifier' => $_COOKIE['remember_identifier'] ?? ''
+            'rememberedIdentifier' => $_COOKIE['remember_me'] ?? ''
         ]);
     }
 
@@ -97,7 +96,7 @@ class AuthController extends Controller
                     'nama' => ['required', 'string', 'min:3'],
                     'nim' => ['required', 'string', 'min:10', 'max:10', 'unique:users,nim'],
                     'email' => ['required', 'email', 'unique:users,email'],
-                    'password' => ['required', 'string', 'min:4', 'max:24'],
+                    'password' => ['required', 'string', 'min:8', 'max:24'],
                     'confirm_password' => ['required', 'string', 'match:password'],
                     'jurusan' => ['required', 'string'],
                     'nomor_hp' => ['required', 'numeric'],
@@ -108,7 +107,6 @@ class AuthController extends Controller
                     'nim' => $validated['nim'],
                     'email' => $validated['email'],
                     'password' => $validated['password'],
-                    'id_role' => Role::getIdByName('mahasiswa'),
                     'jurusan' => $validated['jurusan'],
                     'nomor_hp' => $validated['nomor_hp'],
                 ], 'mahasiswa');
@@ -116,7 +114,7 @@ class AuthController extends Controller
                 $this->auth->sendVerificationOTP($registered);
 
                 if ($registered->id_user) {
-                    Logger::auth('registered', $registered->id_user, "Email: {$registered->email}");
+                    $this->logger->auth('registered', $registered->id_user, "Email: {$registered->email}");
                 }
 
                 flash('success', 'Registration successful! Check your email for verification code.');
@@ -149,7 +147,7 @@ class AuthController extends Controller
                     'nama' => ['required', 'string', 'min:3'],
                     'nip' => ['required', 'string', 'min:18', 'max:18', 'unique:users,nip'],
                     'email' => ['required', 'email', 'unique:users,email'],
-                    'password' => ['required', 'string', 'min:4', 'max:24'],
+                    'password' => ['required', 'string', 'min:8', 'max:24'],
                     'confirm_password' => ['required', 'string', 'match:password'],
                     'jurusan' => ['required', 'string'],
                     'nomor_hp' => ['required', 'numeric'],
@@ -160,7 +158,6 @@ class AuthController extends Controller
                     'nip' => $validated['nip'],
                     'email' => $validated['email'],
                     'password' => $validated['password'],
-                    'id_role' => Role::getIdByName('dosen'),
                     'jurusan' => $validated['jurusan'],
                     'nomor_hp' => $validated['nomor_hp'],
                 ], 'dosen');
@@ -168,7 +165,7 @@ class AuthController extends Controller
                 $this->auth->sendVerificationOTP($registered);
 
                 if ($registered->id_user) {
-                    Logger::auth('registered', $registered->id_user, "Email: {$registered->email}");
+                    $this->logger->auth('registered', $registered->id_user, "Email: {$registered->email}");
                 }
 
                 flash('success', 'Registration successful! Check your email for verification code.');
@@ -191,7 +188,7 @@ class AuthController extends Controller
         app()->user = null;
 
         if ($currentUser) {
-            Logger::auth('logged out', $currentUser->id_user, "Email: {$currentUser->email}");
+            $this->logger->auth('logged out', $currentUser->id_user, "Email: {$currentUser->email}");
         }
 
         flash('success', 'You have been logged out.');

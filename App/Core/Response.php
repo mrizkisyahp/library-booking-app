@@ -129,7 +129,7 @@ class Response
             'expires' => $expire > 0 ? time() + $expire : $expire,
             'path' => $path,
             'domain' => '',
-            'secure' => !empty($_SERVER['HTTPS'] && $_SERVER['HTTPS'] === 'on'),
+            'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
             'httponly' => true,
             'samesite' => 'Lax'
         ]);

@@ -3,6 +3,7 @@
 namespace App\Core\Services;
 
 use App\Core\Repository\UserRepository;
+use App\Core\Repository\RoleRepository;
 use App\Core\Session;
 use App\Core\Response;
 use App\Models\User;
@@ -14,6 +15,7 @@ class AuthService
     public function __construct(
         private Session $session,
         private UserRepository $userRepo,
+        private RoleRepository $roleRepo,
         private Response $response,
         private CacheService $cache,
         private EmailService $email,
@@ -47,9 +49,17 @@ class AuthService
             return false;
         }
 
+        $attemptKey = 'login_attempts_' . md5($identifier);
+        $attempts = (int) ($this->cache->get($attemptKey) ?? 0);
+
+        if ($attempts >= 5) {
+            return false;
+        }
+
         $user = $this->userRepo->findByIdentifier($identifier);
 
         if (!$user || !password_verify($password, $user->password)) {
+            $this->cache->set($attemptKey, $attempts + 1, 900);
             return false;
         }
 
@@ -57,12 +67,15 @@ class AuthService
             return false;
         }
 
+        $this->cache->delete($attemptKey);
+
         $this->login($user, $remember);
         return true;
     }
 
     public function login(User $user, bool $remember = false): void
     {
+        session_regenerate_id(true);
         $this->user = $user;
 
         $primaryKey = $user->primaryKey();
@@ -73,15 +86,15 @@ class AuthService
         error_log("Login: Set user_id in session = " . $id);
 
         if ($remember) {
-            $this->setRememberCookie($user->email ?? $user->nim ?? $user->nip ?? '');
+            $this->setRememberCookie($user);
         }
     }
 
     public function logout(): void
     {
+        // $this->clearRememberCookie();
         $this->user = null;
         $this->session->remove('user_id');
-        $this->clearRememberCookie();
     }
 
     public function user(): ?User
@@ -106,13 +119,17 @@ class AuthService
 
     public function register(array $data, string $role): User
     {
+        $roleId = $this->roleRepo->findIdByName($role);
+        if (!$roleId) {
+            throw new \Exception("Invalid role: {$role}");
+        }
+
+        $data['id_role'] = $roleId;
         if (isset($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
-        $data['status'] = $role === 'dosen'
-            ? 'active'
-            : 'pending verification';
+        $data['status'] = 'pending verification';
 
         return $this->userRepo->create($data);
     }
@@ -122,6 +139,8 @@ class AuthService
         $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $this->cache->set("verify_otp_{$user->id_user}", password_hash($otp, PASSWORD_DEFAULT), 900);
+
+        $this->session->remove('reset_user_id');
 
         $this->session->set('user_id_pending', $user->id_user);
         $this->session->remove('last_resend_time');
@@ -139,7 +158,6 @@ class AuthService
             return false;
         }
 
-        $this->cache->delete("{$prefix}_{$userId}");
         return true;
     }
 
@@ -149,7 +167,13 @@ class AuthService
             return false;
         }
 
+        $attempts = (int) ($this->cache->get("verify_attempts_{$userId}") ?? 0);
+        if ($attempts >= 5) {
+            return false;
+        }
+
         if (!$this->verifyOTP($userId, $code, 'verify_otp')) {
+            $this->cache->set("verify_attempts_{$userId}", $attempts + 1, 900);
             return false;
         }
 
@@ -164,6 +188,8 @@ class AuthService
         $updated = $this->userRepo->update($userId, ['status' => $newStatus]);
 
         if ($updated) {
+            $this->cache->delete("verify_attempts_{$userId}");
+            $this->cache->delete("verify_otp_{$userId}");
             $this->session->remove('user_id_pending');
             $this->logger->auth('email verified', $userId, "Status changed to: {$newStatus}");
         }
@@ -192,7 +218,19 @@ class AuthService
         return true;
     }
 
-    public function sendPasswordResetOTP(string $email): bool
+    private function setRememberCookie(User $user): void
+    {
+        $identifier = $user->email ?? $user->nim ?? $user->nip ?? '';
+
+        $this->response->cookie('remember_me', $identifier, 60 * 60 * 24 * 30);
+    }
+
+    private function clearRememberCookie(): void
+    {
+        $this->response->cookie('remember_me', '', -1);
+    }
+
+    public function sendPasswordResetLink(string $email): bool
     {
         $user = $this->userRepo->findByEmail($email);
 
@@ -200,37 +238,57 @@ class AuthService
             return false;
         }
 
-        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $token = bin2hex(random_bytes(32));
 
-        $this->cache->set("reset_otp_{$user->id_user}", password_hash($otp, PASSWORD_DEFAULT), 900);
+        $this->userRepo->update($user->id_user, [
+            'password_reset_token' => hash('sha256', $token),
+            'password_reset_expires' => date('Y-m-d H:i:s', time() + 900)
+        ]);
 
-        $this->session->set('reset_user_id', $user->id_user);
-
-        $this->email->sendVerificationCode($user, $otp, 'reset');
-
-        $this->logger->auth('password reset otp sent', $user->id_user);
+        $resetLink = config('APP_URL', 'http://localhost:8000') . "/reset-password?token={$token}";
+        $this->email->sendPasswordResetLink($user, $resetLink);
+        $this->logger->auth('password reset link sent', $user->id_user);
 
         return true;
     }
 
-    public function resetPassword(int $userId, string $code, string $password): bool
+    public function verifyResetToken(string $token): ?User
     {
-        if (!$this->verifyOTP($userId, $code, 'reset_otp')) {
+        if (empty($token)) {
+            error_log("verifyResetToken: Token is empty");
+            return null;
+        }
+
+        $hashedToken = hash('sha256', $token);
+        error_log("verifyResetToken: Plain token = " . $token);
+        error_log("verifyResetToken: Hashed token = " . $hashedToken);
+        error_log("verifyResetToken: Current time = " . date('Y-m-d H:i:s'));
+
+        $user = User::Query()->where('password_reset_token', $hashedToken)->where('password_reset_expires', '>', date('Y-m-d H:i:s'))->with('role')->first();
+
+        error_log("verifyResetToken: User found = " . ($user ? "ID: {$user->id_user}" : "NULL"));
+        return $user;
+    }
+
+    public function resetPasswordWithToken(string $token, string $newPassword): bool
+    {
+        $user = $this->verifyResetToken($token);
+
+        if (!$user) {
             return false;
         }
 
-        return $this->userRepo->update($userId, [
-            'password' => password_hash($password, PASSWORD_DEFAULT)
+        $updated = $this->userRepo->update($user->id_user, [
+            'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+            'password_reset_token' => null,
+            'password_reset_expires' => null
         ]);
-    }
 
-    private function setRememberCookie(string $identifier): void
-    {
-        $this->response->cookie('remember_identifier', $identifier, 60 * 60 * 24 * 30);
-    }
+        if ($updated) {
+            $this->logger->auth('password reset completed via link', $user->id_user);
+            $this->email->sendPasswordChangedNotification($user);
+        }
 
-    private function clearRememberCookie(): void
-    {
-        $this->response->cookie('remember_identifier', '', -1);
+        return $updated;
     }
 }

@@ -3,6 +3,8 @@
 use App\Core\App;
 
 $validator = $validator ?? null;
+$token = $token ?? '';
+$email = $email ?? '';
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -38,7 +40,7 @@ $validator = $validator ?? null;
               <?php endif; ?>
             </div>
 
-            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= $_ENV['TURNSTILE_SITE']; ?>"
+            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= config('TURNSTILE_SITE') ?>"
               data-theme="light" data-size="normal" data-callback="onSuccess"></div>
             <div class="mt-6"></div>
             <button type="submit"

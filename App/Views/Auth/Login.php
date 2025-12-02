@@ -4,6 +4,7 @@
 use App\Core\App;
 
 $validator = $validator ?? null;
+$cookie = $rememberedIdentifier;
 ?>
 
 <div class="flex items-center justify-center min-h-dvh mx-4 ">
@@ -38,7 +39,7 @@ $validator = $validator ?? null;
                 class="block text-regular font-medium <?= $validator?->hasError('identifier') ? 'text-red-700' : 'text-gray-700' ?> mb-2"
                 for="identifier">Email atau Nomor Induk</label>
               <input id="identifier" type="text" name="identifier" placeholder="Masukkan Email atau Nomor Induk"
-                value="<?= htmlspecialchars(old('identifier') ?? $rememberedIdentifier ?? '') ?>"
+                value="<?= htmlspecialchars(old('identifier') ?? $cookie ?? '') ?>"
                 class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 placeholder-gray-400 <?= $validator?->hasError('identifier') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>" />
               <?php if ($validator?->hasError('identifier')): ?>
                 <p class="mt-1 text-sm text-red-600">

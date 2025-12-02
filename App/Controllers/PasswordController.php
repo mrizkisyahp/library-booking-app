@@ -39,14 +39,9 @@ class PasswordController extends Controller
                     'email' => ['required', 'email']
                 ]);
 
-                $success = $this->auth->sendPasswordResetOTP($validated['email']);
+                $this->auth->sendPasswordResetLink($validated['email']);
 
-                if ($success) {
-                    flash('success', 'Reset code sent to your email.');
-                    return redirect('/reset');
-                }
-
-                flash('error', 'If that email exists, a reset code has been sent.');
+                flash('success', 'If that email exists, a password reset link has been sent. Please check your inbox.');
                 return redirect('/forgot');
             } catch (ValidationException $e) {
                 return view('ResetPassword/Forgot', [
@@ -63,49 +58,49 @@ class PasswordController extends Controller
         $this->setLayout('auth');
         $this->setTitle('Reset Password | Library Booking App');
 
-        $userId = session('reset_user_id');
+        $token = $request->query('token') ?? $request->input('token');
 
-        if (!$userId) {
-            flash('error', 'Session expired, please request a new reset code.');
+        if (!$token) {
+            flash('error', 'Invalid or missing reset token.');
+            return redirect('/forgot');
+        }
+
+        $user = $this->auth->verifyResetToken($token);
+
+        if (!$user) {
+            flash('error', 'Invalid or expired reset link. Please request a new one.');
             return redirect('/forgot');
         }
 
         if ($request->isPost()) {
-            $token = $request->input('cf-turnstile-response');
-            $remoteIp = $request->ip();
-
-            if (!$this->turnstile->verify($token, $remoteIp)) {
-                flash('error', 'CAPTCHA verification failed');
-                return redirect('/reset');
-            }
-
             try {
                 $validated = $request->validate([
-                    'code' => ['required', 'string', 'min:6', 'max:6'],
+                    'token' => ['required', 'string'],
                     'new_password' => ['required', 'min:8'],
                     'confirm_new_password' => ['required', 'match:new_password']
                 ]);
 
-                $success = $this->auth->resetPassword(
-                    (int) $userId,
-                    $validated['code'],
+                $success = $this->auth->resetPasswordWithToken(
+                    $validated['token'],
                     $validated['new_password']
                 );
 
                 if ($success) {
-                    $this->session->remove('reset_user_id');
-                    flash('success', 'Password reset successfully!');
+                    flash('success', 'Password reset successful! You can now login with your new password.');
                     return redirect('/login');
                 }
-
-                flash('error', 'Invalid reset code');
-                return redirect('/reset');
+                flash('error', 'Failed to reset password. Please try again.');
+                return redirect('/forgot');
             } catch (ValidationException $e) {
                 return view('ResetPassword/Reset', [
-                    'validator' => $e->getValidator()
+                    'validator' => $e->getValidator(),
+                    'token' => $token
                 ]);
             }
         }
-        return view('ResetPassword/Reset');
+        return view('ResetPassword/Reset', [
+            'token' => $token,
+            'email' => $user->email
+        ]);
     }
 }
