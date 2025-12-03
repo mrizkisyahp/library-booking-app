@@ -280,3 +280,50 @@ if (!function_exists('getRemainingAttempts')) {
         return max(0, 5 - $attempts);
     }
 }
+
+if (!function_exists('str_slug')) {
+    function str_slug(string $string): string
+    {
+        $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $string);
+        return trim($slug, '_');
+    }
+}
+if (!function_exists('room_photos')) {
+    function room_photos(\App\Models\Room $room): array
+    {
+        $dir = App::$ROOT_DIR . '/Public/uploads/Room_Photos/';
+        $slug = str_slug($room->nama_ruangan);
+        $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
+        $files = glob($pattern, GLOB_BRACE) ?: [];
+        sort($files);
+        $photos = [];
+        foreach ($files as $file) {
+            $mime = match (strtolower(pathinfo($file, PATHINFO_EXTENSION))) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+                default => 'application/octet-stream',
+            };
+            $photos[] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file));
+        }
+        return $photos;
+    }
+}
+if (!function_exists('room_thumbnail')) {
+    function room_thumbnail(\App\Models\Room $room): ?string
+    {
+        $photos = room_photos($room);
+        return $photos[0] ?? null;
+    }
+}
+if (!function_exists('room_facilities')) {
+    function room_facilities(\App\Models\Room $room): array
+    {
+        if (empty($room->deskripsi_ruangan)) {
+            return [];
+        }
+        $parts = preg_split('/[\r\n;,]+/', $room->deskripsi_ruangan);
+        return array_values(array_filter(array_map('trim', $parts)));
+    }
+}

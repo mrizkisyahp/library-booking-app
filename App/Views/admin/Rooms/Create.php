@@ -1,10 +1,11 @@
 <?php
-use App\Core\App;
-use App\Core\Csrf;
-use App\Models\Room;
-/** @var Room $room */
+$validator = $validator ?? null;
 
-$statusOptions = $statusOptions ?? [];
+$statusOptions = [
+  'available' => 'Available',
+  'unavailable' => 'Unavailable',
+  'adminOnly' => 'Admin Only',
+];
 $roomTypes = [
   'Audio Visual',
   'Telekonferensi',
@@ -19,11 +20,11 @@ $roomTypes = [
 <h1>Create Room</h1>
 <p><a href="/admin/rooms">Back to list</a></p>
 
-<?php if ($message = App::$app->session->getFlash('success')): ?>
+<?php if ($message = flash('success')): ?>
   <p style="color: green;"><?= htmlspecialchars($message) ?></p>
 <?php endif; ?>
 
-<?php if ($message = App::$app->session->getFlash('error')): ?>
+<?php if ($message = flash('error')): ?>
   <p style="color: red;"><?= htmlspecialchars($message) ?></p>
 <?php endif; ?>
 
@@ -33,10 +34,10 @@ $roomTypes = [
     <legend>Basic Information</legend>
     <label>
       Room Name
-      <input type="text" name="nama_ruangan" value="<?= htmlspecialchars($room->nama_ruangan ?? '') ?>">
+      <input type="text" name="nama_ruangan" value="">
     </label>
-    <?php if ($room->hasError('nama_ruangan')): ?>
-      <p style="color: red;"><?= htmlspecialchars($room->getFirstError('nama_ruangan')) ?></p>
+    <?php if ($validator?->hasError('nama_ruangan')): ?>
+      <p style="color: red;"><?= htmlspecialchars($validator?->getFirstError('nama_ruangan')) ?></p>
     <?php endif; ?>
 
     <label>
@@ -50,8 +51,8 @@ $roomTypes = [
         <?php endforeach; ?>
       </select>
     </label>
-    <?php if ($room->hasError('jenis_ruangan')): ?>
-      <p style="color: red;"><?= htmlspecialchars($room->getFirstError('jenis_ruangan')) ?></p>
+    <?php if ($validator?->hasError('jenis_ruangan')): ?>
+      <p style="color: red;"><?= htmlspecialchars($validator?->getFirstError('jenis_ruangan')) ?></p>
     <?php endif; ?>
   </fieldset>
 
@@ -59,20 +60,18 @@ $roomTypes = [
     <legend>Capacity</legend>
     <label>
       Minimum Capacity
-      <input type="number" name="kapasitas_min" min="1"
-        value="<?= htmlspecialchars((string) ($room->kapasitas_min ?? '')) ?>">
+      <input type="number" name="kapasitas_min" min="1" value="">
     </label>
-    <?php if ($room->hasError('kapasitas_min')): ?>
-      <p style="color: red;"><?= htmlspecialchars($room->getFirstError('kapasitas_min')) ?></p>
+    <?php if ($validator?->hasError('kapasitas_min')): ?>
+      <p style="color: red;"><?= htmlspecialchars($validator?->getFirstError('kapasitas_min')) ?></p>
     <?php endif; ?>
 
     <label>
       Maximum Capacity
-      <input type="number" name="kapasitas_max" min="1"
-        value="<?= htmlspecialchars((string) ($room->kapasitas_max ?? '')) ?>">
+      <input type="number" name="kapasitas_max" min="1" value="">
     </label>
-    <?php if ($room->hasError('kapasitas_max')): ?>
-      <p style="color: red;"><?= htmlspecialchars($room->getFirstError('kapasitas_max')) ?></p>
+    <?php if ($validator?->hasError('kapasitas_max')): ?>
+      <p style="color: red;"><?= htmlspecialchars($validator?->getFirstError('kapasitas_max')) ?></p>
     <?php endif; ?>
   </fieldset>
 
@@ -80,11 +79,10 @@ $roomTypes = [
     <legend>Description</legend>
     <label>
       Details
-      <textarea name="deskripsi_ruangan" rows="4"
-        cols="40"><?= htmlspecialchars($room->deskripsi_ruangan ?? '') ?></textarea>
+      <textarea name="deskripsi_ruangan" rows="4" cols="40"></textarea>
     </label>
-    <?php if ($room->hasError('deskripsi_ruangan')): ?>
-      <p style="color: red;"><?= htmlspecialchars($room->getFirstError('deskripsi_ruangan')) ?></p>
+    <?php if ($validator?->hasError('deskripsi_ruangan')): ?>
+      <p style="color: red;"><?= htmlspecialchars($validator?->getFirstError('deskripsi_ruangan')) ?></p>
     <?php endif; ?>
   </fieldset>
 
@@ -93,15 +91,15 @@ $roomTypes = [
     <label>
       Status
       <select name="status_ruangan">
-        <?php foreach ($statusOptions as $status): ?>
+        <?php foreach ($statusOptions as $status => $label): ?>
           <option value="<?= htmlspecialchars($status) ?>" <?= ($room->status_ruangan ?? '') === $status ? 'selected' : '' ?>>
-            <?= htmlspecialchars(ucwords(str_replace('_', ' ', $status))) ?>
+            <?= htmlspecialchars($label) ?>
           </option>
         <?php endforeach; ?>
       </select>
     </label>
-    <?php if ($room->hasError('status_ruangan')): ?>
-      <p style="color: red;"><?= htmlspecialchars($room->getFirstError('status_ruangan')) ?></p>
+    <?php if ($validator?->hasError('status_ruangan')): ?>
+      <p style="color: red;"><?= htmlspecialchars($validator?->getFirstError('status_ruangan')) ?></p>
     <?php endif; ?>
   </fieldset>
 

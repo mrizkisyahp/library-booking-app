@@ -69,21 +69,21 @@ $email = $email ?? '';
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <script>
-document.getElementById('forgotForm').addEventListener('submit', function(e) {
+  document.getElementById('forgotForm').addEventListener('submit', function (e) {
     const submitBtn = document.getElementById('submitBtn');
     const btnText = document.getElementById('btnText');
     const btnLoading = document.getElementById('btnLoading');
-    
+
     // Disable button to prevent double submission
     submitBtn.disabled = true;
     btnText.classList.add('hidden');
     btnLoading.classList.remove('hidden');
-    
+
     // Re-enable after 5 seconds as fallback (in case of error)
-    setTimeout(function() {
-        submitBtn.disabled = false;
-        btnText.classList.remove('hidden');
-        btnLoading.classList.add('hidden');
+    setTimeout(function () {
+      submitBtn.disabled = false;
+      btnText.classList.remove('hidden');
+      btnLoading.classList.add('hidden');
     }, 5000);
-});
+  });
 </script>

@@ -1,8 +1,4 @@
 <?php
-/** @var string $rememberedIdentifier */
-/** @var \App\Core\Validator\Validator|null $validator */
-use App\Core\App;
-
 $validator = $validator ?? null;
 $cookie = $rememberedIdentifier;
 ?>
@@ -18,13 +14,13 @@ $cookie = $rememberedIdentifier;
       </div>
 
       <!-- Flash Messages -->
-      <?php if ($m = App::$app->session->getFlash('success')): ?>
+      <?php if ($m = flash('success')): ?>
         <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
           <?= htmlspecialchars($m) ?>
         </div>
       <?php endif; ?>
 
-      <?php if ($m = App::$app->session->getFlash('error')): ?>
+      <?php if ($m = flash('error')): ?>
         <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
           <?= htmlspecialchars($m) ?>
         </div>

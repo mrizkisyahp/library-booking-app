@@ -18,16 +18,17 @@ use App\Controllers\AdminFeedbackController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\AdminMiddleware;
 use App\Core\Middleware\CsrfMiddleware;
+use App\Core\Middleware\GuestMiddleware;
 
 // Auth routes (public)
-$app->router->get('/', [AuthController::class, 'login']);
-$app->router->get('/login', [AuthController::class, 'login']);
-$app->router->post('/login', [AuthController::class, 'login'], ['middleware' => [new CsrfMiddleware()]]);
-$app->router->get('/register', [AuthController::class, 'register']);
-$app->router->get('/register/mahasiswa', [AuthController::class, 'registerMahasiswa']);
-$app->router->post('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new CsrfMiddleware()]]);
-$app->router->get('/register/dosen', [AuthController::class, 'registerDosen']);
-$app->router->post('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new CsrfMiddleware()]]);
+$app->router->get('/', [AuthController::class, 'login'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->get('/login', [AuthController::class, 'login'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->post('/login', [AuthController::class, 'login'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/register', [AuthController::class, 'register'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->get('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->post('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->post('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/verify', [VerifyController::class, 'verify']);
 $app->router->post('/verify', [VerifyController::class, 'verify'], ['middleware' => [new CsrfMiddleware()]]);
 $app->router->post('/resend', [VerifyController::class, 'resend'], ['middleware' => [new CsrfMiddleware()]]);
@@ -97,6 +98,9 @@ $app->router->post('/admin/rooms/update', [AdminRoomController::class, 'update']
 $app->router->post('/admin/rooms/delete', [AdminRoomController::class, 'delete'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/rooms/activate', [AdminRoomController::class, 'activate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/rooms/deactivate', [AdminRoomController::class, 'deactivate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/rooms/admin-only', [AdminRoomController::class, 'setAdminOnly'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/rooms/activate-all', [AdminRoomController::class, 'activateAll'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/rooms/deactivate-all', [AdminRoomController::class, 'deactivateAll'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin feedback
 $app->router->get('/admin/feedback', [AdminFeedbackController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

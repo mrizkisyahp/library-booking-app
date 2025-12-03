@@ -1,11 +1,10 @@
 <?php
-use App\Core\App;
-use App\Core\Csrf;
-use App\Models\Room;
-/** @var Room[] $rooms */
 
-$filters = $filters ?? [];
-$statusOptions = $statusOptions ?? [];
+$statusOptions = [
+  'available' => 'Available',
+  'unavailable' => 'Unavailable',
+  'adminOnly' => 'Admin Only',
+];
 $roomTypes = [
   'Audio Visual',
   'Telekonferensi',
@@ -16,7 +15,6 @@ $roomTypes = [
   'Ruang Rapat',
 ];
 
-// Status badge colors
 $statusColors = [
   'available' => 'bg-emerald-100 text-emerald-800 border border-emerald-300',
   'under_maintenance' => 'bg-yellow-100 text-yellow-800 border border-yellow-300',
@@ -46,13 +44,13 @@ $statusColors = [
   </div>
 
   <!-- Flash Messages -->
-  <?php if ($message = App::$app->session->getFlash('success')): ?>
+  <?php if ($message = flash('success')): ?>
     <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
   <?php endif; ?>
 
-  <?php if ($message = App::$app->session->getFlash('error')): ?>
+  <?php if ($message = flash('error')): ?>
     <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
@@ -327,29 +325,30 @@ $statusColors = [
 <div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
   <div class="flex items-center justify-between">
     <p class="text-sm text-slate-600">
-      Showing <span class="font-semibold"><?= (($currentPage - 1) * $perPage) + 1 ?></span>
-      to <span class="font-semibold"><?= min($currentPage * $perPage, $totalRooms) ?></span>
-      of <span class="font-semibold"><?= $totalRooms ?></span> results
+      Showing <span class="font-semibold"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+      to <span
+        class="font-semibold"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+      of <span class="font-semibold"><?= $pagination->total ?></span> results
     </p>
 
     <div class="flex gap-2">
-      <?php if ($currentPage > 1): ?>
-        <a href="/admin/rooms?page=<?= $currentPage - 1 ?>"
+      <?php if ($pagination->currentPage > 1): ?>
+        <a href="/admin/rooms?page=<?= $pagination->currentPage - 1 ?>"
           class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
           Previous
         </a>
       <?php endif; ?>
 
-      <?php for ($i = 1; $i <= ceil($totalRooms / $perPage); $i++): ?>
+      <?php for ($i = 1; $i <= ceil($pagination->total / $pagination->perPage); $i++): ?>
         <a href="/admin/rooms?page=<?= $i ?>"
           class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 text-white
-                  <?= $i === $currentPage ? 'bg-emerald-600 hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
+                  <?= $i === $pagination->currentPage ? 'bg-emerald-600 hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
           <?= $i ?>
         </a>
       <?php endfor; ?>
 
-      <?php if ($currentPage < ceil($totalRooms / $perPage)): ?>
-        <a href="/admin/rooms?page=<?= $currentPage + 1 ?>"
+      <?php if ($pagination->currentPage < ceil($pagination->total / $pagination->perPage)): ?>
+        <a href="/admin/rooms?page=<?= $pagination->currentPage + 1 ?>"
           class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
           Next
         </a>

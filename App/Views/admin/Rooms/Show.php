@@ -1,8 +1,6 @@
 <?php
-use App\Core\App;
-use App\Core\Csrf;
-use App\Models\Room;
-/** @var Room $room */
+
+dump($room);
 ?>
 <div class="max-w-5xl mx-auto space-y-6">
   <div class="mb-2">
@@ -16,13 +14,13 @@ use App\Models\Room;
   </div>
 
   <!-- Flash Messages -->
-  <?php if ($message = App::$app->session->getFlash('success')): ?>
+  <?php if ($message = flash('success')): ?>
     <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
   <?php endif; ?>
 
-  <?php if ($message = App::$app->session->getFlash('error')): ?>
+  <?php if ($message = flash('error')): ?>
     <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
@@ -32,14 +30,13 @@ use App\Models\Room;
     <div class="flex items-center justify-between mb-2">
       <div>
         <p class="text-sm text-slate-500 uppercase">Detail Ruangan</p>
-        <h1 class="text-3xl font-bold text-slate-800">#<?= htmlspecialchars((string) $room->id_ruangan) ?></h1>
+        <h1 class="text-3xl font-bold text-slate-800"><?= htmlspecialchars((string) $room->nama_ruangan) ?></h1>
       </div>
       <span
         class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border <?= $statusColors[$room->status_ruangan] ?? 'bg-slate-100 text-slate-700 border-slate-200' ?>">
         <?= htmlspecialchars(ucfirst($room->status_ruangan)) ?>
       </span>
     </div>
-    <p class="text-slate-600">Periksa detail booking sebelum melakukan verifikasi.</p>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
