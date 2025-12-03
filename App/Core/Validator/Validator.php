@@ -5,6 +5,7 @@ namespace App\Core\Validator;
 use App\Core\App;
 use App\Core\Exceptions\ValidationException;
 use App\Core\QueryBuilder;
+use Carbon\Carbon;
 
 class Validator
 {
@@ -95,7 +96,10 @@ class Validator
 
             case 'regex':
                 $pattern = $params[0] ?? '';
-                return (preg_match($pattern, (string) $value)) ? null : 'Invalid format.';
+                if (!$pattern) {
+                    return null;
+                }
+                return preg_match($pattern, (string) $value) === 1 ? null : 'Invalid format.';
 
             case 'exists':
                 return $this->validateExists($field, $value, $params);
@@ -131,7 +135,6 @@ class Validator
                 }
                 $matchValue = $data[$matchField] ?? null;
                 return ($value === $matchValue) ? null : "The {$field} must match {$matchField}.";
-
 
             default:
                 return null;

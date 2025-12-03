@@ -3,9 +3,14 @@
 namespace App\Core\Repository;
 
 use App\Models\Booking;
+use App\Core\QueryBuilder;
 
 class BookingRepository
 {
+    public function findById(int $id): ?Booking
+    {
+        return Booking::Query()->where('id_booking', $id)->first();
+    }
     public function getUserActiveBookings(int $userId, int $limit = 10): array
     {
         return Booking::Query()
@@ -129,5 +134,67 @@ class BookingRepository
         GROUP BY ruangan.id_ruangan, ruangan.nama_ruangan
         ORDER BY booking_count DESC
     ");
+    }
+
+    public function findConflictingBooking(int $roomId, string $date, string $startTime, string $endTime, ?int $excludeBookingId = null): array
+    {
+        $query = Booking::Query()
+            ->where('ruangan_id', $roomId)
+            ->where('tanggal_penggunaan_ruang', $date)
+            ->whereIn('status', ['verified', 'active']);
+
+        if ($excludeBookingId) {
+            $query->where('id_booking', '!=', $excludeBookingId);
+        }
+        return $query->get();
+    }
+
+    public function countActiveBookings(int $userId): int
+    {
+        return Booking::query()
+            ->where('user_id', $userId)
+            ->whereNotIn('status', ['completed', 'cancelled', 'expired', 'no_show'])
+            ->count();
+    }
+
+    public function findRoomById(int $roomId): ?array
+    {
+        $qb = new QueryBuilder(\App\Core\App::$app->db->pdo);
+        return $qb->table('ruangan')->where('id_ruangan', $roomId)->first();
+    }
+
+    public function findUserBookingsOnDate(int $userId, string $date, ?int $excludeId = null): array
+    {
+        $query = Booking::query()
+            ->where('user_id', $userId)
+            ->where('tanggal_penggunaan_ruang', $date)
+            ->whereNotIn('status', ['cancelled', 'expired', 'no_show']);
+        if ($excludeId) {
+            $query->where('id_booking', '!=', $excludeId);
+        }
+        return $query->get();
+    }
+
+    public function findUserMemberBookingsOnDate(int $userId, string $date, ?int $excludeId = null): array
+    {
+        $qb = new QueryBuilder(\App\Core\App::$app->db->pdo);
+
+        $qb->table('booking b')
+            ->select([
+                'b.id_booking',
+                'b.waktu_mulai',
+                'b.waktu_selesai',
+                'b.status'
+            ])
+            ->join('anggota_booking ab', 'b.id_booking', '=', 'ab.booking_id')
+            ->where('ab.user_id', $userId)
+            ->where('b.tanggal_penggunaan_ruang', $date)
+            ->whereNotIn('b.status', ['cancelled', 'expired', 'no_show']);
+
+        if ($excludeId) {
+            $qb->where('b.id_booking', '!=', $excludeId);
+        }
+
+        return $qb->get();
     }
 }

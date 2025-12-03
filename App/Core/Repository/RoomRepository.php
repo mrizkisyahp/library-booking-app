@@ -127,7 +127,7 @@ class RoomRepository
             ->where('ruangan_id', $roomId)
             ->where('tanggal_booking', '>=', $startDate->format('Y-m-d'))
             ->where('tanggal_booking', '<=', $endDate->format('Y-m-d'))
-            ->whereNotIn('status', ['draft', 'cancelled', 'noshow'])
+            ->whereNotIn('status', ['draft', 'cancelled', 'no_show'])
             ->orderBy('tanggal_booking', 'ASC')
             ->orderBy('waktu_mulai', 'ASC')
             ->get();

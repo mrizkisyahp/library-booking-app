@@ -25,15 +25,4 @@ class ValidationException extends \Exception
     {
         return $this->validator;
     }
-
-    public function hasError(string $attribute): bool
-    {
-        return $this->validator->hasError($attribute);
-    }
-
-    public function getFirstError(string $attribute): ?string
-    {
-        return $this->validator->getFirstError($attribute) ?? null;
-    }
-
 }
