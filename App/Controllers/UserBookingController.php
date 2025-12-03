@@ -219,4 +219,33 @@ class UserBookingController extends Controller
             'total' => $data['total'],
         ]);
     }
+    public function detail(Request $request, Response $response)
+    {
+        $user = $this->currentUser;
+        if (!$user instanceof User) {
+            $response->redirect('/login');
+            return;
+        }
+
+        $bookingId = (int) ($request->getBody()['id'] ?? $request->getBody()['id_booking'] ?? 0);
+        if ($bookingId <= 0) {
+            App::$app->session->setFlash('error', 'ID booking tidak valid.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
+        $service = new UserBookingService();
+        $result = $service->getUserBookingDetail((int) $user->id_user, $bookingId);
+
+        if (!$result['success']) {
+            App::$app->session->setFlash('error', $result['message'] ?? 'Booking tidak dapat ditampilkan.');
+            $response->redirect('/dashboard');
+            return;
+        }
+
+        $this->setLayout('main');
+        $this->setTitle('Detail Booking | Library Booking App');
+
+        return $this->render('User/Bookings/Detail', $result['data']);
+    }
 }

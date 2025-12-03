@@ -524,4 +524,36 @@ class UserBookingService
             ]
         ];
     }
+    public function getUserBookingDetail(int $userId, int $bookingId): array
+    {
+        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
+
+        if (!$booking) {
+            return [
+                'success' => false,
+                'message' => 'Booking tidak ditemukan.',
+            ];
+        }
+
+        if (!$this->userCanAccessBooking($booking, $userId)) {
+            return [
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses ke booking ini.',
+            ];
+        }
+
+        $room = Room::Query()->where('id_ruangan', $booking->ruangan_id)->first();
+        $pic = User::Query()->where('id_user', $booking->user_id)->first();
+        $members = $booking->getMembers();
+
+        return [
+            'success' => true,
+            'data' => [
+                'booking' => $booking,
+                'room' => $room,
+                'pic' => $pic,
+                'members' => $members,
+            ],
+        ];
+    }
 }
