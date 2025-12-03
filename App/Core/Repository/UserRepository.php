@@ -101,10 +101,57 @@ class UserRepository
 
     public function findByResetToken(string $hashedToken): ?User
     {
-    return User::Query()
-        ->where('password_reset_token', $hashedToken)
-        ->where('password_reset_expires', '>', date('Y-m-d H:i:s'))
-        ->with('role')
-        ->first();
+        return User::Query()
+            ->where('password_reset_token', $hashedToken)
+            ->where('password_reset_expires', '>', date('Y-m-d H:i:s'))
+            ->with('role')
+            ->first();
+    }
+
+    public function getTotalUsers(): int
+    {
+        return User::Query()->count();
+    }
+
+    public function getActiveUsers(): int
+    {
+        return User::Query()
+            ->where('status', 'active')
+            ->count();
+    }
+
+    public function getPendingKubacaUsers(): int
+    {
+        return User::Query()
+            ->where('status', 'pending kubaca')
+            ->count();
+    }
+
+    public function getSuspendedUsers(): int
+    {
+        return User::Query()
+            ->where('status', 'suspended')
+            ->count();
+    }
+
+    public function getRejectedUsers(): int
+    {
+        return User::Query()
+            ->where('status', 'rejected')
+            ->count();
+    }
+
+    public function getNonaktifUsers(): int
+    {
+        return User::Query()
+            ->where('status', 'nonaktif')
+            ->count();
+    }
+
+    public function getPendingVerificationEmail(): int
+    {
+        return User::Query()
+            ->where('status', 'pending verification')
+            ->count();
     }
 }

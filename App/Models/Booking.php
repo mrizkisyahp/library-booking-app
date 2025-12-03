@@ -21,6 +21,10 @@ class Booking extends DbModel
     public ?string $created_at = null;
     public ?string $updated_at = null;
     public ?string $nama_ruangan = null;
+    public ?string $jenis_ruangan = null;
+    public ?int $required_members = null;
+    public ?int $maximum_members = null;
+    public ?int $current_members = null;
     public ?int $id_feedback = null;
     public ?string $nama = null;
 
@@ -47,6 +51,13 @@ class Booking extends DbModel
             'status',
             'checkin_code',
             'invite_token',
+            'nama_ruangan',
+            'jenis_ruangan',
+            'required_members',
+            'maximum_members',
+            'current_members',
+            'id_feedback',
+            'nama',
         ];
     }
 
