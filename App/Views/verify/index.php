@@ -52,10 +52,11 @@ $validator = $validator ?? null;
 
         <p class="mt-6 text-center text-sm">
           Tidak mendapatkan kodenya?
-        <form action="/resend" method="POST">
+        <form action="/resend" method="POST" id="resendForm">
           <?= csrf_field() ?>
-          <button type="submit" class="italic capitalize text-gray-700 hover:underline active:underline mt-6">
-            Kirim ulang kode
+          <button type="submit" id="resendBtn" class="italic capitalize text-gray-700 hover:underline active:underline mt-6 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span id="resendText">Kirim ulang kode</span>
+            <span id="resendLoading" class="hidden">Mengirim...</span>
           </button>
         </form>
         </p>
@@ -64,3 +65,23 @@ $validator = $validator ?? null;
     </div>
 
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    
+    <script>
+    document.getElementById('resendForm').addEventListener('submit', function(e) {
+        const resendBtn = document.getElementById('resendBtn');
+        const resendText = document.getElementById('resendText');
+        const resendLoading = document.getElementById('resendLoading');
+        
+        // Disable button to prevent double submission
+        resendBtn.disabled = true;
+        resendText.classList.add('hidden');
+        resendLoading.classList.remove('hidden');
+        
+        // Re-enable after 5 seconds as fallback
+        setTimeout(function() {
+            resendBtn.disabled = false;
+            resendText.classList.remove('hidden');
+            resendLoading.classList.add('hidden');
+        }, 5000);
+    });
+    </script>

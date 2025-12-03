@@ -27,7 +27,7 @@ $email = $email ?? '';
       <p>Masukkan email untuk mendapatkan kode perubahan password</p>
 
       <div class="mt-6">
-        <form action="/forgot" method="post">
+        <form action="/forgot" method="post" id="forgotForm">
           <?= csrf_field() ?>
 
           <div>
@@ -43,9 +43,10 @@ $email = $email ?? '';
             <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= config('TURNSTILE_SITE') ?>"
               data-theme="light" data-size="normal" data-callback="onSuccess"></div>
             <div class="mt-6"></div>
-            <button type="submit"
-              class="px-8 py-2 w-full mt-4 bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all">
-              Kirim Kode
+            <button type="submit" id="submitBtn"
+              class="px-8 py-2 w-full mt-4 bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
+              <span id="btnText">Kirim Kode</span>
+              <span id="btnLoading" class="hidden">Mengirim...</span>
             </button>
           </div>
       </div>
@@ -66,3 +67,23 @@ $email = $email ?? '';
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+document.getElementById('forgotForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoading = document.getElementById('btnLoading');
+    
+    // Disable button to prevent double submission
+    submitBtn.disabled = true;
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+    
+    // Re-enable after 5 seconds as fallback (in case of error)
+    setTimeout(function() {
+        submitBtn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+    }, 5000);
+});
+</script>

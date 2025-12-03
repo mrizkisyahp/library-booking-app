@@ -14,8 +14,6 @@ class VerifyController extends Controller
 {
     public function __construct(
         private AuthService $auth,
-        private Session $session,
-        private Response $response,
         private TurnstileService $turnstile
     ) {
     }

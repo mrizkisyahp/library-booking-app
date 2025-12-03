@@ -98,4 +98,13 @@ class UserRepository
     {
         return User::Query()->where('nip', $nip)->exists();
     }
+
+    public function findByResetToken(string $hashedToken): ?User
+    {
+    return User::Query()
+        ->where('password_reset_token', $hashedToken)
+        ->where('password_reset_expires', '>', date('Y-m-d H:i:s'))
+        ->with('role')
+        ->first();
+    }
 }

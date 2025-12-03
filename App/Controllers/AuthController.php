@@ -48,8 +48,6 @@ class AuthController extends Controller
                     $currentUser = $this->auth->user();
                     $roleName = $currentUser?->role?->nama_role;
 
-                    app()->user = $currentUser;
-
                     if ($currentUser?->id_user) {
                         $this->logger->auth('Logged in', $currentUser->id_user, "Email: {$currentUser->email}");
                     }
@@ -185,7 +183,6 @@ class AuthController extends Controller
         $currentUser = $this->auth->user();
 
         $this->auth->logout();
-        app()->user = null;
 
         if ($currentUser) {
             $this->logger->auth('logged out', $currentUser->id_user, "Email: {$currentUser->email}");

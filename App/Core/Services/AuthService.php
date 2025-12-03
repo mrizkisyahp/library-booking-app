@@ -83,8 +83,6 @@ class AuthService
 
         $this->session->set('user_id', $id);
 
-        error_log("Login: Set user_id in session = " . $id);
-
         if ($remember) {
             $this->setRememberCookie($user);
         }
@@ -238,6 +236,15 @@ class AuthService
             return false;
         }
 
+        // Rate limiting: prevent sending multiple reset emails within 5 minutes
+        $rateLimitKey = 'password_reset_' . $user->id_user;
+        $lastSent = $this->cache->get($rateLimitKey);
+        
+        if ($lastSent) {
+            $this->logger->auth('password reset rate limited', $user->id_user);
+            return false;
+        }
+
         $token = bin2hex(random_bytes(32));
 
         $this->userRepo->update($user->id_user, [
@@ -249,24 +256,22 @@ class AuthService
         $this->email->sendPasswordResetLink($user, $resetLink);
         $this->logger->auth('password reset link sent', $user->id_user);
 
+        // Set rate limit cache for 5 minutes (300 seconds)
+        $this->cache->set($rateLimitKey, time(), 300);
+
         return true;
     }
 
     public function verifyResetToken(string $token): ?User
     {
         if (empty($token)) {
-            error_log("verifyResetToken: Token is empty");
             return null;
         }
 
         $hashedToken = hash('sha256', $token);
-        error_log("verifyResetToken: Plain token = " . $token);
-        error_log("verifyResetToken: Hashed token = " . $hashedToken);
-        error_log("verifyResetToken: Current time = " . date('Y-m-d H:i:s'));
 
-        $user = User::Query()->where('password_reset_token', $hashedToken)->where('password_reset_expires', '>', date('Y-m-d H:i:s'))->with('role')->first();
-
-        error_log("verifyResetToken: User found = " . ($user ? "ID: {$user->id_user}" : "NULL"));
+        $user = $this->userRepo->findByResetToken($hashedToken);
+        
         return $user;
     }
 

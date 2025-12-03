@@ -14,8 +14,6 @@ class PasswordController extends Controller
 {
     public function __construct(
         private AuthService $auth,
-        private Session $session,
-        private Response $response,
         private TurnstileService $turnstile
     ) {
     }
@@ -39,9 +37,14 @@ class PasswordController extends Controller
                     'email' => ['required', 'email']
                 ]);
 
-                $this->auth->sendPasswordResetLink($validated['email']);
+                $sent = $this->auth->sendPasswordResetLink($validated['email']);
 
-                flash('success', 'If that email exists, a password reset link has been sent. Please check your inbox.');
+                if (!$sent) {
+                    flash('info', 'If that email exists, a password reset link has been sent. Please check your inbox and wait 5 minutes before requesting another.');
+                } else {
+                    flash('success', 'If that email exists, a password reset link has been sent. Please check your inbox.');
+                }
+                
                 return redirect('/forgot');
             } catch (ValidationException $e) {
                 return view('ResetPassword/Forgot', [
