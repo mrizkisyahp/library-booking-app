@@ -52,6 +52,7 @@ $app->router->post('/bookings/member', [UserBookingController::class, 'addMember
 $app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/my-bookings', [UserBookingController::class, 'showMyBooking'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->get('/bookings/detail', [UserBookingController::class, 'detail'], ['middleware' => [new AuthMiddleware()]]);
 
 // Feedback routes (authenticated)
 $app->router->get('/feedback/create', [UserFeedbackController::class, 'create'], ['middleware' => [new AuthMiddleware()]]);
