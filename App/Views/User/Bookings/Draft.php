@@ -45,10 +45,10 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
     <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
         <div class="flex flex-col justify-start p-6">
             <p class="font-bold text-2xl mb-2">
-                Ruangan #<?= htmlspecialchars($booking->ruangan_id) ?> harusnya nama ruangan nih
+                <?= htmlspecialchars($room->nama_ruangan) ?>
             </p>
             <p class="mb-2">
-                room['JENIS_RUANGAN']
+                <?= htmlspecialchars($room->jenis_ruangan) ?>
             </p>
             <div class="w-full">
 

@@ -25,162 +25,358 @@ $picContact = $pic?->email ?? '-';
 $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
 ?>
 
-<div class="max-w-5xl mx-auto space-y-6">
-    <div class="mb-2">
-        <a href="/bookings"
-            class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-semibold group">
-            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Kembali ke daftar booking
+<div class="p-4 bg-white shadow-md w-full ">
+    <div class="flex items-center gap-4 py-4">
+        <div class="flex items-center gap-4 ">
+            <a href="/dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chevron-left-icon lucide-chevron-left size-9">
+                    <path d="m15 18-6-6 6-6" />
+                </svg>
+            </a>
+            <span class="text-black font-bold text-4xl">
+                Detail Booking
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="p-6 bg-gray-200 pb-8 shadow-md">
+    <?php if ($booking->status === 'draft'): ?>
+        <div class="w-full mb-4">
+            <div
+                class="inline-block bg-yellow-300 border-2 border-yellow-600 font-regular text-sm text-black w-full px-6 py-4 rounded-3xl text-left mb-4 font-regular tracking-wide">
+                <p class="text-2xl font-bold uppercase my-4">
+                    Peringatan!
+                </p>
+                <p class="mb-4">
+                    Sistem tidak menahan jadwal untuk status Draft. Pengguna lain masih dapat membuat booking pada jam ini.
+                </p>
+            </div>
+        </div>
+    <?php endif; ?>
+    <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
+        <div class="flex flex-col justify-start p-6">
+            <p class="font-bold text-2xl mb-2">
+                <?= htmlspecialchars($room->nama_ruangan) ?>
+            </p>
+            <p class="mb-2">
+                <?= htmlspecialchars($room->jenis_ruangan) ?>
+            </p>
+            <div class="w-full">
+
+                <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-calendar-days-icon lucide-calendar-days size-4">
+                        <path d="M8 2v4" />
+                        <path d="M16 2v4" />
+                        <rect width="18" height="18" x="3" y="4" rx="2" />
+                        <path d="M3 10h18" />
+                        <path d="M8 14h.01" />
+                        <path d="M12 14h.01" />
+                        <path d="M16 14h.01" />
+                        <path d="M8 18h.01" />
+                        <path d="M12 18h.01" />
+                        <path d="M16 18h.01" />
+                    </svg>
+                    <?= date('l, d F Y', strtotime($booking->tanggal_penggunaan_ruang)) ?>
+                </p>
+
+                <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-clock3-icon lucide-clock-3 size-4">
+                        <path d="M12 6v6h4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <?= htmlspecialchars(substr($booking->waktu_mulai, 0, 5)) ?> -
+                    <?= htmlspecialchars(substr($booking->waktu_selesai, 0, 5)) ?>
+                </p>
+
+                <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-users-round-icon lucide-users-round size-4">
+                        <path d="M18 21a8 8 0 0 0-16 0" />
+                        <circle cx="10" cy="8" r="5" />
+                        <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                    </svg>
+                    <!-- <?= (int) $currentMembers ?> /
+                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                      · Min <?= (int) $requiredMembers ?>
+                    <?php endif; ?> -->
+                    [1/6 PESERTA . Min 1]
+                </p>
+
+                <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-clock3-icon lucide-clock-3 size-4">
+                        <path d="M12 6v6h4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <?= htmlspecialchars($booking->tujuan) ?>
+                </p>
+
+                <?php
+                $statusColors = [
+                    'draft' => 'bg-gray-300 text-gray-800 border-gray-400',
+                    'pending' => 'bg-yellow-300 text-yellow-800 border-yellow-400',
+                    'verified' => 'bg-blue-100 text-blue-800 border-blue-400',
+                    'active' => 'bg-emerald-100 text-emerald-800 border-emerald-400',
+                    'completed' => 'bg-green-100 text-green-800 border-green-400',
+                    'cancelled' => 'bg-red-100 text-red-800 border-red-400',
+                    'expired' => 'bg-slate-100 text-slate-700 border-slate-400',
+                    'no_show' => 'bg-orange-100 text-orange-800 border-orange-400',
+                ];
+                $statusKey = strtolower($booking->status);
+                $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
+                ?>
+                <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
+                    Status:
+                    <?php
+                    // htmlspecialchars($statusLabel)
+                    ?>
+                    <!-- 🤡🤡🤡 -->
+                    <!-- if $booking['status'] == 'draft' && $requiredMembers == 0:
+                      echo ('(Menunggu Anggota)');
+                      elseif $booking['status'] == 'draft' && $requiredMembers > 0:
+                        echo ('(Siap Dikirim)');
+                      elseif $booking['status'] == 'pending':
+                        echo ('(Menunggu Konfirmasi)');
+                      elseif $booking['status'] == 'verified':
+                        echo ('(Terkonfirmasi)');
+                      elseif $booking['status'] == 'active':
+                        echo ('(Sedang berlangsung)');
+                      elseif $booking['status'] == 'completed':
+                        echo ('(Selesai)');
+                    endif; -->
+                    <?php if ($booking->status === 'draft'): ?>
+                        (Menunggu Anggota)
+                    <?php elseif ($booking->status === 'pending'): ?>
+                        (Menunggu Konfirmasi)
+                    <?php elseif ($booking->status === 'verified'): ?>
+                        (Terkonfirmasi)
+                    <?php elseif ($booking->status === 'active'): ?>
+                        (Sedang berlangsung)
+                    <?php elseif ($booking->status === 'completed'): ?>
+                        (Selesai)
+                    <?php endif ?>
+                </div>
+
+                <div class="w-full mb-4">
+                    <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+                        class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
+                        ubah rincian booking
+                    </a>
+                    <?php if ($booking->role === 'PIC' && $statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
+                        <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
+                            class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                            Isi Feedback
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+                <hr class="h-px py-4 text-gray-400">
+
+                <p class="font-bold text-4xl mb-6">
+                    Undang Anggota
+                </p>
+                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
+                        <?= htmlspecialchars($booking->invite_token) ?>
+                    </p>
+                    <div onclick="copyToken()"
+                        class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
+
+                        <span id="copyToast"
+                            class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
+                            Copied!
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-copy-icon lucide-copy size-4">
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="w-full mb-4">
+                    <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+                        class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
+                        Bagikan tautan undangan
+                    </a>
+                </div>
+
+                <hr class="h-px py-4 text-gray-400">
+                <p class="font-bold text-4xl mb-6">
+                    Anggota Booking
+                </p>
+                <p class="mb-4 flex gap-2 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-users-round-icon lucide-users-round size-4">
+                        <path d="M18 21a8 8 0 0 0-16 0" />
+                        <circle cx="10" cy="8" r="5" />
+                        <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                    </svg>
+                    <span>
+                        ['4/12 Orang']
+                    </span>
+                </p>
+
+                <?php if (isset($maximumMembers) && $maximumMembers > 0 && $currentMembers >= $maximumMembers): ?>
+                    <div class="mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div class="ml-3">
+                                <p class="text-sm font-semibold text-red-800">Kapasitas Penuh</p>
+                                <p class="text-sm text-red-700 mt-1">
+                                    Ruangan sudah mencapai kapasitas maksimum. Anda tidak bisa menambah anggota lagi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php $members = $booking->getMembers(); ?>
+                <?php if (empty($members)): ?>
+                    <div class="text-center py-8">
+                        <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <p class="text-slate-600">Belum ada anggota yang bergabung</p>
+                    </div>
+                <?php else: ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                        <?php foreach ($members as $member): ?>
+                            <div class="flex items-center p-3 bg-slate-50 rounded-xl">
+                                <!-- <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
+                                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div> -->
+                                <div class="flex flex-1 min-w-0 items-center justify-between">
+                                    <div>
+                                        <p class="font-semibold text-slate-800 truncate capitalize">
+                                            <?= htmlspecialchars($member['nama'] ?? 'Unknown') ?>
+                                        </p>
+                                        <p class="text-sm text-slate-500 truncate"><?= htmlspecialchars($member['email']) ?></p>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+
+            </div>
+        </div>
+    </div>
+    <div class="w-full mb-8">
+        <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+            class="inline-block bg-red-600 hover:bg-red-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all capitalize">
+            Hapus draft booking
         </a>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-lg p-8">
-        <div class="flex items-center justify-between mb-2">
-            <div>
-                <p class="text-sm text-slate-500 uppercase">Detail Booking</p>
-                <h1 class="text-3xl font-bold text-slate-800">#<?= htmlspecialchars((string) $booking->id_booking) ?>
-                </h1>
-            </div>
-            <span
-                class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border <?= $statusColors[$booking->status] ?? 'bg-slate-100 text-slate-700 border-slate-200' ?>">
-                <?= htmlspecialchars(ucfirst($booking->status)) ?>
-            </span>
-        </div>
-        <p class="text-slate-600">Informasi detail mengenai booking anda.</p>
-    </div>
+    <nav class="fixed left-0 bottom-0 right-0 bg-gray-100 text-white md:hidden z-999 rounded-t-4xl py-6 shadow-xl">
+        <div class="flex items-center justify-around w-full px-4">
+            <!-- <?php if ($booking->status !== 'draft'): ?>
+            <form action="/bookings/submit" method="post">
+                <?= csrf_field() ?>
+                <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-5">
-                <h2 class="text-xl font-bold text-slate-800 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Ringkasan Booking
-                </h2>
+                <button type="submit"
+                <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
+                class="w-full bg-primary text-slate-500 px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
+                </button>
+            </form>
+        <?php endif; ?> -->
+            <?php if ($booking->status === 'pending'): ?>
+                <form action="/bookings/" method="post">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
-                <div class="space-y-4">
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-xs font-semibold text-slate-500 uppercase">Ruangan</p>
-                        <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($roomName) ?></p>
-                        <?php if ($room): ?>
-                            <p class="text-sm text-slate-600">Kapasitas:
-                                <?= htmlspecialchars((string) $room->kapasitas_min) ?> -
-                                <?= htmlspecialchars((string) $room->kapasitas_max) ?> orang
-                            </p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-xs font-semibold text-slate-500 uppercase">PIC</p>
-                        <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($picName) ?></p>
-                        <p class="text-sm text-slate-600"><?= htmlspecialchars($picContact) ?></p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-4 bg-slate-50 rounded-xl">
-                            <p class="text-xs font-semibold text-slate-500 uppercase">Tanggal Penggunaan</p>
-                            <p class="text-lg font-bold text-slate-800">
-                                <?= date('l, d F Y', strtotime($booking->tanggal_penggunaan_ruang)) ?>
-                            </p>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-xl">
-                            <p class="text-xs font-semibold text-slate-500 uppercase">Waktu</p>
-                            <p class="text-lg font-bold text-slate-800">
-                                <?= htmlspecialchars(substr($booking->waktu_mulai, 0, 5)) ?> -
-                                <?= htmlspecialchars(substr($booking->waktu_selesai, 0, 5)) ?>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-xs font-semibold text-slate-500 uppercase">Tujuan</p>
-                        <p class="text-sm text-slate-700"><?= nl2br(htmlspecialchars($booking->tujuan ?? '-')) ?></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-lg p-8">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold text-slate-800 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+                    <button type="submit"
+                        class="w-full bg-red-600 text-white px-8 py-4 rounded-xl border hover:bg-red-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
-                        Anggota
-                    </h3>
-                    <span class="text-sm text-slate-500"><?= count($members) ?> anggota terdaftar</span>
-                </div>
-
-                <?php if (empty($members)): ?>
-                    <p class="text-sm text-slate-500">Belum ada anggota yang ditambahkan.</p>
-                <?php else: ?>
-                    <div class="overflow-hidden border border-slate-100 rounded-2xl">
-                        <table class="w-full">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th
-                                        class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Nama</th>
-                                    <th
-                                        class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Email</th>
-                                    <th
-                                        class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 bg-white">
-                                <?php foreach ($members as $member): ?>
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm font-semibold text-slate-800">
-                                            <?= htmlspecialchars($member['nama'] ?? '-') ?>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-slate-600">
-                                            <?= htmlspecialchars($member['email'] ?? '-') ?></td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <?php if (!empty($member['is_owner'])): ?>
-                                                <span
-                                                    class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">PIC</span>
-                                            <?php else: ?>
-                                                <span
-                                                    class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-700">Anggota</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="space-y-6">
+                        <span>Batalkan Pengajuan Draft</span>
+                    </button>
+                </form>
+            <?php endif; ?>
             <?php if ($booking->status === 'verified'): ?>
-                <div class="bg-white rounded-2xl shadow-lg p-6 space-y-4">
-                    <h3 class="text-lg font-bold text-slate-800">Kode Akses</h3>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase mb-2">Kode Check-in</p>
-                        <div
-                            class="p-4 bg-slate-100 rounded-xl font-mono tracking-widest text-center text-lg text-slate-800">
-                            <?= $booking->checkin_code ? htmlspecialchars($booking->checkin_code) : 'Belum tersedia' ?>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-2 text-center">Tunjukkan kode ini kepada admin untuk mengambil
-                            kunci.</p>
+                <div class="text-2xl font-bold mb-4">
+                    Kode Kedatangan
+                </div>
+                <div>
+                    <span>Berlaku sampai </span>
+                    <span><?= htmlspecialchars($booking->waktu_mulai + 15) ?></span>
+                </div>
+                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
+                        <?= htmlspecialchars($booking->invite_token) ?>
+                    </p>
+                    <div onclick="copyToken()"
+                        class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
+
+                        <span id="copyToast"
+                            class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
+                            Copied!
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-copy-icon lucide-copy size-4">
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
                     </div>
                 </div>
             <?php endif; ?>
-
-            <!-- Action Buttons could go here if needed, e.g. Cancel Booking -->
-            <!-- For now, we only display info -->
-
+            <?php if ($booking->status === 'active'): ?>
+                <div class="text-2xl font-bold mb-4">
+                    Waktu Tersisa
+                </div>
+                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                    <div class="text-2xl font-bold">
+                        <?php
+                        $datetime1 = new DateTime($booking->waktu_mulai);
+                        $datetime2 = new DateTime($booking->waktu_selesai);
+                        $interval = $datetime1->diff($datetime2);
+                        echo $interval->format('%H:%I:%S');
+                        ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($booking->status === 'completed' && $booking->feedback() === null): ?>
+                <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
+                    class="inline-block bg-primary hover:bg-emerald-700 font-regular text-white active:bg-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                    Isi Feedback (Wajib)
+                </a>
+            <?php else: ?>
+                <div class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
+                    Seluruh rangkaian booking sudah diselesaikan
+                </div>
+            <?php endif; ?>
         </div>
-    </div>
+    </nav>
+
 </div>

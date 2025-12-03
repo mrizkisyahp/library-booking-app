@@ -196,11 +196,6 @@ function formatTanggal($tanggal)
 
         <?php else: ?>
             <?php
-                // $filters = array_filter($bookings, function($book){
-                //     return $book['status'] === 'draft';
-                // });
-            ?>
-            <?php
                 foreach ($bookings as $booking):
             ?>
 

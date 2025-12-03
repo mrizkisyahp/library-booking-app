@@ -7,11 +7,23 @@ use App\Models\User;
 
 $currentUser = App::$app->user instanceof User ? App::$app->user : null;
 
+$roomTypes = [
+    'Audio Visual',
+    'Telekonferensi',
+    'Kreasi dan Rekreasi',
+    'Baca Kelompok',
+    'Koleksi Bahasa Prancis',
+    'Bimbingan & Konseling',
+    'Ruang Rapat',
+];
 ?>
 
-<!-- echo '<pre>';
-print_r($bookings);
-echo '</pre>'; -->
+<?php
+// echo "<pre>";
+// print_r($bookings);
+// echo "</pre>";
+// die();
+?>
 
 <div class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
     <div class="max-w-7xl mx-auto px-6 py-12">
@@ -22,7 +34,8 @@ echo '</pre>'; -->
         </div>
 
         <!-- Filter Form -->
-        <form method="get" action="/my-bookings" class="relative bg-white rounded-2xl shadow-lg p-8 mb-4">
+
+        <form method="get" action="/rooms" class="relative bg-white rounded-2xl shadow-lg p-8 mb-4">
             <?= csrf_field() ?>
 
             <!-- hidden checkbox peer untuk toggle panel -->
@@ -62,7 +75,7 @@ echo '</pre>'; -->
             </label>
 
             <!-- PANEL FILTER (sibling dari input#filterToggle di dalam form) -->
-            <div class="fixed left-0 right-0 bottom-0 h-8/10 z-999 bg-white
+            <div class="fixed left-0 right-0 bottom-0 h-[80vh] z-999 bg-white
                translate-y-full peer-checked:translate-y-0
                transition-transform duration-400 ease-in-out
                rounded-t-3xl shadow-xl px-8 py-8 overflow-auto">
@@ -132,90 +145,118 @@ echo '</pre>'; -->
             </div>
         </form>
 
-    <!-- Filter Form -->
-    <form method="get" action="/rooms" class="bg-white rounded-2xl shadow-lg p-8 mb-10">
-      <!-- Keyword Search -->
-      <div class="mb-6">
-        <label class="block text-sm font-semibold text-slate-700 mb-3">
-          <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Cari Nama Ruangan
-        </label>
-        <input type="text" name="nama_ruangan" value="<?= htmlspecialchars($filters['nama_ruangan'] ?? '') ?>"
-          placeholder="Cari berdasarkan nama ruangan..."
-          class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
-      </div>
-    </form>
-    <!-- Booking List -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-      <?php if (empty($bookings['mybooking'])): ?>
-        <div class="p-8 text-center text-slate-500">
-          Belum ada riwayat booking.
-        </div>
-      <?php else: ?>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-slate-50 border-b border-slate-100">
-              <tr>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Ruangan</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Tanggal &
-                  Waktu</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Aksi</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <?php foreach ($bookings['mybooking'] as $booking): ?>
-                <tr class="hover:bg-slate-50 transition-colors">
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-slate-800">
-                      <?= htmlspecialchars($booking->nama_ruangan ?? 'Ruangan #' . $booking->ruangan_id) ?>
+            <?php
+                foreach ($bookings as $booking):
+            ?>
+
+            <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
+              <div class="flex flex-col justify-start p-6">
+                <p class="font-bold text-2xl mb-2">
+                  <?= htmlspecialchars(string: $booking->nama_ruangan ?? ('#' . $booking->ruangan_id)) ?>
+                </p>
+                <p class="mb-2">
+                  ?$room['JENIS_RUANGAN']
+                </p>
+                <div class="w-full">
+                  <?php
+                  $statusColors = [
+                    'draft' => 'bg-gray-300 text-gray-800 border-gray-400',
+                    'pending' => 'bg-yellow-300 text-yellow-800 border-yellow-400',
+                    'verified' => 'bg-blue-100 text-blue-800 border-blue-400',
+                    'active' => 'bg-emerald-100 text-emerald-800 border-emerald-400',
+                    'completed' => 'bg-green-100 text-green-800 border-green-400',
+                    'cancelled' => 'bg-red-100 text-red-800 border-red-400',
+                    'expired' => 'bg-slate-100 text-slate-700 border-slate-400',
+                    'no_show' => 'bg-orange-100 text-orange-800 border-orange-400',
+                  ];
+                  $statusKey = strtolower($booking->status);
+                  $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                  $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
+                  ?>
+                  <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
+                    Status:
+                    <?= htmlspecialchars($statusLabel) ?>
+                    <!-- 🤡🤡🤡 -->
+                      <?php if ($booking->status === 'draft'): ?>
+                        (Menunggu Anggota)
+                      <?php elseif ($booking->status === 'pending'): ?>
+                        (Menunggu Konfirmasi)
+                      <?php elseif ($booking->status === 'verified'): ?>
+                        (Terkonfirmasi)
+                      <?php elseif ($booking->status === 'active'): ?>
+                        (Sedang berlangsung)
+                      <?php elseif ($booking->status === 'completed'): ?>
+                        (Selesai)
+                      <?php endif ?>
                     </div>
-                    <div class="text-xs text-slate-500">
-                      ID: #<?= $booking->id_booking ?>
+
+                    <p class="mb-4 flex gap-2 items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-calendar-days-icon lucide-calendar-days size-4">
+                        <path d="M8 2v4" />
+                        <path d="M16 2v4" />
+                        <rect width="18" height="18" x="3" y="4" rx="2" />
+                        <path d="M3 10h18" />
+                        <path d="M8 14h.01" />
+                        <path d="M12 14h.01" />
+                        <path d="M16 14h.01" />
+                        <path d="M8 18h.01" />
+                        <path d="M12 18h.01" />
+                        <path d="M16 18h.01" />
+                      </svg>
+                      <?= htmlspecialchars(formatTanggal($booking->tanggal_penggunaan_ruang)) ?>
+                    </p>
+
+                    <p class="mb-4 flex gap-2 items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-clock3-icon lucide-clock-3 size-4">
+                        <path d="M12 6v6h4" />
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                      <?= htmlspecialchars(formatWaktu($booking->waktu_mulai)) ?>
+                    </p>
+
+                    <p class="mb-4 flex gap-2 items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-users-round-icon lucide-users-round size-4">
+                        <path d="M18 21a8 8 0 0 0-16 0" />
+                        <circle cx="10" cy="8" r="5" />
+                        <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                      </svg>
+                      <!-- <?= (int) $currentMembers ?> /
+                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                      · Min <?= (int) $requiredMembers ?>
+                    <?php endif; ?> -->
+                      [1/6 PESERTA . Min 1]
+                    </p>
+
+                    <div class="w-full">
+                      <?php if ($booking->status === 'draft'): ?>
+                        <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+                          class="inline-block bg-emerald-600 hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                          Lihat Detail
+                        </a>
+                      <?php else: ?>
+                        <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>"
+                          class="inline-block bg-emerald-600 hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                          Lihat Detail
+                        </a>
+                      <?php endif; ?>
+                      <?php if ($booking->status === 'completed' && empty($booking->feedback_submitted)): ?>
+                        <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
+                          class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                          Isi Feedback
+                        </a>
+                      <?php endif; ?>
                     </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="text-sm text-slate-800">
-                      <?= date('d M Y', strtotime($booking->tanggal_penggunaan_ruang)) ?>
-                    </div>
-                    <div class="text-xs text-slate-500">
-                      <?= substr($booking->waktu_mulai, 0, 5) ?> - <?= substr($booking->waktu_selesai, 0, 5) ?>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <?php
-                    $statusColors = [
-                      'pending' => 'bg-yellow-100 text-yellow-800',
-                      'verified' => 'bg-blue-100 text-blue-800',
-                      'active' => 'bg-emerald-100 text-emerald-800',
-                      'completed' => 'bg-gray-100 text-gray-800',
-                      'cancelled' => 'bg-rose-100 text-rose-800',
-                      'draft' => 'bg-slate-100 text-slate-800',
-                    ];
-                    $statusClass = $statusColors[$booking->status] ?? 'bg-slate-100 text-slate-800';
-                    ?>
-                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold <?= $statusClass ?>">
-                      <?= ucfirst($booking->status) ?>
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <a href="/bookings/detail?id=<?= $booking->id_booking ?>"
-                      class="inline-flex items-center justify-center px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all">
-                      Detail
-                    </a>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      <?php endif; ?>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+
     </div>
-
-    <!-- Pagination could go here -->
-
-  </div>
 </div>
