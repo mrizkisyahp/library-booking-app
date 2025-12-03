@@ -120,14 +120,14 @@ class BookingRepository
 
     public function getRoomUsageStatistics(): array
     {
-        return Booking::Query()
-            ->select([
-                'ruangan.nama_ruangan',
-                'COUNT(booking.id_booking) as booking_count'
-            ])
-            ->leftJoin('ruangan', 'booking.ruangan_id', '=', 'ruangan.id_ruangan')
-            ->groupBy('ruangan.id_ruangan', 'ruangan.nama_ruangan')
-            ->orderBy('booking_count', 'DESC')
-            ->get();
+        return Booking::Query()->raw("
+        SELECT 
+            ruangan.nama_ruangan,
+            COUNT(booking.id_booking) as booking_count
+        FROM booking
+        LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan
+        GROUP BY ruangan.id_ruangan, ruangan.nama_ruangan
+        ORDER BY booking_count DESC
+    ");
     }
 }
