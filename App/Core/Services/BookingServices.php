@@ -49,32 +49,6 @@ class BookingServices
         return $booking;
     }
 
-    public function updateBooking(int $bookingId, array $data): Booking
-    {
-        $booking = $this->bookingRepo->findById($bookingId);
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
-        }
-        if (!in_array($booking->status, self::EDITABLE_STATES)) {
-            throw new Exception('Booking tidak dapat diubah lagi.');
-        }
-        if ($booking->user_id !== auth()->user()->id_user) {
-            throw new Exception('Anda tidak memiliki akses untuk edit booking ini');
-        }
-        // Controller has already validated, just update
-        $booking->tanggal_penggunaan_ruang = $data['tanggal_penggunaan_ruang'];
-        $booking->waktu_mulai = $data['waktu_mulai'];
-        $booking->waktu_selesai = $data['waktu_selesai'];
-        $booking->tujuan = $data['tujuan'] ?? $booking->tujuan;
-        $booking->save();
-        $this->logger->info('Booking Updated', [
-            'pic' => auth()->user()->nama,
-            'status' => $booking->status,
-            'booking_id' => $booking->id_booking,
-        ]);
-        return $booking;
-    }
-
     public function transitionTo(int $bookingId, string $newStatus, ?string $reason = null): bool
     {
         $booking = $this->bookingRepo->findById($bookingId);
