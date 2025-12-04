@@ -6,6 +6,7 @@ use App\Core\App;
 use App\Core\Controller;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Services\UserDashboardService;
+use App\Core\Services\UserBookingService;
 use App\Models\User;
 use App\Models\Booking;
 
@@ -22,10 +23,11 @@ class UserDashboardController extends Controller
     public function index()
     {
         $dashboardService = new UserDashboardService();
+        $bookingService = new UserBookingService();
         // $dashboardService->expireStaleDrafts();
         $user = $this->currentUser;
 
-        if ((int)$user->id_role === 1) {
+        if ((int) $user->id_role === 1) {
             App::$app->response->redirect('/admin');
             return;
         }
@@ -34,16 +36,11 @@ class UserDashboardController extends Controller
             App::$app->session->setFlash('warning', $warning);
         }
 
-        $userId = (int)$user->id_user;
+        $userId = (int) $user->id_user;
         $stats = $dashboardService->getBookingStatistics($userId);
         $picBookings = $dashboardService->getPicBookings($userId);
         $memberBookings = $dashboardService->getAnggotaBookings($userId);
         $pendingFeedbacks = $dashboardService->getPendingFeedbacks($userId);
-
-        // echo '<pre>';
-        // print_r($booking);
-        // echo '</pre>';
-        // exit;
 
         $bookings = array_merge($picBookings, $memberBookings);
         usort($bookings, static function ($a, $b) {
@@ -55,11 +52,7 @@ class UserDashboardController extends Controller
             'stats' => $stats,
             'bookings' => $bookings,
             'pendingFeedbacks' => $pendingFeedbacks,
-            // 'canSubmit' => $dashboardService->meetsMemberRequirement($booking) ?? null,
-            // 'requiredMembers' => $dashboardService->getMinimumMembersRequired($booking) ?? null,
-            // 'maximumMembers' => $dashboardService->getMaximumMembersRequired($booking) ?? null,
-            // 'currentMembers' => $dashboardService->getMemberCount($booking) ?? null,
-
+            'bookingService' => $bookingService,
         ]);
     }
 }

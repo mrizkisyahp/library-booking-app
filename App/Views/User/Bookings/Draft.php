@@ -95,7 +95,6 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                     <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
                         · Min <?= (int) $requiredMembers ?>
                     <?php endif; ?>
-                    <!-- [1/6 PESERTA . Min 1] -->
                 </p>
 
                 <p class="mb-4 flex gap-2 items-center">
@@ -218,6 +217,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                             <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
                                 · Min <?= (int) $requiredMembers ?>
                             <?php endif; ?>
+                            <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> Orang
                         </span>
                     </p>
                 <?php endif; ?>

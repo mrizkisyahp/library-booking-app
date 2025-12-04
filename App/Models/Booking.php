@@ -23,6 +23,9 @@ class Booking extends DbModel
     public ?string $nama_ruangan = null;
     public ?int $id_feedback = null;
     public ?string $nama = null;
+    public ?string $jenis_ruangan = null;
+    public ?int $kapasitas_min = null;
+    public ?int $kapasitas_max = null;
 
     public static function tableName(): string
     {
@@ -185,7 +188,7 @@ class Booking extends DbModel
     private static function buildQueryMyBooking(int $userid, array $filters): array
     {
         $sql = "
-            SELECT booking.*, users.nama, ruangan.nama_ruangan, id_feedback 
+            SELECT booking.*, users.nama, ruangan.nama_ruangan, id_feedback, ruangan.jenis_ruangan, ruangan.kapasitas_min, ruangan.kapasitas_max 
             FROM booking
             LEFT JOIN users ON booking.user_id = users.id_user
             LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan

@@ -8,10 +8,13 @@ $user = App::$app->user;
 
 use Carbon\Carbon;
 Carbon::setLocale('id');
+
+// dump($bookings);
 ?>
 
+
 <!-- Welcome Header -->
-<div class="rounded-2xl p-4 mb-6 mx-auto max-w-dvh">
+<div class="rounded-2xl p-4 mb-6 mx-auto max-w-5xl">
   <div class="flex items-center justify-between mt-6 px-6 mb-4">
     <div>
       <h1 class="text-4xl font-bold text-white md:text-black mb-2">
@@ -189,8 +192,15 @@ Carbon::setLocale('id');
           <?php else: ?>
             <?php
             foreach ($bookings as $booking):
-              ?>
+              $bookingObj = new \App\Models\Booking();
+              $bookingObj->id_booking = $booking['id_booking'];
+              $bookingObj->user_id = $booking['user_id'];
+              $bookingObj->ruangan_id = $booking['ruangan_id'];
 
+              $currentMembers = $bookingService->getMemberCount($bookingObj);
+              $maximumMembers = $bookingService->getMaximumMembersRequired($bookingObj);
+              $requiredMembers = $bookingService->getMinimumMembersRequired($bookingObj);
+              ?>
               <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
                 <div class="flex flex-col justify-start p-6">
                   <p class="font-bold text-2xl mb-2">
@@ -282,11 +292,10 @@ Carbon::setLocale('id');
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                       </svg>
                       <?= (int) $currentMembers ?> /
-                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                      · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?>
-                      [1/6 PESERTA . Min 1]
+                      <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                      <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                        · Min <?= (int) $requiredMembers ?>
+                      <?php endif; ?>
                     </p>
 
                     <div class="w-full">
