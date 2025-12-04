@@ -11,7 +11,7 @@ Carbon::setLocale('id');
 ?>
 
 <!-- Welcome Header -->
-<div class="rounded-2xl p-4 mb-6">
+<div class="rounded-2xl p-4 mb-6 mx-auto max-w-dvh">
   <div class="flex items-center justify-between mt-6 px-6 mb-4">
     <div>
       <h1 class="text-4xl font-bold text-white md:text-black mb-2">
@@ -197,7 +197,7 @@ Carbon::setLocale('id');
                     <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
                   </p>
                   <p class="mb-2">
-                    ?$room['JENIS_RUANGAN']
+                    <?= htmlspecialchars($booking['jenis_ruangan']) ?>
                   </p>
                   <div class="w-full">
                     <?php
@@ -281,11 +281,11 @@ Carbon::setLocale('id');
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                       </svg>
-                      <!-- <?= (int) $currentMembers ?> /
+                      <?= (int) $currentMembers ?> /
                     <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
                     <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
                       · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?> -->
+                    <?php endif; ?>
                       [1/6 PESERTA . Min 1]
                     </p>
 

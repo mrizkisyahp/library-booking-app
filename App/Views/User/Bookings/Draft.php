@@ -90,12 +90,12 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
-                    <!-- <?= (int) $currentMembers ?> /
+                    <?= (int) $currentMembers ?> /
                     <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
                     <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                      · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?> -->
-                    [1/6 PESERTA . Min 1]
+                        · Min <?= (int) $requiredMembers ?>
+                    <?php endif; ?>
+                    <!-- [1/6 PESERTA . Min 1] -->
                 </p>
 
                 <p class="mb-4 flex gap-2 items-center">
@@ -213,7 +213,11 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                             <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                         </svg>
                         <span>
-                            ['4/12 Orang']
+                            <?= (int) $currentMembers ?> /
+                            <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                            <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                                · Min <?= (int) $requiredMembers ?>
+                            <?php endif; ?>
                         </span>
                     </p>
                 <?php endif; ?>
