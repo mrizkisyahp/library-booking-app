@@ -188,22 +188,23 @@ class Booking extends DbModel
     private static function buildQueryMyBooking(int $userid, array $filters): array
     {
         $sql = "
-            SELECT booking.*, users.nama, ruangan.nama_ruangan, id_feedback, ruangan.jenis_ruangan, ruangan.kapasitas_min, ruangan.kapasitas_max 
-            FROM booking
-            LEFT JOIN users ON booking.user_id = users.id_user
-            LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan
-            LEFT JOIN feedback ON booking.id_booking = feedback.booking_id
-            WHERE booking.user_id = :user_id
-        ";
+        SELECT DISTINCT booking.*, users.nama, ruangan.nama_ruangan, feedback.id_feedback, ruangan.jenis_ruangan, ruangan.kapasitas_min, ruangan.kapasitas_max 
+        FROM booking
+        LEFT JOIN users ON booking.user_id = users.id_user
+        LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan
+        LEFT JOIN feedback ON booking.id_booking = feedback.booking_id
+        LEFT JOIN anggota_booking ON booking.id_booking = anggota_booking.booking_id
+        WHERE (booking.user_id = :user_id OR anggota_booking.user_id = :user_id)
+    ";
         $params = [
             ':user_id' => $userid
         ];
 
         if (!empty($filters['keyword'])) {
             $sql .= " AND (
-                users.nama LIKE :keyword OR
-                ruangan.nama_ruangan LIKE :keyword
-            )";
+            users.nama LIKE :keyword OR
+            ruangan.nama_ruangan LIKE :keyword
+        )";
             $params[':keyword'] = '%' . $filters['keyword'] . '%';
         }
 

@@ -505,9 +505,6 @@ class UserBookingService
 
     public function getMyBookings(int $userid, array $filters = []): array
     {
-
-        $booking = Booking::Query()->where('user_id', $userid)->first();
-
         $page = max(1, (int) ($filters['page'] ?? 1));
         $perPage = (int) ($filters['perPage'] ?? self::PER_PAGE);
 

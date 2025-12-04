@@ -226,6 +226,7 @@ class UserBookingController extends Controller
             'currentPage' => $data['currentPage'],
             'perPage' => $data['perPage'],
             'total' => $data['total'],
+            'bookingService' => $bookingService,
         ]);
     }
     public function detail(Request $request, Response $response)

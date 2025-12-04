@@ -140,6 +140,10 @@ $roomTypes = [
 
     <?php
     foreach ($bookings as $booking):
+
+      $currentMembers = $bookingService->getMemberCount($booking);
+      $maximumMembers = $bookingService->getMaximumMembersRequired($booking);
+      $requiredMembers = $bookingService->getMinimumMembersRequired($booking);
       ?>
 
       <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
@@ -219,7 +223,11 @@ $roomTypes = [
                 <circle cx="10" cy="8" r="5" />
                 <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
               </svg>
-              <?= $booking->kapasitas_min ?> / <?= $booking->kapasitas_max ?> peserta
+              <?= (int) $currentMembers ?> /
+              <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+              <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                · Min <?= (int) $requiredMembers ?>
+              <?php endif; ?>
             </p>
 
             <div class="w-full">

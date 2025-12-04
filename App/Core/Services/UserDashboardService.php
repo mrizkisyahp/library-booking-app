@@ -68,7 +68,7 @@ class UserDashboardService
     public function getAnggotaBookings(int $userId, int $limit = 1): array
     {
         $sql = "
-            SELECT b.*, r.nama_ruangan,
+            SELECT b.*, r.nama_ruangan, r.jenis_ruangan,
                 'Anggota' AS role,
                 EXISTS(SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking) AS feedback_submitted
             FROM booking b
