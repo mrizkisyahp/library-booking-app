@@ -8,10 +8,13 @@ $user = App::$app->user;
 
 use Carbon\Carbon;
 Carbon::setLocale('id');
+
+// dump($bookings);
 ?>
 
+
 <!-- Welcome Header -->
-<div class="rounded-2xl p-4 mb-6">
+<div class="rounded-2xl p-4 mb-6 mx-auto max-w-5xl">
   <div class="flex items-center justify-between mt-6 px-6 mb-4">
     <div>
       <h1 class="text-4xl font-bold text-white md:text-black mb-2">

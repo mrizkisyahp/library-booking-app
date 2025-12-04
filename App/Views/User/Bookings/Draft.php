@@ -213,6 +213,10 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                         </svg>
                         <span>
                             <?= (int) $currentMembers ?> /
+                            <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                            <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                                · Min <?= (int) $requiredMembers ?>
+                            <?php endif; ?>
                             <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> Orang
                         </span>
                     </p>

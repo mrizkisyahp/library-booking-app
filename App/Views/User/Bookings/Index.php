@@ -17,6 +17,7 @@ $roomTypes = [
   'Ruang Rapat',
 ];
 
+dump($bookings);
 
 ?>
 
