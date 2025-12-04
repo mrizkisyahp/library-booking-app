@@ -10,7 +10,7 @@ use App\Models\User;
 
 class AdminBookingService
 {
-    private const PER_PAGE = 20;
+    private const PER_PAGE = 5;
 
     public function listAllBookings(array $filters = []): array
     {

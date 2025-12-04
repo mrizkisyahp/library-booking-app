@@ -18,6 +18,7 @@ use App\Controllers\AdminFeedbackController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\AdminMiddleware;
 use App\Core\Middleware\CsrfMiddleware;
+use App\Controllers\AdminReportController;
 
 // Auth routes (public)
 $app->router->get('/', [AuthController::class, 'login']);
@@ -102,3 +103,5 @@ $app->router->post('/admin/rooms/deactivate', [AdminRoomController::class, 'deac
 // Admin feedback
 $app->router->get('/admin/feedback', [AdminFeedbackController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->get('/admin/feedback/detail', [AdminFeedbackController::class, 'detail'], ['middleware' => [new AdminMiddleware()]]);
+
+$app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

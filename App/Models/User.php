@@ -36,6 +36,8 @@ class User extends DbModel
     public ?string $updated_at = null;
     public string $identifier = '';
     public string $scenario = self::SCENARIO_REGISTER;
+    public ?string $password_reset_token = null;
+    public ?string $password_reset_expires = null;
 
     public static function tableName(): string
     {
