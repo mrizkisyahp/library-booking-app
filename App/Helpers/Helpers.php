@@ -4,6 +4,7 @@ use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use Carbon\Carbon;
 
 if (!function_exists('app')) {
     function app(): App
@@ -246,5 +247,19 @@ if (!function_exists('resolve')) {
     function resolve(string $abstract): mixed
     {
         return app()->container->make($abstract);
+    }
+}
+
+if (!function_exists('formatWaktu')) {
+    function formatWaktu($waktu)
+    {
+        return Carbon::parse($waktu)->format('H:i') . ' WIB';
+    }
+}
+
+if (!function_exists('formatTanggal')) {
+    function formatTanggal($tanggal)
+    {
+        return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
     }
 }

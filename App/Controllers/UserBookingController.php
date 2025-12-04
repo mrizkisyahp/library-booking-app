@@ -212,7 +212,7 @@ class UserBookingController extends Controller
         $data = $result['data'] ?? [];
 
         return $this->render('User/Bookings/Index', [
-            'bookings' => $data,
+            'bookings' => $data['mybooking'],
             'filters' => $filters,
             'currentPage' => $data['currentPage'],
             'perPage' => $data['perPage'],
@@ -246,6 +246,8 @@ class UserBookingController extends Controller
         $this->setLayout('main');
         $this->setTitle('Detail Booking | Library Booking App');
 
-        return $this->render('User/Bookings/Detail', $result['data']);
+        return $this->render('User/Bookings/Detail', [
+            'booking' => $result['data'] ?? [],
+        ]);
     }
 }

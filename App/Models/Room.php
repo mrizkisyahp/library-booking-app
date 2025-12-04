@@ -16,7 +16,7 @@ class Room extends DbModel
     public string $status_ruangan = 'available';
     public ?string $created_at = null;
     public ?string $updated_at = null;
-
+    public ?int $requires_special_approval = 0;
     public static function tableName(): string
     {
         return 'ruangan';
@@ -39,6 +39,7 @@ class Room extends DbModel
             'status_ruangan',
             'created_at',
             'updated_at',
+            'requires_special_approval',
         ];
     }
 

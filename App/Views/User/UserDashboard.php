@@ -8,16 +8,6 @@ $user = App::$app->user;
 
 use Carbon\Carbon;
 Carbon::setLocale('id');
-
-function formatWaktu($waktu)
-{
-  return Carbon::parse($waktu)->format('H:i') . ' WIB';
-}
-
-function formatTanggal($tanggal)
-{
-  return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
-}
 ?>
 
 <!-- Welcome Header -->
@@ -156,78 +146,80 @@ function formatTanggal($tanggal)
               Cari Ruangan
             </a>
 
-          <!-- ini tombol pop up ya buat kode booking -->
-          <a href="/dashboard#modal-invite"
-            class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
-            Masukkan Kode Undangan
+            <!-- ini tombol pop up ya buat kode booking -->
+            <a href="/dashboard#modal-invite"
+              class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
+              Masukkan Kode Undangan
             </a>
 
-        <!-- modal menu kode booking-->
+            <!-- modal menu kode booking-->
             <div id="modal-invite"
-                class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999">
+              class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999">
 
-                <div class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
-                    <a href="/dashboard"
-                        class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold cursor-pointer">
-                        &times;
-                    </a>
+              <div
+                class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
+                <a href="/dashboard"
+                  class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold cursor-pointer">
+                  &times;
+                </a>
 
-                    <h1 class="text-lg font-bold text-slate-800 mb-2">
-                        Gabung dengan Kode Undangan
-                    </h1>
-                    <p class="text-sm text-slate-600 mb-4">
-                        Punya kode Undangan? Gabung di sini!
-                    </p>
+                <h1 class="text-lg font-bold text-slate-800 mb-2">
+                  Gabung dengan Kode Undangan
+                </h1>
+                <p class="text-sm text-slate-600 mb-4">
+                  Punya kode Undangan? Gabung di sini!
+                </p>
 
-                    <form action="/bookings/join" method="post" class="space-y-3">
-                        <?=  csrf_field() ?>
+                <form action="/bookings/join" method="post" class="space-y-3">
+                  <?= csrf_field() ?>
 
-                        <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>" placeholder="Masukkan kode di sini...." required
-                            class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                  <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
+                    placeholder="Masukkan kode di sini...." required
+                    class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
 
-                        <button type="submit"
-                            class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow cursor-pointer">
-                            Gabung
-                        </button>
-                    </form>
-                </div>
+                  <button type="submit"
+                    class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow cursor-pointer">
+                    Gabung
+                  </button>
+                </form>
+              </div>
             </div>
 
 
-        <?php else: ?>
+          <?php else: ?>
             <?php
-                foreach ($bookings as $booking):
-            ?>
+            foreach ($bookings as $booking):
+              ?>
 
-            <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
-              <div class="flex flex-col justify-start p-6">
-                <p class="font-bold text-2xl mb-2">
-                  <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
-                </p>
-                <p class="mb-2">
-                  ?$room['JENIS_RUANGAN']
-                </p>
-                <div class="w-full">
-                  <?php
-                  $statusColors = [
-                    'draft' => 'bg-gray-300 text-gray-800 border-gray-400',
-                    'pending' => 'bg-yellow-300 text-yellow-800 border-yellow-400',
-                    'verified' => 'bg-blue-100 text-blue-800 border-blue-400',
-                    'active' => 'bg-emerald-100 text-emerald-800 border-emerald-400',
-                    'completed' => 'bg-green-100 text-green-800 border-green-400',
-                    'cancelled' => 'bg-red-100 text-red-800 border-red-400',
-                    'expired' => 'bg-slate-100 text-slate-700 border-slate-400',
-                    'no_show' => 'bg-orange-100 text-orange-800 border-orange-400',
-                  ];
-                  $statusKey = strtolower($booking['status']);
-                  $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
-                  $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
-                  ?>
-                  <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
-                    Status:
-                    <?= htmlspecialchars($statusLabel) ?>
-                    <!-- 🤡🤡🤡 -->
-                    <!-- if $booking['status'] == 'draft' && $requiredMembers == 0:
+              <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
+                <div class="flex flex-col justify-start p-6">
+                  <p class="font-bold text-2xl mb-2">
+                    <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
+                  </p>
+                  <p class="mb-2">
+                    ?$room['JENIS_RUANGAN']
+                  </p>
+                  <div class="w-full">
+                    <?php
+                    $statusColors = [
+                      'draft' => 'bg-gray-300 text-gray-800 border-gray-400',
+                      'pending' => 'bg-yellow-300 text-yellow-800 border-yellow-400',
+                      'verified' => 'bg-blue-100 text-blue-800 border-blue-400',
+                      'active' => 'bg-emerald-100 text-emerald-800 border-emerald-400',
+                      'completed' => 'bg-green-100 text-green-800 border-green-400',
+                      'cancelled' => 'bg-red-100 text-red-800 border-red-400',
+                      'expired' => 'bg-slate-100 text-slate-700 border-slate-400',
+                      'no_show' => 'bg-orange-100 text-orange-800 border-orange-400',
+                    ];
+                    $statusKey = strtolower($booking['status']);
+                    $statusColor = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-800';
+                    $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
+                    ?>
+                    <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
+                      Status:
+                      <?= htmlspecialchars($statusLabel) ?>
+                      <!-- 🤡🤡🤡 -->
+                      <!-- if $booking['status'] == 'draft' && $requiredMembers == 0:
                       echo ('(Menunggu Anggota)');
                       elseif $booking['status'] == 'draft' && $requiredMembers > 0:
                         echo ('(Siap Dikirim)');

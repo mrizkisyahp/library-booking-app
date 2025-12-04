@@ -158,10 +158,8 @@ $roomTypes = [
                     <!-- Icon -->
                     <div class="shrink-0">
                         <?php if ($user->status === 'pending kubaca'): ?>
-                            <div
-                                class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center animate-pulse">
-                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center animate-pulse">
+                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -184,8 +182,7 @@ $roomTypes = [
                                 Terima kasih telah mendaftar! Akun Anda sedang menunggu verifikasi dari admin.
                                 Anda dapat melihat ruangan yang tersedia, namun belum dapat melakukan pemesanan.
                             </p>
-                            <div
-                                class="flex items-center gap-2 text-sm text-amber-700 bg-amber-100 rounded-lg px-4 py-2">
+                            <div class="flex items-center gap-2 text-sm text-amber-700 bg-amber-100 rounded-lg px-4 py-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -215,8 +212,8 @@ $roomTypes = [
         <!-- loop ruangan -->
         <?php foreach ($rooms as $room): ?>
             <?php $thumbnail = $room->getThumbnail(); ?>
-        <div class="bg-white rounded-3xl shadow-lg mx-8">
-            <div>
+            <div class="bg-white rounded-3xl shadow-lg mx-8">
+                <div>
                     <div>
                         <!-- Blocked Overlay for rejected/pending users -->
                         <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?>
@@ -237,15 +234,13 @@ $roomTypes = [
                                     <img src="<?= $thumbnail ?>" alt="<?= htmlspecialchars($room->nama_ruangan) ?>"
                                         class="w-full h-full object-cover rounded-t-3xl">
                                 <?php else: ?>
-                                    <div
-                                        class="w-48 bg-linear-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                                        <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                <?php endif; ?>
+                                <div class="w-48 bg-linear-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                                    <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            <?php endif; ?>
                             </p>
                             <div class="p-6 mb-4">
                                 <p class="font-bold text-4xl">
@@ -256,7 +251,14 @@ $roomTypes = [
                                 </p>
                                 <div class="flex items-center gap-4">
                                     <p class="flex gap-4 items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round size-4"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            class="lucide lucide-users-round-icon lucide-users-round size-4">
+                                            <path d="M18 21a8 8 0 0 0-16 0" />
+                                            <circle cx="10" cy="8" r="5" />
+                                            <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                                        </svg>
                                         <span>
                                             <span class="font-semibold"><?= (int) $room->kapasitas_min ?> -
                                                 <?= (int) $room->kapasitas_max ?>
@@ -265,7 +267,12 @@ $roomTypes = [
                                         </span>
                                     </p>
                                     <p class="flex items-center gap-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star-icon lucide-star size-4"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" class="lucide lucide-star-icon lucide-star size-4">
+                                            <path
+                                                d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+                                        </svg>
                                         <span>
                                             ['RATING 5']
                                         </span>
@@ -299,6 +306,5 @@ $roomTypes = [
                     </div>
                 </div>
             </div>
-            <?php endforeach; ?>
+        <?php endforeach; ?>
     </div>
-

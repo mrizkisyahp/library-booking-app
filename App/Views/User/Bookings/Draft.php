@@ -32,7 +32,8 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
 <div class="p-6 bg-gray-200">
     <?php if ($booking->status === 'draft'): ?>
         <div class="w-full mb-4">
-            <div class="inline-block bg-yellow-300 border-2 border-yellow-600 font-regular text-sm text-black w-full px-6 py-4 rounded-3xl text-left mb-4 font-regular tracking-wide">
+            <div
+                class="inline-block bg-yellow-300 border-2 border-yellow-600 font-regular text-sm text-black w-full px-6 py-4 rounded-3xl text-left mb-4 font-regular tracking-wide">
                 <p class="text-2xl font-bold uppercase my-4">
                     Peringatan!
                 </p>
@@ -315,40 +316,39 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
     </div>
     <?php if ($isOwner): ?>
         <div class="bg-white rounded-2xl shadow-lg p-4 mb-12 hidden md:block">
-          <form action="/bookings/submit" method="post">
-            <?= csrf_field() ?>
-            <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
+            <form action="/bookings/submit" method="post">
+                <?= csrf_field() ?>
+                <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
-            <button type="submit"
-              <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
-              class="w-full bg-primary text-gray-500 px-8 py-4 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
-              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-              <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
-            </button>
-          </form>
+                <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
+                    class="w-full bg-primary text-gray-500 px-8 py-4 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
+                </button>
+            </form>
         </div>
-      <?php endif; ?>
+    <?php endif; ?>
 
     <nav class="fixed left-0 bottom-0 right-0 bg-gray-100 text-white md:hidden z-999 rounded-t-4xl py-6 shadow-xl">
         <div class="flex items-center justify-around w-full px-4">
-        <form action="/bookings/submit" method="post">
-            <?= csrf_field() ?>
-            <input type="hidden" name="booking_id" value="<?= (int)$booking->id_booking ?>">
+            <form action="/bookings/submit" method="post">
+                <?= csrf_field() ?>
+                <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
-            <button type="submit"
-              <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
-              class="w-full bg-primary text-slate-500 px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
-              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-              <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
-            </button>
-          </form>
+                <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
+                    class="w-full bg-primary text-slate-500 px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
+                </button>
+            </form>
 
         </div>
     </nav>
 
 </div>
-

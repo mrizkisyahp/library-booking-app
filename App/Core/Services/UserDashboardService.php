@@ -22,7 +22,7 @@ class UserDashboardService
         $stmt = $db->prepare('SELECT COUNT(*) AS count FROM booking WHERE user_id = :user_id');
         $stmt->bindValue(':user_id', $userId);
         $stmt->execute();
-        $totalBookings = (int)($stmt->fetch(\PDO::FETCH_ASSOC)['count'] ?? 0);
+        $totalBookings = (int) ($stmt->fetch(\PDO::FETCH_ASSOC)['count'] ?? 0);
 
         $statusList = ['draft', 'pending', 'verified', 'active', 'completed', 'cancelled', 'expired', 'no_show'];
         $statusCounts = [];
@@ -42,10 +42,10 @@ class UserDashboardService
         $stmt->bindValue(':user_id', $userId);
         $stmt->bindValue(':status', $status);
         $stmt->execute();
-        return (int)($stmt->fetch(\PDO::FETCH_ASSOC)['count'] ?? 0);
+        return (int) ($stmt->fetch(\PDO::FETCH_ASSOC)['count'] ?? 0);
     }
 
-    public function getPicBookings(int $userId, int $limit = 10): array
+    public function getPicBookings(int $userId, int $limit = 1): array
     {
         $sql = "
             SELECT b.*, r.nama_ruangan,
@@ -65,7 +65,7 @@ class UserDashboardService
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function getAnggotaBookings(int $userId, int $limit = 10): array
+    public function getAnggotaBookings(int $userId, int $limit = 1): array
     {
         $sql = "
             SELECT b.*, r.nama_ruangan,
@@ -106,30 +106,30 @@ class UserDashboardService
         return $warnings;
     }
 
-//     public function getMinimumMembersRequired(?Booking $booking): int
+    //     public function getMinimumMembersRequired(?Booking $booking): int
 //     {
 //         $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
 //         return $room && $room->kapasitas_min ? (int) $room->kapasitas_min : 0;
 //     }
 
-//     public function getMaximumMembersRequired(?Booking $booking): int
+    //     public function getMaximumMembersRequired(?Booking $booking): int
 //     {
 //         $room = Room::findOne(['id_ruangan' => $booking->ruangan_id]);
 //         return $room && $room->kapasitas_max ? (int) $room->kapasitas_max : 0;
 //     }
 
-//     public function getMemberCount(?Booking $booking): int
+    //     public function getMemberCount(?Booking $booking): int
 //     {
 //         $db = App::$app->db;
 
-//         $membersStmt = $db->prepare("
+    //         $membersStmt = $db->prepare("
 //             SELECT COUNT(*) FROM anggota_booking WHERE booking_id = :id
 //         ");
 //         $membersStmt->bindValue(':id', $booking->id_booking, \PDO::PARAM_INT);
 //         $membersStmt->execute();
 //         $members = (int) $membersStmt->fetchColumn();
 
-//         $picStmt = $db->prepare("
+    //         $picStmt = $db->prepare("
 //             SELECT 1 FROM anggota_booking WHERE booking_id = :id AND user_id = :pic LIMIT 1
 //         ");
 //         $picStmt->bindValue(':id', $booking->id_booking, \PDO::PARAM_INT);
@@ -137,22 +137,22 @@ class UserDashboardService
 //         $picStmt->execute();
 //         $picAlreadyCounted = (bool) $picStmt->fetchColumn();
 
-//         return $picAlreadyCounted ? $members : $members + 1;
+    //         return $picAlreadyCounted ? $members : $members + 1;
 //     }
 
-// public function meetsMemberRequirement(?Booking $booking): bool
+    // public function meetsMemberRequirement(?Booking $booking): bool
 //     {
 //         $minRequired = $this->getMinimumMembersRequired($booking) ?? null;
 //         $maxRequired = $this->getMaximumMembersRequired($booking) ?? null;
 //         $currentCount = $this->getMemberCount($booking) ?? null;
 
-//         if ($minRequired <= 0 && $maxRequired <= 0) {
+    //         if ($minRequired <= 0 && $maxRequired <= 0) {
 //             return true;
 //         }
 
-//         $meetsMin = $minRequired <= 0 || $currentCount >= $minRequired;
+    //         $meetsMin = $minRequired <= 0 || $currentCount >= $minRequired;
 //         $meetsMax = $maxRequired <= 0 || $currentCount <= $maxRequired;
 
-//         return $meetsMin && $meetsMax;
+    //         return $meetsMin && $meetsMax;
 //     }
 }
