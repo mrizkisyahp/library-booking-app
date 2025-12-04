@@ -17,8 +17,6 @@ $roomTypes = [
   'Ruang Rapat',
 ];
 
-dump($bookings);
-
 ?>
 
 <div class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
