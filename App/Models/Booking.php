@@ -50,7 +50,6 @@ class Booking extends DbModel
             'status',
             'checkin_code',
             'invite_token',
-            'jenis_ruangan',
         ];
     }
 
