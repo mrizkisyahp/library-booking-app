@@ -16,6 +16,8 @@ $roomTypes = [
   'Bimbingan & Konseling',
   'Ruang Rapat',
 ];
+
+
 ?>
 
 <div class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
@@ -146,7 +148,7 @@ $roomTypes = [
             <?= htmlspecialchars($booking->nama_ruangan) ?>
           </p>
           <p class="mb-2">
-            ?$room['JENIS_RUANGAN']
+            <?= htmlspecialchars($booking->jenis_ruangan) ?>
           </p>
           <div class="w-full">
             <?php
@@ -217,12 +219,7 @@ $roomTypes = [
                 <circle cx="10" cy="8" r="5" />
                 <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
               </svg>
-              <!-- <?= (int) $currentMembers ?> /
-                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                      · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?> -->
-              [1/6 PESERTA . Min 1]
+              <?= $booking->kapasitas_min ?> / <?= $booking->kapasitas_max ?> peserta
             </p>
 
             <div class="w-full">

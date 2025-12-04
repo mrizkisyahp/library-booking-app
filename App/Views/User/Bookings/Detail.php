@@ -103,12 +103,11 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
-                    <!-- <?= (int) $currentMembers ?> /
+                    <?= (int) $currentMembers ?> /
                     <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
                     <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                      · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?> -->
-                    [1/6 PESERTA . Min 1]
+                        · Min <?= (int) $requiredMembers ?>
+                    <?php endif; ?>
                 </p>
 
                 <p class="mb-4 flex gap-2 items-center">
@@ -225,7 +224,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
                     <span>
-                        ['4/12 Orang']
+                        <?= $currentMembers . ' / ' . $maximumMembers ?> Orang
                     </span>
                 </p>
 
@@ -372,7 +371,8 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     Isi Feedback (Wajib)
                 </a>
             <?php else: ?>
-                <div class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
+                <div
+                    class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
                     Seluruh rangkaian booking sudah diselesaikan
                 </div>
             <?php endif; ?>

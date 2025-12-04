@@ -103,7 +103,16 @@ class UserBookingController extends Controller
         $this->setLayout('main');
         $this->setTitle('Draft Booking');
 
-        return $this->render('User/Bookings/Draft', $data);
+        return $this->render('User/Bookings/Draft', [
+            'booking' => $data['booking'] ?? null,
+            'room' => $data['room'] ?? null,
+            'members' => $data['members'] ?? [],
+            'currentUser' => $user,
+            'canSubmit' => $data['canSubmit'],
+            'requiredMembers' => $data['requiredMembers'],
+            'maximumMembers' => $data['maximumMembers'],
+            'currentMembers' => $data['currentMembers'],
+        ]);
     }
 
     public function addMember(Request $request, Response $response)
@@ -246,8 +255,16 @@ class UserBookingController extends Controller
         $this->setLayout('main');
         $this->setTitle('Detail Booking | Library Booking App');
 
+        $data = $result['data'];
+
         return $this->render('User/Bookings/Detail', [
-            'booking' => $result['data'] ?? [],
+            'booking' => $data['booking'] ?? [],
+            'room' => $data['room'] ?? [],
+            'pic' => $data['pic'] ?? [],
+            'members' => $data['members'] ?? [],
+            'requiredMembers' => $data['requiredMembers'] ?? 0,
+            'maximumMembers' => $data['maximumMembers'] ?? 0,
+            'currentMembers' => $data['currentMembers'] ?? 0,
         ]);
     }
 }

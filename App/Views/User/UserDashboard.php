@@ -189,15 +189,22 @@ Carbon::setLocale('id');
           <?php else: ?>
             <?php
             foreach ($bookings as $booking):
-              ?>
+              $bookingObj = new \App\Models\Booking();
+              $bookingObj->id_booking = $booking['id_booking'];
+              $bookingObj->user_id = $booking['user_id'];
+              $bookingObj->ruangan_id = $booking['ruangan_id'];
 
+              $currentMembers = $bookingService->getMemberCount($bookingObj);
+              $maximumMembers = $bookingService->getMaximumMembersRequired($bookingObj);
+              $requiredMembers = $bookingService->getMinimumMembersRequired($bookingObj);
+              ?>
               <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
                 <div class="flex flex-col justify-start p-6">
                   <p class="font-bold text-2xl mb-2">
                     <?= htmlspecialchars($booking['nama_ruangan'] ?? ('#' . $booking['ruangan_id'])) ?>
                   </p>
                   <p class="mb-2">
-                    ?$room['JENIS_RUANGAN']
+                    <?= htmlspecialchars($booking['jenis_ruangan']) ?>
                   </p>
                   <div class="w-full">
                     <?php
@@ -281,12 +288,11 @@ Carbon::setLocale('id');
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                       </svg>
-                      <!-- <?= (int) $currentMembers ?> /
-                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                      · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?> -->
-                      [1/6 PESERTA . Min 1]
+                      <?= (int) $currentMembers ?> /
+                      <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
+                      <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
+                        · Min <?= (int) $requiredMembers ?>
+                      <?php endif; ?>
                     </p>
 
                     <div class="w-full">
