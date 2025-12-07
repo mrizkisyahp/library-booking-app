@@ -35,4 +35,39 @@ class ProfileController extends Controller
         }
         redirect('/profile');
     }
+
+    public function detail(Request $request)
+    {
+        $userId = auth()->id();
+        $user = $this->profileServices->getCurrentUserProfile($userId);
+
+        return view('Profile/Detail', [
+            'user' => $user,
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $userId = auth()->id();
+        $user = $this->profileServices->getCurrentUserProfile($userId);
+
+        return view('Profile/ResetPassword', [
+            'user' => $user,
+        ]);
+    }
+
+    public function faq(Request $request)
+    {
+        return view('Profile/Faq');
+    }
+
+    public function verifikasi(Request $request)
+    {
+        $userId = auth()->id();
+        $user = $this->profileServices->getCurrentUserProfile($userId);
+
+        return view('Profile/Verifikasi', [
+            'user' => $user,
+        ]);
+    }
 }

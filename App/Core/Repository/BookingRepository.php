@@ -342,7 +342,11 @@ class BookingRepository
     {
         $qb = new QueryBuilder($this->database->pdo);
 
-        return $qb->table('blocked_dates')->orderBy('tanggal_begin', 'asc')->get();
+        return $qb->table('blocked_dates')
+            ->select(['blocked_dates.*', 'ruangan.nama_ruangan'])
+            ->leftJoin('ruangan', 'blocked_dates.ruangan_id', '=', 'ruangan.id_ruangan')
+            ->orderBy('blocked_dates.tanggal_begin', 'asc')
+            ->get();
     }
     private function baseBookingQuery(): QueryBuilder
     {
@@ -374,7 +378,10 @@ class BookingRepository
 
     public function getAllRooms(): array
     {
-        return Room::Query()->whereIn('status_ruangan', ['available', 'adminOnly'])->get();
+        return Room::Query()
+            ->whereIn('status_ruangan', ['available', 'adminOnly'])
+            ->orderBy('nama_ruangan', 'asc')
+            ->get();
     }
     public function getAllUsers(): array
     {

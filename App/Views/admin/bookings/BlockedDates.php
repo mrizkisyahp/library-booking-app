@@ -62,10 +62,7 @@ use App\Core\App;
                         <select name="ruangan_id"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
                             <option value="">Semua Ruangan</option>
-                            <?php
-                            $rooms = \App\Models\Room::Query()->orderBy('nama_ruangan')->get();
-                            foreach ($rooms as $room):
-                                ?>
+                            <?php foreach ($rooms as $room): ?>
                                 <option value="<?= (int) $room->id_ruangan ?>"><?= htmlspecialchars($room->nama_ruangan) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -142,11 +139,8 @@ use App\Core\App;
                                                     Semua Ruangan
                                                 </span>
                                             <?php else: ?>
-                                                <?php
-                                                $room = \App\Models\Room::Query()->where('id_ruangan', $blocked['ruangan_id'])->first();
-                                                ?>
                                                 <span
-                                                    class="text-slate-800"><?= htmlspecialchars($room->nama_ruangan ?? 'Unknown') ?></span>
+                                                    class="text-slate-800"><?= htmlspecialchars($blocked['nama_ruangan'] ?? 'Unknown') ?></span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="py-4 px-4">

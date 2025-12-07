@@ -41,6 +41,10 @@ $app->router->post('/reset-password', [PasswordController::class, 'reset'], ['mi
 $app->router->get('/dashboard', [UserDashboardController::class, 'index'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->get('/profile', [ProfileController::class, 'index'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/upload-kubaca', [ProfileController::class, 'uploadKubaca'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/profile/detail', [ProfileController::class, 'detail'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->get('/profile/reset-password', [ProfileController::class, 'resetPassword'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->get('/profile/faq', [ProfileController::class, 'faq'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->get('/profile/verifikasi', [ProfileController::class, 'verifikasi'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/logout', [AuthController::class, 'logout'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 
 // Room & booking routes (authenticated)

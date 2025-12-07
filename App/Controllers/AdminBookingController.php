@@ -226,9 +226,11 @@ class AdminBookingController extends Controller
     public function blockedDates(Request $request)
     {
         $blockedDates = $this->bookingServices->getBlockedDates();
+        $rooms = $this->bookingServices->getAllRooms();
 
         return view('Admin/Bookings/BlockedDates', [
             'blockedDates' => $blockedDates,
+            'rooms' => $rooms,
         ]);
     }
 

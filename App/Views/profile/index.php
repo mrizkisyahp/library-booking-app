@@ -53,6 +53,72 @@
             </div>
         </div>
 
+        <!-- Submenu Navigation -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6 divide-y divide-gray-100">
+            <!-- Detail Akun -->
+            <a href="/profile/detail"
+                class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="text-gray-700 font-medium">Detail Akun</span>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-600 transition-colors" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+
+            <!-- Reset Password -->
+            <a href="/forgot" class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    <span class="text-gray-700 font-medium">Reset Password</span>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-600 transition-colors" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+
+            <!-- FAQ -->
+            <a href="/profile/faq"
+                class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-gray-700 font-medium">FAQ</span>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-600 transition-colors" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+
+            <!-- Verifikasi -->
+            <a href="/profile/verifikasi"
+                class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors group">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span class="text-gray-700 font-medium">Verifikasi</span>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-600 transition-colors" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
         <?php if ($user->role_name === 'mahasiswa'): ?>
             <?php if ($user->status === 'rejected'): ?>
                 <!-- Rejected state - Show upload form again -->
