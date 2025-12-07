@@ -396,6 +396,9 @@
   .z-10 {
     z-index: 10;
   }
+  .z-30 {
+    z-index: 30;
+  }
   .z-50 {
     z-index: 50;
   }
@@ -654,6 +657,9 @@
   }
   .w-24 {
     width: calc(var(--spacing) * 24);
+  }
+  .w-28 {
+    width: calc(var(--spacing) * 28);
   }
   .w-40 {
     width: calc(var(--spacing) * 40);
@@ -2127,6 +2133,13 @@
     &:hover {
       @media (hover: hover) {
         width: calc(var(--spacing) * 72);
+      }
+    }
+  }
+  .hover\:w-80 {
+    &:hover {
+      @media (hover: hover) {
+        width: calc(var(--spacing) * 80);
       }
     }
   }
