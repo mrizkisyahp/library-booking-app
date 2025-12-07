@@ -36,8 +36,16 @@ class RoomRepository
     {
         $query = Room::Query();
 
-        if (!empty($filters['keyword'])) {
-            $query->where('nama_ruangan', 'like', '%' . $filters['keyword'] . '%');
+        if (!empty($filters['nama_ruangan'])) {
+            $query->where('nama_ruangan', 'like', '%' . $filters['nama_ruangan'] . '%');
+        }
+
+        if (!empty($filters['tanggal'])) {
+            $query->where('tanggal_penggunaan_ruang', 'like', '%' . $filters['tanggal'] . '%');
+        }
+
+        if (!empty($filters['waktu_mulai'])) {
+            $query->where('waktu_mulai', 'like', '%' . $filters['waktu_mulai'] . '%');
         }
 
         if (!empty($filters['status_ruangan'])) {
@@ -45,7 +53,7 @@ class RoomRepository
         }
 
         if (!empty($filters['jenis_ruangan'])) {
-            $query->where('jenis_ruangan', $filters['jenis_ruangan']);
+            $query->whereIn('jenis_ruangan', $filters['jenis_ruangan']);
         }
 
         if (!empty($filters['kapasitas_min'])) {

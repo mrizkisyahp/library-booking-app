@@ -16,14 +16,18 @@ class UserRoomController extends Controller
     public function index(Request $request)
     {
         $page = (int) ($request->input('page') ?? 1);
-        $keyword = $request->input('keyword') ?? '';
-        $jenis = $request->input('jenis_ruangan') ?? '';
+        $nama_ruangan = $request->input('nama_ruangan') ?? '';
+        $tanggal = $request->input('tanggal') ?? '';
+        $waktu_mulai = $request->input('waktu_mulai') ?? '';
+        $jenis = $request->input('jenis_ruangan') ?? [];
         $status = $request->input('status_ruangan') ?? '';
         $kapasitasmin = $request->input('kapasitas_min') ?? '';
         $kapasitasmax = $request->input('kapasitas_max') ?? '';
 
         $filters = [
-            'keyword' => $keyword,
+            'nama_ruangan' => $nama_ruangan,
+            'tanggal' => $tanggal,
+            'waktu_mulai' => $waktu_mulai,
             'jenis_ruangan' => $jenis,
             'status_ruangan' => $status,
             'kapasitas_min' => $kapasitasmin,
