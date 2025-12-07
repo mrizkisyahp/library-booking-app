@@ -1,8 +1,9 @@
 <?php
 ?>
 
+
 <!-- Welcome Header -->
-<div class="rounded-2xl p-4 mb-6">
+<div class="rounded-2xl p-4 mb-6 mx-auto max-w-5xl">
   <div class="flex items-center justify-between mt-6 px-6 mb-4">
     <div>
       <h1 class="text-4xl font-bold text-white md:text-black mb-2">
@@ -137,10 +138,46 @@
               Cari Ruangan
             </a>
 
-            <a href="/"
+            <!-- ini tombol pop up ya buat kode booking -->
+            <a href="/dashboard#modal-invite"
               class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
               Masukkan Kode Undangan
             </a>
+
+            <!-- modal menu kode booking-->
+            <div id="modal-invite"
+              class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999">
+
+              <div
+                class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
+                <a href="/dashboard"
+                  class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold cursor-pointer">
+                  &times;
+                </a>
+
+                <h1 class="text-lg font-bold text-slate-800 mb-2">
+                  Gabung dengan Kode Undangan
+                </h1>
+                <p class="text-sm text-slate-600 mb-4">
+                  Punya kode Undangan? Gabung di sini!
+                </p>
+
+                <form action="/bookings/join" method="post" class="space-y-3">
+                  <?= csrf_field() ?>
+
+                  <input type="text" name="invite_token" value="<?= htmlspecialchars($prefill ?? '') ?>"
+                    placeholder="Masukkan kode di sini...." required
+                    class="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+
+                  <button type="submit"
+                    class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-semibold text-sm shadow cursor-pointer">
+                    Gabung
+                  </button>
+                </form>
+              </div>
+            </div>
+
+
           <?php else: ?>
             <?php foreach ($bookings as $booking): ?>
               <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
