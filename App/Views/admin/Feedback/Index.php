@@ -1,14 +1,7 @@
 <?php
-use App\Core\Csrf;
-
-$filters = $filters ?? [];
-$feedback = $feedback ?? [];
-
-// echo '<pre>';
-// print_r($feedback);
-// print_r($filters);
-// echo '</pre>';
+dump($feedbacks);
 ?>
+
 <div class="p-6">
   <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
     <div>
@@ -69,9 +62,9 @@ $feedback = $feedback ?? [];
             <div class=" text-nowrap">
               Tanggal Penggunaan
             </div>
-            <input type="date" name="tanggal_penggunaan_ruang"
+            <input type="date" name="tanggal"
               class="w-full flex grow border border-gray-300 rounded-lg px-4 py-1 text-sm accent-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              value="<?= htmlspecialchars($filters['tanggal_penggunaan_ruang'] ?? '') ?>">
+              value="<?= htmlspecialchars($filters['tanggal'] ?? '') ?>">
           </label>
         </div>
 
@@ -93,7 +86,7 @@ $feedback = $feedback ?? [];
   </section>
 
   <section>
-    <?php if (empty($feedback)): ?>
+    <?php if (empty($feedbacks)): ?>
       <!-- Empty State -->
       <div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
         <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +110,7 @@ $feedback = $feedback ?? [];
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <?php foreach ($feedback as $row): ?>
+            <?php foreach ($feedbacks as $row): ?>
               <tr class="hover:bg-gray-200 odd:bg-gray-50 even:bg-gray-100 transition-colors border-b border-gray-200">
                 <th scope="row" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   <?= htmlspecialchars($row->nama ?? '-') ?>

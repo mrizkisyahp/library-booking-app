@@ -97,23 +97,6 @@ class UserBookingController extends Controller
         }
     }
 
-    public function removeMember(Request $request)
-    {
-        try {
-            $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
-            $memberUserId = (int) $request->all()['member_user_id'];
-
-            $this->bookingServices->removeMember($bookingId, $memberUserId, $user->id_user);
-
-            flash('success', 'Anggota berhasil dihapus');
-            back();
-        } catch (Exception $e) {
-            flash('error', $e->getMessage());
-            back();
-        }
-    }
-
     public function showJoinForm(Request $request)
     {
         $prefill = $request->query()['code'] ?? '';

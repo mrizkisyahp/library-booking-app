@@ -28,6 +28,7 @@ class Booking extends DbModel
     public ?int $id_feedback = null;
     public ?string $nama = null;
     public ?bool $has_been_rescheduled = null;
+    public ?string $deleted_at = null;
 
     public static function tableName(): string
     {
@@ -54,6 +55,7 @@ class Booking extends DbModel
             'checkin_code',
             'invite_token',
             'has_been_rescheduled',
+            'deleted_at',
         ];
     }
 

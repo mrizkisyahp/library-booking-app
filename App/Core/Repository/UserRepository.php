@@ -3,6 +3,7 @@
 namespace App\Core\Repository;
 
 use App\Core\Database;
+use App\Core\Paginator;
 use App\Models\User;
 
 class UserRepository
@@ -153,5 +154,33 @@ class UserRepository
         return User::Query()
             ->where('status', 'pending verification')
             ->count();
+    }
+
+    public function getAllUsers(array $filters = [], int $perPage = 15, int $page = 1): Paginator
+    {
+        $query = User::Query()->with('role');
+
+        if (!empty($filters['keyword'])) {
+            $keyword = '%' . $filters['keyword'] . '%';
+            $query->whereRaw(
+                "(nama LIKE ? OR email LIKE ? OR nim LIKE ? OR nip LIKE ?)",
+                [$keyword, $keyword, $keyword, $keyword]
+            );
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['role'])) {
+            $query->where('id_role', $filters['role']);
+        }
+
+        return $query->orderBy('id_user', 'desc')->paginate($perPage, $page);
+    }
+
+    public function delete(int $id): bool
+    {
+        return User::Query()->where('id_user', $id)->delete();
     }
 }

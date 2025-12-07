@@ -10,7 +10,7 @@ use Exception;
 class AdminBookingController extends Controller
 {
     public function __construct(
-        private BookingServices $bookingServices
+        private BookingServices $bookingServices,
     ) {
     }
 
@@ -37,32 +37,81 @@ class AdminBookingController extends Controller
 
     public function create(Request $request)
     {
-        return $this->render('WorkInProgress');
+        $rooms = $this->bookingServices->getAllRooms();
+        $users = $this->bookingServices->getAllUsers();
+
+        return view('Admin/Bookings/Create', [
+            'rooms' => $rooms,
+            'users' => $users,
+        ]);
     }
 
     public function store(Request $request)
     {
-        flash('info', 'Work in progress');
-        redirect('/admin/bookings');
+        try {
+            $data = $request->all();
+            $targetUserId = (int) $data['user_id'];
+
+            $booking = $this->bookingServices->adminCreateBooking($data, $targetUserId);
+
+            flash('success', 'Booking berhasil dibuat');
+            redirect('/admin/bookings/edit?id=' . $booking->id_booking);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 
     public function edit(Request $request)
     {
-        return $this->render('WorkInProgress');
+        try {
+            $bookingId = (int) $request->query()['id'];
+            $data = $this->bookingServices->getBookingForUser($bookingId, 0, true);
+
+            $rooms = $this->bookingServices->getAllRooms();
+
+            return view('Admin/Bookings/Edit', [
+                'booking' => $data['booking'],
+                'members' => $data['allMembers'],
+                'rooms' => $rooms,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/bookings');
+        }
     }
 
     public function update(Request $request)
     {
-        flash('info', 'Work in progress');
-        redirect('/admin/bookings');
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $data = $request->all();
+            unset($data['booking_id'], $data['_token']);
+
+            $this->bookingServices->adminUpdateBooking($bookingId, $data);
+
+            flash('success', 'Booking berhasil diupdate');
+            redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 
     public function delete(Request $request)
     {
-        flash('info', 'Work in progress');
-        redirect('/admin/bookings');
-    }
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
 
+            $this->bookingServices->deleteBooking($bookingId);
+
+            flash('success', 'Booking berhasil dihapus');
+            redirect('/admin/bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
     public function detail(Request $request)
     {
         try {
@@ -75,15 +124,6 @@ class AdminBookingController extends Controller
                 'members' => $data['members'],
                 'allMembers' => $data['allMembers'],
             ]);
-
-            //     return [
-            //     'booking' => $bookings,
-            //     'pic' => $pic,
-            //     'members' => $otherMembers,
-            //     'isPic' => $isPic,
-            //     'isMember' => $isMember,
-            //     'canSubmit' => $canSubmit,
-            // ];
 
         } catch (Exception $e) {
             flash('error', $e->getMessage());
@@ -221,6 +261,37 @@ class AdminBookingController extends Controller
 
             flash('success', 'Tanggal berhasil di-unblock');
             back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function addMember(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $identifier = $request->all()['member_email'];
+
+            $this->bookingServices->addMemberByIdentifier($bookingId, $identifier);
+
+            flash('success', 'Anggota berhasil ditambahkan');
+            redirect('/admin/bookings/edit?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+    public function kickMember(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $memberId = (int) $request->all()['user_id'];
+
+            $this->bookingServices->kickMember($bookingId, $memberId, auth()->user()->id_user);
+
+            flash('success', 'Anggota berhasil dikeluarkan');
+            redirect('/admin/bookings/edit?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();

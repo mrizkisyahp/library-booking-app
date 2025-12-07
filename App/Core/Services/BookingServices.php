@@ -49,6 +49,110 @@ class BookingServices
         return $this->bookingRepo->getBlockedDates();
     }
 
+    public function getAllRooms(): array
+    {
+        return $this->bookingRepo->getAllRooms();
+    }
+
+    public function getAllUsers(): array
+    {
+        return $this->bookingRepo->getAllUsers();
+    }
+
+    public function adminCreateBooking(array $data, int $targetUserId): Booking
+    {
+        $user = $this->bookingRepo->findUserById($targetUserId);
+
+        if (!$user) {
+            throw new Exception('User tidak ditemukan');
+        }
+
+        $booking = new Booking();
+        $booking->user_id = $targetUserId;
+        $booking->ruangan_id = $data['ruangan_id'];
+        $booking->tanggal_booking = Carbon::now()->format('Y-m-d');
+        $booking->tanggal_penggunaan_ruang = $data['tanggal_penggunaan_ruang'];
+        $booking->waktu_mulai = $data['waktu_mulai'];
+        $booking->waktu_selesai = $data['waktu_selesai'];
+        $booking->tujuan = $data['tujuan'] ?? '';
+        $booking->status = 'verified';
+        $booking->checkin_code = $this->generateCheckinCode();
+        $booking->invite_token = bin2hex(random_bytes(16));
+
+        $booking->save();
+        $this->logger->info('Admin Created Booking', [
+            'booking_id' => $booking->id_booking,
+            'for_user' => $targetUserId,
+            'status' => $booking->status,
+        ]);
+        return $booking;
+    }
+
+    public function adminUpdateBooking(int $bookingId, array $data): Booking
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if (!in_array($booking->status, ['draft', 'pending', 'verified'])) {
+            throw new Exception('Booking dengan status ' . $booking->status . ' tidak dapat diedit');
+        }
+
+        // Update fields if provided
+        if (isset($data['ruangan_id'])) {
+            $booking->ruangan_id = $data['ruangan_id'];
+        }
+
+        if (isset($data['tanggal_penggunaan_ruang'])) {
+            $booking->tanggal_penggunaan_ruang = $data['tanggal_penggunaan_ruang'];
+        }
+
+        if (isset($data['waktu_mulai'])) {
+            $booking->waktu_mulai = $data['waktu_mulai'];
+        }
+
+        if (isset($data['waktu_selesai'])) {
+            $booking->waktu_selesai = $data['waktu_selesai'];
+        }
+
+        if (isset($data['tujuan'])) {
+            $booking->tujuan = $data['tujuan'];
+        }
+
+        if (isset($data['status'])) {
+            $booking->status = $data['status'];
+            if ($data['status'] === 'verified' && empty($booking->checkin_code)) {
+                $booking->checkin_code = $this->generateCheckinCode();
+            }
+        }
+
+        $booking->save();
+
+        $this->logger->info('Admin Updated Booking', [
+            'booking_id' => $bookingId,
+            'updated_fields' => array_keys($data),
+        ]);
+
+        return $booking;
+    }
+
+    public function deleteBooking(int $bookingId): void
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        // Hard delete
+        $this->bookingRepo->delete($bookingId);
+
+        $this->logger->info('Booking Deleted', [
+            'booking_id' => $bookingId,
+        ]);
+    }
+
     public function createDraft(array $data): Booking
     {
         $booking = new Booking();
@@ -211,11 +315,13 @@ class BookingServices
             throw new Exception("Booking tidak ditemukan");
         }
 
-        if ((int) $booking->user_id !== $requestingUserId) {
+        $isAdmin = auth()->user()->id_role === 1;
+
+        if (!$isAdmin && (int) $booking->user_id !== $requestingUserId) {
             throw new Exception('Hanya PIC yang dapat menambahkan anggota');
         }
 
-        if ($booking->status !== 'draft') {
+        if (!$isAdmin && $booking->status !== 'draft') {
             throw new Exception('Hanya booking dengan status draft yang bisa menambahkan anggota');
         }
 
@@ -248,6 +354,16 @@ class BookingServices
             'member_user_id' => $memberUserId,
             'added_by' => $requestingUserId,
         ]);
+    }
+
+    public function addMemberByIdentifier(int $bookingId, string $identifier): void
+    {
+        $user = $this->bookingRepo->findUserByIdentifier($identifier);
+        if (!$user) {
+            throw new Exception('User dengan email/NIM/NIP/nama tersebut tidak ditemukan');
+        }
+
+        $this->addMember($bookingId, $user->id_user, auth()->user()->id_user);
     }
 
     public function joinViaInviteToken(string $token, int $userId): int
@@ -295,35 +411,6 @@ class BookingServices
         return $booking->id_booking;
     }
 
-    public function removeMember(int $bookingId, int $memberUserId, int $requestingUserId): void
-    {
-        $booking = $this->bookingRepo->findById($bookingId);
-
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
-        }
-
-        if ((int) $booking->user_id !== $requestingUserId) {
-            throw new Exception('Hanya PIC yang dapat menghapus anggota');
-        }
-
-        if ($booking->status !== 'draft') {
-            throw new Exception('Tidak dapat menghapus anggota - booking sudah ' . $booking->status);
-        }
-
-        if (!$this->bookingRepo->isMemberOfBooking($bookingId, $memberUserId)) {
-            throw new Exception('User bukan anggota dari booking ini');
-        }
-
-        $this->bookingRepo->removeMember($bookingId, $memberUserId);
-
-        $this->logger->info('Member removed from booking', [
-            'booking_id' => $bookingId,
-            'member_user_id' => $memberUserId,
-            'removed_by' => $requestingUserId,
-        ]);
-    }
-
     public function leaveBooking(int $bookingId, int $userId): void
     {
         $booking = $this->bookingRepo->findById($bookingId);
@@ -357,7 +444,9 @@ class BookingServices
             throw new Exception('Booking tidak ditemukan');
         }
 
-        if ((int) $booking->user_id !== $picId) {
+        $isAdmin = auth()->user()->id_role === 1;
+
+        if (!$isAdmin && (int) $booking->user_id !== $picId) {
             throw new Exception('Hanya PIC yang dapat mengeluarkan anggota');
         }
 
@@ -365,7 +454,7 @@ class BookingServices
             throw new Exception('Tidak dapat mengeluarkan diri sendiri');
         }
 
-        if ($booking->status !== 'draft') {
+        if (!$isAdmin && $booking->status !== 'draft') {
             throw new Exception('Tidak dapat mengeluarkan anggota dari booking yang sudah berlangsung');
         }
 
@@ -374,6 +463,7 @@ class BookingServices
         }
 
         $this->bookingRepo->removeMember($bookingId, $memberId);
+
         $this->logger->info('Member kicked from booking', [
             'booking_id' => $bookingId,
             'kicked_user_id' => $memberId,

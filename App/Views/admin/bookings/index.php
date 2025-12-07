@@ -209,7 +209,7 @@ $statusOptions = [
                 </a>
                 <form action="/admin/bookings/delete" method="POST" class="inline">
                   <?= csrf_field() ?>
-                  <input type="hidden" name="id_booking" value="<?= (int) $booking->id_booking ?>">
+                  <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
                   <button type="submit"
                     class="inline-flex items-center px-4 py-2 bg-red-200 rounded-lg font-medium text-red-900 hover:bg-red-400 transition-colors cursor-pointer border-2 border-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-sm">
                     Hapus

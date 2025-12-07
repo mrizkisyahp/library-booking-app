@@ -237,24 +237,24 @@ $statusColors = [
 
     <!-- HELP OVER HERE -->
 
-    <img id="popUpImage" src="<?= !empty($picKubaca) ? $picKubaca : '' ?> " alt="Pop-up Image"
+    <img id="popUpImage" src="<?= !empty($pic['kubaca']) ? $pic['kubaca'] : '' ?> " alt="Pop-up Image"
       class="w-full h-64 object-cover rounded-md mb-4">
     <div class="flex items-center justify-start gap-4">
-      <p><?php if ($pic?->nim ?? $pic?->nip): ?>
+      <p><?php if ($pic['nim'] ?? $pic['nip']): ?>
           NIM:
         <?php else: ?>
           NIP:
         <?php endif; ?>
       </p>
       <p id="popUpId" class="text-sm font-semibold text-gray-600">
-        <?= htmlspecialchars($pic?->nim ?? $pic?->nip ?? '') ?>
+        <?= htmlspecialchars($pic['nim'] ?? $pic['nip'] ?? '') ?>
       </p>
     </div>
     <div class="flex items-center justify-start gap-4">
       <p>
         Nama:
       </p>
-      <p id="popUpNama" class="text-sm font-semibold text-gray-600 capitalize"><?= htmlspecialchars($picName) ?></p>
+      <p id="popUpNama" class="text-sm font-semibold text-gray-600 capitalize"><?= htmlspecialchars($pic['nama']) ?></p>
     </div>
     <button id="closePopUp"
       class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-800 w-full transition-all">

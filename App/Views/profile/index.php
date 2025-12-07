@@ -1,8 +1,3 @@
-<?php
-use App\Core\App;
-/** @var \App\Models\User $user */
-?>
-
 <div class="max-w-4xl mx-auto p-6">
     <!-- Header -->
     <div class="mb-8">
@@ -26,7 +21,7 @@ use App\Core\App;
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Role</label>
                     <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-sm font-semibold rounded-full">
-                        <?= htmlspecialchars($roleLabel ?? 'Unknown') ?>
+                        <?= htmlspecialchars($user->nama_role ?? 'Unknown') ?>
                     </span>
                 </div>
                 <?php if ($user->nim): ?>
@@ -58,7 +53,7 @@ use App\Core\App;
             </div>
         </div>
 
-        <?php if ($user->isMahasiswa()): ?>
+        <?php if ($user->role_name === 'mahasiswa'): ?>
             <?php if ($user->status === 'rejected'): ?>
                 <!-- Rejected state - Show upload form again -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -154,7 +149,7 @@ use App\Core\App;
                     </div>
                 </div>
             <?php endif; ?>
-        <?php elseif ($user->isDosen() && $user->status === 'active'): ?>
+        <?php elseif ($user->role_name === 'dosen' && $user->status === 'active'): ?>
             <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">

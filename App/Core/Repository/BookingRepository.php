@@ -7,6 +7,8 @@ use App\Models\Feedback;
 use App\Models\Booking;
 use App\Core\Database;
 use App\Core\Paginator;
+use App\Models\Room;
+use App\Models\User;
 
 class BookingRepository
 {
@@ -360,5 +362,31 @@ class BookingRepository
             ->join('ruangan r', 'b.ruangan_id', '=', 'r.id_ruangan')
             ->join('users u', 'b.user_id', '=', 'u.id_user')
             ->leftJoin('feedback f', 'b.id_booking', '=', 'f.booking_id');
+    }
+
+    public function delete(int $bookingId): bool
+    {
+        $qb = new QueryBuilder($this->database->pdo);
+        return $qb->table('booking')
+            ->where('id_booking', $bookingId)
+            ->delete();
+    }
+
+    public function getAllRooms(): array
+    {
+        return Room::Query()->whereIn('status_ruangan', ['available', 'adminOnly'])->get();
+    }
+    public function getAllUsers(): array
+    {
+        return User::Query()->where('status', 'active')->get();
+    }
+    public function findUserByIdentifier(string $identifier): ?object
+    {
+        return User::Query()
+            ->whereRaw(
+                "(email = ? OR nim = ? OR nip = ? OR nama = ?)",
+                [$identifier, $identifier, $identifier, $identifier]
+            )
+            ->first();
     }
 }

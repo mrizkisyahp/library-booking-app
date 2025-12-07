@@ -50,7 +50,6 @@ $app->router->get('/bookings/draft', [UserBookingController::class, 'showDraft']
 $app->router->post('/bookings/draft', [UserBookingController::class, 'createDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/submit', [UserBookingController::class, 'submitDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/member', [UserBookingController::class, 'addMember'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
-$app->router->post('/bookings/member/remove', [UserBookingController::class, 'removeMember'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/my-bookings', [UserBookingController::class, 'showMyBooking'], ['middleware' => [new AuthMiddleware()]]);
@@ -82,6 +81,8 @@ $app->router->post('/admin/bookings/noshow', [AdminBookingController::class, 'no
 $app->router->get('/admin/blocked-dates', [AdminBookingController::class, 'blockedDates'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->post('/admin/blocked-dates', [AdminBookingController::class, 'blockDate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/blocked-dates/delete', [AdminBookingController::class, 'unblockDate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/bookings/add', [AdminBookingController::class, 'addMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/bookings/kick', [AdminBookingController::class, 'kickMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin users
 $app->router->get('/admin/users', [AdminUserController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
