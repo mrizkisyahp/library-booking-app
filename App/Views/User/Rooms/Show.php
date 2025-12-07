@@ -95,7 +95,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Kalender Ketersediaan (5 Hari Ke Depan)
+        Kalender Ketersediaan (7 Hari Ke Depan, excluding weekend);
       </h3>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -241,19 +241,19 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Penggunaan</label>
-            <input type="date" name="tanggal_penggunaan_ruang" required
+            <input type="date" name="tanggal_penggunaan_ruang" value="<?= old('tanggal_penggunaan_ruang') ?>" required
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Mulai</label>
-            <input type="time" name="waktu_mulai" required
+            <input type="time" name="waktu_mulai" value="<?= old('waktu_mulai') ?>" required
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Selesai</label>
-            <input type="time" name="waktu_selesai" required
+            <input type="time" name="waktu_selesai" value="<?= old('waktu_selesai') ?>" required
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
           </div>
         </div>
@@ -277,7 +277,7 @@
             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
             <option value="" disabled selected>Pilih tujuan penggunaan</option>
             <?php foreach ($tujuanMahasiswa as $tujuan): ?>
-              <option value="<?= htmlspecialchars($tujuan) ?>">
+              <option value="<?= htmlspecialchars($tujuan) ?>" <?= old('tujuan') == $tujuan ? 'selected' : '' ?>>
                 <?= htmlspecialchars($tujuan) ?>
               </option>
             <?php endforeach; ?>

@@ -16,6 +16,8 @@ class Room extends DbModel
     public string $status_ruangan = 'available';
     public ?string $created_at = null;
     public ?string $updated_at = null;
+    public ?string $deleted_at = null;
+    public ?bool $requires_special_approval = false;
 
     public static function tableName(): string
     {
@@ -39,6 +41,8 @@ class Room extends DbModel
             'status_ruangan',
             'created_at',
             'updated_at',
+            'deleted_at',
+            'requires_special_approval',
         ];
     }
 
@@ -54,13 +58,7 @@ class Room extends DbModel
 
     public function rules(): array
     {
-        return [
-            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3], [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_ruangan]],
-            'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
-            'kapasitas_max' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
-            'jenis_ruangan' => [self::RULE_REQUIRED],
-            'deskripsi_ruangan' => [self::RULE_REQUIRED],
-        ];
+        return [];
     }
 
 

@@ -9,6 +9,9 @@ class Suspensi extends DbModel
     public ?int $id_suspensi = null;
     public ?int $id_akun = null;
     public string $tgl_suspensi = '';
+    public ?string $created_at = null;
+    public ?string $updated_at = null;
+    public ?string $deleted_at = null;
 
     public static function tableName(): string
     {
@@ -23,6 +26,7 @@ class Suspensi extends DbModel
     public function attributes(): array
     {
         return [
+            'id_suspensi',
             'id_akun',
             'tgl_suspensi',
             'created_at',
@@ -38,9 +42,6 @@ class Suspensi extends DbModel
 
     public function rules(): array
     {
-        return [
-            'id_akun' => [self::RULE_REQUIRED],
-            'tgl_suspensi' => [self::RULE_REQUIRED],
-        ];
+        return [];
     }
 }

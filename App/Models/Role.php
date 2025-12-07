@@ -10,6 +10,9 @@ class Role extends DbModel
 
     public $id_role;
     public $nama_role;
+    public ?string $created_at = null;
+    public ?string $updated_at = null;
+    public ?string $deleted_at = null;
 
     public static function primaryKey(): string
     {
@@ -23,10 +26,7 @@ class Role extends DbModel
 
     public function rules(): array
     {
-        return [
-            'id_role' => ['required', 'integer'],
-            'nama_role' => ['required', 'string', 'max:255'],
-        ];
+        return [];
     }
 
     public function attributes(): array
@@ -34,6 +34,9 @@ class Role extends DbModel
         return [
             'id_role',
             'nama_role',
+            'created_at',
+            'updated_at',
+            'deleted_at',
         ];
     }
 

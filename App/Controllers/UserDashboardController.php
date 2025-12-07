@@ -14,8 +14,17 @@ class UserDashboardController extends Controller
     }
     public function index(Request $request)
     {
+        // dd("Hello");
         $data = $this->dashboardService->getUserDashboardData(user()->id_user);
 
-        return $this->render('User/UserDashboard', $data);
+        $bookings = $data['bookings'];
+        $user = $data['user'];
+        $feedbacks = $data['pendingFeedbacks'];
+
+        return view('User/UserDashboard', [
+            'bookings' => $bookings,
+            'user' => $user,
+            'feedbacks' => $feedbacks,
+        ]);
     }
 }

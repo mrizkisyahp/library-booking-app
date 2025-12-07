@@ -118,17 +118,24 @@ class RoomRepository
             ->update(['status_ruangan' => 'unavailable']);
     }
 
-    public function getAvailability(int $roomId, int $days = 5): array
+    public function getAvailability(int $roomId, int $days = 7): array
     {
         $startDate = new \DateTime();
-        $endDate = new \DateTime('+21 days');
+        $endDate = new \DateTime();
+        $addedDays = 0;
+        while ($addedDays < $days) {
+            $endDate->modify('+1 day');
+            if ((int) $endDate->format('N') < 6) { // Mon–Fri
+                $addedDays++;
+            }
+        }
 
         $bookings = Booking::query()
             ->where('ruangan_id', $roomId)
-            ->where('tanggal_booking', '>=', $startDate->format('Y-m-d'))
-            ->where('tanggal_booking', '<=', $endDate->format('Y-m-d'))
-            ->whereNotIn('status', ['draft', 'cancelled', 'no_show'])
-            ->orderBy('tanggal_booking', 'ASC')
+            ->where('tanggal_penggunaan_ruang', '>=', $startDate->format('Y-m-d'))
+            ->where('tanggal_penggunaan_ruang', '<=', $endDate->format('Y-m-d'))
+            ->whereIn('status', ['verified', 'active'])
+            ->orderBy('tanggal_penggunaan_ruang', 'ASC')
             ->orderBy('waktu_mulai', 'ASC')
             ->get();
 
@@ -158,11 +165,11 @@ class RoomRepository
         }
 
         foreach ($bookings as $booking) {
-            if (isset($calendar[$booking->tanggal_booking])) {
-                $calendar[$booking->tanggal_booking]['bookings'][] = [
+            if (isset($calendar[$booking->tanggal_penggunaan_ruang])) {
+                $calendar[$booking->tanggal_penggunaan_ruang]['bookings'][] = [
                     'waktu_mulai' => $booking->waktu_mulai,
                     'waktu_selesai' => $booking->waktu_selesai,
-                    'status_booking' => $booking->status_booking,
+                    'status_booking' => $booking->status,
                 ];
             }
         }

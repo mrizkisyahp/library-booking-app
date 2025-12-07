@@ -4,12 +4,35 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
+use App\Core\Services\BookingServices;
+use Exception;
 
 class AdminBookingController extends Controller
 {
+    public function __construct(
+        private BookingServices $bookingServices
+    ) {
+    }
+
     public function index(Request $request)
     {
-        return $this->render('WorkInProgress');
+        $filters = $request->query();
+        $page = (int) ($filters['page'] ?? 1);
+        $keyword = $request->input('keyword') ?? '';
+        $status = $request->input('status') ?? '';
+
+        $filters = [
+            'keyword' => $keyword,
+            'status' => $status,
+        ];
+
+        $paginatedBookings = $this->bookingServices->getAllBookings($filters, 15, $page);
+
+        return view('Admin/Bookings/Index', [
+            'bookings' => $paginatedBookings->items,
+            'pagination' => $paginatedBookings,
+            'filters' => $filters,
+        ]);
     }
 
     public function create(Request $request)
@@ -42,30 +65,165 @@ class AdminBookingController extends Controller
 
     public function detail(Request $request)
     {
-        return $this->render('WorkInProgress');
+        try {
+            $bookingId = (int) $request->query()['id'];
+            $data = $this->bookingServices->getBookingForUser($bookingId, 0, true); // admin = true
+
+            return view('Admin/Bookings/Detail', [
+                'bookings' => $data['booking'],
+                'pic' => $data['pic'],
+                'members' => $data['members'],
+                'allMembers' => $data['allMembers'],
+            ]);
+
+            //     return [
+            //     'booking' => $bookings,
+            //     'pic' => $pic,
+            //     'members' => $otherMembers,
+            //     'isPic' => $isPic,
+            //     'isMember' => $isMember,
+            //     'canSubmit' => $canSubmit,
+            // ];
+
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/bookings');
+        }
     }
 
     public function verify(Request $request)
     {
-        flash('info', 'Work in progress');
-        back();
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $this->bookingServices->approveBooking($bookingId);
+
+            flash('success', 'Booking berhasil diverifikasi');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function reject(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
+
+            $this->bookingServices->rejectBooking($bookingId, $reason);
+
+            flash('success', 'Booking berhasil ditolak');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 
     public function complete(Request $request)
     {
-        flash('info', 'Work in progress');
-        back();
-    }
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
 
+            $this->bookingServices->completeBooking($bookingId);
+
+            flash('success', 'Booking berhasil diselesaikan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
     public function activate(Request $request)
     {
-        flash('info', 'Work in progress');
-        back();
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $checkinCode = $request->all()['checkin_code'] ?? '';
+
+            $this->bookingServices->activateBooking($bookingId, $checkinCode);
+
+            flash('success', 'Booking berhasil diaktifkan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 
     public function cancel(Request $request)
     {
-        flash('info', 'Work in progress');
-        back();
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $reason = $request->all()['reason'] ?? 'Dibatalkan oleh admin';
+
+            $this->bookingServices->cancelBooking($bookingId, $user->id_user, $reason);
+
+            flash('success', 'Booking berhasil dibatalkan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function noshow(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->handleNoShow($bookingId);
+
+            flash('success', 'Booking ditandai sebagai no-show');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function blockedDates(Request $request)
+    {
+        $blockedDates = $this->bookingServices->getBlockedDates();
+
+        return view('Admin/Bookings/BlockedDates', [
+            'blockedDates' => $blockedDates,
+        ]);
+    }
+
+    public function blockDate(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->all();
+            $this->bookingServices->blockDateRange(
+                $data['tanggal_begin'],
+                $data['tanggal_end'],
+                $data['ruangan_id'] ?? null,
+                $data['alasan'] ?? 'Diblokir oleh admin',
+                $user->id_user
+            );
+
+            flash('success', 'Tanggal berhasil diblokir');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function unblockDate(Request $request)
+    {
+        try {
+            $blockedDateId = (int) $request->all()['blocked_date_id'];
+            $this->bookingServices->unblockDate($blockedDateId);
+
+            flash('success', 'Tanggal berhasil di-unblock');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 }

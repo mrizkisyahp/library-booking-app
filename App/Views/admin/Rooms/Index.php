@@ -322,35 +322,61 @@ $statusColors = [
 </div>
 
 <!-- Pagination -->
-<div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
-  <div class="flex items-center justify-between">
+<?php
+$paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
+?>
+<div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
     <p class="text-sm text-slate-600">
-      Showing <span class="font-semibold"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
-      to <span
-        class="font-semibold"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
-      of <span class="font-semibold"><?= $pagination->total ?></span> results
+      Menampilkan <span
+        class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+      sampai <span
+        class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+      dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> booking
     </p>
-
-    <div class="flex gap-2">
+    <div class="flex gap-2 items-center">
+      <!-- First Page -->
       <?php if ($pagination->currentPage > 1): ?>
-        <a href="/admin/rooms?page=<?= $pagination->currentPage - 1 ?>"
-          class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-          Previous
+        <?php $paginationQuery['page'] = 1; ?>
+        <a href="/admin/rooms?<?= http_build_query($paginationQuery) ?>"
+          class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          Awal
         </a>
       <?php endif; ?>
-
-      <?php for ($i = 1; $i <= ceil($pagination->total / $pagination->perPage); $i++): ?>
-        <a href="/admin/rooms?page=<?= $i ?>"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 text-white
-                  <?= $i === $pagination->currentPage ? 'bg-emerald-600 hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
-          <?= $i ?>
+      <!-- Previous -->
+      <?php if ($pagination->currentPage > 1): ?>
+        <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+        <a href="/admin/rooms?<?= http_build_query($paginationQuery) ?>"
+          class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          ← Sebelumnya
         </a>
-      <?php endfor; ?>
-
-      <?php if ($pagination->currentPage < ceil($pagination->total / $pagination->perPage)): ?>
-        <a href="/admin/rooms?page=<?= $pagination->currentPage + 1 ?>"
-          class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-          Next
+      <?php endif; ?>
+      <!-- Page Numbers -->
+      <div class="flex gap-1">
+        <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+          <?php $paginationQuery['page'] = $i; ?>
+          <a href="/admin/rooms?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                <?= $i === $pagination->currentPage
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+            <?= $i ?>
+          </a>
+        <?php endfor; ?>
+      </div>
+      <!-- Next -->
+      <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+        <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+        <a href="/admin/rooms?<?= http_build_query($paginationQuery) ?>"
+          class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          Selanjutnya →
+        </a>
+      <?php endif; ?>
+      <!-- Last Page -->
+      <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+        <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+        <a href="/admin/rooms?<?= http_build_query($paginationQuery) ?>"
+          class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          Akhir
         </a>
       <?php endif; ?>
     </div>

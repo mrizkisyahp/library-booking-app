@@ -1,18 +1,3 @@
-<?php
-
-use App\Core\App;
-use App\Models\Booking;
-use App\Core\Csrf;
-use App\Models\User;
-
-$currentUser = App::$app->user instanceof User ? App::$app->user : null;
-$isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_id;
-
-/** @var Booking $booking */
-
-
-?>
-
 <div class="max-w-5xl mx-auto">
   <!-- Back Button -->
   <div class="mb-6">
@@ -64,7 +49,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
             </svg>
             <div>
               <p class="text-sm font-semibold text-slate-600">Ruangan</p>
-              <p class="text-lg font-bold text-slate-800">Ruangan #<?= htmlspecialchars($booking->ruangan_id) ?></p>
+              <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($booking->nama_ruangan) ?></p>
             </div>
           </div>
 
@@ -108,15 +93,15 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
             Daftar Anggota
           </h3>
           <div class="text-sm font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">
-            <?= (int) $currentMembers ?> /
-            <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-            <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-              · Min <?= (int) $requiredMembers ?>
+            <?= (int) $booking->current_members ?> /
+            <?= $booking->maximum_members > 0 ? (int) $booking->maximum_members : '∞' ?> peserta
+            <?php if ($booking->required_members > 0): ?>
+              · Min <?= (int) $booking->required_members ?>
             <?php endif; ?>
           </div>
         </div>
 
-        <?php if (isset($maximumMembers) && $maximumMembers > 0 && $currentMembers >= $maximumMembers): ?>
+        <?php if ($booking->current_members >= $booking->maximum_members): ?>
           <div class="mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
             <div class="flex items-start">
               <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
@@ -134,8 +119,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
           </div>
         <?php endif; ?>
 
-        <?php $members = $booking->getMembers(); ?>
-        <?php if (empty($members)): ?>
+        <?php if (empty($allMembers)): ?>
           <div class="text-center py-8">
             <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -145,7 +129,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
           </div>
         <?php else: ?>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            <?php foreach ($members as $member): ?>
+            <?php foreach ($allMembers as $member): ?>
               <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                 <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                   <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,12 +150,27 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                     </span>
                   <?php endif; ?>
                 </div>
+                <!-- Kick Button (PIC only, not for owner) -->
+                <?php if ($isPic && empty($member['is_owner'])): ?>
+                  <form action="/bookings/kick" method="post" class="ml-2"
+                    onsubmit="return confirm('Keluarkan anggota ini?');">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                    <input type="hidden" name="user_id" value="<?= (int) $member['id_user'] ?>">
+                    <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Keluarkan">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </form>
+                <?php endif; ?>
               </div>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
 
-        <?php if ($isOwner): ?>
+        <?php if ($isPic): ?>
           <!-- Add Member Form -->
           <form action="/bookings/member" method="post" class="border-t pt-6">
             <?= csrf_field() ?>
@@ -202,7 +201,8 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
                 <div class="ml-3">
                   <p class="text-sm font-semibold text-yellow-800">Anggota Belum Mencukupi</p>
                   <p class="text-sm text-yellow-700 mt-1">
-                    Minimal <?= (int) $requiredMembers ?> anggota diperlukan. Saat ini: <?= (int) $currentMembers ?>
+                    Minimal <?= (int) $booking->required_members ?> anggota diperlukan. Saat ini:
+                    <?= (int) $booking->current_members ?>
                     anggota.
                   </p>
                 </div>
@@ -213,7 +213,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
       </div>
 
       <!-- Submit Form -->
-      <?php if ($isOwner): ?>
+      <?php if ($isPic): ?>
         <div class="bg-white rounded-2xl shadow-lg p-8">
           <form action="/bookings/submit" method="post">
             <?= csrf_field() ?>
@@ -230,12 +230,45 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
           </form>
         </div>
       <?php endif; ?>
+
+      <!-- Cancel/Leave Booking Actions -->
+      <div class="bg-white rounded-2xl shadow-lg p-8">
+        <?php if ($isPic): ?>
+          <!-- Cancel Booking (PIC only) -->
+          <form action="/bookings/cancel" method="post"
+            onsubmit="return confirm('Yakin ingin membatalkan booking ini? Semua anggota akan dikeluarkan.');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+            <button type="submit"
+              class="w-full bg-red-500 text-white px-8 py-4 rounded-xl hover:bg-red-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Batalkan Booking
+            </button>
+          </form>
+        <?php elseif ($isMember): ?>
+          <!-- Leave Booking (Member only) -->
+          <form action="/bookings/leave" method="post" onsubmit="return confirm('Yakin ingin keluar dari booking ini?');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+            <button type="submit"
+              class="w-full bg-gray-500 text-white px-8 py-4 rounded-xl hover:bg-gray-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Keluar dari Booking
+            </button>
+          </form>
+        <?php endif; ?>
+      </div>
     </div>
 
     <!-- Sidebar -->
     <div class="space-y-6">
       <!-- Invite Link Card -->
-      <?php if (!empty($booking->invite_token)): ?>
+      <?php if (!empty($booking->invite_token) && $isPic): ?>
         <div
           class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl shadow-lg p-6 border-2 border-emerald-200">
           <h3 class="font-bold text-emerald-800 mb-3 flex items-center">
@@ -276,7 +309,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
           <li class="flex items-start">
             <span
               class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 font-semibold text-xs flex items-center justify-center mr-2">1</span>
-            <span>Tambahkan anggota minimal <?= (int) $requiredMembers ?> orang</span>
+            <span>Tambahkan anggota minimal <?= (int) $booking->required_members ?> orang</span>
           </li>
           <li class="flex items-start">
             <span

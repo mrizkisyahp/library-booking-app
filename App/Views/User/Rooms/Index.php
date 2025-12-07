@@ -1,18 +1,3 @@
-<?php
-
-$roomTypes = [
-  'Audio Visual',
-  'Telekonferensi',
-  'Kreasi dan Rekreasi',
-  'Baca Kelompok',
-  'Koleksi Bahasa Prancis',
-  'Bimbingan & Konseling',
-  'Ruang Rapat',
-];
-
-?>
-
-
 <div class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
   <div class="max-w-7xl mx-auto px-6 py-12">
     <!-- Header -->

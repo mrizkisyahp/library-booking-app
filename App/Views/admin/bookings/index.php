@@ -1,11 +1,5 @@
 <?php
 
-use App\Core\App;
-use App\Models\Booking;
-use App\Core\Csrf;
-/** @var Booking[] $bookings */
-
-// Status badge colors
 $statusColors = [
   'draft' => 'bg-gray-100 text-gray-800 border border-gray-300',
   'pending' => 'bg-yellow-100 text-yellow-800 border border-yellow-300',
@@ -15,6 +9,17 @@ $statusColors = [
   'cancelled' => 'bg-red-100 text-red-800 border border-red-300',
   'expired' => 'bg-gray-100 text-gray-600 border-gray-300',
   'no_show' => 'bg-orange-100 text-orange-800 border border-orange-300'
+];
+
+$statusOptions = [
+  'draft' => 'Draft',
+  'pending' => 'Pending',
+  'verified' => 'Verified',
+  'active' => 'Active',
+  'completed' => 'Completed',
+  'cancelled' => 'Cancelled',
+  'expired' => 'Expired',
+  'no_show' => 'No Show'
 ];
 ?>
 
@@ -87,7 +92,7 @@ $statusColors = [
           <div class="relative">
             <button id="dropdownButton" type="button" data-dropdown-toggle="dropdown"
               class="flex items-center justify-center gap-4 bg-primary text-white box-border border border-transparent shadow font-medium leading-5 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition">
-              <span class="capitalize"><?= htmlspecialchars($filters['status'] ?? 'Semua') ?></span>
+              <span class="capitalize"><?= htmlspecialchars($filters['status'] ?: 'Semua') ?></span>
               <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-chevron-down-icon lucide-chevron-down mt-0.5">
@@ -220,36 +225,65 @@ $statusColors = [
 </div>
 
 <!-- Pagination -->
-<div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
-  <div class="flex items-center justify-between">
-    <p class="text-sm text-slate-600">
-      Showing <span class="font-semibold"><?= (($currentPage - 1) * $perPage) + 1 ?></span>
-      to <span class="font-semibold"><?= min($currentPage * $perPage, $totalBookings) ?></span>
-      of <span class="font-semibold"><?= $totalBookings ?></span> results
-    </p>
-
-    <div class="flex gap-2">
-      <?php if ($currentPage > 1): ?>
-        <a href="/admin/bookings?page=<?= $currentPage - 1 ?>"
-          class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-          Previous
-        </a>
-      <?php endif; ?>
-
-      <?php for ($i = 1; $i <= ceil($totalBookings / $perPage); $i++): ?>
-        <a href="/admin/bookings?page=<?= $i ?>"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 text-white
-                  <?= $i === $currentPage ? 'bg-emerald-600 hover:bg-emerald-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100' ?>">
-          <?= $i ?>
-        </a>
-      <?php endfor; ?>
-
-      <?php if ($currentPage < ceil($totalBookings / $perPage)): ?>
-        <a href="/admin/bookings?page=<?= $currentPage + 1 ?>"
-          class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-          Next
-        </a>
-      <?php endif; ?>
+<?php if ($pagination->total > 0): ?>
+  <?php
+  $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
+  ?>
+  <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-slate-600">
+        Menampilkan <span
+          class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+        sampai <span
+          class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+        dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> booking
+      </p>
+      <div class="flex gap-2 items-center">
+        <!-- First Page -->
+        <?php if ($pagination->currentPage > 1): ?>
+          <?php $paginationQuery['page'] = 1; ?>
+          <a href="/admin/bookings?<?= http_build_query($paginationQuery) ?>"
+            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+            Awal
+          </a>
+        <?php endif; ?>
+        <!-- Previous -->
+        <?php if ($pagination->currentPage > 1): ?>
+          <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+          <a href="/admin/bookings?<?= http_build_query($paginationQuery) ?>"
+            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+            ← Sebelumnya
+          </a>
+        <?php endif; ?>
+        <!-- Page Numbers -->
+        <div class="flex gap-1">
+          <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+            <?php $paginationQuery['page'] = $i; ?>
+            <a href="/admin/bookings?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                <?= $i === $pagination->currentPage
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+              <?= $i ?>
+            </a>
+          <?php endfor; ?>
+        </div>
+        <!-- Next -->
+        <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+          <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+          <a href="/admin/bookings?<?= http_build_query($paginationQuery) ?>"
+            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+            Selanjutnya →
+          </a>
+        <?php endif; ?>
+        <!-- Last Page -->
+        <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+          <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+          <a href="/admin/bookings?<?= http_build_query($paginationQuery) ?>"
+            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+            Akhir
+          </a>
+        <?php endif; ?>
+      </div>
     </div>
   </div>
-</div>
+<?php endif; ?>

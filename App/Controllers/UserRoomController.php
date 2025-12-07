@@ -30,12 +30,23 @@ class UserRoomController extends Controller
             'kapasitas_max' => $kapasitasmax,
         ];
 
+        $roomTypes = [
+            'Audio Visual',
+            'Telekonferensi',
+            'Kreasi dan Rekreasi',
+            'Baca Kelompok',
+            'Koleksi Bahasa Prancis',
+            'Bimbingan & Konseling',
+            'Ruang Rapat',
+        ];
+
         $paginatedRooms = $this->roomService->getAllRooms($filters, 15, $page);
 
         return view('User/Rooms/Index', [
             'rooms' => $paginatedRooms->items,
             'pagination' => $paginatedRooms,
             'filters' => $filters,
+            'roomTypes' => $roomTypes,
         ]);
     }
 
@@ -49,7 +60,6 @@ class UserRoomController extends Controller
             redirect('/rooms');
         }
 
-        // Prevent users from viewing adminOnly rooms
         if ($room->status_ruangan === 'adminOnly' || $room->status_ruangan === 'unavailable') {
             flash('error', 'Ruangan tidak tersedia');
             redirect('/rooms');

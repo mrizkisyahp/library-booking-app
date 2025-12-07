@@ -1,3 +1,6 @@
+<?php
+?>
+
 <!-- Welcome Header -->
 <div class="rounded-2xl p-4 mb-6">
   <div class="flex items-center justify-between mt-6 px-6 mb-4">
@@ -17,7 +20,7 @@
   </div>
 
   <!-- Pending Feedback Warning -->
-  <?php if (!empty($pendingFeedbacks ?? [])): ?>
+  <?php if (!empty($feedbacks ?? [])): ?>
     <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-5 shadow-md">
       <div class="flex items-start">
         <svg class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,14 +32,14 @@
           <p class="text-yellow-700 mb-3">Anda memiliki booking yang sudah selesai namun belum mengisi feedback. Harap
             lengkapi feedback sebelum membuat booking baru.</p>
           <ul class="space-y-2">
-            <?php foreach ($pendingFeedbacks as $pending): ?>
+            <?php foreach ($feedbacks as $feedback): ?>
               <li class="flex items-center justify-between bg-yellow-100 px-4 py-2 rounded-lg">
                 <span class="text-yellow-800 text-sm">
-                  <strong><?= htmlspecialchars($pending->nama_ruangan) ?></strong> –
-                  <?= htmlspecialchars($pending->tanggal_penggunaan_ruang) ?>
-                  <?= htmlspecialchars($pending->waktu_mulai) ?>
+                  <strong><?= htmlspecialchars($feedback->nama_ruangan) ?></strong>
+                  <?= htmlspecialchars($feedback->tanggal_penggunaan_ruang) ?>
+                  <?= htmlspecialchars($feedback->waktu_mulai) ?>
                 </span>
-                <a href="/feedback/create?booking=<?= (int) $pending->id_booking ?>"
+                <a href="/feedback/create?booking=<?= (int) $feedback->id_booking ?>"
                   class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm underline">
                   Isi Feedback
                 </a>
@@ -143,7 +146,7 @@
               <div class="rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
                 <div class="flex flex-col justify-start p-6">
                   <p class="font-bold text-2xl mb-2">
-                    <?= htmlspecialchars($booking->nama_ruangan ?? ('#' . $booking->ruangan_id)) ?>
+                    <?= htmlspecialchars($booking->nama_ruangan) ?>
                   </p>
                   <p class="mb-2">
                     <?= htmlspecialchars($booking->jenis_ruangan) ?>
@@ -230,14 +233,11 @@
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                       </svg>
-                      <!-- <?= (int) $currentMembers ?> /
-                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                      · Min <?= (int) $requiredMembers ?>
-                    <?php endif; ?> -->
-                      <?= $booking->current_members ?> /
-                      <?= $booking->maximum_members ?> PESERTA . Min
-                      <?= $booking->required_members ?>
+                      <?= (int) $booking->current_members ?> /
+                      <?= $booking->maximum_members > 0 ? (int) $booking->maximum_members : '∞' ?> peserta
+                      <?php if ($booking->required_members > 0): ?>
+                        · Min <?= (int) $booking->required_members ?>
+                      <?php endif; ?>
                     </p>
 
                     <div class="w-full">
@@ -245,7 +245,7 @@
                         class="inline-block bg-emerald-600 hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                         Lihat Detail
                       </a>
-                      <?php if ($booking->role === 'PIC' && $statusKey === 'completed' && empty($booking->feedback_submitted)): ?>
+                      <?php if ((int) $booking->user_id === user()->id_user && $booking->status === 'completed' && empty($booking->id_feedback)): ?>
                         <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                           class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                           Isi Feedback

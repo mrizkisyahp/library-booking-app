@@ -36,6 +36,7 @@ class User extends DbModel
     public ?string $password_reset_expires = null;
     public ?string $created_at = null;
     public ?string $updated_at = null;
+    public ?string $deleted_at = null;
     public string $identifier = '';
     public string $scenario = self::SCENARIO_REGISTER;
 
@@ -78,21 +79,24 @@ class User extends DbModel
     {
         return [
             'id_user',
+            'id_role',
             'nama',
             'nim',
             'nip',
             'email',
             'password',
-            'id_role',
             'kubaca_img',
             'peringatan',
             'status',
             'jurusan',
             'nomor_hp',
+            'suspensi_terakhir',
+            'masa_aktif',
             'password_reset_token',
             'password_reset_expires',
             'created_at',
             'updated_at',
+            'deleted_at',
         ];
     }
 

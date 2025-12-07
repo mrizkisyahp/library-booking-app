@@ -180,15 +180,15 @@ $users = $resourceStats['users'];
             </thead>
             <tbody class="divide-y divide-gray-200">
               <?php
-              $totalBookingsRoom = array_sum(array_map(fn($usage) => $usage['booking_count'], $roomUsage));
+              $totalBookingsRoom = array_sum(array_map(fn($usage) => $usage['usage_count'], $roomUsage));
               foreach ($roomUsage as $usage):
-                $usagePercentage = $totalBookingsRoom > 0 ? round(($usage['booking_count'] / $totalBookingsRoom) * 100, 2) : 0;
+                $usagePercentage = $totalBookingsRoom > 0 ? round(($usage['usage_count'] / $totalBookingsRoom) * 100, 2) : 0;
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                     <?= htmlspecialchars($usage['nama_ruangan']) ?>
                   </td>
-                  <td class="px-6 py-4 text-gray-700"><?= $usage['booking_count'] ?></td>
+                  <td class="px-6 py-4 text-gray-700"><?= $usage['usage_count'] ?></td>
                   <td class="px-6 py-4 text-gray-900">
                     <div class="flex items-center">
                       <span class="font-semibold"><?= $usagePercentage ?>%</span>

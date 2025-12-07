@@ -1,25 +1,8 @@
 <?php
-
-use App\Core\Csrf;
-use App\Models\Booking;
-use App\Models\Room;
-use App\Models\User;
-
-/** @var Booking $booking */
-/** @var Room|null $room */
-/** @var User|null $pic */
-$members = $members ?? [];
-
 $statusColors = [
   'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
   'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
 ];
-
-$roomName = $room?->nama_ruangan ?? ('Ruangan #' . htmlspecialchars((string) $booking->ruangan_id));
-$picName = $pic?->nama ?? 'Pengguna #' . htmlspecialchars((string) $booking->user_id);
-$picContact = $pic?->email ?? '-';
-$picKubaca = $pic?->kubaca_img ?? null;
-$picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
 ?>
 
 <div class="max-w-5xl mx-auto space-y-6">
@@ -38,11 +21,11 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
     <div class="flex items-center justify-between mb-2">
       <div>
         <p class="text-sm text-slate-500 uppercase">Detail Booking</p>
-        <h1 class="text-3xl font-bold text-slate-800">#<?= htmlspecialchars((string) $booking->id_booking) ?></h1>
+        <h1 class="text-3xl font-bold text-slate-800"><?= htmlspecialchars($bookings->nama_ruangan) ?></h1>
       </div>
       <span
-        class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border <?= $statusColors[$booking->status] ?? 'bg-slate-100 text-slate-700 border-slate-200' ?>">
-        <?= htmlspecialchars(ucfirst($booking->status)) ?>
+        class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border <?= $statusColors[$bookings->status] ?? 'bg-slate-100 text-slate-700 border-slate-200' ?>">
+        <?= htmlspecialchars(ucfirst($bookings->status)) ?>
       </span>
     </div>
     <p class="text-slate-600">Periksa detail booking sebelum melakukan verifikasi.</p>
@@ -62,27 +45,25 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
         <div class="space-y-4">
           <div class="p-4 bg-slate-50 rounded-xl">
             <p class="text-xs font-semibold text-slate-500 uppercase">Ruangan</p>
-            <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($roomName) ?></p>
-            <?php if ($room): ?>
-              <p class="text-sm text-slate-600">Kapasitas: <?= htmlspecialchars((string) $room->kapasitas_min) ?> -
-                <?= htmlspecialchars((string) $room->kapasitas_max) ?> orang
-              </p>
-            <?php endif; ?>
+            <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($bookings->nama_ruangan) ?></p>
+            <p class="text-sm text-slate-600">Kapasitas: <?= htmlspecialchars($bookings->required_members) ?> -
+              <?= htmlspecialchars($bookings->maximum_members) ?> orang
+            </p>
           </div>
 
           <div class="p-4 bg-slate-50 rounded-xl">
             <p class="text-xs font-semibold text-slate-500 uppercase">PIC</p>
-            <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($picName) ?></p>
-            <p class="text-sm text-slate-600"><?= htmlspecialchars($picContact) ?></p>
+            <p class="text-lg font-bold text-slate-800"><?= htmlspecialchars($pic['nama']) ?></p>
+            <p class="text-sm text-slate-600"><?= htmlspecialchars($pic['email']) ?></p>
             <div class="mt-2 flex items-center gap-3">
-              <p class="text-xs text-slate-500 uppercase"><?= $pic?->nim ? 'NIM' : 'NIP' ?>:</p>
-              <p class="text-sm font-semibold text-slate-700"><?= htmlspecialchars($picIdNumber) ?></p>
-              <?php if ($picKubaca): ?>
+              <p class="text-xs text-slate-500 uppercase"><?= $pic['nim'] ? 'NIM' : 'NIP' ?>:</p>
+              <p class="text-sm font-semibold text-slate-700"><?= htmlspecialchars($pic['nim'] ?? $pic['nip']) ?></p>
+              <?php if ($pic['kubaca_img']): ?>
                 <button
                   class="view-button text-emerald-600 hover:text-emerald-700 text-sm font-semibold flex items-center"
-                  data-img="uploads/kubaca/<?= htmlspecialchars($picKubaca) ?>"
-                  data-nim="<?= htmlspecialchars($pic?->nim ?? $pic?->nip ?? '') ?>"
-                  data-nama="<?= htmlspecialchars($picName) ?>">
+                  data-img="uploads/kubaca/<?= htmlspecialchars($pic['kubaca_img']) ?>"
+                  data-nim="<?= htmlspecialchars($pic['nim'] ?? $pic['nip']) ?>"
+                  data-nama="<?= htmlspecialchars($pic['nama']) ?>">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -101,21 +82,21 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
             <div class="p-4 bg-slate-50 rounded-xl">
               <p class="text-xs font-semibold text-slate-500 uppercase">Tanggal Penggunaan</p>
               <p class="text-lg font-bold text-slate-800">
-                <?= date('l, d F Y', strtotime($booking->tanggal_penggunaan_ruang)) ?>
+                <?= date('l, d F Y', strtotime($bookings->tanggal_penggunaan_ruang)) ?>
               </p>
             </div>
             <div class="p-4 bg-slate-50 rounded-xl">
               <p class="text-xs font-semibold text-slate-500 uppercase">Waktu</p>
               <p class="text-lg font-bold text-slate-800">
-                <?= htmlspecialchars(substr($booking->waktu_mulai, 0, 5)) ?> -
-                <?= htmlspecialchars(substr($booking->waktu_selesai, 0, 5)) ?>
+                <?= htmlspecialchars(substr($bookings->waktu_mulai, 0, 5)) ?> -
+                <?= htmlspecialchars(substr($bookings->waktu_selesai, 0, 5)) ?>
               </p>
             </div>
           </div>
 
           <div class="p-4 bg-slate-50 rounded-xl">
             <p class="text-xs font-semibold text-slate-500 uppercase">Tujuan</p>
-            <p class="text-sm text-slate-700"><?= nl2br(htmlspecialchars($booking->tujuan ?? '-')) ?></p>
+            <p class="text-sm text-slate-700"><?= nl2br(htmlspecialchars($bookings->tujuan ?? '-')) ?></p>
           </div>
         </div>
       </div>
@@ -129,10 +110,10 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
             </svg>
             Anggota
           </h3>
-          <span class="text-sm text-slate-500"><?= count($members) ?> anggota terdaftar</span>
+          <span class="text-sm text-slate-500"><?= count($allMembers) ?> anggota terdaftar</span>
         </div>
 
-        <?php if (empty($members)): ?>
+        <?php if (empty($allMembers)): ?>
           <p class="text-sm text-slate-500">Belum ada anggota yang ditambahkan.</p>
         <?php else: ?>
           <div class="overflow-hidden border border-slate-100 rounded-2xl">
@@ -146,7 +127,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
-                <?php foreach ($members as $member): ?>
+                <?php foreach ($allMembers as $member): ?>
                   <tr>
                     <td class="px-4 py-3 text-sm font-semibold text-slate-800">
                       <?= htmlspecialchars($member['nama'] ?? '-') ?>
@@ -174,13 +155,13 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase mb-2">Invite Token</p>
           <div class="p-4 bg-slate-900 rounded-xl text-white font-mono tracking-widest text-center text-lg">
-            <?= htmlspecialchars($booking->invite_token ?? '-') ?>
+            <?= htmlspecialchars($bookings->invite_token ?? '-') ?>
           </div>
         </div>
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase mb-2">Kode Check-in</p>
           <div class="p-4 bg-slate-100 rounded-xl font-mono tracking-widest text-center text-lg text-slate-800">
-            <?= $booking->checkin_code ? htmlspecialchars($booking->checkin_code) : 'Belum tersedia' ?>
+            <?= $bookings->checkin_code ? htmlspecialchars($bookings->checkin_code) : 'Belum tersedia' ?>
           </div>
         </div>
       </div>
@@ -188,34 +169,34 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
       <div class="bg-white rounded-2xl shadow-lg p-6 space-y-5">
         <h3 class="text-lg font-bold text-slate-800">Aksi</h3>
 
-        <?php if ($booking->status === 'pending'): ?>
+        <?php if ($bookings->status === 'pending'): ?>
           <form action="/admin/bookings/verify" method="post" class="space-y-3">
             <?= csrf_field() ?>
-            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+            <input type="hidden" name="booking_id" value="<?= (int) $bookings->id_booking ?>">
             <button type="submit"
               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
               Konfirmasi Booking
             </button>
           </form>
-        <?php elseif ($booking->status === 'verified'): ?>
+        <?php elseif ($bookings->status === 'verified'): ?>
           <form action="/admin/bookings/activate" method="post" class="space-y-3">
             <?= csrf_field() ?>
-            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+            <input type="hidden" name="booking_id" value="<?= (int) $bookings->id_booking ?>">
             <label class="block text-sm font-semibold text-slate-700">
               Masukkan Kode Check-in
               <input type="text" name="checkin_code"
                 class="mt-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="CT-XXXX" required>
+                placeholder="" required>
             </label>
             <button type="submit"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
               Validasi Check-in
             </button>
           </form>
-        <?php elseif ($booking->status === 'active'): ?>
+        <?php elseif ($bookings->status === 'active'): ?>
           <form action="/admin/bookings/complete" method="post" class="space-y-3">
             <?= csrf_field() ?>
-            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+            <input type="hidden" name="booking_id" value="<?= $bookings->id_booking ?>">
             <button type="submit"
               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
               Tandai Selesai
@@ -226,22 +207,20 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
         <?php endif; ?>
 
         <div class="pt-4 border-t border-slate-200">
-          <?php if ($booking->status !== 'draft'): ?>
-            <form action="/admin/bookings/cancel" method="post" class="space-y-3">
-              <?= csrf_field() ?>
-              <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
-              <label class="block text-sm font-semibold text-slate-700">
-                Batalkan Booking (opsional: alasan)
-                <textarea name="reason" rows="3"
-                  class="mt-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  placeholder="Alasan pembatalan (opsional)"></textarea>
-              </label>
-              <button type="submit"
-                class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
-                Batalkan Booking
-              </button>
-            </form>
-          <?php endif; ?>
+          <form action="/admin/bookings/cancel" method="post" class="space-y-3">
+            <?= csrf_field() ?>
+            <input type="hidden" name="booking_id" value="<?= $bookings->id_booking ?>">
+            <label class="block text-sm font-semibold text-slate-700">
+              Batalkan Booking
+              <textarea name="reason" rows="3" required
+                class="mt-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                placeholder="Alasan pembatalan"></textarea>
+            </label>
+            <button type="submit"
+              class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
+              Batalkan Booking
+            </button>
+          </form>
         </div>
 
         <a href="/admin/bookings"

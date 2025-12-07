@@ -1,7 +1,3 @@
-<?php
-
-dump($room);
-?>
 <div class="max-w-5xl mx-auto space-y-6">
   <div class="mb-2">
     <a href="/admin/rooms" class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-semibold group">

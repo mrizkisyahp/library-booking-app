@@ -3,39 +3,43 @@
 namespace App\Models;
 
 use App\Core\DbModel;
+use App\Core\App;
 
-class PeringatanSuspensi extends DbModel
+class Blocked_Dates extends DbModel
 {
-    public ?int $id_peringatan = null;
-    public string $nama_peringatan = '';
+    public ?int $id_blocked_date = null;
+    public string $tanggal_begin = '';
+    public string $tanggal_end = '';
+    public ?int $ruangan_id = null;
+    public ?string $alasan = null;
+    public ?int $created_by = null;
     public ?string $created_at = null;
     public ?string $updated_at = null;
     public ?string $deleted_at = null;
 
     public static function tableName(): string
     {
-        return 'peringatan_suspensi';
+        return 'blocked_dates';
     }
 
     public static function primaryKey(): string
     {
-        return 'id_peringatan';
+        return 'id_blocked_date';
     }
 
     public function attributes(): array
     {
         return [
-            'id_peringatan',
-            'nama_peringatan',
+            'id_blocked_date',
+            'tanggal_begin',
+            'tanggal_end',
+            'ruangan_id',
+            'alasan',
+            'created_by',
             'created_at',
             'updated_at',
             'deleted_at',
         ];
-    }
-
-    public function peringatanMhs()
-    {
-        return $this->hasMany(PeringatanMhs::class, 'id_peringatan', 'id_peringatan');
     }
 
     public function rules(): array
