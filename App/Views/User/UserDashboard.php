@@ -278,10 +278,17 @@
                     </p>
 
                     <div class="w-full">
-                      <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-                        class="inline-block bg-emerald-600 hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
-                        Lihat Detail
-                      </a>
+                      <?php if ($booking->status === 'draft'): ?>
+                        <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+                          class="inline-block bg-emerald-600 hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                          Lihat Draft
+                        </a>
+                      <?php else: ?>
+                        <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>"
+                          class="inline-block bg-emerald-600 hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                          Lihat Detail
+                        </a>
+                      <?php endif; ?>
                       <?php if ((int) $booking->user_id === user()->id_user && $booking->status === 'completed' && empty($booking->id_feedback)): ?>
                         <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                           class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">

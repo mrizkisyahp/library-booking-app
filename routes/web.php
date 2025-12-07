@@ -56,6 +56,10 @@ $app->router->get('/my-bookings', [UserBookingController::class, 'showMyBooking'
 $app->router->post('/bookings/cancel', [UserBookingController::class, 'cancelBooking'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/leave', [UserBookingController::class, 'leaveBooking'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/kick', [UserBookingController::class, 'kickMember'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/bookings/detail', [UserBookingController::class, 'detail'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->get('/bookings/reschedule', [UserBookingController::class, 'showRescheduleForm'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->post('/bookings/reschedule/confirm', [UserBookingController::class, 'confirmReschedule'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/bookings/reschedule', [UserBookingController::class, 'reschedule'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 
 // Feedback routes (authenticated)
 $app->router->get('/feedback/create', [UserFeedbackController::class, 'create'], ['middleware' => [new AuthMiddleware()]]);
@@ -83,6 +87,8 @@ $app->router->post('/admin/blocked-dates', [AdminBookingController::class, 'bloc
 $app->router->post('/admin/blocked-dates/delete', [AdminBookingController::class, 'unblockDate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/bookings/add', [AdminBookingController::class, 'addMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/bookings/kick', [AdminBookingController::class, 'kickMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/admin/bookings/reschedule', [AdminBookingController::class, 'showRescheduleForm'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->post('/admin/bookings/reschedule', [AdminBookingController::class, 'reschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin users
 $app->router->get('/admin/users', [AdminUserController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

@@ -5,9 +5,16 @@ namespace App\Core\Repository;
 use App\Models\Room;
 use App\Models\Booking;
 use App\Core\Paginator;
+use App\Core\Database;
+use App\Core\QueryBuilder;
 
 class RoomRepository
 {
+    public function __construct(
+        private Database $database
+    ) {
+    }
+
     public function getTotalRooms(): int
     {
         return Room::Query()->count();
@@ -183,5 +190,18 @@ class RoomRepository
         }
 
         return array_values($calendar);
+    }
+
+    public function getRoomAverageRating(int $roomId): ?float
+    {
+        $result = (new QueryBuilder($this->database->pdo))
+            ->table('booking')
+            ->select(['AVG(feedback.rating) as avg_rating'])
+            ->leftJoin('feedback', 'booking.id_booking', '=', 'feedback.booking_id')
+            ->where('booking.ruangan_id', $roomId)
+            ->whereNotNull('feedback.rating')
+            ->first();
+
+        return $result && $result['avg_rating'] ? (float) $result['avg_rating'] : null;
     }
 }

@@ -23,10 +23,17 @@ $statusColors = [
         <p class="text-sm text-slate-500 uppercase">Detail Booking</p>
         <h1 class="text-3xl font-bold text-slate-800"><?= htmlspecialchars($bookings->nama_ruangan) ?></h1>
       </div>
-      <span
-        class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border <?= $statusColors[$bookings->status] ?? 'bg-slate-100 text-slate-700 border-slate-200' ?>">
-        <?= htmlspecialchars(ucfirst($bookings->status)) ?>
-      </span>
+      <div class="text-right">
+        <span
+          class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border <?= $statusColors[$bookings->status] ?? 'bg-slate-100 text-slate-700 border-slate-200' ?>">
+          <?= htmlspecialchars(ucfirst($bookings->status)) ?>
+        </span>
+        <?php if (!empty($bookings->has_been_rescheduled)): ?>
+          <span class="block mt-2 px-3 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full">
+            🔄 Booking ini sudah di-reschedule
+          </span>
+        <?php endif; ?>
+      </div>
     </div>
     <p class="text-slate-600">Periksa detail booking sebelum melakukan verifikasi.</p>
   </div>
@@ -193,6 +200,14 @@ $statusColors = [
               Validasi Check-in
             </button>
           </form>
+          <a href="/admin/bookings/reschedule?id=<?= (int) $bookings->id_booking ?>"
+            class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Reschedule
+          </a>
         <?php elseif ($bookings->status === 'active'): ?>
           <form action="/admin/bookings/complete" method="post" class="space-y-3">
             <?= csrf_field() ?>

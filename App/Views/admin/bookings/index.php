@@ -30,9 +30,17 @@ $statusOptions = [
       <h2 class="text-3xl font-bold text-gray-900 mb-2">Manajemen Booking</h2>
       <p class="text-gray-600">Kelola dan verifikasi booking ruangan</p>
     </div>
-    <p>
+    <div class="flex gap-4 mt-4 md:mt-0">
+      <a href="/admin/blocked-dates"
+        class="flex gap-2 bg-red-500 shadow text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        Blocked Dates
+      </a>
       <a href="/admin/bookings/create"
-        class="flex gap-4 bg-primary shadow text-white mt-4 md:mt-0 px-8 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+        class="flex gap-2 bg-primary shadow text-white px-8 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="lucide lucide-plus-icon lucide-plus">
@@ -41,7 +49,7 @@ $statusOptions = [
         </svg>
         Tambah Booking
       </a>
-    </p>
+    </div>
   </div>
 
   <section class="bg-white shadow rounded-lg p-6 mb-8 border border-gray-100">
@@ -175,6 +183,11 @@ $statusOptions = [
                   class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow <?= $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' ?>">
                   <?= htmlspecialchars(ucfirst($booking->status)) ?>
                 </span>
+                <?php if (!empty($booking->has_been_rescheduled)): ?>
+                  <span class="block mt-1 px-2 py-0.5 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                    🔄 Rescheduled
+                  </span>
+                <?php endif; ?>
               </td>
               <td class="px-6 py-4 text-sm">
                 <?php if (!empty($booking->id_feedback)): ?>

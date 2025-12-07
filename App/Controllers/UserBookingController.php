@@ -189,4 +189,126 @@ class UserBookingController extends Controller
             back();
         }
     }
+
+    public function detail(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->query('id');
+
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            return view('User/Bookings/Detail', [
+                'booking' => $data['booking'],
+                'pic' => $data['pic'],
+                'members' => $data['members'],
+                'allMembers' => $data['allMembers'],
+                'isPic' => $data['isPic'],
+                'isMember' => $data['isMember'],
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function showRescheduleForm(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->query('id');
+
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            $booking = $data['booking'];
+
+            // Only PIC can reschedule
+            if (!$data['isPic']) {
+                flash('error', 'Hanya PIC yang dapat melakukan reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            // Only verified bookings can be rescheduled
+            if ($booking->status !== 'verified') {
+                flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            return view('User/Bookings/Reschedule', [
+                'booking' => $booking,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function confirmReschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $newDate = $request->all()['tanggal_penggunaan_ruang'];
+            $newStart = $request->all()['waktu_mulai'];
+            $newEnd = $request->all()['waktu_selesai'];
+
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            $booking = $data['booking'];
+
+            if (!$data['isPic']) {
+                flash('error', 'Hanya PIC yang dapat melakukan reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            if ($booking->status !== 'verified') {
+                flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            return view('User/Bookings/RescheduleConfirm', [
+                'booking' => $booking,
+                'newDate' => $newDate,
+                'newStart' => $newStart,
+                'newEnd' => $newEnd,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function reschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $newData = [
+                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $request->all()['waktu_mulai'],
+                'waktu_selesai' => $request->all()['waktu_selesai'],
+            ];
+
+            $this->bookingServices->rescheduleBooking($bookingId, $newData, $user->id_user);
+
+            flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
+            redirect('/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
 }

@@ -16,7 +16,14 @@ class RoomService
     public function getAllRooms(array $filters = [], int $perPage = 15, int $page = 1): Paginator
     {
         $isAdmin = auth()->user()->id_role === 1;
-        return $this->roomRepository->getAll($filters, $perPage, $page, $isAdmin);
+        $paginator = $this->roomRepository->getAll($filters, $perPage, $page, $isAdmin);
+
+        // Attach ratings to each room
+        foreach ($paginator->items as $room) {
+            $room->avg_rating = $this->roomRepository->getRoomAverageRating($room->id_ruangan);
+        }
+
+        return $paginator;
     }
 
     public function getRoomById(int $id): ?Room

@@ -237,10 +237,11 @@ class AdminBookingController extends Controller
         try {
             $user = auth()->user();
             $data = $request->all();
+            $ruanganId = !empty($data['ruangan_id']) ? (int) $data['ruangan_id'] : null;
             $this->bookingServices->blockDateRange(
                 $data['tanggal_begin'],
                 $data['tanggal_end'],
-                $data['ruangan_id'] ?? null,
+                $ruanganId,
                 $data['alasan'] ?? 'Diblokir oleh admin',
                 $user->id_user
             );
@@ -292,6 +293,53 @@ class AdminBookingController extends Controller
 
             flash('success', 'Anggota berhasil dikeluarkan');
             redirect('/admin/bookings/edit?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function showRescheduleForm(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->query('id');
+            $booking = $this->bookingServices->getBookingById($bookingId);
+
+            if (!$booking) {
+                flash('error', 'Booking tidak ditemukan');
+                redirect('/admin/bookings');
+            }
+
+            if ($booking->status !== 'verified') {
+                flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
+                redirect('/admin/bookings/detail?id=' . $bookingId);
+            }
+
+            return view('Admin/Bookings/Reschedule', [
+                'booking' => $booking,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/bookings');
+        }
+    }
+
+    public function reschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $newData = [
+                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $request->all()['waktu_mulai'],
+                'waktu_selesai' => $request->all()['waktu_selesai'],
+            ];
+
+            $this->bookingServices->rescheduleBooking($bookingId, $newData, $user->id_user);
+
+            flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
+            redirect('/admin/bookings/detail?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();

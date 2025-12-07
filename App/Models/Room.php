@@ -18,6 +18,7 @@ class Room extends DbModel
     public ?string $updated_at = null;
     public ?string $deleted_at = null;
     public ?bool $requires_special_approval = false;
+    public ?float $avg_rating = null;
 
     public static function tableName(): string
     {

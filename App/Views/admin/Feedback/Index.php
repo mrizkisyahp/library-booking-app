@@ -1,7 +1,3 @@
-<?php
-dump($feedbacks);
-?>
-
 <div class="p-6">
   <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
     <div>

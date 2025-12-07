@@ -279,6 +279,23 @@ class BookingServices
         $this->validateHasPendingFeedback($user->id_user);
     }
 
+    /**
+     * Validate reschedule-specific rules (skips user status and one-booking-per-day checks
+     * since the user already has an approved booking)
+     */
+    public function validateRescheduleRules(array $data): void
+    {
+        $this->validateNotPastBookings($data);
+        $this->validateTimeOrder($data);
+        $this->validateDuration($data);
+        $this->validateSessionHours($data);
+        $this->validateBreakTime($data);
+        $this->validateMaxDaysAhead($data);
+        $this->validateMinLeadTime($data);
+        $this->validateRoomAvailable($data['ruangan_id']);
+        $this->validateDateNotBlocked($data['tanggal_penggunaan_ruang'], $data['ruangan_id']);
+    }
+
     public function validateNoTimeConflicts(array $data, int $userId, ?int $excludeBookingId = null): void
     {
         $this->validateRoomNoOverlap($data, $excludeBookingId);
@@ -719,8 +736,15 @@ class BookingServices
             throw new Exception('Booking hanya dapat di-reschedule 1 kali');
         }
 
-        $this->validateBookingRules($newData, $user);
-        $this->validateNoTimeConflicts($newData, $booking->user_id, $bookingId);
+        // Merge existing booking data with new reschedule data for validation
+        $validationData = array_merge([
+            'ruangan_id' => $booking->ruangan_id,
+            'tujuan' => $booking->tujuan,
+        ], $newData);
+
+        // Use auth()->user() for validation as validateBookingRules expects a user object
+        $this->validateRescheduleRules($validationData);
+        $this->validateNoTimeConflicts($validationData, $booking->user_id, $bookingId);
 
         $booking->tanggal_penggunaan_ruang = $newData['tanggal_penggunaan_ruang'];
         $booking->waktu_mulai = $newData['waktu_mulai'];
