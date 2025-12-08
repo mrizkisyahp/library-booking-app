@@ -1,7 +1,0 @@
-[2025-11-18 07:58:14] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
-[2025-11-18 07:59:36] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
-[2025-11-18 14:45:58] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
-[2025-11-18 14:54:19] [INFO] Admin #1 cancelled booking - Booking #5 cancelled {"admin_id":1,"action":"cancelled booking"}
-[2025-11-18 14:55:02] [WARNING] Failed to send notification email {"booking_id":7,"user_id":1}
-[2025-11-18 14:55:02] [INFO] Booking #7 draft created by User #1 {"user_id":1,"booking_id":7,"room_id":8,"usage_date":"2025-11-19","time":"12:00 - 15:00","status":"draft"}
-[2025-11-18 14:58:20] [INFO] Admin #1 cancelled booking - Booking #7 cancelled {"admin_id":1,"action":"cancelled booking"}

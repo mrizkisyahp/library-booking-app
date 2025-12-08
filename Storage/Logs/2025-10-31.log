@@ -1,6 +1,0 @@
-[2025-10-31 09:19:17] [ERROR] Unhandled exception {"error":"SQLSTATE[42S02]: Base table or view not found: 1146 Table 'library_booking.users' doesn't exist","file":"\/var\/www\/html\/App\/Core\/DbModel.php","line":45}
-[2025-10-31 09:19:21] [ERROR] Unhandled exception {"error":"SQLSTATE[42S02]: Base table or view not found: 1146 Table 'library_booking.users' doesn't exist","file":"\/var\/www\/html\/App\/Core\/DbModel.php","line":45}
-[2025-10-31 09:25:08] [ERROR] Unhandled exception {"error":"SQLSTATE[42S02]: Base table or view not found: 1146 Table 'library_booking.users' doesn't exist","file":"\/var\/www\/html\/App\/Core\/DbModel.php","line":45}
-[2025-10-31 09:29:53] [ERROR] Unhandled exception {"error":"SQLSTATE[42S02]: Base table or view not found: 1146 Table 'library_booking.users' doesn't exist","file":"\/var\/www\/html\/App\/Core\/DbModel.php","line":45}
-[2025-10-31 09:30:04] [ERROR] Unhandled exception {"error":"SQLSTATE[42S02]: Base table or view not found: 1146 Table 'library_booking.users' doesn't exist","file":"\/var\/www\/html\/App\/Core\/DbModel.php","line":45}
-[2025-10-31 09:50:30] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
