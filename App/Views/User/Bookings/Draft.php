@@ -114,9 +114,9 @@
           Status:
           <?= htmlspecialchars($statusLabel) ?>
           <!-- status state -->
-          <?php if ($booking->status === 'draft' && $booking->currentMembers < $booking->requiredMembers): ?>
+          <?php if ($booking->status === 'draft' && $booking->current_members < $booking->required_members): ?>
             (Menunggu Anggota)
-          <?php elseif ($booking->status === 'draft' && $booking->currentMembers >= $booking->requiredMembers): ?>
+          <?php elseif ($booking->status === 'draft' && $booking->current_members >= $booking->required_members): ?>
             (Siap Dikirim)
           <?php elseif ($booking->status === 'pending'): ?>
             (Menunggu Konfirmasi)
@@ -261,12 +261,44 @@
                     </span>
                   <?php endif; ?>
                 </div>
+                <?php if ($isPic && empty($member['is_owner'])): ?>
+                  <form action="/bookings/kick" method="post" class="ml-2"
+                    onsubmit="return confirm('Keluarkan anggota ini?');">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                    <input type="hidden" name="user_id" value="<?= (int) $member['id_user'] ?>">
+                    <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Keluarkan">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </form>
+                <?php endif; ?>
               </div>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
 
         <?php if ($isPic): ?>
+          <!-- Add Member Form -->
+          <form action="/bookings/member" method="post" class="border-t pt-6">
+            <?= csrf_field() ?>
+            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Tambah Anggota</label>
+            <div class="flex gap-3">
+              <input type="email" name="member_email" required placeholder="Email anggota"
+                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+              <button type="submit"
+                class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold whitespace-nowrap">
+                <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Kirim Link Undangan
+              </button>
+            </div>
+          </form>
+
           <!-- Requirement Warning -->
           <?php if (!$canSubmit): ?>
             <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
@@ -331,5 +363,38 @@
 
     </div>
   </nav>
+
+  <div class="bg-white rounded-2xl shadow-lg p-8">
+    <?php if ($isPic): ?>
+      <!-- Cancel Booking (PIC only) -->
+      <form action="/bookings/cancel" method="post"
+        onsubmit="return confirm('Yakin ingin membatalkan booking ini? Semua anggota akan dikeluarkan.');">
+        <?= csrf_field() ?>
+        <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+        <button type="submit"
+          class="w-full bg-red-500 text-white px-8 py-4 rounded-xl hover:bg-red-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Batalkan Booking
+        </button>
+      </form>
+    <?php elseif ($isMember): ?>
+      <!-- Leave Booking (Member only) -->
+      <form action="/bookings/leave" method="post" onsubmit="return confirm('Yakin ingin keluar dari booking ini?');">
+        <?= csrf_field() ?>
+        <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+        <button type="submit"
+          class="w-full bg-gray-500 text-white px-8 py-4 rounded-xl hover:bg-gray-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Keluar dari Booking
+        </button>
+      </form>
+    <?php endif; ?>
+  </div>
+</div>
 
 </div>

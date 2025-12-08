@@ -536,22 +536,22 @@ class BookingServices
             throw new Exception('Kode check-in tidak valid');
         }
 
-        $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
-        $now = Carbon::now();
+        // $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
+        // $now = Carbon::now();
 
-        if ($now->lt($startDateTime)) {
-            Carbon::setLocale('id');
-            $diff = $now->diff($startDateTime);
-            $parts = [];
-            if ($diff->d > 0)
-                $parts[] = "{$diff->d} hari";
-            if ($diff->h > 0)
-                $parts[] = "{$diff->h} jam";
-            if ($diff->i > 0 && count($parts) < 2)
-                $parts[] = "{$diff->i} menit";
-            $timeStr = implode(' ', $parts);
-            throw new Exception("Check-in belum dibuka. Mulai dalam {$timeStr}");
-        }
+        // if ($now->lt($startDateTime)) {
+        //     Carbon::setLocale('id');
+        //     $diff = $now->diff($startDateTime);
+        //     $parts = [];
+        //     if ($diff->d > 0)
+        //         $parts[] = "{$diff->d} hari";
+        //     if ($diff->h > 0)
+        //         $parts[] = "{$diff->h} jam";
+        //     if ($diff->i > 0 && count($parts) < 2)
+        //         $parts[] = "{$diff->i} menit";
+        //     $timeStr = implode(' ', $parts);
+        //     throw new Exception("Check-in belum dibuka. Mulai dalam {$timeStr}");
+        // }
 
         $this->transitionTo($bookingId, 'active', 'Checked in by admin');
     }

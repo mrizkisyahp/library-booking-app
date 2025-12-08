@@ -406,9 +406,6 @@
   .z-10 {
     z-index: 10;
   }
-  .z-30 {
-    z-index: 30;
-  }
   .z-40 {
     z-index: 40;
   }
@@ -417,9 +414,6 @@
   }
   .z-999 {
     z-index: 999;
-  }
-  .col-span-2 {
-    grid-column: span 2 / span 2;
   }
   .container {
     width: 100%;
@@ -606,9 +600,6 @@
   .h-8 {
     height: calc(var(--spacing) * 8);
   }
-  .h-8\/10 {
-    height: calc(8/10 * 100%);
-  }
   .h-10 {
     height: calc(var(--spacing) * 10);
   }
@@ -632,9 +623,6 @@
   }
   .h-72 {
     height: calc(var(--spacing) * 72);
-  }
-  .h-\[80vh\] {
-    height: 80vh;
   }
   .h-dvh {
     height: 100dvh;
@@ -906,13 +894,6 @@
       margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
-  .space-x-2 {
-    :where(& > :not(:last-child)) {
-      --tw-space-x-reverse: 0;
-      margin-inline-start: calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));
-      margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
-    }
-  }
   .divide-y {
     :where(& > :not(:last-child)) {
       --tw-divide-y-reverse: 0;
@@ -920,11 +901,6 @@
       border-top-style: var(--tw-border-style);
       border-top-width: calc(1px * var(--tw-divide-y-reverse));
       border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
-    }
-  }
-  .divide-gray-100 {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-gray-100);
     }
   }
   .divide-gray-200 {
@@ -1050,9 +1026,6 @@
   }
   .border-cyan-200 {
     border-color: var(--color-cyan-200);
-  }
-  .border-emerald-100 {
-    border-color: var(--color-emerald-100);
   }
   .border-emerald-200 {
     border-color: var(--color-emerald-200);
@@ -1611,17 +1584,11 @@
   .pt-8 {
     padding-top: calc(var(--spacing) * 8);
   }
-  .pt-12 {
-    padding-top: calc(var(--spacing) * 12);
-  }
   .pr-4 {
     padding-right: calc(var(--spacing) * 4);
   }
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
-  }
-  .pb-12 {
-    padding-bottom: calc(var(--spacing) * 12);
   }
   .pl-12 {
     padding-left: calc(var(--spacing) * 12);
@@ -2044,10 +2011,6 @@
     --tw-duration: 300ms;
     transition-duration: 300ms;
   }
-  .duration-400 {
-    --tw-duration: 400ms;
-    transition-duration: 400ms;
-  }
   .duration-500 {
     --tw-duration: 500ms;
     transition-duration: 500ms;
@@ -2164,13 +2127,6 @@
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
         border-color: var(--color-gray-300);
-      }
-    }
-  }
-  .group-hover\:text-emerald-600 {
-    &:is(:where(.group):hover *) {
-      @media (hover: hover) {
-        color: var(--color-emerald-600);
       }
     }
   }
@@ -2295,11 +2251,6 @@
   .checked\:bg-emerald-600 {
     &:checked {
       background-color: var(--color-emerald-600);
-    }
-  }
-  .checked\:text-white {
-    &:checked {
-      color: var(--color-white);
     }
   }
   .focus-within\:border-emerald-500 {
@@ -2886,11 +2837,6 @@
       background-color: var(--color-gray-200);
     }
   }
-  .disabled\:bg-gray-300 {
-    &:disabled {
-      background-color: var(--color-gray-300);
-    }
-  }
   .disabled\:bg-slate-200 {
     &:disabled {
       background-color: var(--color-slate-200);
@@ -3088,19 +3034,9 @@
       font-weight: var(--font-weight-normal);
     }
   }
-  .md\:text-black {
-    @media (width >= 48rem) {
-      color: var(--color-black);
-    }
-  }
   .md\:text-emerald-200 {
     @media (width >= 48rem) {
       color: var(--color-emerald-200);
-    }
-  }
-  .md\:text-emerald-800 {
-    @media (width >= 48rem) {
-      color: var(--color-emerald-800);
     }
   }
   .md\:shadow-none {
@@ -3216,11 +3152,6 @@
   inherits: false;
 }
 @property --tw-space-y-reverse {
-  syntax: "*";
-  inherits: false;
-  initial-value: 0;
-}
-@property --tw-space-x-reverse {
   syntax: "*";
   inherits: false;
   initial-value: 0;
@@ -3481,7 +3412,6 @@
       --tw-skew-x: initial;
       --tw-skew-y: initial;
       --tw-space-y-reverse: 0;
-      --tw-space-x-reverse: 0;
       --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-gradient-position: initial;

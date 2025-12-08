@@ -87,11 +87,11 @@ $statusColors = [
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
-                    <?= (int) $booking->currentMembers ?> /
-                    <?= isset($booking->maximumMembers) && $booking->maximumMembers > 0 ? (int) $booking->maximumMembers : '∞' ?>
+                    <?= (int) $booking->current_members ?> /
+                    <?= isset($booking->maximum_members) && $booking->maximum_members > 0 ? (int) $booking->maximum_members : '∞' ?>
                     peserta
-                    <?php if (isset($booking->requiredMembers) && $booking->requiredMembers > 0): ?>
-                        · Min <?= (int) $booking->requiredMembers ?>
+                    <?php if (isset($booking->required_members) && $booking->required_members > 0): ?>
+                        · Min <?= (int) $booking->required_members ?>
                     <?php endif; ?>
                 </p>
 
@@ -122,12 +122,11 @@ $statusColors = [
                 ?>
                 <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
                     Status:
-                    Status:
                     <?= htmlspecialchars($statusLabel) ?>
                     <!-- status state -->
-                    <?php if ($booking->status === 'draft' && $booking->currentMembers < $booking->requiredMembers): ?>
+                    <?php if ($booking->status === 'draft' && $booking->current_members < $booking->required_members): ?>
                         (Menunggu Anggota)
-                    <?php elseif ($booking->status === 'draft' && $booking->currentMembers >= $booking->requiredMembers): ?>
+                    <?php elseif ($booking->status === 'draft' && $booking->current_members >= $booking->required_members): ?>
                         (Siap Dikirim)
                     <?php elseif ($booking->status === 'pending'): ?>
                         (Menunggu Konfirmasi)
@@ -197,11 +196,11 @@ $statusColors = [
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
                     <span>
-                        <?= $booking->currentMembers . ' / ' . $booking->maximumMembers ?> Orang
+                        <?= $booking->current_members . ' / ' . $booking->maximum_members ?> Orang
                     </span>
                 </p>
 
-                <?php if (isset($booking->maximumMembers) && $booking->maximumMembers > 0 && $booking->currentMembers >= $booking->maximumMembers): ?>
+                <?php if (isset($booking->maximum_members) && $booking->maximum_members > 0 && $booking->current_members >= $booking->maximum_members): ?>
                     <div class="mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
