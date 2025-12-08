@@ -1,15 +1,4 @@
 <?php
-
-use App\Core\Csrf;
-use App\Models\Booking;
-use App\Models\Room;
-use App\Models\User;
-
-/** @var Booking $booking */
-/** @var Room|null $room */
-/** @var User|null $pic */
-$members = $members ?? [];
-
 $statusColors = [
     'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
     'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
@@ -18,11 +7,6 @@ $statusColors = [
     'cancelled' => 'bg-rose-100 text-rose-800 border-rose-200',
     'draft' => 'bg-slate-100 text-slate-800 border-slate-200',
 ];
-
-$roomName = $room?->nama_ruangan ?? ('Ruangan #' . htmlspecialchars((string) $booking->ruangan_id));
-$picName = $pic?->nama ?? 'Pengguna #' . htmlspecialchars((string) $booking->user_id);
-$picContact = $pic?->email ?? '-';
-$picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
 ?>
 
 <div class="p-4 bg-white shadow-md w-full ">
@@ -59,10 +43,10 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
     <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
         <div class="flex flex-col justify-start p-6">
             <p class="font-bold text-2xl mb-2">
-                <?= htmlspecialchars($room->nama_ruangan) ?>
+                <?= htmlspecialchars($booking->nama_ruangan) ?>
             </p>
             <p class="mb-2">
-                <?= htmlspecialchars($room->jenis_ruangan) ?>
+                <?= htmlspecialchars($booking->jenis_ruangan) ?>
             </p>
             <div class="w-full">
 
@@ -103,10 +87,11 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
-                    <?= (int) $currentMembers ?> /
-                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                        · Min <?= (int) $requiredMembers ?>
+                    <?= (int) $booking->currentMembers ?> /
+                    <?= isset($booking->maximumMembers) && $booking->maximumMembers > 0 ? (int) $booking->maximumMembers : '∞' ?>
+                    peserta
+                    <?php if (isset($booking->requiredMembers) && $booking->requiredMembers > 0): ?>
+                        · Min <?= (int) $booking->requiredMembers ?>
                     <?php endif; ?>
                 </p>
 
@@ -137,25 +122,13 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                 ?>
                 <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
                     Status:
-                    <?php
-                    // htmlspecialchars($statusLabel)
-                    ?>
-                    <!-- 🤡🤡🤡 -->
-                    <!-- if $booking['status'] == 'draft' && $requiredMembers == 0:
-                      echo ('(Menunggu Anggota)');
-                      elseif $booking['status'] == 'draft' && $requiredMembers > 0:
-                        echo ('(Siap Dikirim)');
-                      elseif $booking['status'] == 'pending':
-                        echo ('(Menunggu Konfirmasi)');
-                      elseif $booking['status'] == 'verified':
-                        echo ('(Terkonfirmasi)');
-                      elseif $booking['status'] == 'active':
-                        echo ('(Sedang berlangsung)');
-                      elseif $booking['status'] == 'completed':
-                        echo ('(Selesai)');
-                    endif; -->
-                    <?php if ($booking->status === 'draft'): ?>
+                    Status:
+                    <?= htmlspecialchars($statusLabel) ?>
+                    <!-- status state -->
+                    <?php if ($booking->status === 'draft' && $booking->currentMembers < $booking->requiredMembers): ?>
                         (Menunggu Anggota)
+                    <?php elseif ($booking->status === 'draft' && $booking->currentMembers >= $booking->requiredMembers): ?>
+                        (Siap Dikirim)
                     <?php elseif ($booking->status === 'pending'): ?>
                         (Menunggu Konfirmasi)
                     <?php elseif ($booking->status === 'verified'): ?>
@@ -172,7 +145,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
                         ubah rincian booking
                     </a>
-                    <?php if ($booking->role === 'PIC' && $statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
+                    <?php if ($isPic && $statusKey === 'completed' && empty($booking->id_feedback)): ?>
                         <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                             class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                             Isi Feedback
@@ -224,11 +197,11 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
                     <span>
-                        <?= $currentMembers . ' / ' . $maximumMembers ?> Orang
+                        <?= $booking->currentMembers . ' / ' . $booking->maximumMembers ?> Orang
                     </span>
                 </p>
 
-                <?php if (isset($maximumMembers) && $maximumMembers > 0 && $currentMembers >= $maximumMembers): ?>
+                <?php if (isset($booking->maximumMembers) && $booking->maximumMembers > 0 && $booking->currentMembers >= $booking->maximumMembers): ?>
                     <div class="mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
@@ -246,8 +219,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 <?php endif; ?>
 
-                <?php $members = $booking->getMembers(); ?>
-                <?php if (empty($members)): ?>
+                <?php if (empty($allMembers)): ?>
                     <div class="text-center py-8">
                         <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -258,7 +230,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                        <?php foreach ($members as $member): ?>
+                        <?php foreach ($allMembers as $member): ?>
                             <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                                 <!-- <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +244,15 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                                             <?= htmlspecialchars($member['nama'] ?? 'Unknown') ?>
                                         </p>
                                         <p class="text-sm text-slate-500 truncate"><?= htmlspecialchars($member['email']) ?></p>
-                                        </span>
+                                        <?php if (!empty($member['is_owner'])): ?>
+                                            <span class="text-xs text-emerald-600 font-semibold flex items-center mt-1">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                PIC
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -280,6 +260,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 <?php endif; ?>
 
+                <!-- BELOM KELAR -->
             </div>
         </div>
     </div>

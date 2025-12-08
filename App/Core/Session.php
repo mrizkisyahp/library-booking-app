@@ -64,7 +64,7 @@ class Session
         }
     }
 
-    public function getFlash(string $key, $default = false): string|false
+    public function getFlash(string $key, $default = false): mixed
     {
         return $_SESSION[self::FLASH_KEY][$key]['value'] ?? $default;
     }

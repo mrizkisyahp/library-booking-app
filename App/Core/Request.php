@@ -46,15 +46,11 @@ class Request
         $body = [];
 
         if ($this->method() === 'get') {
-            foreach ($_GET as $key => $value) {
-                $body[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-            }
+            $body = $_GET;
         }
 
         if ($this->method() === 'post') {
-            foreach ($_POST as $key => $value) {
-                $body[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-            }
+            $body = $_POST;
         }
 
         return $body;
@@ -91,12 +87,7 @@ class Request
 
     public function getQuery(): array
     {
-        $query = [];
-        foreach ($_GET as $key => $value) {
-            $query[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-        }
-
-        return $query;
+        return $_GET;
     }
 
     public function query(?string $key = null, $default = null)

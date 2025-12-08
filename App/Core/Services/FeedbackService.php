@@ -2,155 +2,74 @@
 
 namespace App\Core\Services;
 
-use App\Core\App;
-use App\Models\Booking;
-use App\Models\Feedback;
-use App\Models\User;
-use App\Core\Services\Logger;
+use App\Core\Repository\FeedbackRepository;
+use App\Core\Repository\BookingRepository;
+use Exception;
 
 class FeedbackService
 {
-    public function getFeedbackForm(int $bookingId, int $userId): array
-    {
-        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
-
-        if (!$booking || $booking->user_id !== $userId || $booking->status !== 'completed') {
-            return [
-                'success' => false,
-                'message' => 'Booking tidak valid.',
-                'redirect' => '/dashboard',
-            ];
-        }
-
-        if (Feedback::Query()->where('booking_id', $bookingId)->first()) {
-            return [
-                'success' => false,
-                'message' => 'Feedback untuk booking ini sudah dikirim.',
-                'redirect' => '/dashboard',
-            ];
-        }
-
-        return [
-            'success' => true,
-            'data' => [
-                'booking' => $booking,
-            ],
-        ];
+    public function __construct(
+        private FeedbackRepository $feedbackRepo,
+        private BookingRepository $bookingRepo
+    ) {
     }
 
-    public function submitFeedback(int $bookingId, int $userId, array $input): array
+    public function createFeedback(int $bookingId, int $userId, array $data): void
     {
-        $booking = Booking::Query()->where('id_booking', $bookingId)->first();
-        if (!$booking || $booking->user_id !== $userId || $booking->status !== 'completed') {
-            return [
-                'success' => false,
-                'message' => 'Booking tidak valid.',
-                'redirect' => '/dashboard',
-            ];
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
         }
 
-        if (Feedback::Query()->where('booking_id', $bookingId)->first()) {
-            return [
-                'success' => false,
-                'message' => 'Feedback untuk booking ini sudah dikirim.',
-                'redirect' => '/dashboard',
-            ];
+        if ((int) $booking->user_id !== $userId) {
+            throw new Exception('Hanya PIC yang dapat memberikan feedback');
         }
 
-        $serviceRating = (int) ($input['service_rating'] ?? 0);
-        $roomRating = (int) ($input['room_rating'] ?? 0);
-
-        if ($serviceRating < 1 || $serviceRating > 5 || $roomRating < 1 || $roomRating > 5) {
-            return [
-                'success' => false,
-                'message' => 'Rating harus di antara 1 sampai 5.',
-                'redirect' => '/feedback/create?booking=' . $bookingId,
-            ];
+        if ($booking->status !== 'completed') {
+            throw new Exception('Feedback hanya dapat diberikan untuk booking yang sudah selesai');
         }
 
-        $feedback = new Feedback();
-        $feedback->booking_id = $bookingId;
-        $feedback->user_id = $userId;
-        $feedback->rating = round(($serviceRating + $roomRating) / 2, 1);
-        $feedback->komentar = $input['comments'] ?? null;
-
-        if ($feedback->save()) {
-            Logger::info('Feedback submitted', [
-                'user_id' => $userId,
-                'booking_id' => $bookingId,
-                'rating' => $feedback->rating,
-            ]);
-            return [
-                'success' => true,
-                'message' => 'Terima kasih atas feedback Anda.',
-                'redirect' => '/dashboard',
-            ];
+        $existingFeedback = $this->feedbackRepo->findByBookingId($bookingId);
+        if ($existingFeedback) {
+            throw new Exception('Feedback sudah pernah diberikan untuk booking ini');
         }
 
-        Logger::error('Failed to save feedback', [
-            'user_id' => $userId,
+        $rating = (float) $data['rating'];
+        if ($rating < 1.0 || $rating > 5.0) {
+            throw new Exception('Rating harus antara 1.0 sampai 5.0');
+        }
+
+        $this->feedbackRepo->create([
             'booking_id' => $bookingId,
+            'user_id' => $userId,
+            'rating' => $rating,
+            'komentar' => trim($data['komentar'] ?? ''),
         ]);
-
-        return [
-            'success' => false,
-            'message' => 'Gagal menyimpan feedback.',
-            'redirect' => '/dashboard',
-        ];
     }
 
-    public function userHasPendingFeedback(int $userId): bool
+    public function getBookingForFeedback(int $bookingId, int $userId): array
     {
-        $stmt = App::$app->db->prepare("
-            SELECT COUNT(*) AS cnt
-            FROM booking b
-            WHERE b.user_id = :user_id
-              AND b.status = 'completed'
-              AND NOT EXISTS (
-                SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking
-              )
-        ");
-        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
-        $stmt->execute();
-        return (int) $stmt->fetchColumn() > 0;
+        $booking = $this->bookingRepo->findByIdWithDetails($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if ((int) $booking->user_id !== $userId) {
+            throw new Exception('Anda tidak memiliki akses ke booking ini');
+        }
+
+        if ($booking->status !== 'completed') {
+            throw new Exception('Feedback hanya dapat diberikan untuk booking yang sudah selesai');
+        }
+
+        $existingFeedback = $this->feedbackRepo->findByBookingId($bookingId);
+        if ($existingFeedback) {
+            throw new Exception('Feedback sudah pernah diberikan untuk booking ini');
+        }
+
+        return ['booking' => $booking];
     }
 
-    public function getPendingFeedbackBookings(int $userId): array
-    {
-        $stmt = App::$app->db->prepare("
-            SELECT b.id_booking, b.tanggal_penggunaan_ruang, b.waktu_mulai, r.nama_ruangan
-            FROM booking b
-            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
-            WHERE b.user_id = :user_id
-              AND b.status = 'completed'
-              AND NOT EXISTS (
-                SELECT 1 FROM feedback f WHERE f.booking_id = b.id_booking
-              )
-            ORDER BY b.tanggal_penggunaan_ruang DESC, b.waktu_mulai DESC
-        ");
-        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    public function getFeedbackForBooking(int $bookingId): ?Feedback
-    {
-        return Feedback::Query()->where('booking_id', $bookingId)->first();
-    }
-
-    public function getAdminFeedbackList(): array
-    {
-        $sql = "
-            SELECT f.*, u.nama AS user_name, b.tanggal_penggunaan_ruang, b.waktu_mulai, r.nama_ruangan
-            FROM feedback f
-            JOIN users u ON u.id_user = f.user_id
-            JOIN booking b ON b.id_booking = f.booking_id
-            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
-            ORDER BY f.created_at DESC
-        ";
-
-        $stmt = App::$app->db->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
 }

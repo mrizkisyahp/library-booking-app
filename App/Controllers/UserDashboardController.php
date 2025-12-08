@@ -2,57 +2,29 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Middleware\AuthMiddleware;
-use App\Core\Services\UserDashboardService;
-use App\Core\Services\UserBookingService;
-use App\Models\User;
-use App\Models\Booking;
+use App\Core\Request;
+use App\Core\Services\DashboardService;
 
 class UserDashboardController extends Controller
 {
-    protected ?User $currentUser = null;
-
-    public function __construct()
-    {
-        $this->registerMiddleware(new AuthMiddleware());
-        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
+    public function __construct(
+        private DashboardService $dashboardService
+    ) {
     }
-
-    public function index()
+    public function index(Request $request)
     {
-        $dashboardService = new UserDashboardService();
-        $bookingService = new UserBookingService();
-        // $dashboardService->expireStaleDrafts();
-        $user = $this->currentUser;
+        // dd("Hello");
+        $data = $this->dashboardService->getUserDashboardData(user()->id_user);
 
-        if ((int) $user->id_role === 1) {
-            App::$app->response->redirect('/admin');
-            return;
-        }
+        $bookings = $data['bookings'];
+        $user = $data['user'];
+        $feedbacks = $data['pendingFeedbacks'];
 
-        foreach ($dashboardService->computeWarnings($user) as $warning) {
-            App::$app->session->setFlash('warning', $warning);
-        }
-
-        $userId = (int) $user->id_user;
-        $stats = $dashboardService->getBookingStatistics($userId);
-        $picBookings = $dashboardService->getPicBookings($userId);
-        $memberBookings = $dashboardService->getAnggotaBookings($userId);
-        $pendingFeedbacks = $dashboardService->getPendingFeedbacks($userId);
-
-        $bookings = array_merge($picBookings, $memberBookings);
-        usort($bookings, static function ($a, $b) {
-            return strcmp($b['created_at'] ?? '', $a['created_at'] ?? '');
-        });
-
-        return $this->render('User/UserDashboard', [
-            'user' => $user,
-            'stats' => $stats,
+        return view('User/UserDashboard', [
             'bookings' => $bookings,
-            'pendingFeedbacks' => $pendingFeedbacks,
-            'bookingService' => $bookingService,
+            'user' => $user,
+            'feedbacks' => $feedbacks,
         ]);
     }
 }

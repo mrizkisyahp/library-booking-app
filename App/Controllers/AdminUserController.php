@@ -2,227 +2,189 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Csrf;
-use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
-use App\Core\Response;
-use App\Core\Services\AdminUserService;
-use App\Models\User;
+use App\Core\Services\UserServices;
+use Exception;
 
 class AdminUserController extends Controller
 {
-    private AdminUserService $service;
-    private ?User $currentUser = null;
-
-    public function __construct()
+    public function __construct(private UserServices $userServices)
     {
-        $this->registerMiddleware(new AdminMiddleware());
-        $this->service = new AdminUserService();
-        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Admin User Management | Library Booking App');
-
-        $request = App::$app->request;
-        $query = $request->getBody();
         $filters = [
-            'keyword' => $query['keyword'] ?? null,
-            'role' => $query['role'] ?? null,
-            'status' => $query['status'] ?? null,
-            'page' => (int) ($query['page'] ?? ($_GET['page'] ?? 1)),
-            'perPage' => 20,
+            'keyword' => $request->query()['keyword'] ?? '',
+            'status' => $request->query()['status'] ?? '',
+            'role' => $request->query()['role'] ?? '',
         ];
+        $page = (int) ($request->query()['page'] ?? 1);
 
-        $result = $this->service->listUsers($filters);
-        $data = $result['data'] ?? [];
-        $stats = $data['stats'] ?? [];
+        $paginator = $this->userServices->getAllUsers($filters, 15, $page);
 
-        // echo '<pre>';
-        // print_r($result);
-        // print_r($data);
-        // print_r($stats);
-        // print_r($filters);
-        // print_r($data['filters']);
-        // echo '</pre>';
-
-        return $this->render('Admin/Users/Index', [
-            'users' => $data['users'] ?? [],
-            'filters' => $data['filters'] ?? $filters,
-            'stats' => $stats,
-            'currentPage' => $data['currentPage'] ?? $filters['page'],
-            'perPage' => $data['perPage'] ?? $filters['perPage'],
-            'totalUsers' => $stats['total'] ?? count($data['users'] ?? []),
-            'roles' => $this->service->getRoles(),
-            'statuses' => $this->service->getStatusOptions(),
+        return view('Admin/Users/Index', [
+            'users' => $paginator->items,
+            'paginator' => $paginator,
+            'filters' => $filters,
+            'stats' => $this->userServices->getStats(),
+            'roles' => $this->userServices->getAllRoles(),
+            'statuses' => $this->userServices->getAllStatuses(),
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Create User | Library Booking App');
-
-        $model = new User();
-        $model->status = 'pending verification';
-
-        return $this->render('Admin/Users/Create', [
-            'model' => $model,
-            'roles' => $this->service->getRoles(),
-            'statuses' => $this->service->getStatusOptions(),
+        return view('Admin/Users/Create', [
+            'roles' => $this->userServices->getAllRoles(),
         ]);
     }
 
-    public function store(Request $request, Response $response)
+    public function store(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/users');
-            return;
+        try {
+            $this->userServices->createUser($request->all());
+
+            flash('success', 'User berhasil dibuat');
+            redirect('/admin/users');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $result = $this->service->createUser($request->getBody(), $this->currentUser?->id_user);
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
+    public function show(Request $request)
+    {
+        try {
+            $id = (int) $request->query()['id'];
+            $user = $this->userServices->getUserById($id);
 
-        if ($result['success']) {
-            $response->redirect('/admin/users');
-            return;
+            return view('Admin/Users/Show', [
+                'user' => $user,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/users');
         }
-
-        $this->setLayout('main');
-        return $this->render('Admin/Users/Create', [
-            'model' => $result['data']['model'] ?? new User(),
-            'roles' => $this->service->getRoles(),
-            'statuses' => $this->service->getStatusOptions(),
-        ]);
     }
 
-    public function edit(Request $request, Response $response)
+    public function edit(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Edit User | Library Booking App');
+        try {
+            $id = (int) $request->query()['id'];
+            $user = $this->userServices->getUserById($id);
 
-        $id = (int) ($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
-        $user = $this->service->getUserById($id);
-        if (!$user) {
-            App::$app->session->setFlash('error', 'User not found.');
-            $response->redirect('/admin/users');
-            return;
+            return view('Admin/Users/Edit', [
+                'user' => $user,
+                'roles' => $this->userServices->getAllRoles(),
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/users');
         }
-
-        return $this->render('Admin/Users/Edit', [
-            'model' => $user,
-            'roles' => $this->service->getRoles(),
-            'statuses' => $this->service->getStatusOptions(),
-        ]);
     }
 
-    public function show(Request $request, Response $response)
+    public function update(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('User Detail | Library Booking App');
+        try {
+            $id = (int) $request->all()['id_user'];
+            $data = $request->all();
+            unset($data['id_user']);
 
-        $id = (int) ($request->getBody()['id_user'] ?? $request->getBody()['id'] ?? 0);
-        $user = $this->service->getUserById($id);
-        if (!$user) {
-            App::$app->session->setFlash('error', 'User not found.');
-            $response->redirect('/admin/users');
-            return;
+            $this->userServices->updateUser($id, $data);
+
+            flash('success', 'User berhasil diupdate');
+            redirect('/admin/users');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        return $this->render('Admin/Users/Show', [
-            'user' => $user,
-            'statuses' => $this->service->getStatusOptions(),
-        ]);
     }
 
-    public function update(Request $request, Response $response)
+    public function delete(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/users');
-            return;
+        try {
+            $id = (int) $request->all()['id_user'];
+            $this->userServices->deleteUser($id);
+
+            flash('success', 'User berhasil dihapus');
+            redirect('/admin/users');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $body = $request->getBody();
-        $id = (int) ($body['id_user'] ?? 0);
-        $result = $this->service->updateUser($id, $body, $this->currentUser?->id_user);
+    public function suspend(Request $request)
+    {
+        try {
+            $id = (int) $request->all()['id_user'];
+            $this->userServices->suspendUser($id);
 
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-
-        if ($result['success']) {
-            $response->redirect('/admin/users');
-            return;
+            flash('success', 'User berhasil disuspend');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        $this->setLayout('main');
-        return $this->render('Admin/Users/Edit', [
-            'model' => $result['data']['model'] ?? $this->service->getUserById($id),
-            'roles' => $this->service->getRoles(),
-            'statuses' => $this->service->getStatusOptions(),
-        ]);
     }
 
-    public function delete(Request $request, Response $response)
+    public function unsuspend(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/users');
-            return;
+        try {
+            $id = (int) $request->all()['id_user'];
+            $this->userServices->unsuspendUser($id);
+
+            flash('success', 'User berhasil diaktifkan kembali');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        $id = (int) ($request->getBody()['id_user'] ?? 0);
-        $result = $this->service->deleteUser($id, $this->currentUser?->id_user);
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/users');
     }
 
-    public function suspend(Request $request, Response $response)
+    public function resetPassword(Request $request)
     {
-        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->suspendUser($id, $this->currentUser?->id_user));
-    }
+        try {
+            $id = (int) $request->all()['id_user'];
+            $newPassword = $this->userServices->resetPassword($id);
 
-    public function unsuspend(Request $request, Response $response)
-    {
-        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->unsuspendUser($id, $this->currentUser?->id_user));
-    }
-
-    public function resetPassword(Request $request, Response $response)
-    {
-        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->resetPassword($id, $this->currentUser?->id_user));
-    }
-
-    public function approveKubaca(Request $request, Response $response)
-    {
-        $this->handleQuickAction($request, $response, fn(int $id) => $this->service->approveKubaca($id, $this->currentUser?->id_user));
-    }
-
-    public function rejectKubaca(Request $request, Response $response)
-    {
-        $body = $request->getBody();
-        $reason = $body['reason'] ?? null;
-        $this->handleQuickAction(
-            $request,
-            $response,
-            fn(int $id) => $this->service->rejectKubaca($id, $reason, $this->currentUser?->id_user)
-        );
-    }
-
-    private function handleQuickAction(Request $request, Response $response, callable $action): void
-    {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/users');
-            return;
+            flash('success', 'Password berhasil direset. Password baru: ' . $newPassword);
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $id = (int) ($request->getBody()['id_user'] ?? 0);
-        $result = $action($id);
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/users');
+    public function approveKubaca(Request $request)
+    {
+        try {
+            $id = (int) $request->all()['id_user'];
+            $this->userServices->approveKubaca($id);
+
+            flash('success', 'KuBaca berhasil disetujui, user sekarang aktif');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function rejectKubaca(Request $request)
+    {
+        try {
+            $id = (int) $request->all()['id_user'];
+            $reason = $request->all()['reason'] ?? '';
+
+            $this->userServices->rejectKubaca($id, $reason);
+
+            flash('success', 'KuBaca ditolak');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 }

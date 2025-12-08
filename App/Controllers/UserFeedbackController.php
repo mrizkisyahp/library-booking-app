@@ -2,64 +2,51 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Middleware\AuthMiddleware;
 use App\Core\Request;
-use App\Core\Response;
 use App\Core\Services\FeedbackService;
-use App\Models\User;
+use Exception;
 
 class UserFeedbackController extends Controller
 {
-    protected ?User $currentUser = null;
-    public function __construct()
-    {
-        $this->registerMiddleware(new AuthMiddleware(['create', 'store']));
-        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
+    public function __construct(
+        private FeedbackService $feedbackService
+    ) {
     }
 
-    public function create(Request $request, Response $response): string
+    public function create(Request $request)
     {
-        $user = $this->currentUser;
-        if (!$user instanceof User) {
-            $response->redirect('/login');
-            return '';
+        try {
+            $user = auth()->user();
+            $bookingId = (int) ($request->query()['booking'] ?? 0);
+
+            $data = $this->feedbackService->getBookingForFeedback($bookingId, $user->id_user);
+
+            return view('User/Feedback/Create', $data);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
         }
-
-        $bookingId = (int)($request->getBody()['booking'] ?? 0);
-        $service = new FeedbackService();
-        $result = $service->getFeedbackForm($bookingId, (int)$user->id_user);
-
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Booking tidak valid.');
-            $response->redirect($result['redirect'] ?? '/dashboard');
-            return '';
-        }
-
-        $this->setLayout('main');
-        $this->setTitle('Feedback Booking');
-        return $this->render('User/Feedback/Create', $result['data'] ?? []);
     }
 
-    public function store(Request $request, Response $response)
+    public function store(Request $request)
     {
-        $user = $this->currentUser;
-        if (!$request->isPost()) {
-            $response->redirect('/dashboard');
-            return;
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $data = [
+                'rating' => $request->all()['rating'],
+                'komentar' => $request->all()['komentar'] ?? '',
+            ];
+
+            $this->feedbackService->createFeedback($bookingId, $user->id_user, $data);
+
+            flash('success', 'Terima kasih atas feedback Anda!');
+            redirect('/my-bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        if (!$this->currentUser instanceof User) {
-            $response->redirect('/login');
-            return;
-        }
-
-        $bookingId = (int)($request->getBody()['booking_id'] ?? 0);
-        $service = new FeedbackService();
-        $result = $service->submitFeedback($bookingId, (int)$user->id_user, $request->getBody());
-
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect($result['redirect'] ?? '/dashboard');
     }
 }

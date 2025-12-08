@@ -2,191 +2,226 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Csrf;
-use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
-use App\Core\Response;
-use App\Core\Services\AdminRoomService;
-use App\Models\Room;
+use App\Core\Services\RoomService;
+use App\Core\Exceptions\ValidationException;
 
 class AdminRoomController extends Controller
 {
-    private AdminRoomService $service;
-
-    public function __construct()
+    public function __construct(private RoomService $roomService)
     {
-        $this->registerMiddleware(new AdminMiddleware());
     }
 
-    public function index(Request $request, Response $response)
+    public function index(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Admin Room Management | Library Booking App');
+        $page = (int) ($request->input('page') ?? 1);
+        $keyword = $request->input('keyword') ?? '';
+        $jenis = $request->input('jenis_ruangan') ?? '';
+        $status = $request->input('status_ruangan') ?? '';
+        $kapasitasmin = $request->input('kapasitas_min') ?? '';
+        $kapasitasmax = $request->input('kapasitas_max') ?? '';
 
         $filters = [
-            'keyword' => $request->getBody()['keyword'] ?? null,
-            'jenis_ruangan' => $request->getBody()['jenis_ruangan'] ?? null,
-            'status_ruangan' => $request->getBody()['status_ruangan'] ?? null,
-            'page' => (int) ($request->getBody()['page'] ?? 1),
+            'keyword' => $keyword,
+            'kapasitas_min' => $kapasitasmin,
+            'kapasitas_max' => $kapasitasmax,
+            'jenis_ruangan' => $jenis,
+            'status_ruangan' => $status,
         ];
 
-        $service = new AdminRoomService();
-        $result = $service->listRooms($filters);
-        $data = $result['data'] ?? [];
+        $paginatedRooms = $this->roomService->getAllRooms($filters, 15, $page);
 
-        return $this->render('Admin/Rooms/Index', [
-            'rooms' => $data['rooms'] ?? [],
+        return view('Admin/Rooms/Index', [
+            'rooms' => $paginatedRooms->items,
+            'pagination' => $paginatedRooms,
             'filters' => $filters,
-            'statusOptions' => $data['statusOptions'] ?? $service->getStatusOptions(),
-            'totalRooms' => $data['total'] ?? 0,
-            'currentPage' => $data['currentPage'] ?? $filters['page'],
-            'perPage' => $data['perPage'] ?? 20,
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Create Room | Library Booking App');
-
-        $service = new AdminRoomService();
-
-        return $this->render('Admin/Rooms/Create', [
-            'room' => new Room(),
-            'statusOptions' => $service->getStatusOptions(),
-        ]);
+        return view('Admin/Rooms/Create');
     }
 
-    public function store(Request $request, Response $response)
+    public function store(Request $request)
     {
         if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/rooms');
-            return;
+            redirect('/admin/rooms');
         }
 
-        $service = new AdminRoomService();
-        $result = $service->createRoom($request->getBody());
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
+        try {
+            $validated = $request->validate([
+                'nama_ruangan' => ['required', 'string', 'max:100'],
+                'jenis_ruangan' => ['required', 'string'],
+                'kapasitas_min' => ['required', 'numeric', 'min:1'],
+                'kapasitas_max' => ['required', 'numeric', 'min:1'],
+                'deskripsi_ruangan' => ['required', 'string'],
+                'status_ruangan' => ['required', 'string', 'in:available,unavailable,adminOnly'],
+            ]);
 
-        if ($result['success']) {
-            $response->redirect('/admin/rooms');
-            return;
+            $this->roomService->createRoom($validated);
+
+            flash('success', 'Ruangan berhasil ditambahkan!');
+            redirect('/admin/rooms');
+        } catch (ValidationException $e) {
+            return view('Admin/Rooms/Create', [
+                'validator' => $e->getValidator()
+            ]);
         }
-
-        $this->setLayout('main');
-        return $this->render('Admin/Rooms/Create', [
-            'room' => $result['data']['room'] ?? new Room(),
-            'statusOptions' => $service->getStatusOptions(),
-        ]);
     }
 
-    public function edit(Request $request, Response $response)
+    public function edit(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Edit Room | Library Booking App');
+        $id = (int) $request->query('id');
+        $room = $this->roomService->getRoomById($id);
 
-        $id = (int) ($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
-        $service = new AdminRoomService();
-        $room = $service->getRoomById($id);
         if (!$room) {
-            App::$app->session->setFlash('error', 'Room not found.');
-            $response->redirect('/admin/rooms');
-            return;
+            flash('error', 'Ruangan tidak ditemukan');
+            redirect('/admin/rooms');
         }
 
-        return $this->render('Admin/Rooms/Edit', [
+        return view('Admin/Rooms/Edit', [
             'room' => $room,
-            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
-    public function update(Request $request, Response $response)
+    public function show(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/rooms');
-            return;
-        }
+        $id = (int) $request->query('id');
+        $room = $this->roomService->getRoomById($id);
 
-        $body = $request->getBody();
-        $id = (int) ($body['id_ruangan'] ?? 0);
-        $service = new AdminRoomService();
-        $result = $service->updateRoom($id, $body);
-
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-
-        if ($result['success']) {
-            $response->redirect('/admin/rooms');
-            return;
-        }
-
-        $this->setLayout('main');
-        return $this->render('Admin/Rooms/Edit', [
-            'room' => $result['data']['room'] ?? $service->getRoomById($id),
-            'statusOptions' => $service->getStatusOptions(),
-        ]);
-    }
-
-    public function delete(Request $request, Response $response)
-    {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/rooms');
-            return;
-        }
-
-        $id = (int) ($request->getBody()['id_ruangan'] ?? 0);
-        $service = new AdminRoomService();
-        $result = $service->deleteRoom($id);
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/rooms');
-    }
-
-    public function activate(Request $request, Response $response)
-    {
-        $this->handleStatusAction($request, $response, 'activateRoom');
-    }
-
-    public function deactivate(Request $request, Response $response)
-    {
-        $this->handleStatusAction($request, $response, 'deactivateRoom');
-    }
-
-    public function show(Request $request, Response $response)
-    {
-        $this->setLayout('main');
-        $this->setTitle('Room Detail | Library Booking App');
-
-        $id = (int) ($request->getBody()['id_ruangan'] ?? $request->getBody()['id'] ?? 0);
-        $service = new AdminRoomService();
-        $room = $service->getRoomById($id);
         if (!$room) {
-            App::$app->session->setFlash('error', 'Room not found.');
-            $response->redirect('/admin/rooms');
-            return;
+            flash('error', 'Ruangan tidak ditemukan');
+            redirect('/admin/rooms');
         }
 
-        return $this->render('Admin/Rooms/Show', [
+        return view('Admin/Rooms/Show', [
             'room' => $room,
-            'statusOptions' => $service->getStatusOptions(),
         ]);
     }
 
-    private function handleStatusAction(Request $request, Response $response, string $method): void
+    public function update(Request $request)
     {
         if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'Invalid request.');
-            $response->redirect('/admin/rooms');
-            return;
+            redirect('/admin/rooms');
         }
 
-        $id = (int) ($request->getBody()['id_ruangan'] ?? 0);
-        $service = new AdminRoomService();
-        $result = $service->{$method}($id);
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/rooms');
+        $id = (int) $request->input('id_ruangan');
+
+        try {
+            $validated = $request->validate([
+                'nama_ruangan' => ['required', 'string', 'max:100'],
+                'jenis_ruangan' => ['required', 'string'],
+                'kapasitas_min' => ['required', 'numeric', 'min:1'],
+                'kapasitas_max' => ['required', 'numeric', 'min:1'],
+                'deskripsi_ruangan' => ['required', 'string'],
+                'status_ruangan' => ['required', 'string', 'in:available,unavailable,adminOnly'],
+            ]);
+
+            $this->roomService->updateRoom($id, $validated);
+
+            flash('success', 'Ruangan berhasil diperbarui!');
+            redirect('/admin/rooms');
+        } catch (ValidationException $e) {
+            $room = $this->roomService->getRoomById($id);
+            return view('Admin/Rooms/Edit', [
+                'room' => $room,
+                'validator' => $e->getValidator()
+            ]);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+
+        if (!$request->isPost()) {
+            redirect('/admin/rooms');
+        }
+
+        $id = (int) $request->input('id_ruangan');
+
+        try {
+            $this->roomService->deleteRoom($id);
+            flash('success', 'Ruangan berhasil dihapus');
+        } catch (\Exception $e) {
+            flash('error', $e->getMessage());
+        }
+
+        redirect('/admin/rooms');
+    }
+
+    public function activate(Request $request)
+    {
+        $id = (int) $request->input('id_ruangan');
+
+        try {
+            $this->roomService->setRoomAvailable($id);
+            flash('success', 'Ruangan berhasil diaktifkan');
+        } catch (\Exception $e) {
+            flash('error', $e->getMessage());
+        }
+
+        redirect('/admin/rooms');
+    }
+
+    public function deactivate(Request $request)
+    {
+        $id = (int) $request->input('id_ruangan');
+
+        try {
+            $this->roomService->setRoomUnavailable($id);
+            flash('success', 'Ruangan berhasil dinonaktifkan');
+        } catch (\Exception $e) {
+            flash('error', $e->getMessage());
+        }
+
+        redirect('/admin/rooms');
+    }
+
+    public function setAdminOnly(Request $request)
+    {
+        $id = (int) $request->input('id_ruangan');
+
+        try {
+            $this->roomService->setRoomAdminOnly($id);
+            flash('success', 'Ruangan berhasil diset sebagai AdminOnly');
+        } catch (\Exception $e) {
+            flash('error', $e->getMessage());
+        }
+
+        redirect('/admin/rooms');
+    }
+
+    public function activateAll(Request $request)
+    {
+        if (!$request->isPost()) {
+            redirect('/admin/rooms');
+        }
+
+        try {
+            $count = $this->roomService->activateAllRooms();
+            flash('success', "Berhasil mengaktifkan {$count} ruangan");
+        } catch (\Exception $e) {
+            flash('error', $e->getMessage());
+        }
+
+        redirect('/admin/rooms');
+    }
+
+    public function deactivateAll(Request $request)
+    {
+        if (!$request->isPost()) {
+            redirect('/admin/rooms');
+        }
+
+        try {
+            $count = $this->roomService->deactivateAllRooms();
+            flash('success', "Berhasil mengnonaktifkan {$count} ruangan");
+        } catch (\Exception $e) {
+            flash('error', $e->getMessage());
+        }
+
+        redirect('/admin/rooms');
     }
 }

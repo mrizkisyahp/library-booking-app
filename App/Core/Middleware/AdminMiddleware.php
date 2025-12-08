@@ -12,15 +12,13 @@ class AdminMiddleware extends Middleware
 {
     public function handle(Request $request, Response $response): bool
     {
-        $user = auth();
-
-        if (guest()) {
+        if (auth()->guest()) {
             flash('error', 'Please login to access this page.');
             redirect('/login');
             return false;
         }
 
-        if (!$user instanceof User || !$user->isAdmin()) {
+        if (!auth()->user() instanceof User || !auth()->user()->isAdmin()) {
             flash('error', 'Access denied. Admin only.');
             redirect('/dashboard');
             return false;

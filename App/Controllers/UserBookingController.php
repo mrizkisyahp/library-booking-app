@@ -2,270 +2,313 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Middleware\AuthMiddleware;
-use App\Core\Middleware\BookingMiddleware;
 use App\Core\Request;
-use App\Core\Response;
-use App\Models\User;
-use App\Core\Services\UserBookingService;
+use App\Core\Services\BookingServices;
+use Exception;
 
 class UserBookingController extends Controller
 {
-    protected ?User $currentUser = null;
-    public function __construct()
-    {
-        $this->registerMiddleware(new AuthMiddleware());
-        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
-
-        $this->registerMiddleware(new BookingMiddleware([
-            'showDraft',
-            'submitDraft',
-            'addMember',
-        ]));
+    public function __construct(
+        private BookingServices $bookingServices
+    ) {
     }
 
-    public function createDraft(Request $request, Response $response)
+    public function createDraft(Request $request)
     {
-        // Booking::expireStaleDrafts();
-        if (!$request->isPost()) {
-            $response->redirect('/rooms');
-            return;
+        try {
+            $user = auth()->user();
+            $data = $request->all();
+            $data['user_id'] = $user->id_user;
+            $data['ruangan_id'] = (int) trim($data['ruangan_id']);
+
+            $this->bookingServices->validateBookingRules($data, $user);
+            $this->bookingServices->validateNoTimeConflicts($data, $user->id_user);
+
+            $booking = $this->bookingServices->createDraft($data);
+
+            flash('success', 'Draft booking berhasil dibuat');
+            redirect('/bookings/draft?id=' . $booking->id_booking);
+        } catch (Exception $e) {
+            foreach ($request->all() as $key => $value) {
+                flash('old_' . $key, $value);
+            }
+            flash('error', $e->getMessage());
+            back();
         }
+    }
+    public function showDraft(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->query()['id'];
 
-        $user = $this->currentUser;
-        if (!$user instanceof User) {
-            $response->redirect('/login');
-            return;
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            return view('User/Bookings/Draft', [
+                'booking' => $data['booking'],
+                'pic' => $data['pic'],
+                'members' => $data['members'],
+                'allMembers' => $data['allMembers'],
+                'isPic' => $data['isPic'],
+                'isMember' => $data['isMember'],
+                'canSubmit' => $data['canSubmit'],
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        $bookingService = new UserBookingService();
-        $result = $bookingService->createDraft($user, $request->getBody());
-
-        // $debug = $result;
-
-        // echo '<pre>';
-        // print_r($debug);
-        // echo '</pre>';
-        // exit;
-        if ($result['success'] ?? false) {
-            App::$app->session->setFlash('success', $result['message'] ?? 'Draft booking berhasil dibuat.');
-            $response->redirect($result['redirect'] ?? '/dashboard');
-            return;
-        }
-
-        App::$app->session->setFlash('error', $result['message'] ?? 'Gagal membuat draft booking');
-        $response->redirect($result['redirect'] ?? '/rooms');
     }
 
-    public function submitDraft(Request $request, Response $response)
+    public function submitDraft(Request $request)
     {
-        // Booking::expireStaleDrafts();
-        $user = $this->currentUser;
-        $bookingId = (int) ($request->getBody()['booking_id']);
-        $bookingService = new UserBookingService();
-        $result = $bookingService->submitDraft($bookingId, (int) $user->id_user);
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
 
-        if ($result['success'] ?? false) {
-            App::$app->session->setFlash('success', $result['message'] ?? 'Booking dikirim ke admin.');
-            $response->redirect($result['redirect'] ?? '/dashboard');
-            return;
+            $this->bookingServices->submitForApproval($bookingId, $user->id_user);
+
+            flash('success', 'Booking berhasil diajukan untuk persetujuan admin');
+            redirect('/my-bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        App::$app->session->setFlash('error', $result['message'] ?? 'Gagal mengirim draft booking.');
-        $redirect = $result['redirect'] ?? '/dashboard';
-        $response->redirect($redirect);
     }
 
-    public function showDraft(Request $request, Response $response)
+    public function addMember(Request $request)
     {
-        // Booking::expireStaleDrafts();
-        $user = $this->currentUser;
-        if (!$user instanceof User) {
-            $response->redirect('/login');
-            return;
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $memberUserId = (int) $request->all()['member_user_id'];
+
+            $this->bookingServices->addMember($bookingId, $memberUserId, $user->id_user);
+
+            flash('success', 'Anggota berhasil ditambahkan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-        $body = $request->getBody();
-        $bookingId = (int) ($body['id'] ?? $body['booking_id'] ?? 0);
-
-        $bookingService = new UserBookingService();
-        $result = $bookingService->getDraftViewData((int) $user->id_user, $bookingId);
-
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Draft tidak tersedia');
-            $response->redirect('/dashboard');
-            return;
-        }
-
-        $data = $result['data'] ?? [];
-
-        $this->setLayout('main');
-        $this->setTitle('Draft Booking');
-
-        return $this->render('User/Bookings/Draft', [
-            'booking' => $data['booking'] ?? null,
-            'room' => $data['room'] ?? null,
-            'members' => $data['members'] ?? [],
-            'currentUser' => $user,
-            'canSubmit' => $data['canSubmit'],
-            'requiredMembers' => $data['requiredMembers'],
-            'maximumMembers' => $data['maximumMembers'],
-            'currentMembers' => $data['currentMembers'],
-        ]);
     }
 
-    public function addMember(Request $request, Response $response)
+    public function showJoinForm(Request $request)
     {
-        // Booking::expireStaleDrafts();
-        $user = $this->currentUser;
-        if (!$request->isPost()) {
-            $response->redirect('/dashboard');
-            return;
-        }
-
-        $bookingId = (int) $request->getBody()['booking_id'];
-        $memberEmail = trim($request->getBody()['member_email']);
-        $bookingService = new UserBookingService();
-        $result = $bookingService->addMember($bookingId, (int) $user->id_user, $memberEmail);
-
-        if ($result['success'] ?? false) {
-            App::$app->session->setFlash('success', $result['message'] ?? 'Anggota ditambahkan.');
-            $response->redirect($result['redirect'] ?? '/bookings/draft?id=' . $bookingId);
-            return;
-        }
-
-        App::$app->session->setFlash('error', $result['message'] ?? 'Gagal menambah anggota.');
-        if ($result['fatal'] ?? false) {
-            $response->redirect('/dashboard');
-            return;
-        }
-
-        $response->redirect('/bookings/draft?id=' . $bookingId);
+        $prefill = $request->query()['code'] ?? '';
+        return view('User/Bookings/Join', ['prefill' => $prefill]);
     }
 
-    public function showJoinForm(Request $request, Response $response)
+    public function joinByLink(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Gabung Booking');
+        try {
+            $user = auth()->user();
+            $token = $request->all()['invite_token'];
 
-        return $this->render('User/Bookings/Join', [
-            'prefill' => $request->getBody()['code'] ?? null,
-        ]);
+            $bookingId = $this->bookingServices->joinViaInviteToken($token, $user->id_user);
+
+            flash('success', 'Berhasil bergabung dengan booking');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 
-    public function joinByLink(Request $request, Response $response)
+    public function showMyBooking(Request $request)
     {
-        // Booking::expireStaleDrafts();
+        $user = auth()->user();
+        $page = (int) ($request->query()['page'] ?? 1);
 
-        $user = $this->currentUser;
-        if (!$user instanceof User) {
-            $response->redirect('/login');
-            return;
-        }
-
-        $body = $request->getBody();
-        $token = trim((string) $body['invite_token'] ?? '');
-        if ($token === '') {
-            App::$app->session->setFlash('error', 'Link tidak boleh kosong');
-            $response->redirect('/bookings/join');
-            return;
-        }
-
-        $bookingService = new UserBookingService();
-        $result = $bookingService->joinViaInviteToken((int) $user->id_user, $token);
-
-        App::$app->session->setFlash($result['success'] ? 'success' : (($result['info'] ?? false) ? 'info' : 'error'), $result['message'] ?? '');
-
-        if ($result['success'] ?? false) {
-            $response->redirect($result['redirect'] ?? '/dashboard');
-            return;
-        }
-
-        if ($result['info'] ?? false) {
-            $response->redirect('/dashboard');
-            return;
-        }
-
-        $response->redirect('/bookings/join');
-    }
-
-    public function showMyBooking(Request $request, Response $response)
-    {
-        $this->setLayout('main');
-        $this->setTitle('My Bookings | Library Booking App');
-
-        $user = $this->currentUser;
-        if (!$user instanceof User) {
-            $response->redirect('/login');
-            return;
-        }
-
-        $params = App::$app->request->getBody();
         $filters = [
-            'keyword' => $params['keyword'] ?? null,
-            'tanggal_penggunaan_ruang' => $params['tanggal_penggunaan_ruang'] ?? null,
-            'status' => $params['status'] ?? null,
-            'page' => (int) ($params['page'] ?? ($_GET['page'] ?? 1)),
+            'nama_ruangan' => $request->input('nama_ruangan') ?? '',
+            'tanggal' => $request->input('tanggal') ?? '',
+            'waktu_mulai' => $request->input('waktu_mulai') ?? '',
+            'kapasitas_min' => $request->input('kapasitas_min') ?? '',
+            'jenis_ruangan' => $request->input('jenis_ruangan') ?? [],
         ];
 
-        $bookingService = new UserBookingService();
-        $result = $bookingService->getMyBookings((int) $user->id_user, $filters);
-
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Gagal memuat data booking');
-            $response->redirect('/dashboard');
-            return;
-        }
-
-        $data = $result['data'] ?? [];
-
-        return $this->render('User/Bookings/Index', [
-            'bookings' => $data['mybooking'],
+        $bookings = $this->bookingServices->getBookingsByUser($user->id_user, $filters, 15, $page);
+        return view('User/Bookings/Index', [
+            'bookings' => $bookings->items,
+            'pagination' => $bookings,
             'filters' => $filters,
-            'currentPage' => $data['currentPage'],
-            'perPage' => $data['perPage'],
-            'total' => $data['total'],
-            'bookingService' => $bookingService,
         ]);
     }
-    public function detail(Request $request, Response $response)
+
+    public function cancelBooking(Request $request)
     {
-        $user = $this->currentUser;
-        if (!$user instanceof User) {
-            $response->redirect('/login');
-            return;
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $reason = $request->all()['reason'] ?? 'Dibatalkan oleh user';
+
+            $this->bookingServices->cancelBooking($bookingId, $user->id_user, $reason);
+
+            flash('success', 'Booking berhasil dibatalkan');
+            redirect('/my-bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $bookingId = (int) ($request->getBody()['id'] ?? $request->getBody()['id_booking'] ?? 0);
-        if ($bookingId <= 0) {
-            App::$app->session->setFlash('error', 'ID booking tidak valid.');
-            $response->redirect('/dashboard');
-            return;
+    public function leaveBooking(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->leaveBooking($bookingId, $user->id_user);
+
+            flash('success', 'Berhasil meninggalkan booking');
+            redirect('/my-bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $service = new UserBookingService();
-        $result = $service->getUserBookingDetail((int) $user->id_user, $bookingId);
+    public function kickMember(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $memberId = (int) $request->all()['user_id'];
 
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Booking tidak dapat ditampilkan.');
-            $response->redirect('/dashboard');
-            return;
+            $this->bookingServices->kickMember($bookingId, $memberId, $user->id_user);
+
+            flash('success', 'Anggota berhasil dikeluarkan');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $this->setLayout('main');
-        $this->setTitle('Detail Booking | Library Booking App');
+    public function detail(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->query('id');
 
-        $data = $result['data'];
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
 
-        return $this->render('User/Bookings/Detail', [
-            'booking' => $data['booking'] ?? [],
-            'room' => $data['room'] ?? [],
-            'pic' => $data['pic'] ?? [],
-            'members' => $data['members'] ?? [],
-            'requiredMembers' => $data['requiredMembers'] ?? 0,
-            'maximumMembers' => $data['maximumMembers'] ?? 0,
-            'currentMembers' => $data['currentMembers'] ?? 0,
-        ]);
+            return view('User/Bookings/Detail', [
+                'booking' => $data['booking'],
+                'pic' => $data['pic'],
+                'members' => $data['members'],
+                'allMembers' => $data['allMembers'],
+                'isPic' => $data['isPic'],
+                'isMember' => $data['isMember'],
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function showRescheduleForm(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->query('id');
+
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            $booking = $data['booking'];
+
+            // Only PIC can reschedule
+            if (!$data['isPic']) {
+                flash('error', 'Hanya PIC yang dapat melakukan reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            // Only verified bookings can be rescheduled
+            if ($booking->status !== 'verified') {
+                flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            return view('User/Bookings/Reschedule', [
+                'booking' => $booking,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function confirmReschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $newDate = $request->all()['tanggal_penggunaan_ruang'];
+            $newStart = $request->all()['waktu_mulai'];
+            $newEnd = $request->all()['waktu_selesai'];
+
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            $booking = $data['booking'];
+
+            if (!$data['isPic']) {
+                flash('error', 'Hanya PIC yang dapat melakukan reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            if ($booking->status !== 'verified') {
+                flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
+                redirect('/bookings/detail?id=' . $bookingId);
+            }
+
+            return view('User/Bookings/RescheduleConfirm', [
+                'booking' => $booking,
+                'newDate' => $newDate,
+                'newStart' => $newStart,
+                'newEnd' => $newEnd,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function reschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $newData = [
+                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $request->all()['waktu_mulai'],
+                'waktu_selesai' => $request->all()['waktu_selesai'],
+            ];
+
+            $this->bookingServices->rescheduleBooking($bookingId, $newData, $user->id_user);
+
+            flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
+            redirect('/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 }

@@ -3,8 +3,13 @@
 use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
+<<<<<<< HEAD
 use App\Core\Session;
 use Carbon\Carbon;
+=======
+use Carbon\Carbon;
+
+>>>>>>> revampwf
 
 if (!function_exists('app')) {
     function app(): App
@@ -62,23 +67,23 @@ if (!function_exists('view')) {
 }
 
 if (!function_exists('auth')) {
-    function auth(): mixed
+    function auth(): \App\Core\Services\AuthService
     {
-        return App::$app->user;
+        return App::$app->auth;
     }
 }
 
 if (!function_exists('user')) {
-    function user(): mixed
+    function user(): ?\App\Models\User
     {
-        return App::$app->user;
+        return App::$app->auth->user();
     }
 }
 
 if (!function_exists('guest')) {
     function guest(): bool
     {
-        return App::$app->user === null;
+        return App::$app->auth->guest();
     }
 }
 
@@ -135,7 +140,7 @@ if (!function_exists('dd')) {
     {
         foreach ($vars as $var) {
             echo '<pre>';
-            var_dump($var);
+            print_r($var);
             echo '</pre>';
         }
         die(1);
@@ -150,7 +155,7 @@ if (!function_exists('dump')) {
     {
         foreach ($vars as $var) {
             echo '<pre>';
-            var_dump($var);
+            print_r($var);
             echo '</pre>';
         }
     }
@@ -263,3 +268,70 @@ if (!function_exists('formatTanggal')) {
         return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
     }
 }
+<<<<<<< HEAD
+=======
+
+if (!function_exists('getRemainingAttempts')) {
+    function getRemainingAttempts(string $identifier, string $type = 'login'): int
+    {
+        $cache = app()->container->make(\App\Core\Services\CacheService::class);
+
+        $cacheKey = match ($type) {
+            'login' => 'login_attempts_' . md5($identifier),
+            'verify' => 'verify_attempts_' . $identifier,
+            'reset' => 'reset_attempts_' . $identifier,
+            default => 'login_attempts_' . md5($identifier)
+        };
+
+        $attempts = (int) ($cache->get($cacheKey) ?? 0);
+        return max(0, 5 - $attempts);
+    }
+}
+
+if (!function_exists('str_slug')) {
+    function str_slug(string $string): string
+    {
+        $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $string);
+        return trim($slug, '_');
+    }
+}
+if (!function_exists('room_photos')) {
+    function room_photos(\App\Models\Room $room): array
+    {
+        $dir = App::$ROOT_DIR . '/Public/uploads/Room_Photos/';
+        $slug = str_slug($room->nama_ruangan);
+        $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
+        $files = glob($pattern, GLOB_BRACE) ?: [];
+        sort($files);
+        $photos = [];
+        foreach ($files as $file) {
+            $mime = match (strtolower(pathinfo($file, PATHINFO_EXTENSION))) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+                default => 'application/octet-stream',
+            };
+            $photos[] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file));
+        }
+        return $photos;
+    }
+}
+if (!function_exists('room_thumbnail')) {
+    function room_thumbnail(\App\Models\Room $room): ?string
+    {
+        $photos = room_photos($room);
+        return $photos[0] ?? null;
+    }
+}
+if (!function_exists('room_facilities')) {
+    function room_facilities(\App\Models\Room $room): array
+    {
+        if (empty($room->deskripsi_ruangan)) {
+            return [];
+        }
+        $parts = preg_split('/[\r\n;,]+/', $room->deskripsi_ruangan);
+        return array_values(array_filter(array_map('trim', $parts)));
+    }
+}
+>>>>>>> revampwf

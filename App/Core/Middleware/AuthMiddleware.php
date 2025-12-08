@@ -23,7 +23,7 @@ class AuthMiddleware extends Middleware
             return true;
         }
 
-        if (guest()) {
+        if (auth()->guest()) {
             flash('error', 'Please login to access this page.');
             redirect('/login');
             return false;

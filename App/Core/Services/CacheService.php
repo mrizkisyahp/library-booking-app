@@ -6,11 +6,15 @@ use App\Core\App;
 
 class CacheService
 {
-    private const CACHE_DIR = '/Storage/Cache';
-
-    private static function getCachePath(string $key): string
+    private string $cacheDir;
+    public function __construct(?string $cacheDir = null)
     {
-        $dir = App::$ROOT_DIR . self::CACHE_DIR;
+        $this->cacheDir = $cacheDir ?? App::$ROOT_DIR . '/Storage/Cache';
+    }
+
+    private function getCachePath(string $key): string
+    {
+        $dir = $this->cacheDir;
         if (!is_dir($dir)) {
             mkdir($dir, 0775, true);
         }
@@ -18,9 +22,9 @@ class CacheService
         return $dir . '/' . md5($key) . '.cache';
     }
 
-    public static function set(string $key, mixed $value, int $ttl = 900): bool
+    public function set(string $key, mixed $value, int $ttl = 900): bool
     {
-        $file = self::getCachePath($key);
+        $file = $this->getCachePath($key);
         $data = [
             'value' => $value,
             'expires' => time() + $ttl,
@@ -29,9 +33,9 @@ class CacheService
         return file_put_contents($file, serialize($data)) !== false;
     }
 
-    public static function get(string $key): mixed
+    public function get(string $key): mixed
     {
-        $file = self::getCachePath($key);
+        $file = $this->getCachePath($key);
         if (!file_exists($file)) {
             return null;
         }
@@ -45,15 +49,15 @@ class CacheService
         return $data['value'] ?? null;
     }
 
-    public static function delete(string $key): bool
+    public function delete(string $key): bool
     {
-        $file = self::getCachePath($key);
+        $file = $this->getCachePath($key);
         return file_exists($file) ? unlink($file) : true;
     }
 
-    public static function clear(): void
+    public function clear(): void
     {
-        $dir = App::$ROOT_DIR . self::CACHE_DIR;
+        $dir = $this->cacheDir;
         if (!is_dir($dir)) {
             return;
         }

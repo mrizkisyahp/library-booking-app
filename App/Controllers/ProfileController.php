@@ -1,69 +1,73 @@
 <?php
-
 namespace App\Controllers;
-
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Middleware\AuthMiddleware;
 use App\Core\Request;
-use App\Core\Response;
-use App\Models\Role;
-use App\Models\User;
-use App\Core\Services\ProfileService;
-
+use App\Core\Services\ProfileServices;
+use Exception;
 class ProfileController extends Controller
 {
-    protected ?User $currentUser = null;
-    public function __construct()
+    public function __construct(
+        private ProfileServices $profileServices,
+    ) {
+    }
+    public function index(Request $request)
     {
-        $this->registerMiddleware(new AuthMiddleware(['index', 'uploadKubaca']));
-        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
+        $userId = auth()->id();
+
+        $user = $this->profileServices->getCurrentUserProfile($userId);
+
+        return view('Profile/index', [
+            'user' => $user,
+        ]);
+    }
+    public function uploadKubaca(Request $request)
+    {
+        try {
+            $userId = auth()->id();
+
+            $file = $request->file('kubaca_img');
+
+            $this->profileServices->uploadKubaca($userId, $file);
+
+            flash('success', 'KuBaca berhasil diupload. Menunggu verifikasi admin.');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+        }
+        redirect('/profile');
     }
 
-    public function index(Request $request, Response $response)
+    public function detail(Request $request)
     {
-        $this->setTitle('Profile | Library Booking App');
-        $this->setLayout('main');
+        $userId = auth()->id();
+        $user = $this->profileServices->getCurrentUserProfile($userId);
 
-        if (!$this->currentUser instanceof User) {
-            $response->redirect('/login');
-            return;
-        }
-
-        $roleName = Role::getNameById($this->currentUser->id_role ?? null);
-        if ($roleName === 'mahasiswa' && $this->currentUser->status === 'pending kubaca' && !$this->currentUser->kubaca_img) {
-            App::$app->session->setFlash('warning', 'Warning! Your account has not been verified fully, please upload kubaca image.');
-        }
-
-        return $this->render('Profile/Index', [
-            'user' => $this->currentUser,
-            'roleLabel' => $roleName,
+        return view('Profile/Detail', [
+            'user' => $user,
         ]);
     }
 
-    public function uploadKubaca(Request $request, Response $response)
+    public function resetPassword(Request $request)
     {
-        if (!$request->isPost()) {
-            $response->redirect('/profile');
-            return;
-        }
+        $userId = auth()->id();
+        $user = $this->profileServices->getCurrentUserProfile($userId);
 
-        if (!$this->currentUser instanceof User) {
-            App::$app->session->setFlash('error', 'You must be logged in to upload KuBaca.');
-            $response->redirect('/login');
-            return;
-        }
+        return view('Profile/ResetPassword', [
+            'user' => $user,
+        ]);
+    }
 
-        $service = new ProfileService();
-        $result = $service->uploadKubaca($this->currentUser, $_FILES['kubaca_img'] ?? null);
+    public function faq(Request $request)
+    {
+        return view('Profile/Faq');
+    }
 
-        $flashKey = $result['success'] ? 'success' : 'error';
-        App::$app->session->setFlash($flashKey, $result['message']);
+    public function verifikasi(Request $request)
+    {
+        $userId = auth()->id();
+        $user = $this->profileServices->getCurrentUserProfile($userId);
 
-        if ($result['success']) {
-            return $response->redirect('/profile');
-        }
-
-        $response->redirect('/profile');
+        return view('Profile/Verifikasi', [
+            'user' => $user,
+        ]);
     }
 }

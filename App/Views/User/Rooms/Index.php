@@ -1,11 +1,4 @@
 <?php
-use App\Core\Csrf;
-use App\Models\Room;
-use App\Models\User;
-/** @var Room[] $rooms */
-/** @var array $filters */
-/** @var User $user */
-
 $roomTypes = [
     'Audio Visual',
     'Telekonferensi',
@@ -15,11 +8,6 @@ $roomTypes = [
     'Bimbingan & Konseling',
     'Ruang Rapat',
 ];
-
-// echo "<pre>";
-// print_r($filters);
-// echo "</pre>";
-// die();
 
 ?>
 
@@ -198,7 +186,7 @@ $roomTypes = [
 
 
     <!-- Cek pending KuBaca PNJ -->
-    <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?>
+    <?php if (auth()->user()->status === 'pending kubaca' || auth()->user()->status === 'rejected'): ?>
         <!-- Overlay Blocking Message -->
         <div class="relative mb-8">
             <div
@@ -217,7 +205,7 @@ $roomTypes = [
                 <div class="relative flex items-start gap-6">
                     <!-- Icon -->
                     <div class="shrink-0">
-                        <?php if ($user->status === 'pending kubaca'): ?>
+                        <?php if (auth()->user()->status === 'pending kubaca'): ?>
                             <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center animate-pulse">
                                 <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -236,7 +224,7 @@ $roomTypes = [
 
                     <!-- Content -->
                     <div class="flex-1">
-                        <?php if ($user->status === 'pending kubaca'): ?>
+                        <?php if (auth()->user()->status === 'pending kubaca'): ?>
                             <h3 class="text-2xl font-bold text-amber-900 mb-2">Akun Anda Sedang Dalam Verifikasi</h3>
                             <p class="text-amber-800 mb-4 leading-relaxed">
                                 Terima kasih telah mendaftar! Akun Anda sedang menunggu verifikasi dari admin.
@@ -268,16 +256,27 @@ $roomTypes = [
         </div>
     <?php endif; ?>
 
+    <!-- Room List -->
+    <?php if (empty($rooms)): ?>
+        <div class="bg-white rounded-2xl shadow-lg p-16 text-center">
+            <svg class="w-24 h-24 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-xl font-semibold text-slate-700 mb-2">Tidak Ada Ruangan Ditemukan</h3>
+            <p class="text-slate-500">Coba ubah filter pencarian Anda</p>
+        </div>
+    <?php else: ?>
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 px-6 mb-8">
         <!-- loop ruangan -->
         <div class="md:col-span-3 md:grid md:grid-cols-3 gap-4 mx-auto space-y-6 p-6">
             <?php foreach ($rooms as $room): ?>
-                <?php $thumbnail = $room->getThumbnail(); ?>
+                <?php $thumbnail = room_thumbnail($room); ?>
                 <div class="bg-white rounded-3xl shadow-lg h-fit ">
                     <div>
                         <div>
                             <!-- Blocked Overlay for rejected/pending users -->
-                            <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?>
+                            <?php if (auth()->user()->status === 'pending kubaca' || auth()->user()->status === 'rejected'): ?>
                                 <div>
                                     <div
                                         class="bg-slate-900/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg">
@@ -339,24 +338,10 @@ $roomTypes = [
                                                         d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
                                                 </svg>
                                                 <span>
-                                                    ['RATING 5']
+                                                    Rating <?= $room->avg_rating ? number_format($room->avg_rating, 1) : '-' ?>
                                                 </span>
                                             </p>
                                         </div>
-                                        <!-- <p class="mb-4">
-                                        <?php $facilities = $room->getFacilities(); ?>
-                                        <?php if (!empty($facilities)): ?>
-                                            <div class="flex items-start text-slate-600">
-                                                <svg class="w-5 h-5 mr-2 mt-0.5 text-emerald-600 shrink-0" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span
-                                                    class="text-sm"><?= htmlspecialchars(implode(', ', array_slice($facilities, 0, 3))) ?><?= count($facilities) > 3 ? '...' : '' ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </p> -->
                                     </div>
                                     <div class="p-4 mt-4">
                                         <a href="/rooms/show?id_ruangan=<?= (int) $room->id_ruangan ?>"
@@ -377,7 +362,6 @@ $roomTypes = [
             <?php endforeach; ?>
         </div>
         <form method="get" action="/rooms" class="relative mb-4 max-w-7xl mx-auto md:px-6">
-            <?= csrf_field() ?>
 
             <div class="border border-gray-200 bg-white
                 rounded-3xl shadow-xl px-8 py-8 hidden md:block h-fit sticky top-0">

@@ -1,11 +1,3 @@
-<?php
-/** @var array $stats */
-/** @var array $recentBookings */
-/** @var array $roomUsage */
-use App\Core\App;
-use App\Core\Csrf;
-?>
-
 <div class="mb-8">
   <h2 class="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
   <p class="text-gray-600 mt-2">Kelola sistem booking ruangan perpustakaan</p>
@@ -84,12 +76,12 @@ $users = $resourceStats['users'];
               <p class="text-2xl font-bold text-teal-800"><?= $users['total'] ?></p>
             </div>
             <div class="bg-linear-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 border-2 border-cyan-200">
-              <p class="text-xs font-semibold text-cyan-600 mb-1">Verified</p>
-              <p class="text-2xl font-bold text-cyan-800"><?= $users['verified'] ?></p>
+              <p class="text-xs font-semibold text-cyan-600 mb-1">Active</p>
+              <p class="text-2xl font-bold text-cyan-800"><?= $users['active'] ?></p>
             </div>
             <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-xl p-4 border-2 border-amber-200">
-              <p class="text-xs font-semibold text-amber-600 mb-1">Pending</p>
-              <p class="text-2xl font-bold text-amber-800"><?= $users['pending'] ?></p>
+              <p class="text-xs font-semibold text-amber-600 mb-1">Pending Kubaca</p>
+              <p class="text-2xl font-bold text-amber-800"><?= $users['pending kubaca'] ?></p>
             </div>
           </div>
         </div>
@@ -130,16 +122,16 @@ $users = $resourceStats['users'];
               ?>
               <?php foreach ($recentBookings as $booking): ?>
                 <?php
-                $statusKey = strtolower($booking['status']);
+                $statusKey = strtolower($booking->status);
                 $badgeClass = $statusBadges[$statusKey] ?? 'bg-gray-100 text-gray-800';
                 $statusLabel = ucwords(str_replace('_', ' ', $statusKey));
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 text-sm text-gray-900 capitalize"><?= htmlspecialchars($booking['user_name']) ?></td>
-                  <td class="px-6 py-4 text-sm text-gray-700"><?= htmlspecialchars($booking['room_title']) ?></td>
+                  <td class="px-6 py-4 text-sm text-gray-900 capitalize"><?= htmlspecialchars($booking->nama) ?></td>
+                  <td class="px-6 py-4 text-sm text-gray-700"><?= htmlspecialchars($booking->nama_ruangan) ?></td>
                   <td class="px-6 py-4 text-sm text-gray-700">
-                    <?= htmlspecialchars($booking['tanggal_penggunaan_ruang']) ?>
-                    <?= htmlspecialchars($booking['waktu_mulai']) ?> - <?= htmlspecialchars($booking['waktu_selesai']) ?>
+                    <?= htmlspecialchars($booking->tanggal_penggunaan_ruang) ?>
+                    <?= htmlspecialchars($booking->waktu_mulai) ?> - <?= htmlspecialchars($booking->waktu_selesai) ?>
                   </td>
                   <td class="px-6 py-4 text-sm">
                     <span class="px-2 py-1 text-xs font-semibold rounded-full <?= $badgeClass ?>">
@@ -147,8 +139,8 @@ $users = $resourceStats['users'];
                     </span>
                   </td>
                   <td class="px-6 py-4 text-sm">
-                    <?php if (!empty($booking['feedback_id'])): ?>
-                      <a href="/admin/feedback/detail?id=<?= (int) $booking['feedback_id'] ?>"
+                    <?php if (!empty($booking->id_feedback)): ?>
+                      <a href="/admin/feedback/detail?id=<?= (int) $booking->id_feedback ?>"
                         class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
                         Lihat Feedback
                       </a>
@@ -157,7 +149,7 @@ $users = $resourceStats['users'];
                     <?php endif; ?>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm space-y-2">
-                    <a href="/admin/bookings/detail?id=<?= (int) $booking['id_booking'] ?>"
+                    <a href="/admin/bookings/detail?id=<?= (int) $booking->id_booking ?>"
                       class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                       Detail
                     </a>
@@ -188,15 +180,15 @@ $users = $resourceStats['users'];
             </thead>
             <tbody class="divide-y divide-gray-200">
               <?php
-              $totalBookingsRoom = array_sum(array_column($roomUsage, 'booking_count'));
+              $totalBookingsRoom = array_sum(array_map(fn($usage) => $usage['usage_count'], $roomUsage));
               foreach ($roomUsage as $usage):
-                $usagePercentage = $totalBookingsRoom > 0 ? round(($usage['booking_count'] / $totalBookingsRoom) * 100, 2) : 0;
+                $usagePercentage = $totalBookingsRoom > 0 ? round(($usage['usage_count'] / $totalBookingsRoom) * 100, 2) : 0;
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                     <?= htmlspecialchars($usage['nama_ruangan']) ?>
                   </td>
-                  <td class="px-6 py-4 text-gray-700"><?= $usage['booking_count'] ?></td>
+                  <td class="px-6 py-4 text-gray-700"><?= $usage['usage_count'] ?></td>
                   <td class="px-6 py-4 text-gray-900">
                     <div class="flex items-center">
                       <span class="font-semibold"><?= $usagePercentage ?>%</span>

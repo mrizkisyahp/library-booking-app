@@ -8,6 +8,9 @@ class PeringatanSuspensi extends DbModel
 {
     public ?int $id_peringatan = null;
     public string $nama_peringatan = '';
+    public ?string $created_at = null;
+    public ?string $updated_at = null;
+    public ?string $deleted_at = null;
 
     public static function tableName(): string
     {
@@ -22,6 +25,7 @@ class PeringatanSuspensi extends DbModel
     public function attributes(): array
     {
         return [
+            'id_peringatan',
             'nama_peringatan',
             'created_at',
             'updated_at',
@@ -36,8 +40,6 @@ class PeringatanSuspensi extends DbModel
 
     public function rules(): array
     {
-        return [
-            'nama_peringatan' => [self::RULE_REQUIRED]
-        ];
+        return [];
     }
 }

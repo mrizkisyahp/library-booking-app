@@ -175,6 +175,10 @@ class QueryBuilder
 
     public function whereIn(string $column, array $values): static
     {
+        if (empty($values)) {
+            return $this;
+        }
+
         $placeholders = [];
         foreach ($values as $value) {
             $placeholders[] = $this->addBinding($value);
@@ -191,6 +195,10 @@ class QueryBuilder
 
     public function whereNotIn(string $column, array $values): static
     {
+        if (empty($values)) {
+            return $this;
+        }
+
         $placeholders = [];
         foreach ($values as $value) {
             $placeholders[] = $this->addBinding($value);
@@ -398,17 +406,37 @@ class QueryBuilder
 
     public function count(string $column = '*'): int
     {
+        if (!empty($this->groupBys)) {
+            $originalSelects = $this->selects;
+            $originalGroupBys = $this->groupBys;
+            $originalLimit = $this->limitValue;
+            $originalOffset = $this->offsetValue;
+
+            $groupColumn = $this->groupBys[0]; // Use first group by column
+            $this->selects = ["COUNT(DISTINCT {$groupColumn}) as count"];
+            $this->groupBys = [];
+            $this->limitValue = null;
+            $this->offsetValue = null;
+
+            $stmt = $this->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $this->selects = $originalSelects;
+            $this->groupBys = $originalGroupBys;
+            $this->limitValue = $originalLimit;
+            $this->offsetValue = $originalOffset;
+
+            return (int) ($result['count'] ?? 0);
+        }
+
+        // Normal count without GROUP BY
         $originalSelects = $this->selects;
         $originalBindings = $this->bindings;
-
         $this->selects = ["COUNT({$column}) as count"];
-
         $stmt = $this->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
         $this->selects = $originalSelects;
         $this->bindings = $originalBindings;
-
         return (int) ($result['count'] ?? 0);
     }
 
@@ -523,5 +551,18 @@ class QueryBuilder
     public function getTable(): string
     {
         return $this->table;
+    }
+
+    public function pluck(string $column): array
+    {
+        $this->select($column);
+        $results = $this->get();
+
+        $values = [];
+        foreach ($results as $row) {
+            $values[] = $row->$column;
+        }
+
+        return $values;
     }
 }

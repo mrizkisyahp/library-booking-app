@@ -8,31 +8,40 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 
 class EmailService
-{   
+{
+    public function __construct(
+        private string $host,
+        private string $username,
+        private string $password,
+        private string $encryption,
+        private int $port,
+        private string $fromAddress,
+        private string $fromName,
+    ) {
+    }
 
-    private static function configureMailer(): PHPMailer
+    private function configureMailer(): PHPMailer
     {
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host = $_ENV['MAIL_HOST'];
+        $mail->Host = $this->host;
         $mail->SMTPAuth = false;
-        $mail->Username = $_ENV['MAIL_USERNAME'];
-        $mail->Password = $_ENV['MAIL_PASSWORD'];
-        $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
-        $mail->Port = (int)($_ENV['MAIL_PORT']);
+        $mail->Username = $this->username;
+        $mail->Password = $this->password;
+        $mail->SMTPSecure = $this->encryption;
+        $mail->Port = $this->port;
         $mail->isHTML(true);
         return $mail;
     }
 
-    public static function send(string $to, string $toName, string $subject, string $body, bool $ccSelf = false): bool
+    public function send(string $to, string $toName, string $subject, string $body, bool $ccSelf = false): bool
     {
         try {
-            $mail = self::configureMailer();
-            $fromEmail = $_ENV['MAIL_FROM_ADDRESS'];
-            $fromName = $_ENV['MAIL_FROM_NAME'];
-            $mail->setFrom($fromEmail, $fromName);
+            $mail = $this->configureMailer();
+            $mail->setFrom($this->fromAddress, $this->fromName);
             $mail->addAddress($to, $toName);
-            if ($ccSelf) $mail->addCC($to);
+            if ($ccSelf)
+                $mail->addCC($to);
 
             $mail->Subject = $subject;
             $mail->Body = $body;
@@ -44,17 +53,17 @@ class EmailService
         }
     }
 
-    public static function sendVerificationCode(User $user, string $otp, string $purpose = 'register'): bool
+    public function sendVerificationCode(User $user, string $otp, string $purpose = 'register'): bool
     {
-        $subject = $purpose === 'reset_password'
+        $subject = $purpose === 'reset'
             ? 'Password Reset Request | Library Booking App'
             : 'Account Verification Code | Library Booking App';
 
-        $intro = $purpose === 'reset_password'
-            ? 'Kami menerima permintaan untuk mereset kata sandi akun kamu.'
+        $intro = $purpose === 'reset'
+            ? 'Kami menerima permintaan untuk reset kata sandi akun kamu.'
             : 'Selamat datang! Berikut adalah kode verifikasi akun kamu.';
 
-        $note = $purpose === 'reset_password'
+        $note = $purpose === 'reset'
             ? 'Jika kamu tidak meminta pengaturan ulang kata sandi, abaikan email ini.'
             : 'Jangan bagikan kode ini kepada siapa pun demi keamanan akunmu.';
 
@@ -67,10 +76,10 @@ class EmailService
             <p>Library Booking App PNJ</p>
         ";
 
-        return self::send($user->email, $user->nama, $subject, $body);
+        return $this->send($user->email, $user->nama, $subject, $body);
     }
 
-    public static function sendKubacaVerified(User $user): bool
+    public function sendKubacaVerified(User $user): bool
     {
         $subject = 'KuBaca Verified | Library Booking App';
         $body = "
@@ -80,11 +89,11 @@ class EmailService
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
 
-        return self::send($user->email, $user->nama, $subject, $body);
+        return $this->send($user->email, $user->nama, $subject, $body);
     }
 
     // send valid notif
-    public static function sendBookingValidated(User $user, $booking): bool
+    public function sendBookingValidated(User $user, $booking): bool
     {
         $subject = 'Booking Validated | Library Booking App';
         $body = "
@@ -97,11 +106,11 @@ class EmailService
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
 
-        return self::send($user->email, $user->nama, $subject, $body);
+        return $this->send($user->email, $user->nama, $subject, $body);
     }
 
     // send cancel notif
-    public static function sendBookingCancelled(User $user, $booking, string $reason = ''): bool
+    public function sendBookingCancelled(User $user, $booking, string $reason = ''): bool
     {
 
         $reasonText = $reason ? "<p><strong>Alasan:</strong> {$reason}</p>" : '';
@@ -118,11 +127,11 @@ class EmailService
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
 
-        return self::send($user->email, $user->nama, $subject, $body);
+        return $this->send($user->email, $user->nama, $subject, $body);
     }
 
     // send feedback notif
-    public static function sendFeedbackRequest(User $user, $booking): bool
+    public function sendFeedbackRequest(User $user, $booking): bool
     {
         $subject = 'Berikan Feedback Anda | Library Booking App';
         $body = "
@@ -135,11 +144,11 @@ class EmailService
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
 
-        return self::send($user->email, $user->nama, $subject, $body);
+        return $this->send($user->email, $user->nama, $subject, $body);
     }
 
     // send check in remind
-    public static function sendCheckInReminder(User $user, $booking): bool
+    public function sendCheckInReminder(User $user, $booking): bool
     {
 
         $subject = 'Reminder: Check-in Reservasi Anda | Library Booking App';
@@ -153,7 +162,48 @@ class EmailService
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
 
-        return self::send($user->email, $user->nama, $subject, $body);
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+    public function sendPasswordResetLink(User $user, string $resetLink): bool
+    {
+        $subject = 'Password Reset Request | Library Booking App';
+
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Kami menerima permintaan untuk reset kata sandi akun kamu.</p>
+            <p>Klik link berikut untuk mengatur ulang kata sandi:</p>
+            <p><a href=\"{$resetLink}\" style=\"display: inline-block; padding: 10px 20px; background-color: #10b981; color: white; text-decoration: none; border-radius: 5px;\">Reset Password</a></p>
+            <p>Atau salin link ini ke browser kamu:</p>
+            <p><a href=\"{$resetLink}\">{$resetLink}</a></p>
+            <p><strong>Link ini akan kadaluarsa dalam 15 menit.</strong></p>
+            <p>Jika kamu tidak meminta reset password, abaikan email ini.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+    public function sendPasswordChangedNotification(User $user): bool
+    {
+        $subject = 'Password Changed | Library Booking App';
+
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Password untuk akun kamu telah berhasil diubah.</p>
+            <p><strong>Email:</strong> {$user->email}</p>
+            <p><strong>Waktu:</strong> " . date('d F Y, H:i') . " WIB</p>
+            <p><strong>Jika kamu tidak melakukan perubahan ini, segera hubungi admin atau reset password kamu.</strong></p>
+            <p>Untuk keamanan akun kamu, pastikan:</p>
+            <ul>
+                <li>Gunakan password yang kuat dan unik</li>
+                <li>Jangan bagikan password kepada siapa pun</li>
+                <li>Logout dari perangkat yang tidak digunakan</li>
+            </ul>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($user->email, $user->nama, $subject, $body);
     }
 
 }

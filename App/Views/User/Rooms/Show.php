@@ -1,14 +1,3 @@
-<?php
-
-use App\Core\Csrf;
-/** @var \App\Models\User $user */
-use App\Models\Room;
-/** @var Room $room */
-/** @var array $photos */
-/** @var array $facilities */
-/** @var array $availability */
-?>
-
 <div class="max-w-6xl mx-auto">
   <!-- Back Button -->
   <div class="mb-6">
@@ -25,14 +14,19 @@ use App\Models\Room;
   <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
     <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
       <div>
-        <h2 class="text-3xl font-bold text-slate-800 mb-3"><?= htmlspecialchars($room->nama_ruangan) ?></h2>
+        <h2 class="text-3xl font-bold text-slate-800 mb-3">
+          <?= htmlspecialchars($room->nama_ruangan) ?>
+        </h2>
         <div class="flex flex-wrap gap-4 text-slate-600">
           <div class="flex items-center">
             <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span><span class="font-semibold"><?= (int) $room->kapasitas_min ?> - <?= (int) $room->kapasitas_max ?></span>
+            <span><span class="font-semibold">
+                <?= (int) $room->kapasitas_min ?> -
+                <?= (int) $room->kapasitas_max ?>
+              </span>
               orang</span>
           </div>
           <div class="flex items-center">
@@ -40,7 +34,9 @@ use App\Models\Room;
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
-            <span><?= htmlspecialchars($room->jenis_ruangan) ?></span>
+            <span>
+              <?= htmlspecialchars($room->jenis_ruangan) ?>
+            </span>
           </div>
         </div>
       </div>
@@ -63,11 +59,11 @@ use App\Models\Room;
     <?php if (!empty($photos)): ?>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <?php foreach ($photos as $photo): ?>
-          <img src="<?= $photo ?>" alt="Foto <?= htmlspecialchars($room->nama_ruangan) ?>"
+          <img src="<?= $photo ?>" alt="Foto 
+      <?= htmlspecialchars($room->nama_ruangan) ?>"
             class="w-full h-40 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer">
         <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
+      </div> <?php endif; ?>
 
     <!-- Facilities -->
     <?php if (!empty($facilities)): ?>
@@ -86,13 +82,11 @@ use App\Models\Room;
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               <?= htmlspecialchars($facility) ?>
-            </div>
-          <?php endforeach; ?>
+            </div> <?php endforeach; ?>
         </div>
       </div>
     <?php endif; ?>
   </div>
-
   <!-- Availability Calendar -->
   <?php if (!empty($availability)): ?>
     <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
@@ -101,7 +95,7 @@ use App\Models\Room;
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Kalender Ketersediaan (7 Hari Ke Depan)
+        Kalender Ketersediaan (7 Hari Ke Depan, excluding weekend);
       </h3>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -112,13 +106,14 @@ use App\Models\Room;
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200">
-            <?php foreach ($availability as $date => $slots): ?>
+            <?php foreach ($availability as $day): ?>
               <tr class="hover:bg-slate-50 transition-colors">
                 <td class="px-4 py-4 font-medium text-slate-700">
-                  <?= date('D, d M Y', strtotime($date)) ?>
+                  <?= htmlspecialchars($day['day_short']) ?>, <?= htmlspecialchars($day['day_number']) ?>
+                  <?= htmlspecialchars($day['month']) ?>
                 </td>
                 <td class="px-4 py-4">
-                  <?php if (empty($slots)): ?>
+                  <?php if (empty($day['bookings'])): ?>
                     <span
                       class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,22 +123,23 @@ use App\Models\Room;
                     </span>
                   <?php else: ?>
                     <div class="space-y-2">
-                      <?php foreach ($slots as $slot): ?>
+                      <?php foreach ($day['bookings'] as $booking): ?>
                         <?php
                         $slotStatusColors = [
-                          'booked' => 'bg-red-100 text-red-800',
                           'pending' => 'bg-yellow-100 text-yellow-800',
-                          'approved' => 'bg-blue-100 text-blue-800'
+                          'verified' => 'bg-blue-100 text-blue-800',
+                          'active' => 'bg-red-100 text-red-800',
+                          'completed' => 'bg-gray-100 text-gray-800'
                         ];
-                        $slotColor = $slotStatusColors[strtolower($slot['status'])] ?? 'bg-gray-100 text-gray-800';
+                        $slotColor = $slotStatusColors[strtolower($booking['status_booking'])] ?? 'bg-gray-100 text-gray-800';
                         ?>
                         <div class="flex items-center gap-2">
                           <span class="text-slate-600 font-medium">
-                            <?= htmlspecialchars(substr($slot['waktu_mulai'], 0, 5)) ?> -
-                            <?= htmlspecialchars(substr($slot['waktu_selesai'], 0, 5)) ?>
+                            <?= htmlspecialchars(substr($booking['waktu_mulai'], 0, 5)) ?> -
+                            <?= htmlspecialchars(substr($booking['waktu_selesai'], 0, 5)) ?>
                           </span>
                           <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium <?= $slotColor ?>">
-                            <?= htmlspecialchars(ucfirst($slot['status'])) ?>
+                            <?= htmlspecialchars(ucfirst($booking['status_booking'])) ?>
                           </span>
                         </div>
                       <?php endforeach; ?>
@@ -168,7 +164,7 @@ use App\Models\Room;
       Buat Booking
     </h3>
 
-    <?php if ($user->status === 'pending kubaca' || $user->status === 'rejected'): ?>
+    <?php if (auth()->user()->status === 'pending kubaca' || auth()->user()->status === 'rejected'): ?>
       <!-- Blocked Booking Form Overlay -->
       <div class="relative">
         <!-- Blurred Form (for visual context) -->
@@ -200,10 +196,10 @@ use App\Models\Room;
         <!-- Overlay Message -->
         <div class="absolute inset-0 flex items-center justify-center">
           <div
-            class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 <?= $user->status === 'pending kubaca' ? 'border-amber-300' : 'border-red-300' ?> p-8 max-w-md text-center transform hover:scale-105 transition-transform">
+            class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 <?= auth()->user()->status === 'pending kubaca' ? 'border-amber-300' : 'border-red-300' ?> p-8 max-w-md text-center transform hover:scale-105 transition-transform">
             <div
-              class="w-20 h-20 mx-auto mb-4 <?= $user->status === 'pending kubaca' ? 'bg-amber-100' : 'bg-red-100' ?> rounded-full flex items-center justify-center">
-              <?php if ($user->status === 'pending kubaca'): ?>
+              class="w-20 h-20 mx-auto mb-4 <?= auth()->user()->status === 'pending kubaca' ? 'bg-amber-100' : 'bg-red-100' ?> rounded-full flex items-center justify-center">
+              <?php if (auth()->user()->status === 'pending kubaca'): ?>
                 <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -213,12 +209,11 @@ use App\Models\Room;
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               <?php endif; ?>
-            </div>
-
-            <?php if ($user->status === 'pending kubaca'): ?>
+            </div> <?php if (auth()->user()->status === 'pending kubaca'): ?>
               <h4 class="text-xl font-bold text-amber-900 mb-3">Booking Tidak Tersedia</h4>
               <p class="text-amber-800 mb-2 leading-relaxed">
-                Akun Anda sedang dalam proses verifikasi. Anda tidak dapat membuat booking hingga akun Anda disetujui oleh
+                Akun Anda sedang dalam proses verifikasi. Anda tidak dapat membuat booking hingga akun Anda disetujui
+                oleh
                 admin.
               </p>
               <p class="text-sm text-amber-700">
@@ -240,24 +235,25 @@ use App\Models\Room;
       <!-- Active Booking Form -->
       <form action="/bookings/draft" method="post" enctype="multipart/form-data" class="space-y-6">
         <?= csrf_field() ?>
-        <input type="hidden" name="ruangan_id" value="<?= (int) $room->id_ruangan ?>">
+        <input type="hidden" name="ruangan_id" value="
+                <?= (int) $room->id_ruangan ?>">
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Penggunaan</label>
-            <input type="date" name="tanggal_penggunaan_ruang" required
+            <input type="date" name="tanggal_penggunaan_ruang" value="<?= old('tanggal_penggunaan_ruang') ?>" required
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Mulai</label>
-            <input type="time" name="waktu_mulai" required
+            <input type="time" name="waktu_mulai" value="<?= old('waktu_mulai') ?>" required
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Selesai</label>
-            <input type="time" name="waktu_selesai" required
+            <input type="time" name="waktu_selesai" value="<?= old('waktu_selesai') ?>" required
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
           </div>
         </div>
@@ -281,13 +277,13 @@ use App\Models\Room;
             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
             <option value="" disabled selected>Pilih tujuan penggunaan</option>
             <?php foreach ($tujuanMahasiswa as $tujuan): ?>
-              <option value="<?= htmlspecialchars($tujuan) ?>">
+              <option value="<?= htmlspecialchars($tujuan) ?>" <?= old('tujuan') == $tujuan ? 'selected' : '' ?>>
                 <?= htmlspecialchars($tujuan) ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
-        <?php if ($user->isDosen()): ?>
+        <?php if (auth()->user()->isDosen()): ?>
           <div class="border-t pt-6 space-y-6">
             <h4 class="font-semibold text-slate-800 text-lg">Informasi Tambahan (Dosen/Pegawai)</h4>
 

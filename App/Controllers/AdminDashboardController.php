@@ -1,32 +1,17 @@
 <?php
-
 namespace App\Controllers;
-
 use App\Core\Controller;
-use App\Core\Middleware\AdminMiddleware;
-use App\Core\Services\AdminDashboardService;
-
+use App\Core\Request;
+use App\Core\Services\DashboardService;
 class AdminDashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->registerMiddleware(new AdminMiddleware());
+    public function __construct(
+        private DashboardService $dashboardService
+    ) {
     }
-
-    public function index()
+    public function index(Request $request)
     {
-        $dashboardService = new AdminDashboardService();
-        $this->setTitle('Admin Dashboard | Library Booking App');
-        $this->setLayout('main');
-
-        $stats = $dashboardService->getGlobalStatistics();
-        $recentBookings = $dashboardService->getRecentBookings();
-        $roomUsage = $dashboardService->getRoomUsage();
-
-        return $this->render('Admin/AdminDashboard', [
-            'stats' => $stats,
-            'recentBookings' => $recentBookings,
-            'roomUsage' => $roomUsage
-        ]);
+        $data = $this->dashboardService->getAdminDashboardData();
+        return $this->render('Admin/AdminDashboard', $data);
     }
 }

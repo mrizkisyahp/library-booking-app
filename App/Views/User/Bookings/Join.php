@@ -1,4 +1,3 @@
-<?php use App\Core\Csrf; ?>
 <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-8">
   <h2 class="text-2xl font-bold text-slate-800 mb-4">Masukkan Code Undangan</h2>
   <p class="text-slate-600 mb-6">Tempel code yang dibagikan oleh ketua booking untuk bergabung.</p>
