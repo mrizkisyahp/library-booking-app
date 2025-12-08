@@ -13,7 +13,7 @@ class BookingServices
 {
     private const STATE_TRANSITIONS = [
         'draft' => ['pending', 'cancelled', 'expired'],
-        'pending' => ['verified', 'cancelled', 'expired'],
+        'pending' => ['verified', 'cancelled', 'expired', 'draft'],
         'verified' => ['active', 'cancelled', 'no_show'],
         'active' => ['completed', 'no_show'],
         'completed' => [],
@@ -77,7 +77,7 @@ class BookingServices
         $booking->tujuan = $data['tujuan'] ?? '';
         $booking->status = 'verified';
         $booking->checkin_code = $this->generateCheckinCode();
-        $booking->invite_token = bin2hex(random_bytes(16));
+        $booking->invite_token = $this->generateInviteToken();
 
         $booking->save();
         $this->logger->info('Admin Created Booking', [
@@ -164,7 +164,7 @@ class BookingServices
         $booking->waktu_selesai = $data['waktu_selesai'];
         $booking->tujuan = $data['tujuan'] ?? '';
         $booking->status = 'draft';
-        $booking->invite_token = bin2hex(random_bytes(16));
+        $booking->invite_token = $this->generateInviteToken();
         $booking->save();
 
         $this->logger->info('Booking Created', [
@@ -260,6 +260,10 @@ class BookingServices
     {
         return strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
     }
+    private function generateInviteToken(): string
+    {
+        return strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+    }
 
     public function validateBookingRules(array $data, $user): void
     {
@@ -277,6 +281,20 @@ class BookingServices
         $this->validateOneBookingPerDay($user->id_user, $data['tanggal_penggunaan_ruang']);
         $this->validateDateNotBlocked($data['tanggal_penggunaan_ruang'], $data['ruangan_id']);
         $this->validateHasPendingFeedback($user->id_user);
+    }
+
+    public function validateUpdateDraftRules(array $data, int $excludeBookingId): void
+    {
+        $this->validateRequiredFields($data);
+        $this->validateNotPastBookings($data);
+        $this->validateTimeOrder($data);
+        $this->validateDuration($data);
+        $this->validateSessionHours($data);
+        $this->validateBreakTime($data);
+        $this->validateMaxDaysAhead($data);
+        $this->validateMinLeadTime($data);
+        $this->validateRoomAvailable($data['ruangan_id']);
+        $this->validateDateNotBlocked($data['tanggal_penggunaan_ruang'], $data['ruangan_id']);
     }
 
     /**
@@ -1260,6 +1278,76 @@ class BookingServices
         $this->logger->info('Draft Deleted', [
             'booking_id' => $bookingId,
             'deleted_by' => $userId,
+        ]);
+    }
+
+    public function updateDraft(int $bookingId, array $data, int $userId): Booking
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if ($booking->status !== 'draft') {
+            throw new Exception('Hanya booking dengan status draft yang dapat diedit');
+        }
+
+        if ($booking->user_id !== $userId) {
+            throw new Exception('Hanya PIC yang dapat mengedit booking ini');
+        }
+
+        if (isset($data['ruangan_id'])) {
+            $booking->ruangan_id = $data['ruangan_id'];
+        }
+
+        if (isset($data['tanggal_penggunaan_ruang'])) {
+            $booking->tanggal_penggunaan_ruang = $data['tanggal_penggunaan_ruang'];
+        }
+
+        if (isset($data['waktu_mulai'])) {
+            $booking->waktu_mulai = $data['waktu_mulai'];
+        }
+
+        if (isset($data['waktu_selesai'])) {
+            $booking->waktu_selesai = $data['waktu_selesai'];
+        }
+
+        if (isset($data['tujuan'])) {
+            $booking->tujuan = $data['tujuan'];
+        }
+
+        $booking->save();
+        $this->logger->info('User Updated Draft Booking', [
+            'booking_id' => $bookingId,
+            'user_id' => $userId,
+            'updated_fields' => array_keys($data),
+        ]);
+
+        return $booking;
+    }
+
+    public function cancelPending(int $bookingId, int $userId): void
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if ($booking->status !== 'pending') {
+            throw new Exception('Hanya booking dengan status pending yang dapat dibatalkan');
+        }
+
+        if ($booking->user_id !== $userId) {
+            throw new Exception('Hanya PIC yang dapat membatalkan booking ini');
+        }
+
+        $booking->status = 'draft';
+        $booking->save();
+        $this->logger->info('Pending Booking Reverted to Draft', [
+            'booking_id' => $bookingId,
+            'user_id' => $userId,
         ]);
     }
 }

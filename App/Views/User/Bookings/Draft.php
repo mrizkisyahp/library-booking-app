@@ -129,11 +129,13 @@
           <?php endif ?>
         </div>
 
-        <div class="w-full mb-4">
-          <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-            class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
-            ubah rincian booking
-          </a>
+        <?php if ($booking->status === 'draft' && $isPic): ?>
+          <div class="w-full mb-4">
+            <a href="/bookings/edit-draft?id=<?= (int) $booking->id_booking ?>"
+              class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
+              ubah rincian booking
+            </a>
+          <?php endif ?>
           <?php if ($isPic && $statusKey === 'completed' && empty($booking->id_feedback)): ?>
             <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
               class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
@@ -142,41 +144,42 @@
           <?php endif; ?>
         </div>
 
-        <hr class="h-px py-4 text-gray-400">
-
-        <p class="font-bold text-4xl mb-6">
-          Undang Anggota
-        </p>
-        <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
-          <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
-            <?= htmlspecialchars($booking->invite_token) ?>
+        <?php if ($booking->status === 'draft' && $isPic): ?>
+          <hr class="h-px py-4 text-gray-400">
+          <p class="font-bold text-4xl mb-6">
+            Undang Anggota
           </p>
-          <div onclick="copyToken()"
-            class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
+          <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+            <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
+              <?= htmlspecialchars($booking->invite_token) ?>
+            </p>
+            <div onclick="copyToken()"
+              class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
 
-            <span id="copyToast"
-              class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
-              Copied!
-            </span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-copy-icon lucide-copy size-4">
-              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-            </svg>
+              <span id="copyToast"
+                class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
+                Copied!
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-copy-icon lucide-copy size-4">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+              </svg>
+            </div>
           </div>
-        </div>
-        <div class="w-full mb-4">
-          <button type="button"
-            onclick="navigator.clipboard.writeText(window.location.origin + '/bookings/join?code=<?= rawurlencode($booking->invite_token) ?>'); alert('Link berhasil disalin!');"
-            class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm flex items-center justify-center">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            Salin Link Undangan
-          </button>
-        </div>
+          <div class="w-full mb-4">
+            <button type="button"
+              onclick="navigator.clipboard.writeText(window.location.origin + '/bookings/join?code=<?= rawurlencode($booking->invite_token) ?>'); alert('Link berhasil disalin!');"
+              class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm flex items-center justify-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Salin Link Undangan
+            </button>
+          </div>
+        <?php endif; ?>
 
         <hr class="h-px py-4 text-gray-400">
         <?php if ($isPic): ?>
@@ -299,6 +302,90 @@
             </div>
           </form>
 
+          <?php if ($isPic): ?>
+            <!-- Pending Members Section -->
+            <hr class="h-px py-4 text-gray-400 mt-6">
+            <p class="font-bold text-2xl mb-4">
+              Permintaan Bergabung
+            </p>
+
+            <!-- Static pending members for design preview -->
+            <div class="space-y-3 mb-6">
+              <!-- Pending Member 1 -->
+              <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Ahmad Fauzi</p>
+                    <p class="text-sm text-slate-500">ahmad.fauzi@student.polinema.ac.id</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button"
+                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Terima
+                  </button>
+                  <button type="button"
+                    class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Tolak
+                  </button>
+                </div>
+              </div>
+              <!-- Pending Member 2 -->
+              <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Siti Nurhaliza</p>
+                    <p class="text-sm text-slate-500">siti.nurhaliza@student.polinema.ac.id</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button"
+                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Terima
+                  </button>
+                  <button type="button"
+                    class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Tolak
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Empty state (toggle this when no pending members) -->
+            <!-- 
+  <div class="text-center py-6 bg-slate-50 rounded-xl">
+    <svg class="w-12 h-12 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+    <p class="text-slate-500 text-sm">Tidak ada permintaan bergabung</p>
+  </div>
+  -->
+          <?php endif; ?>
+
           <!-- Requirement Warning -->
           <?php if (!$canSubmit): ?>
             <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
@@ -336,9 +423,10 @@
   <?php endif; ?>
   <?php if ($isPic): ?>
     <div class="bg-white rounded-2xl shadow-lg p-4 mb-12 hidden md:block">
-      <form action="/bookings/submit" method="post">
+      <form action="/bookings/submit" method="post"
+        onsubmit="return confirm('Anda yakin ingin mengirimkan pengajuan ini?')">
         <?= csrf_field() ?>
-        <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+        <input type=" hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
         <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
           class="w-full bg-primary text-gray-500 px-8 py-4 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">

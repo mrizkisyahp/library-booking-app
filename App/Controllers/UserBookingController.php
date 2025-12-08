@@ -217,6 +217,69 @@ class UserBookingController extends Controller
         }
     }
 
+    public function showEditDraft(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->query('id');
+
+            $data = $this->bookingServices->getBookingForUser(
+                $bookingId,
+                $user->id_user,
+                $user->id_role === 1,
+            );
+
+            $booking = $data['booking'];
+
+            if (!$data['isPic']) {
+                flash('error', 'Hanya PIC yang dapat mengedit booking');
+                redirect('/bookings/draft?id=' . $bookingId);
+            }
+
+            if ($booking->status !== 'draft') {
+                flash('error', 'Hanya booking dengan status draft yang dapat diedit');
+                redirect('/bookings/draft?id=' . $bookingId);
+            }
+
+            $rooms = $this->bookingServices->getAllRooms();
+            return view('User/Bookings/EditDraft', [
+                'booking' => $booking,
+                'rooms' => $rooms,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/my-bookings');
+        }
+    }
+
+    public function updateDraft(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $data = [
+                'ruangan_id' => (int) $request->all()['ruangan_id'],
+                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $request->all()['waktu_mulai'],
+                'waktu_selesai' => $request->all()['waktu_selesai'],
+                'tujuan' => $request->all()['tujuan'],
+            ];
+
+            $this->bookingServices->validateUpdateDraftRules($data, $bookingId);
+
+            $this->bookingServices->validateNoTimeConflicts($data, $user->id_user, $bookingId);
+
+            $this->bookingServices->updateDraft($bookingId, $data, $user->id_user);
+
+            flash('success', 'Draft booking berhasil diperbarui');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
     public function deleteDraft(Request $request)
     {
         try {
@@ -226,6 +289,22 @@ class UserBookingController extends Controller
             $this->bookingServices->deleteDraft($bookingId, $user->id_user);
 
             flash('success', 'Draft booking berhasil dihapus');
+            redirect('/my-bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function cancelPending(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->cancelPending($bookingId, $user->id_user);
+
+            flash('success', 'Booking berhasil dibatalkan');
             redirect('/my-bookings');
         } catch (Exception $e) {
             flash('error', $e->getMessage());
