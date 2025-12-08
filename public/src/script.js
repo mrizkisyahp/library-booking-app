@@ -188,3 +188,28 @@ function togglePassword(id) {
             setTimeout(() => toast.style.opacity = 0, 1500);
         });
     }
+
+    // charts
+    document.addEventListener("DOMContentLoaded", () => {
+    const ctx = document.getElementById("bookingChart");
+
+    const labels = window.chartData.map(item => item.date);
+    const data = window.chartData.map(item => item.count);
+
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: "Jumlah Booking",
+                data,
+                borderWidth: 3,
+                tension: 0.3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+});

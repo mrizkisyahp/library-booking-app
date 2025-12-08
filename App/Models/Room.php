@@ -223,7 +223,7 @@ class Room extends DbModel
     {
         $start = date('Y-m-d');
         $stmt = App::$app->db->prepare("
-            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status 
+            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status
             FROM booking
             WHERE ruangan_id = :room
               AND tanggal_penggunaan_ruang BETWEEN :start AND :end

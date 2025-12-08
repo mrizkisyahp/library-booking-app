@@ -29,9 +29,13 @@ class UserRoomController extends Controller
         $page = max(1, $page);
 
         $filters = [
-            'nama_ruangan' => $request->getBody()['nama_ruangan'] ?? null,
-            'kapasitas_min' => $request->getBody()['kapasitas_min'] ?? null,
-            'kapasitas_max' => $request->getBody()['kapasitas_max'] ?? null,
+            'nama_ruangan' => $request->getQuery()['nama_ruangan'] ?? null,
+            'tanggal' => $request->getQuery()['tanggal'] ?? null,
+            'waktu_mulai' => $request->getQuery()['waktu_mulai'] ?? null,
+            'kapasitas_min' => $request->getQuery()['kapasitas_min'] ?? null,
+            'kapasitas_max' => $request->getQuery()['kapasitas_max'] ?? null,
+
+            // 'jenis_ruangan' => $request->getQuery()['jenis_ruangan'] ?? null,
             'jenis_ruangan' => $request->getBody()['jenis_ruangan'] ?? null,
         ];
 

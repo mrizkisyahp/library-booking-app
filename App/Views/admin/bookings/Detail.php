@@ -253,7 +253,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
   </div>
 </div>
 
-<div id="imagePopUp" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-md z-50">
+<div id="imagePopUp" class="hidden fixed inset-0 items-center justify-center bg-black/40 backdrop-blur-md z-50">
   <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 transition-all scale-95 opacity-0 duration-300">
 
     <!-- HELP OVER HERE -->

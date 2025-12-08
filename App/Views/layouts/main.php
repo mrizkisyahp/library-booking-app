@@ -15,8 +15,8 @@ $user = App::$app->user;
     <link href="css/output.css" rel="stylesheet">
 </head>
 
-<body class="min-h-screen bg-slate-100">
-    <!-- sidebar 😭 -->
+<body class="min-h-dvh bg-slate-100">
+    <!-- sidebar -->
     <aside class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10">
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
@@ -46,9 +46,9 @@ $user = App::$app->user;
                 </a>
             </li>
 
-            <!-- Main navigation 😋-->
+            <!-- Main navigation -->
             <?php if (App::$app->auth->isGuest()): ?>
-                <!-- Guest 🥸 -->
+                <!-- Guest -->
                 <li class="w-full px-3">
                     <a href="/login"
                         class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -68,12 +68,12 @@ $user = App::$app->user;
                     </a>
                 </li>
             <?php else: ?>
-                <!-- User Admin 🧑🏻‍💻 -->
+                <!-- User Admin -->
                 <?php if ($user && $user->isAdmin()): ?>
                     <li class="w-full px-3">
                         <a href="/admin/bookings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text-icon lucide-book-open-text size-6 shrink-0"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
                             <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Booking
                             </span>
@@ -82,7 +82,7 @@ $user = App::$app->user;
                     <li class="w-full px-3">
                         <a href="/admin/rooms"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-door-open-icon lucide-door-open size-6 shrink-0"><path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/></svg>
                             <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Ruangan
                             </span>
@@ -91,7 +91,7 @@ $user = App::$app->user;
                     <li class="w-full px-3">
                         <a href="/admin/users"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round size-6 shrink-0"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
                             <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 User
                             </span>
@@ -100,7 +100,7 @@ $user = App::$app->user;
                     <li class="w-full px-3">
                         <a href="/admin/reports"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text size-6 shrink-0"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                             <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Laporan
                             </span>
@@ -109,8 +109,7 @@ $user = App::$app->user;
                     <li class="w-full px-3">
                         <a href="/rooms"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-icon lucide-circle size-6 shrink-0"><circle cx="12" cy="12" r="10"/></svg>
-                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-plus-icon lucide-calendar-plus size-6 shrink-0"><path d="M16 19h6"/><path d="M16 2v4"/><path d="M19 16v6"/><path d="M21 12.598V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8.5"/><path d="M3 10h18"/><path d="M8 2v4"/></svg>                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Buat Booking
                             </span>
                         </a>
@@ -176,7 +175,7 @@ $user = App::$app->user;
                         <?= csrf_field() ?>
                         <button type="submit"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4 cursor-pointer">
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out size-6 shrink-0"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out size-6 shrink-0"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Logout
                             </span>
                         </button>
@@ -186,8 +185,8 @@ $user = App::$app->user;
         </ul>
     </aside>
     <!-- Main Content -->
-    <main class="pt-12 md:pt-0 pb-12 min-h-screen">
-        <div class="max-w-7xl mx-auto bg-primary md:bg-slate-100">
+    <main class="py-12 md:pt-0 min-h-dvh">
+        <div class=" bg-primary md:bg-slate-100">
             <!-- Flash Messages -->
             <?php if ($m = App::$app->session->getFlash('success')): ?>
                 <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
@@ -270,7 +269,8 @@ $user = App::$app->user;
 
     <!-- mobile Navigation -->
     <header
-        class="absolute left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-30 md:hidden">
+        class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-40 md:hidden">
+
         <div>Logo</div>
         <div>
             <a href="#">
@@ -278,7 +278,7 @@ $user = App::$app->user;
             </a>
         </div>
     </header>
-    <nav class="fixed left-0 bottom-0 right-0 bg-primary text-white md:hidden z-50 rounded-t-4xl py-3 shadow-xl">
+    <nav class="fixed left-0 -bottom-1 right-0 bg-primary text-white md:hidden z-50 rounded-t-4xl py-3 shadow-xl">
         <div class="flex items-center justify-around w-full px-4">
 
             <?php

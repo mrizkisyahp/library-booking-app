@@ -12,7 +12,7 @@ $isOwner = $currentUser && (int) $currentUser->id_user === (int) $booking->user_
 ?>
 
 <!-- Welcome Header -->
-<div class="p-4 bg-white shadow-md w-full ">
+<div class="p-4 bg-white shadow-md w-full">
     <div class="flex items-center gap-4 py-4">
         <div class="flex items-center gap-4 ">
             <a href="/dashboard">
