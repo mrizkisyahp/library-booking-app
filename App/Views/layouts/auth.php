@@ -13,16 +13,6 @@ use App\Core\App;
 </head>
 
 <body class="min-h-dvh bg-primary font-sans">
-    <?php if (flash('error')): ?>
-        <div class="error"><?= flash('error') ?></div>
-    <?php endif; ?>
-    <?php if (flash('info')): ?>
-        <div class="info"><?= flash('info') ?></div>
-    <?php endif; ?>
-    <?php if (flash('success')): ?>
-        <div class="success"><?= flash('success') ?></div>
-    <?php endif; ?>
-
     {{content}}
 </body>
 

@@ -183,4 +183,13 @@ class UserRepository
     {
         return User::Query()->where('id_user', $id)->delete();
     }
+
+    public function deactivateExpiredUsers(): int
+    {
+        return User::Query()
+            ->where('status', 'active')
+            ->whereNotNull('masa_aktif')
+            ->where('masa_aktif', '<', date('Y-m-d'))
+            ->update(['status' => 'nonaktif']);
+    }
 }

@@ -20,11 +20,11 @@ $roomTypes = [
 <h1>Create Room</h1>
 <p><a href="/admin/rooms">Back to list</a></p>
 
-<?php if ($message = session('success')): ?>
+<?php if ($message = flash('success')): ?>
   <p style="color: green;"><?= htmlspecialchars($message) ?></p>
 <?php endif; ?>
 
-<?php if ($message = session('error')): ?>
+<?php if ($message = flash('error')): ?>
   <p style="color: red;"><?= htmlspecialchars($message) ?></p>
 <?php endif; ?>
 

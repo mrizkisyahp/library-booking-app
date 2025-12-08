@@ -18,13 +18,18 @@ $validator = $validator ?? null;
             Buka email yang didaftarkan untuk mendapatkan kode verifikasi
           </p>
         </div>
-        <?php if ($m = App::$app->session->getFlash('success')): ?>
-          <p><?= htmlspecialchars($m) ?></p>
+        <?php if ($m = flash('success')): ?>
+          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-3">
+            <p><?= htmlspecialchars($m) ?></p>
+          </div>
         <?php endif; ?>
 
-        <?php if ($m = App::$app->session->getFlash('error')): ?>
-          <p><?= htmlspecialchars($m) ?></p>
+        <?php if ($m = flash('error')): ?>
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-3">
+            <p><?= htmlspecialchars($m) ?></p>
+          </div>
         <?php endif; ?>
+
 
         <form action="/verify" method="post">
           <?= csrf_field() ?>
@@ -54,7 +59,8 @@ $validator = $validator ?? null;
           Tidak mendapatkan kodenya?
         <form action="/resend" method="POST" id="resendForm">
           <?= csrf_field() ?>
-          <button type="submit" id="resendBtn" class="italic capitalize text-gray-700 hover:underline active:underline mt-6 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="submit" id="resendBtn"
+            class="italic capitalize text-gray-700 hover:underline active:underline mt-6 disabled:opacity-50 disabled:cursor-not-allowed">
             <span id="resendText">Kirim ulang kode</span>
             <span id="resendLoading" class="hidden">Mengirim...</span>
           </button>
@@ -65,23 +71,23 @@ $validator = $validator ?? null;
     </div>
 
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    
+
     <script>
-    document.getElementById('resendForm').addEventListener('submit', function(e) {
+      document.getElementById('resendForm').addEventListener('submit', function (e) {
         const resendBtn = document.getElementById('resendBtn');
         const resendText = document.getElementById('resendText');
         const resendLoading = document.getElementById('resendLoading');
-        
+
         // Disable button to prevent double submission
         resendBtn.disabled = true;
         resendText.classList.add('hidden');
         resendLoading.classList.remove('hidden');
-        
+
         // Re-enable after 5 seconds as fallback
-        setTimeout(function() {
-            resendBtn.disabled = false;
-            resendText.classList.remove('hidden');
-            resendLoading.classList.add('hidden');
+        setTimeout(function () {
+          resendBtn.disabled = false;
+          resendText.classList.remove('hidden');
+          resendLoading.classList.add('hidden');
         }, 5000);
-    });
+      });
     </script>

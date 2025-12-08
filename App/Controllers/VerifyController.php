@@ -48,7 +48,7 @@ class VerifyController extends Controller
                 $success = $this->auth->completeVerification((int) $userId, $validated['code']);
 
                 if ($success) {
-                    flash('success', 'Account verified! You can now login.');
+                    flash('success', 'Email verified! You can now login.');
                     return redirect('/login');
                 }
 

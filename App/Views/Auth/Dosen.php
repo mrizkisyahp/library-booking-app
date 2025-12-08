@@ -30,7 +30,18 @@ $validator = $validator ?? null;
         <form action="/register/dosen" method="post">
           <?= csrf_field() ?>
 
-          <div id="step1" class="space-y-4">
+          <?php
+          $step2Errors = false;
+          $step2FieldNames = ['nama', 'jurusan', 'nomor_hp', 'password', 'confirm_password'];
+          foreach ($step2FieldNames as $field) {
+            if ($validator?->hasError($field)) {
+              $step2Errors = true;
+              break;
+            }
+          }
+          ?>
+          <div id="step1" class="space-y-4" data-has-step2-errors="<?= $step2Errors ? 'true' : 'false' ?>">
+
             <div class="mb-4">
               <label for="nip"
                 class="block text-sm font-medium <?= $validator?->hasError('nip') ? 'text-red-700' : 'text-gray-700' ?> mb-2">

@@ -110,7 +110,7 @@ class BookingRepository
             $query->where('r.nama_ruangan', 'LIKE', '%' . $filters['keyword'] . '%')
                 ->orWhere('u.nama', 'LIKE', '%' . $filters['keyword'] . '%');
         }
-        return $query->orderBy('b.tanggal_penggunaan_ruang', 'desc')
+        return $query->orderBy('b.tanggal_penggunaan_ruang', 'desc')->orderBy('b.created_at', 'asc')
             ->paginate($perPage, $page);
     }
 

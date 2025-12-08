@@ -18,13 +18,13 @@
     </p>
   </div>
 
-  <?php if ($message = session('success')): ?>
+  <?php if ($message = flash('success')): ?>
     <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
   <?php endif; ?>
 
-  <?php if ($message = session('error')): ?>
+  <?php if ($message = flash('error')): ?>
     <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
@@ -267,7 +267,7 @@
                   <small>HP: <?= htmlspecialchars($user->nomor_hp ?? '-') ?></small>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  <?= htmlspecialchars($user->nama_role ?? 'Unknown') ?>
+                  <?= htmlspecialchars(strtoupper($user->role?->nama_role ?? 'Unknown')) ?>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                   <?php if ($user->nim): ?>
@@ -373,7 +373,7 @@
     <?php endif; ?>
   </section>
 
-  !-- Pagination -->
+
   <?php
   $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
   ?>
@@ -384,7 +384,7 @@
           class="font-semibold text-slate-800"><?= (($paginator->currentPage - 1) * $paginator->perPage) + 1 ?></span>
         sampai <span
           class="font-semibold text-slate-800"><?= min($paginator->currentPage * $paginator->perPage, $paginator->total) ?></span>
-        dari <span class="font-semibold text-slate-800"><?= $paginator->total ?></span> booking
+        dari <span class="font-semibold text-slate-800"><?= $paginator->total ?></span> users
       </p>
       <div class="flex gap-2 items-center">
         <!-- First Page -->

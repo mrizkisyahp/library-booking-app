@@ -32,9 +32,9 @@ class Database
         $appliedMigration = $this->getAppliedMigration();
 
         $newMigrations = [];
-        $migrationFolder = App::$ROOT_DIR . '/migrations';
+        $migrationFolder = App::$ROOT_DIR . '/Migrations';
         $this->log($migrationFolder);
-        $files = scandir(App::$ROOT_DIR . '/migrations');
+        $files = scandir(App::$ROOT_DIR . '/Migrations');
         $toApplyMigrations = array_diff($files, $appliedMigration);
 
         foreach ($toApplyMigrations as $migration) {
@@ -42,7 +42,7 @@ class Database
                 continue;
             }
 
-            require_once App::$ROOT_DIR . '/migrations/' . $migration;
+            require_once App::$ROOT_DIR . '/Migrations/' . $migration;
             $className = pathinfo($migration, PATHINFO_FILENAME);
             $instance = new $className();
 
@@ -85,22 +85,23 @@ class Database
         $statement->execute();
     }
 
-    public function rollbackLastMigration(): void {
-    $applied = $this->getAppliedMigration();
-    if (empty($applied)) {
-        $this->log("No migrations to rollback.");
-        return;
-    }
+    public function rollbackLastMigration(): void
+    {
+        $applied = $this->getAppliedMigration();
+        if (empty($applied)) {
+            $this->log("No migrations to rollback.");
+            return;
+        }
 
-    $lastMigration = end($applied);
-    require_once App::$ROOT_DIR . '/migrations/' . $lastMigration;
-    $className = pathinfo($lastMigration, PATHINFO_FILENAME);
-    $instance = new $className();
+        $lastMigration = end($applied);
+        require_once App::$ROOT_DIR . '/Migrations/' . $lastMigration;
+        $className = pathinfo($lastMigration, PATHINFO_FILENAME);
+        $instance = new $className();
 
-    $this->log("Rolling back $lastMigration...");
-    $instance->down();
-    $this->pdo->prepare("DELETE FROM migrations WHERE migration = ?")->execute([$lastMigration]);
-    $this->log("Rolled back $lastMigration successfully.");
+        $this->log("Rolling back $lastMigration...");
+        $instance->down();
+        $this->pdo->prepare("DELETE FROM migrations WHERE migration = ?")->execute([$lastMigration]);
+        $this->log("Rolled back $lastMigration successfully.");
     }
 
     public function prepare(string $sql): PDOStatement

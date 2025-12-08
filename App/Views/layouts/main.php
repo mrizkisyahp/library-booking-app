@@ -183,6 +183,7 @@ use App\Core\App;
     <!-- Main Content -->
     <main class="py-12 md:pt-0 min-h-dvh pl-28">
         <div class="mx-auto bg-primary md:bg-slate-100">
+
             <div class="bg-white top-0 left-0 w-full h-40 fixed -z-10">
 
             </div>

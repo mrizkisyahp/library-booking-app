@@ -2,11 +2,11 @@
   <h1>Edit User</h1>
   <p><a href="/admin/users">Back to list</a></p>
 
-  <?php if ($message = session('success')): ?>
+  <?php if ($message = flash('success')): ?>
     <p style="color: green;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
-  <?php if ($message = session('error')): ?>
+  <?php if ($message = flash('error')): ?>
     <p style="color: red;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 

@@ -157,40 +157,40 @@ function togglePassword(id) {
     const eyeClosed = document.getElementById(`eyesclosed-${id}`);
 
     if (input.type === "password") {
-      input.type = "text";
-      eyeOpen.classList.add("hidden");
-      eyeClosed.classList.remove("hidden");
+        input.type = "text";
+        eyeOpen.classList.add("hidden");
+        eyeClosed.classList.remove("hidden");
     } else {
-      input.type = "password";
-      eyeOpen.classList.remove("hidden");
-      eyeClosed.classList.add("hidden");
+        input.type = "password";
+        eyeOpen.classList.remove("hidden");
+        eyeClosed.classList.add("hidden");
     }
-  }
+}
 
-  //multi step register form
-    function nextStep() {
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-    }
+//multi step register form
+function nextStep() {
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+}
 
-    function prevStep() {
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
-    }
+function prevStep() {
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+}
 
-    // copy text
-    function copyToken() {
-        const text = document.getElementById("inviteToken").textContent.trim();
-        const toast = document.getElementById("copyToast");
+// copy text
+function copyToken() {
+    const text = document.getElementById("inviteToken").textContent.trim();
+    const toast = document.getElementById("copyToast");
 
-        navigator.clipboard.writeText(text).then(() => {
-            toast.style.opacity = 1;
-            setTimeout(() => toast.style.opacity = 0, 1500);
-        });
-    }
+    navigator.clipboard.writeText(text).then(() => {
+        toast.style.opacity = 1;
+        setTimeout(() => toast.style.opacity = 0, 1500);
+    });
+}
 
-    // charts
-    document.addEventListener("DOMContentLoaded", () => {
+// charts
+document.addEventListener("DOMContentLoaded", () => {
     const ctx = document.getElementById("bookingChart");
 
     const labels = window.chartData.map(item => item.date);
@@ -212,4 +212,14 @@ function togglePassword(id) {
             maintainAspectRatio: false,
         }
     });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+
+    if (step1 && step2 && step1.dataset.hasStep2Errors === 'true') {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+    }
 });
