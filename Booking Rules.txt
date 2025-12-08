@@ -1,0 +1,131 @@
+This is the core logic app. Or MVP as you might says. 
+
+Booking Logic: PIC or User -> creates a booking in rooms -> input a date, a start date, end date, purpose -> status become draft -> wait for members to fill up capacity minimum -> sent to admin status become pending -> admin approve checks for time overlap, and all that rule stuff status become verified -> PIC and his member retrieve room key, admin manually verify. After verify admin input check in code from the group status become active, admin give room key -> PIC and his group use the room until time limit -> PIC and his group give back the room key to admin -> admin can manually complete it or let the system automatically completed it once the end time is passed
+
+system checks rules for: 
+1. The booking must have a purpose. A booking without purpose is denied
+2. The booking must have a date, start time, and end time. If any is missing, it is denied.
+3. The booking cannot be in the past. Any past booking is denied.
+4. The start time must be earlier than the end time. If not, the booking is denied.  
+5. A PIC cannot have another verified or active booking happening at the same time
+6. A room cannot be booked if it already has a verified or active booking at the same time
+7. A room must be available. Unavailable rooms cannot be booked
+8. The booking duration must be at least 1 hour and at most 3 hours.
+9. A booking is only allowed inside the official session hours:
+   Session 1: 08:15 – 10:55
+   Session 2: 13:15 – 16:00
+   Any time outside these sessions is denied.
+
+10. The PIC must be allowed to book that type of room. (User Role)
+11. A booking can only be made up to 7 days ahead and never on weekends.
+12. A booking cannot be made on days that are closed or blocked.
+13. A PIC cannot submit bookings repeatedly in a very short time.
+14. A booking cannot be created if it is less than 15 minutes before its start time.
+15. The PIC must have an active account.
+16. No booking can be created during system maintenance.
+17. A booking must never cross the official break time:
+    Monday–Thursday: 11:00 – 12:00
+    Friday: 11:00 – 13:00
+
+18. A booking cannot end later than 16:00.
+19. A booking cannot touch the library closing buffer.
+20. A booking cannot start before the official opening buffer.
+21. A booking cannot be made on dates that are manually blocked by admin.
+22. A PIC is only allowed to have one booking per day, and that one booking must not exceed 3 hours.
+23. Only bookings with status verified and active occupy time and block other bookings.
+24. Bookings with status draft, pending, cancelled, expired, no_show, completed do not block time, even though their date and time are still stored.	
+
+Draft -> pending rules:
+1. A draft booking can only be sent to admin when the minimum required member capacity has been met.
+2. A draft booking cannot be sent to admin if the minimum member requirement is not fulfilled.
+3. Once a draft booking is sent to admin, its status becomes pending.
+4. After becoming pending, the booking can no longer accept new members.
+
+pending -> verified rules:
+1. A pending booking can only become verified if all booking creation rules are still valid.
+2. A pending booking must pass time overlap checking against verified and active bookings.
+3. A pending booking may be verified only by admin.
+4. A pending booking may be rejected by admin.
+5. If a pending booking is rejected by admin, its status becomes cancelled.
+6. If a pending booking is verified by admin, its status becomes verified.
+
+verified -> active rules:
+1. A verified booking only becomes active when the PIC and group retrieve the room key from admin.
+2. A verified booking must also provide a valid check-in code to admin for activation.
+3. If the room key is not retrieved within 10 minutes after the start time, the booking becomes no_show.
+4. Once the booking becomes active, the room key is officially released to the PIC.
+
+active -> complete rules:
+1. An active booking becomes completed when the room key is returned to admin.
+2. An active booking becomes completed automatically when the end time has passed.
+3. Once a booking is completed, it cannot return to any previous state.
+
+
+Cancelled/Expiration rules:
+
+1. A draft booking must be sent to admin at least 15 minutes before the start time.
+2. A pending booking is automatically cancelled 5 minutes before the start time if it is not verified by admin.
+3. A verified booking only becomes active when the PIC and group retrieve the room key from admin.
+4. A verified booking is automatically marked as no_show if the room key is not retrieved within 10 minutes after the start time.
+5. A booking is automatically marked as completed after the end time passes, if it was active.
+6. If the system goes down during booking time:
+   The booking becomes completed if the end time has passed
+   The booking becomes no_show if attendance is not detected
+
+7. A verified booking may only be cancelled more than 15 minutes before the start time.
+8. If a verified booking is cancelled too close to the start time, the cancellation is denied or the booking is still counted as no_show.
+9. If a booking is cancelled, the booking time still counts toward the 3-hour daily limit.
+10. If a booking is cancelled, the same time slot becomes available again immediately.
+11. If a verified booking is manually cancelled by admin, the final status is cancelled.
+
+Join/Add Member rules:
+1. A member cannot join if they are already part of a verified or active booking.
+2. Members cannot be added if the booking is pending, verified, active, completed, cancelled, expired, or no_show. 
+3. Members cannot be added if the room capacity is already full.
+4. The PIC cannot be added as a normal member.
+5. A member must have an active account to join.
+6. A member cannot join the same booking more than once.
+7. A member cannot join if the booking is less than 15 minutes from starting.
+8. A member must be invited by the PIC to join.
+9. A member must be allowed to join that room type based on their role.
+10. If a member leaves a booking, the slot becomes available again.
+11. If the PIC removes a member, the same member cannot be added again.
+12. If a booking is already verified, members cannot be removed anymore.
+13. If a booking is already pending admin verification, members cannot be added anymore.
+
+Reschedule rules:
+1. Only verified bookings are allowed to be rescheduled.
+2. A booking cannot be rescheduled if it is too close to the start time.
+3. A rescheduled booking must still pass all booking creation rules.
+4. If the room changes during reschedule, room availability rules are rechecked.
+5. After rescheduling, admin verification is reset.
+6. A booking can only be rescheduled once.
+7. A booking cannot be rescheduled after it has already started.
+8. A completed, cancelled, expired, or no_show booking cannot be rescheduled.
+9. If the admin rejects the reschedule request, the original booking remains unchanged.
+
+Admin Booking Rules:
+1. Admin may verify or reject pending bookings.
+2. Admin must re-check time overlap and booking validity before verification. (Admin dont need to, when admin wants to verify system checks it)
+3. Admin may manually cancel a verified or active booking.
+4. Admin may manually complete an active booking when the room key is returned.
+5. Admin may block specific dates from being booked.
+6. Admin may unblock a previously blocked date.
+7. Admin may deny booking verification if booking rules are violated.
+8. Admin may input the check-in code to activate a verified booking.
+9. Admin is responsible for room key handover and return.
+
+User Penalty Rules:
+1. A user who receives no_show is recorded as a violation + 1
+2. Every late cancellation of a verified booking also adds 1 peringatan to the user.
+3. A user with peringatan level 1 receives a warning notification from the system.
+4. A user with peringatan level 2 receives a final warning and is flagged for monitoring.
+5. A user who reaches peringatan level 3 is automatically suspended by the system.
+6. A user who is automatically suspended at peringatan level 3 is suspended for 1 week.
+7. A suspended user cannot create bookings, join bookings, or reschedule bookings.
+8. After the suspension period ends, the user is automatically reactivated by the system.
+9. After reactivation, the user’s peringatan level may either reset to 0 or be reduced to 1, based on admin policy.
+10. A user who reaches peringatan level 3 again after reactivation may receive a longer suspension.
+11. Admin may manually increase or decrease a user’s peringatan level in special cases.
+12. Admin may manually suspend or unsuspend a user regardless of peringatan level.
+ 
