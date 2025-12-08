@@ -6,7 +6,6 @@ $roomTypes = [
     'Baca Kelompok',
     'Koleksi Bahasa Prancis',
     'Bimbingan & Konseling',
-    'Ruang Rapat',
 ];
 
 ?>
