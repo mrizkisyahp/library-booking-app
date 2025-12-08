@@ -140,10 +140,6 @@ $statusColors = [
                 </div>
 
                 <div class="w-full mb-4">
-                    <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-                        class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
-                        ubah rincian booking
-                    </a>
                     <?php if ($isPic && $statusKey === 'completed' && empty($booking->id_feedback)): ?>
                         <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                             class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
@@ -152,36 +148,37 @@ $statusColors = [
                     <?php endif; ?>
                 </div>
 
-                <hr class="h-px py-4 text-gray-400">
-
-                <p class="font-bold text-4xl mb-6">
-                    Undang Anggota
-                </p>
-                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
-                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
-                        <?= htmlspecialchars($booking->invite_token) ?>
+                <?php if ($booking->status === 'draft'): ?>
+                    <hr class="h-px py-4 text-gray-400">
+                    <p class="font-bold text-4xl mb-6">
+                        Undang Anggota
                     </p>
-                    <div onclick="copyToken()"
-                        class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
+                    <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                        <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
+                            <?= htmlspecialchars($booking->invite_token) ?>
+                        </p>
+                        <div onclick="copyToken()"
+                            class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
 
-                        <span id="copyToast"
-                            class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
-                            Copied!
-                        </span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-copy-icon lucide-copy size-4">
-                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                        </svg>
+                            <span id="copyToast"
+                                class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
+                                Copied!
+                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-copy-icon lucide-copy size-4">
+                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                            </svg>
+                        </div>
                     </div>
-                </div>
-                <div class="w-full mb-4">
-                    <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-                        class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
-                        Bagikan tautan undangan
-                    </a>
-                </div>
+                    <div class="w-full mb-4">
+                        <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+                            class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
+                            Bagikan tautan undangan
+                        </a>
+                    </div>
+                <?php endif; ?>
 
                 <hr class="h-px py-4 text-gray-400">
                 <p class="font-bold text-4xl mb-6">
@@ -266,7 +263,8 @@ $statusColors = [
     <div class="w-full mb-8">
         <div class="flex items-center justify-around w-full px-4">
             <?php if ($booking->status === 'draft'): ?>
-                <form action="/bookings/submit" method="post">
+                <form action="/bookings/submit" method="post"
+                    onsubmit="return confirm('Anda yakin ingin mengirimkan pengajuan ini?')">
                     <?= csrf_field() ?>
                     <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
@@ -285,7 +283,8 @@ $statusColors = [
                 </a>
             <?php endif; ?>
             <?php if ($booking->status === 'pending'): ?>
-                <form action="/bookings/" method="post">
+                <form action="/bookings/cancel-pending" method="post"
+                    onsubmit="return confirm('Anda yakin ingin membatalkan pengajuan ini?')">
                     <?= csrf_field() ?>
                     <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 

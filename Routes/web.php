@@ -66,6 +66,9 @@ $app->router->get('/bookings/reschedule', [UserBookingController::class, 'showRe
 $app->router->post('/bookings/reschedule/confirm', [UserBookingController::class, 'confirmReschedule'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/reschedule', [UserBookingController::class, 'reschedule'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/delete-draft', [UserBookingController::class, 'deleteDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/bookings/edit-draft', [UserBookingController::class, 'showEditDraft'], ['middleware' => [new AuthMiddleware()]]);
+$app->router->post('/bookings/update-draft', [UserBookingController::class, 'updateDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/bookings/cancel-pending', [UserBookingController::class, 'cancelPending'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 
 // Feedback routes (authenticated)
 $app->router->get('/feedback/create', [UserFeedbackController::class, 'create'], ['middleware' => [new AuthMiddleware()]]);
