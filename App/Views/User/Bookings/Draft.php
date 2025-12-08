@@ -33,10 +33,10 @@
   <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
     <div class="flex flex-col justify-start p-6">
       <p class="font-bold text-2xl mb-2">
-        <?= htmlspecialchars($room->nama_ruangan) ?>
+        <?= htmlspecialchars($booking->nama_ruangan) ?>
       </p>
       <p class="mb-2">
-        <?= htmlspecialchars($room->jenis_ruangan) ?>
+        <?= htmlspecialchars($booking->jenis_ruangan) ?>
       </p>
       <div class="w-full">
 
@@ -167,10 +167,15 @@
           </div>
         </div>
         <div class="w-full mb-4">
-          <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-            class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
-            Bagikan tautan undangan
-          </a>
+          <button type="button"
+            onclick="navigator.clipboard.writeText(window.location.origin + '/bookings/join?code=<?= rawurlencode($booking->invite_token) ?>'); alert('Link berhasil disalin!');"
+            class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm flex items-center justify-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Salin Link Undangan
+          </button>
         </div>
 
         <hr class="h-px py-4 text-gray-400">

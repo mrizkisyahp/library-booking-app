@@ -19,6 +19,8 @@ $roomTypes = [
   'Ruang Rapat',
 ];
 
+dump($bookings);
+
 ?>
 
 <div class="min-h-dvh bg-slate-100">
@@ -227,9 +229,9 @@ $roomTypes = [
               Status:
               <?= htmlspecialchars($statusLabel) ?>
               <!-- status state -->
-              <?php if ($booking->status === 'draft' && $booking->currentMembers < $booking->requiredMembers): ?>
+              <?php if ($booking->status === 'draft' && $booking->current_members < $booking->required_members): ?>
                 (Menunggu Anggota)
-              <?php elseif ($booking->status === 'draft' && $booking->currentMembers >= $booking->requiredMembers): ?>
+              <?php elseif ($booking->status === 'draft' && $booking->current_members >= $booking->required_members): ?>
                 (Siap Dikirim)
               <?php elseif ($booking->status === 'pending'): ?>
                 (Menunggu Konfirmasi)
@@ -278,11 +280,11 @@ $roomTypes = [
                 <circle cx="10" cy="8" r="5" />
                 <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
               </svg>
-              <?= (int) $booking->currentMembers ?> /
-              <?= isset($booking->maximumMembers) && $booking->maximumMembers > 0 ? (int) $booking->maximumMembers : '∞' ?>
+              <?= (int) $booking->current_members ?> /
+              <?= isset($booking->maximum_members) && $booking->maximum_members > 0 ? (int) $booking->maximum_members : '∞' ?>
               peserta
-              <?php if (isset($booking->requiredMembers) && $booking->requiredMembers > 0): ?>
-                · Min <?= (int) $booking->requiredMembers ?>
+              <?php if (isset($booking->required_members) && $booking->required_members > 0): ?>
+                · Min <?= (int) $booking->required_members ?>
               <?php endif; ?>
             </p>
 
@@ -310,7 +312,7 @@ $roomTypes = [
       </div>
     <?php endforeach; ?>
   </div>
-  <form method="get" action="/rooms" class="relative mb-4 max-w-7xl mx-auto md:px-6">
+  <form method="get" action="/my-bookings" class="relative mb-4 max-w-7xl mx-auto md:px-6">
 
     <div class="border border-gray-200 bg-white
                 rounded-3xl shadow-xl px-8 py-8 hidden md:block h-fit sticky top-0">
@@ -406,7 +408,7 @@ $roomTypes = [
             Terapkan
           </button>
 
-          <a href="/rooms" class="flex-1 px-4 py-3 border-2 border-slate-300 rounded-2xl text-slate-700 text-center
+          <a href="/my-bookings" class="flex-1 px-4 py-3 border-2 border-slate-300 rounded-2xl text-slate-700 text-center
                         hover:bg-slate-100 transition active:scale-95">
             Reset
           </a>
