@@ -16,14 +16,10 @@ class Room extends DbModel
     public string $status_ruangan = 'available';
     public ?string $created_at = null;
     public ?string $updated_at = null;
-<<<<<<< HEAD
-    public ?int $requires_special_approval = 0;
-=======
     public ?string $deleted_at = null;
     public ?bool $requires_special_approval = false;
     public ?float $avg_rating = null;
 
->>>>>>> revampwf
     public static function tableName(): string
     {
         return 'ruangan';
@@ -46,10 +42,7 @@ class Room extends DbModel
             'status_ruangan',
             'created_at',
             'updated_at',
-<<<<<<< HEAD
-=======
             'deleted_at',
->>>>>>> revampwf
             'requires_special_approval',
         ];
     }
@@ -224,23 +217,6 @@ class Room extends DbModel
     //     return $photos[0] ?? null;
     // }
 
-<<<<<<< HEAD
-    public function getAvailabilityCalendar(int $days = 5): array
-    {
-        $start = date('Y-m-d');
-        $stmt = App::$app->db->prepare("
-            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status
-            FROM booking
-            WHERE ruangan_id = :room
-              AND tanggal_penggunaan_ruang BETWEEN :start AND :end
-              AND status NOT IN ('draft', 'cancelled', 'noshow')
-            ORDER BY tanggal_penggunaan_ruang ASC, waktu_mulai ASC
-        ");
-        $stmt->bindValue(':room', $this->id_ruangan, \PDO::PARAM_INT);
-        $stmt->bindValue(':start', $start);
-        $stmt->bindValue(':end', date('Y-m-d', strtotime('+21 days')));
-        $stmt->execute();
-=======
     // public function getAvailabilityCalendar(int $days = 5): array
     // {
     //     $start = date('Y-m-d');
@@ -256,7 +232,6 @@ class Room extends DbModel
     //     $stmt->bindValue(':start', $start);
     //     $stmt->bindValue(':end', date('Y-m-d', strtotime('+21 days')));
     //     $stmt->execute();
->>>>>>> revampwf
 
     //     $calendar = [];
     //     $added = 0;

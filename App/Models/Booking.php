@@ -27,14 +27,8 @@ class Booking extends DbModel
     public ?int $current_members = null;
     public ?int $id_feedback = null;
     public ?string $nama = null;
-<<<<<<< HEAD
-    public ?string $jenis_ruangan = null;
-    public ?int $kapasitas_min = null;
-    public ?int $kapasitas_max = null;
-=======
     public ?bool $has_been_rescheduled = null;
     public ?string $deleted_at = null;
->>>>>>> revampwf
 
     public static function tableName(): string
     {
@@ -197,30 +191,6 @@ class Booking extends DbModel
     //     return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
     // }
 
-<<<<<<< HEAD
-    private static function buildQueryMyBooking(int $userid, array $filters): array
-    {
-        $sql = "
-        SELECT DISTINCT booking.*, users.nama, ruangan.nama_ruangan, feedback.id_feedback, ruangan.jenis_ruangan, ruangan.kapasitas_min, ruangan.kapasitas_max 
-        FROM booking
-        LEFT JOIN users ON booking.user_id = users.id_user
-        LEFT JOIN ruangan ON booking.ruangan_id = ruangan.id_ruangan
-        LEFT JOIN feedback ON booking.id_booking = feedback.booking_id
-        LEFT JOIN anggota_booking ON booking.id_booking = anggota_booking.booking_id
-        WHERE (booking.user_id = :user_id OR anggota_booking.user_id = :user_id)
-    ";
-        $params = [
-            ':user_id' => $userid
-        ];
-
-        if (!empty($filters['keyword'])) {
-            $sql .= " AND (
-            users.nama LIKE :keyword OR
-            ruangan.nama_ruangan LIKE :keyword
-        )";
-            $params[':keyword'] = '%' . $filters['keyword'] . '%';
-        }
-=======
     // private static function buildQueryMyBooking(int $userid, array $filters): array
     // {
     //     $sql = "
@@ -242,7 +212,6 @@ class Booking extends DbModel
     //         )";
     //         $params[':keyword'] = '%' . $filters['keyword'] . '%';
     //     }
->>>>>>> revampwf
 
     //     if (!empty($filters['status'])) {
     //         $sql .= " AND booking.status = :status";

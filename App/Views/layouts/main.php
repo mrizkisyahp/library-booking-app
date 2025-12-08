@@ -11,33 +11,20 @@ use App\Core\App;
     <base href="<?= App::getBaseUrl() ?>/" />
     <link href="css/output.css" rel="stylesheet">
 </head>
-<<<<<<< HEAD
 
 <body class="min-h-dvh bg-slate-100">
     <!-- sidebar -->
-=======
-<body class="min-h-screen bg-slate-100">
-    <!-- sidebar 😭 -->
->>>>>>> revampwf
     <aside class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10">
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
             <!-- Logo -->
             <li class="w-full px-3">
                 <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all"
-<<<<<<< HEAD
-                    <?php if (App::$app->auth->isGuest()): ?>
-                        href="/"
-                    <?php else: ?>
-                        <?php if ($user && $user->isAdmin()): ?>
-                            href="/admin"
-=======
                     <?php if (auth()->guest()): ?> 
                         href="/" 
                     <?php else: ?> 
                         <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
                             href="/admin" 
->>>>>>> revampwf
                         <?php else: ?>
                             href="/dashboard"
                         <?php endif; ?>
@@ -55,16 +42,9 @@ use App\Core\App;
                     </span>
                 </a>
             </li>
-<<<<<<< HEAD
-
-            <!-- Main navigation -->
-            <?php if (App::$app->auth->isGuest()): ?>
-                <!-- Guest -->
-=======
             <!-- Main navigation 😋-->
             <?php if (auth()->guest()): ?>
                 <!-- Guest 🥸 -->
->>>>>>> revampwf
                 <li class="w-full px-3">
                     <a href="/login"
                         class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -84,13 +64,8 @@ use App\Core\App;
                     </a>
                 </li>
             <?php else: ?>
-<<<<<<< HEAD
-                <!-- User Admin -->
-                <?php if ($user && $user->isAdmin()): ?>
-=======
                 <!-- User Admin 🧑🏻‍💻 -->
                 <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
->>>>>>> revampwf
                     <li class="w-full px-3">
                         <a href="/admin/bookings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -174,11 +149,7 @@ use App\Core\App;
         </ul>
         <!-- Bagian bawah 🤔 -->
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
-<<<<<<< HEAD
-            <?php if (App::$app->auth->isGuest()): ?>
-=======
             <?php if (auth()->guest()): ?>
->>>>>>> revampwf
                 <!-- Empty -->
             <?php else: ?>
                 <li class="mx-2 px-2">
@@ -200,11 +171,7 @@ use App\Core\App;
                         <?= csrf_field() ?>
                         <button type="submit"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4 cursor-pointer">
-<<<<<<< HEAD
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out size-6 shrink-0"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
-=======
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out size-6 shrink-0"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
->>>>>>> revampwf
                                 Logout
                             </span>
                         </button>
@@ -295,12 +262,8 @@ use App\Core\App;
     <?php endif; ?>
     <!-- mobile Navigation -->
     <header
-<<<<<<< HEAD
         class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-40 md:hidden">
 
-=======
-        class="absolute left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-30 md:hidden">
->>>>>>> revampwf
         <div>Logo</div>
         <div>
             <a href="#">
@@ -314,16 +277,7 @@ use App\Core\App;
             $active = $_SERVER['REQUEST_URI'];
             $currentPageQuery = basename($active);
             $currentPage = explode('?', $currentPageQuery)[0];
-<<<<<<< HEAD
-            // echo "<pre>";
-            // print_r($currentPage);
-            // echo '</pre>';
-            // exit;
-
-            if (App::$app->auth->isGuest()) {
-=======
             if (auth()->guest()) {
->>>>>>> revampwf
                 $url = '/';
             } else {
                 $url = auth()->check() && auth()->user()->isAdmin() ? '/admin' : '/dashboard';
@@ -417,9 +371,4 @@ use App\Core\App;
     </nav>
 </body>
 </html>
-<<<<<<< HEAD
-
 <script src="src/script.js"></script>
-=======
-<script src="src/script.js"></script>
->>>>>>> revampwf

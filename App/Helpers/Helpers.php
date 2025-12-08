@@ -3,13 +3,8 @@
 use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
-<<<<<<< HEAD
-use App\Core\Session;
-use Carbon\Carbon;
-=======
 use Carbon\Carbon;
 
->>>>>>> revampwf
 
 if (!function_exists('app')) {
     function app(): App
@@ -268,8 +263,6 @@ if (!function_exists('formatTanggal')) {
         return Carbon::parse($tanggal)->translatedFormat('l, d F Y');
     }
 }
-<<<<<<< HEAD
-=======
 
 if (!function_exists('getRemainingAttempts')) {
     function getRemainingAttempts(string $identifier, string $type = 'login'): int
@@ -334,4 +327,3 @@ if (!function_exists('room_facilities')) {
         return array_values(array_filter(array_map('trim', $parts)));
     }
 }
->>>>>>> revampwf

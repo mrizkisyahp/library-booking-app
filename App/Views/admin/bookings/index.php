@@ -299,8 +299,4 @@ $statusOptions = [
       </div>
     </div>
   </div>
-<<<<<<< HEAD
-</div>
-=======
 <?php endif; ?>
->>>>>>> revampwf

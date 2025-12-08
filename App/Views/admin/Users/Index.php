@@ -1,13 +1,3 @@
-<?php
-use App\Core\App;
-use App\Core\Csrf;
-
-$filters = $filters ?? [];
-$stats = $stats ?? [];
-$roles = $roles ?? [];
-$statuses = $statuses ?? [];
-$users = $users ?? [];
-?>
 <div class="p-6">
   <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
     <div>
@@ -28,13 +18,13 @@ $users = $users ?? [];
     </p>
   </div>
 
-  <?php if ($message = App::$app->session->getFlash('success')): ?>
+  <?php if ($message = session('success')): ?>
     <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
   <?php endif; ?>
 
-  <?php if ($message = App::$app->session->getFlash('error')): ?>
+  <?php if ($message = session('error')): ?>
     <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>

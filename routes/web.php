@@ -19,6 +19,7 @@ use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\AdminMiddleware;
 use App\Core\Middleware\CsrfMiddleware;
 use App\Core\Middleware\GuestMiddleware;
+use App\Controllers\AdminReportController;
 
 // Auth routes (public)
 $app->router->get('/', [AuthController::class, 'login'], ['middleware' => [new GuestMiddleware()]]);
@@ -93,6 +94,7 @@ $app->router->post('/admin/bookings/add', [AdminBookingController::class, 'addMe
 $app->router->post('/admin/bookings/kick', [AdminBookingController::class, 'kickMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/admin/bookings/reschedule', [AdminBookingController::class, 'showRescheduleForm'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->post('/admin/bookings/reschedule', [AdminBookingController::class, 'reschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
 
 // Admin users
 $app->router->get('/admin/users', [AdminUserController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

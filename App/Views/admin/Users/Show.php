@@ -1,11 +1,3 @@
-<?php
-use App\Core\App;
-use App\Core\Csrf;
-use App\Models\User;
-/** @var User $user */
-
-?>
-
 <div class="max-w-5xl mx-auto space-y-6">
   <div class="mb-2">
     <a href="/admin/users" class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-semibold group">
@@ -18,13 +10,13 @@ use App\Models\User;
   </div>
 
   <!-- Flash Messages -->
-  <?php if ($message = App::$app->session->getFlash('success')): ?>
+  <?php if ($message = session('success')): ?>
     <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>
   <?php endif; ?>
 
-  <?php if ($message = App::$app->session->getFlash('error')): ?>
+  <?php if ($message = session('error')): ?>
     <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
       <?= htmlspecialchars($message) ?>
     </div>

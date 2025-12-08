@@ -1,20 +1,12 @@
-<?php
-use App\Core\App;
-use App\Core\Csrf;
-
-$roles = $roles ?? [];
-$statuses = ['active', 'pending kubaca', 'pending verification', 'suspended', 'rejected', 'nonaktif'];
-?>
-
 <body>
   <h1>Create User</h1>
   <p><a href="/admin/users">Back to list</a></p>
 
-  <?php if ($message = App::$app->session->getFlash('success')): ?>
+  <?php if ($message = session('success')): ?>
     <p style="color: green;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
-  <?php if ($message = App::$app->session->getFlash('error')): ?>
+  <?php if ($message = session('error')): ?>
     <p style="color: red;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
