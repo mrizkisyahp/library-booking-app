@@ -207,6 +207,7 @@ class UserBookingController extends Controller
                 'pic' => $data['pic'],
                 'members' => $data['members'],
                 'allMembers' => $data['allMembers'],
+                'canSubmit' => $data['canSubmit'],
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
             ]);

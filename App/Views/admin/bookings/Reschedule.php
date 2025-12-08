@@ -1,5 +1,7 @@
 <?php
 use App\Core\App;
+
+dump($booking);
 ?>
 
 <div class="container mx-auto px-4 py-6 max-w-2xl">
@@ -62,7 +64,7 @@ use App\Core\App;
         </div>
         <div class="mt-4 bg-white rounded-lg p-3">
             <p class="text-amber-600 font-semibold text-sm">Booking Code</p>
-            <p class="text-slate-800 font-bold font-mono"><?= htmlspecialchars($booking->booking_code ?? '-') ?></p>
+            <p class="text-slate-800 font-bold font-mono"><?= htmlspecialchars($booking->checkin_code ?? '-') ?></p>
         </div>
     </div>
 

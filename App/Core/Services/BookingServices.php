@@ -30,7 +30,7 @@ class BookingServices
 
     public function getBookingById(int $id): ?Booking
     {
-        return $this->bookingRepo->findById($id);
+        return $this->bookingRepo->findByIdWithDetails($id);
     }
     public function getBookingsByUser(int $userId, array $filters = [], int $perPage = 15, int $page = 1): Paginator
     {
