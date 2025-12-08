@@ -25,7 +25,12 @@ class GuestMiddleware extends Middleware
         }
 
         if (!guest()) {
-            redirect('/dashboard');
+            flash('error', 'You are already logged in.');
+            if (user()->isAdmin()) {
+                redirect('/admin');
+            } else {
+                redirect('/dashboard');
+            }
             return false;
         }
         return true;

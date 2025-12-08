@@ -7,60 +7,104 @@ use App\Core\Exceptions\ForbiddenException;
 use App\Core\Exceptions\ValidationException;
 use App\Core\Services\AuthService;
 use App\Core\Services\Logger;
+use App\Core\Repository\UserRepository;
+use App\Core\Services\TurnstileService;
+use App\Core\Services\EmailService;
+use App\Core\Services\CacheService;
 use App\Models\User;
 
 class App
 {
     public static string $ROOT_DIR;
-    public string $userClass;
+    public static App $app;
     public Router $router;
     public Request $request;
     public Response $response;
     public Session $session;
     public Database $db;
     public Logger $log;
-    public static App $app;
-    public ?Controller $controller = null;
-    public ?DbModel $user;
-    public AuthService $auth;
     public Container $container;
+    public ?DbModel $user = null;
+    public ?Controller $controller = null;
+    public AuthService $auth;
+    public string $userClass;
+
     public static function getBaseUrl(): string
     {
         $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
         return rtrim(str_replace('//', '/', $scriptDir), '/');
     }
 
-    public function __construct($rootPath, array $config)
+    public function __construct(string $rootPath, array $config)
     {
-        $this->userClass = $config['userClass'] ?? User::class;
-        self::$ROOT_DIR = $rootPath;
         self::$app = $this;
+        self::$ROOT_DIR = $rootPath;
 
-        // Initialize Container
+        $this->userClass = $config['userClass'] ?? User::class;
+
         $this->container = new Container();
 
         $this->request = new Request();
         $this->response = new Response();
         $this->session = new Session();
-        $this->log = new Logger();
         $this->router = new Router($this->request, $this->response);
 
-        $dbConfig = $config['database'] ?? $config['db'] ?? [];
-
+        $dbConfig = $config['database'] ?? [];
         $this->db = new Database($dbConfig);
 
-        $this->auth = new AuthService($this->session, $this->userClass);
-        $this->auth->bootstrap();
-        $this->user = $this->auth->getUser();
+        $this->container->instance(Container::class, $this->container);
+        $this->container->instance(Request::class, $this->request);
+        $this->container->instance(Response::class, $this->response);
+        $this->container->instance(Session::class, $this->session);
+        $this->container->instance(Database::class, $this->db);
+        $this->container->instance(Router::class, $this->router);
 
-        // Register core bindings
-        $this->container->singleton(Container::class, fn() => $this->container);
-        $this->container->singleton(Request::class, fn() => $this->request);
-        $this->container->singleton(Response::class, fn() => $this->response);
-        $this->container->singleton(Session::class, fn() => $this->session);
-        $this->container->singleton(Database::class, fn() => $this->db);
-        $this->container->singleton(Router::class, fn() => $this->router);
-        $this->container->singleton(AuthService::class, fn() => $this->auth);
+        $this->container->singleton(
+            UserRepository::class,
+            fn($c) => new UserRepository($this->db)
+        );
+
+        $this->container->singleton(
+            TurnstileService::class,
+            fn($c) => new TurnstileService(
+                $_ENV['TURNSTILE_SECRET'] ?? '',
+                filter_var($_ENV['TURNSTILE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN)
+            )
+        );
+
+        $this->container->singleton(
+            CacheService::class,
+            fn($c) => new CacheService(cacheDir: App::$ROOT_DIR . '/Storage/Cache')
+        );
+
+        $this->container->singleton(
+            Logger::class,
+            fn($c) => new Logger(logDir: App::$ROOT_DIR . '/Storage/Logs')
+        );
+
+        $mailConfig = $config['mail'] ?? [];
+        $this->container->singleton(EmailService::class, function () use ($mailConfig) {
+            return new EmailService(
+                host: $mailConfig['host'] ?? 'localhost',
+                username: $mailConfig['username'] ?? '',
+                password: $mailConfig['password'] ?? '',
+                encryption: $mailConfig['encryption'] ?? 'tls',
+                port: (int) ($mailConfig['port'] ?? 587),
+                fromAddress: $mailConfig['from_email'] ?? 'noreply@localhost',
+                fromName: $mailConfig['from_name'] ?? 'Library Booking App'
+            );
+        });
+
+        $this->auth = $this->container->make(AuthService::class, [
+            'userClass' => $this->userClass
+        ]);
+
+        $this->log = $this->container->make(Logger::class);
+
+        $this->auth->bootstrap();
+        $this->user = $this->auth->user();
+
+        $this->container->instance(AuthService::class, $this->auth);
     }
 
     public function run(): void
@@ -69,62 +113,114 @@ class App
             echo $this->router->resolve();
 
         } catch (NotFoundException $e) {
-            $this->response->setStatusCode(404);
-            $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-
-            echo $this->router->renderView('errors/404', [
-                'message' => $isDev ? $e->getMessage() : null,
-                'file' => $isDev ? $e->getFile() : null,
-                'line' => $isDev ? $e->getLine() : null,
-                'trace' => $isDev ? $e->getTraceAsString() : null,
-            ]);
+            $this->handleNotFoundException($e);
 
         } catch (ForbiddenException $e) {
-            $this->response->setStatusCode(403);
-            $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-
-            echo $this->router->renderView('errors/403', [
-                'message' => $isDev ? $e->getMessage() : null,
-                'file' => $isDev ? $e->getFile() : null,
-                'line' => $isDev ? $e->getLine() : null,
-                'trace' => $isDev ? $e->getTraceAsString() : null,
-            ]);
+            $this->handleForbiddenException($e);
 
         } catch (ValidationException $e) {
-            $this->response->setStatusCode(422);
-            $errors = $e->errors();
-            $old = $this->request->getBody();
-            $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+            $this->handleValidationException($e);
 
-            if ($this->request->isAjax()) {
-                $this->response->json(['errors' => $errors], 422);
-            }
-
-            $this->session->setFlash('errors', $errors);
-            $this->session->setFlash('old', $old);
-            $this->response->back();
+        } catch (\PDOException $e) {
+            $this->handleDatabaseException($e);
 
         } catch (\Throwable $e) {
-            $this->response->setStatusCode(500);
-            $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
-
-            $context = [
-                'message' => $isDev ? $e->getMessage() : null,
-                'file' => $isDev ? $e->getFile() : null,
-                'line' => $isDev ? $e->getLine() : null,
-                'trace' => $isDev ? $e->getTraceAsString() : null,
-            ];
-
-            if (class_exists('\App\Core\Services\Logger')) {
-                Logger::error('Unhandled exception', [
-                    'error' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ]);
-            }
-
-            echo $this->router->renderView('errors/500', $context);
+            $this->handleGeneralException($e);
         }
     }
-}
 
+    private function handleNotFoundException(NotFoundException $e): void
+    {
+        $this->response->setStatusCode(404);
+        $this->log->warning('404 Not Found', [
+            'uri' => $this->request->getPath(),
+            'method' => $this->request->method()
+        ]);
+        $this->renderError('errors/404', $e, 'Page not found');
+    }
+
+    private function handleForbiddenException(ForbiddenException $e): void
+    {
+        $this->response->setStatusCode(403);
+        $this->log->warning('403 Forbidden', [
+            'uri' => $this->request->getPath(),
+            'method' => $this->request->method(),
+            'user_id' => $this->user?->id_user ?? null
+        ]);
+        $this->renderError('errors/403', $e, 'Access forbidden');
+    }
+
+    private function handleValidationException(ValidationException $e): void
+    {
+        $this->response->setStatusCode(422);
+
+        if ($this->request->isAjax()) {
+            $this->response->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+            return;
+        }
+
+        $this->session->setFlash('errors', $e->errors());
+        foreach ($this->request->getBody() as $key => $value) {
+            if (!is_array($value)) {
+                $this->session->setFlash('old_' . $key, $value);
+            }
+        }
+        $this->response->back();
+    }
+
+    private function handleDatabaseException(\PDOException $e): void
+    {
+        $this->response->setStatusCode(500);
+        $this->log->error('Database Error', [
+            'error' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'uri' => $this->request->getPath()
+        ]);
+
+        $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+        $message = $isDev ? $e->getMessage() : 'A database error occurred';
+
+        $this->renderError('errors/500', $e, $message);
+    }
+
+    private function handleGeneralException(\Throwable $e): void
+    {
+        $this->response->setStatusCode(500);
+        $this->log->error('Unhandled Exception', [
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        $this->renderError('errors/500', $e, 'An unexpected error occurred');
+    }
+
+    private function renderError(string $view, \Throwable $e, string $defaultMessage = 'An error occurred'): void
+    {
+        $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+
+        if ($this->request->isAjax()) {
+            $this->response->json([
+                'success' => false,
+                'message' => $isDev ? $e->getMessage() : $defaultMessage,
+                'error' => $isDev ? [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => explode("\n", $e->getTraceAsString())
+                ] : null
+            ]);
+            return;
+        }
+
+        echo $this->router->renderView($view, [
+            'message' => $isDev ? $e->getMessage() : $defaultMessage,
+            'file' => $isDev ? $e->getFile() : null,
+            'line' => $isDev ? $e->getLine() : null,
+            'trace' => $isDev ? $e->getTraceAsString() : null,
+        ]);
+    }
+}

@@ -1,7 +1,10 @@
 <?php
-/** @var \App\Models\User $model */
+/** @var \App\Core\Validator\Validator|null $validator */
 use App\Core\App;
-use App\Core\Csrf;
+
+$validator = $validator ?? null;
+$token = $token ?? '';
+$email = $email ?? '';
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -21,36 +24,34 @@ use App\Core\Csrf;
         <p><?= htmlspecialchars($m) ?></p>
       <?php endif; ?>
 
-      <p>Masukkan kode verifikasi dan atur password barumu.</p>
+      <p>Masukkan password baru untuk akun: <strong><?= htmlspecialchars($email) ?></strong></p>
 
       <div class="mt-6">
-        <form action="/reset" method="post">
+        <form action="/reset-password" method="post">
           <?= csrf_field() ?>
 
           <div>
-            <div class="mt-6">
-              <input id="code" type="text" name="code" placeholder="Kode verifikasi"
-                value="<?= htmlspecialchars($model->code ?? '') ?>"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $model->hasError('code') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
-              <?php if ($model->hasError('code')): ?>
-                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('code')) ?></p>
-              <?php endif; ?>
-            </div>
+            <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+            <?php if ($validator?->hasError('token')): ?>
+              <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('token')) ?></p>
+            <?php endif; ?>
 
             <div class="mt-6">
               <input id="password" type="password" name="new_password" placeholder="Password baru"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $model->hasError('new_password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
-              <?php if ($model->hasError('new_password')): ?>
-                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('new_password')) ?></p>
+                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $validator?->hasError('new_password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
+              <?php if ($validator?->hasError('new_password')): ?>
+                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('new_password')) ?>
+                </p>
               <?php endif; ?>
             </div>
 
             <div class="mt-6">
               <input id="confirm_password" type="password" name="confirm_new_password" placeholder="Konfirmasi password"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $model->hasError('confirm_new_password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
-              <?php if ($model->hasError('confirm_new_password')): ?>
+                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $validator?->hasError('confirm_new_password') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
+              <?php if ($validator?->hasError('confirm_new_password')): ?>
                 <p class="mt-1 text-sm text-red-600">
-                  <?= htmlspecialchars($model->getFirstError('confirm_new_password')) ?></p>
+                  <?= htmlspecialchars($validator->getFirstError('confirm_new_password')) ?>
+                </p>
               <?php endif; ?>
             </div>
 

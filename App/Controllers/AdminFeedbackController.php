@@ -2,76 +2,59 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
-use App\Core\Response;
-use App\Core\Services\AdminFeedbackService;
+use App\Core\Repository\FeedbackRepository;
+use Exception;
 
 class AdminFeedbackController extends Controller
 {
-    private AdminFeedbackService $service;
+    private FeedbackRepository $feedbackRepo;
 
-    public function __construct()
+    public function __construct(FeedbackRepository $feedbackRepo)
     {
-        $this->registerMiddleware(new AdminMiddleware());
+        $this->feedbackRepo = $feedbackRepo;
     }
 
-    public function index(Request $request, Response $response): ?string
+    public function index(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Feedback Pengguna | Library Booking App');
+        try {
+            $filters = [
+                'keyword' => $request->query()['keyword'] ?? '',
+                'rating' => $request->query()['rating'] ?? '',
+                'tanggal' => $request->query()['tanggal'] ?? '',
+            ];
+            $page = (int) ($request->query()['page'] ?? 1);
 
-        $filters = [
-            'keyword' => $request->getBody()['keyword'] ?? null,
-            'tanggal_penggunaan_ruang' => $request->getBody()['tanggal_penggunaan_ruang'] ?? null,
-            'rating' => $request->getBody()['rating'] ?? null,
-            'page' => (int) ($request->getBody()['page'] ?? 1),
-        ];
+            $paginator = $this->feedbackRepo->getAllFeedbacks($filters, 15, $page);
 
-        $service = new AdminFeedbackService();
-        $result = $service->listFeedback($filters);
-
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Feedback tidak ditemukan.');
-            $response->redirect('/admin/feedback');
-            return null;
+            return view('Admin/Feedback/Index', [
+                'feedbacks' => $paginator->items,
+                'paginator' => $paginator,
+                'filters' => $filters,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin');
         }
-
-        $data = $result['data'];
-
-        return $this->render('Admin/Feedback/Index', [
-            'feedback' => $data['feedback'] ?? [],
-            'filters' => $data['filters'] ?? [],
-            'currentPage' => $data['currentPage'],
-            'perPage' => $data['perPage'],
-            'total' => $data['total'],
-        ]);
     }
 
-    public function detail(Request $request, Response $response): ?string
+    public function detail(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Detail Feedback | Library Booking App');
+        try {
+            $id = (int) $request->query()['id'];
+            $feedback = $this->feedbackRepo->findByIdWithDetails($id);
 
-        $id = (int) ($request->getBody()['id'] ?? 0);
-        if ($id <= 0) {
-            App::$app->session->setFlash('error', 'ID feedback tidak valid.');
-            $response->redirect('/admin/feedback');
-            return null;
+            if (!$feedback) {
+                throw new Exception('Feedback tidak ditemukan');
+            }
+
+            return view('Admin/Feedback/Detail', [
+                'feedback' => $feedback,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/feedback');
         }
-
-        $service = new AdminFeedbackService();
-        $result = $service->getFeedbackDetail($id);
-        $data = $result['data'];
-
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Feedback tidak ditemukan.');
-            $response->redirect('/admin/feedback');
-            return null;
-        }
-
-        return $this->render('Admin/Feedback/Detail', $data);
     }
 }

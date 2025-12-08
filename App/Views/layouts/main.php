@@ -1,12 +1,9 @@
 <?php
 use App\Core\App;
-use App\Core\Csrf;
-/** @var \App\Models\User|null $user */
-$user = App::$app->user;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,10 +20,10 @@ $user = App::$app->user;
             <!-- Logo -->
             <li class="w-full px-3">
                 <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all"
-                    <?php if (App::$app->auth->isGuest()): ?>
+                    <?php if (auth()->guest()): ?>
                         href="/"
                     <?php else: ?>
-                        <?php if ($user && $user->isAdmin()): ?>
+                        <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
                             href="/admin"
                         <?php else: ?>
                             href="/dashboard"
@@ -45,10 +42,9 @@ $user = App::$app->user;
                     </span>
                 </a>
             </li>
-
-            <!-- Main navigation -->
-            <?php if (App::$app->auth->isGuest()): ?>
-                <!-- Guest -->
+            <!-- Main navigation 😋-->
+            <?php if (auth()->guest()): ?>
+                <!-- Guest 🥸 -->
                 <li class="w-full px-3">
                     <a href="/login"
                         class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -68,8 +64,8 @@ $user = App::$app->user;
                     </a>
                 </li>
             <?php else: ?>
-                <!-- User Admin -->
-                <?php if ($user && $user->isAdmin()): ?>
+                <!-- User Admin 🧑🏻‍💻 -->
+                <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
                     <li class="w-full px-3">
                         <a href="/admin/bookings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -153,7 +149,7 @@ $user = App::$app->user;
         </ul>
         <!-- Bagian bawah 🤔 -->
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
-            <?php if (App::$app->auth->isGuest()): ?>
+            <?php if (auth()->guest()): ?>
                 <!-- Empty -->
             <?php else: ?>
                 <li class="mx-2 px-2">
@@ -203,7 +199,6 @@ $user = App::$app->user;
                     </div>
                 </div>
             <?php endif; ?>
-
             <?php if ($m = App::$app->session->getFlash('error')): ?>
                 <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -215,7 +210,6 @@ $user = App::$app->user;
                     </div>
                 </div>
             <?php endif; ?>
-
             <?php if ($m = App::$app->session->getFlash('warning')): ?>
                 <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -227,7 +221,6 @@ $user = App::$app->user;
                     </div>
                 </div>
             <?php endif; ?>
-
             <?php if ($m = App::$app->session->getFlash('info')): ?>
                 <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -243,7 +236,6 @@ $user = App::$app->user;
             {{content}}
         </div>
     </main>
-
     <!-- Footer -->
     <footer class="bg-primary text-white py-8 mt-auto hidden md:block">
         <div class="max-w-7xl mx-auto px-6">
@@ -259,9 +251,8 @@ $user = App::$app->user;
             </div>
         </div>
     </footer>
-
     <!-- mobile guest checker -->
-    <?php if (App::$app->auth->isGuest()): ?>
+    <?php if (auth()->guest()): ?>
         <div class="min-h-dvh bg-black/30 backdrop-blur-md z-50">
             <div class="bg-white shadow-lg fixed flex justify-center items-center">
                 <a href="/login">Login</a>
@@ -269,7 +260,6 @@ $user = App::$app->user;
             </div>
         </div>
     <?php endif; ?>
-
     <!-- mobile Navigation -->
     <header
         class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-40 md:hidden">
@@ -283,22 +273,15 @@ $user = App::$app->user;
     </header>
     <nav class="fixed left-0 -bottom-1 right-0 bg-primary text-white md:hidden z-50 rounded-t-4xl py-3 shadow-xl">
         <div class="flex items-center justify-around w-full px-4">
-
             <?php
             $active = $_SERVER['REQUEST_URI'];
             $currentPageQuery = basename($active);
             $currentPage = explode('?', $currentPageQuery)[0];
-            // echo "<pre>";
-            // print_r($currentPage);
-            // echo '</pre>';
-            // exit;
-
-            if (App::$app->auth->isGuest()) {
+            if (auth()->guest()) {
                 $url = '/';
             } else {
-                $url = $user && $user->isAdmin() ? '/admin' : '/dashboard';
+                $url = auth()->check() && auth()->user()->isAdmin() ? '/admin' : '/dashboard';
             }
-
             function isActiveClass($current, $target)
             {
                 return $current === $target
@@ -306,7 +289,6 @@ $user = App::$app->user;
                     : "opacity-70 hover:opacity-100 transition px-4 py-2";
             }
             ?>
-
             <!-- beranda -->
             <a href="<?=  $url?>"
                 class="flex flex-col size-16 gap-1.5 text-sm items-center  <?= isActiveClass($active, $url) ?>">
@@ -318,22 +300,7 @@ $user = App::$app->user;
                 </svg>
                 <span>Beranda</span>
             </a>
-            <!-- <a href="" class="p-2 size-16">
-                <a href="<?= $url ?>"
-                    class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, $url) ?>">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-house size-6">
-                        <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-                        <path
-                            d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    </svg>
-                    <span>Beranda</span>
-                </a>
-            </a> -->
-
-            <?php if ($user && $user->isAdmin()): ?>
-
+            <?php if (auth()->check() && auth()->user()->isAdmin()): ?>
                 <!-- manajemen all -->
                 <a href="/admin/bookings"
                     class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/admin/bookings") ?>">
@@ -347,7 +314,6 @@ $user = App::$app->user;
                     </svg>
                     <span>Manajemen</span>
                 </a>
-
                 <!-- laporan/report -->
                 <a href="/reports"
                     class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/reports") ?>">
@@ -362,9 +328,7 @@ $user = App::$app->user;
                     </svg>
                     <span>Laporan</span>
                 </a>
-
             <?php else: ?>
-
                 <!-- Cari ruangan -->
                 <a href="/rooms" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/rooms") ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -375,7 +339,6 @@ $user = App::$app->user;
                     </svg>
                     <span>Cari</span>
                 </a>
-
                 <!-- buking -->
                 <a href="/my-bookings" class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/my-bookings") ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -391,9 +354,7 @@ $user = App::$app->user;
                     </svg>
                     <span>Booking</span>
                 </a>
-
             <?php endif; ?>
-
             <!-- profil -->
             <a href="/profile"
                 class="flex flex-col gap-1.5 text-sm items-center <?= isActiveClass($active, "/profile") ?>">
@@ -405,11 +366,8 @@ $user = App::$app->user;
                 </svg>
                 <span>Profil</span>
             </a>
-
         </div>
     </nav>
 </body>
-
 </html>
-
 <script src="src/script.js"></script>

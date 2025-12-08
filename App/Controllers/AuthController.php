@@ -5,191 +5,190 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\App;
-use App\Models\User;
-use App\Core\Csrf;
+use App\Core\Services\AuthService;
+use App\Core\Services\TurnstileService;
 use App\Core\Services\Logger;
-use App\Core\Middleware\GuestMiddleware;
-use App\Models\Role;
+use App\Core\Exceptions\ValidationException;
 
 class AuthController extends Controller
 {
-    public function __construct()
-    {
-        $this->registerMiddleware(new GuestMiddleware(['logout']));
+    public function __construct(
+        private AuthService $auth,
+        private TurnstileService $turnstile,
+        private Logger $logger
+    ) {
     }
 
     public function login(Request $request, Response $response)
     {
-        $loginModel = new User();
-        $loginModel->setScenario(User::SCENARIO_LOGIN);
-        $authService = App::$app->auth;
-
         $this->setLayout('auth');
         $this->setTitle('Login | Library Booking App');
 
         if ($request->isPost()) {
 
-            $token = $_POST['cf-turnstile-response'] ?? null;
-            $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
+            $token = $request->input('cf-turnstile-response');
+            $remoteIp = $request->ip();
 
-            if (!$authService->verifyTurnstile($token, $remoteIp)) {
-                return $this->render('Auth/Login', ['model' => $loginModel]);
+            if (!$this->turnstile->verify($token, $remoteIp)) {
+                flash('error', 'Captcha verification failed. Please try again.');
+                return view('Auth/Login', [
+                    'rememberedIdentifier' => $_COOKIE['remember_identifier'] ?? ''
+                ]);
             }
 
-            $loginModel->loadData($request->getBody());
+            try {
+                $validated = $request->validate([
+                    'identifier' => ['required', 'string', 'max:255'],
+                    'password' => ['required', 'string', 'max:255', 'min:6']
+                ]);
 
-            if ($loginModel->validate() && $authService->processLogin($loginModel)) {
-                $currentUser = $authService->getUser();
-                $roleName = null;
+                $remember = (bool) $request->input('remember', false);
 
-                if ($currentUser instanceof User && $currentUser->id_user !== null) {
-                    $roleName = Role::getNameById($currentUser->id_role ?? null);
+                if ($this->auth->attempt($validated, $remember)) {
+                    $currentUser = $this->auth->user();
+                    $roleName = $currentUser?->role?->nama_role;
+
+                    if ($currentUser?->id_user) {
+                        $this->logger->auth('Logged in', $currentUser->id_user, "Email: {$currentUser->email}");
+                    }
+
+                    flash('success', 'Login successful!');
+                    redirect($roleName === 'admin' ? '/admin' : '/dashboard');
                 }
-
-                App::$app->session->setFlash('success', 'Login successful!');
-                $response->redirect($roleName === 'admin' ? '/admin' : '/dashboard');
-                return;
+            } catch (ValidationException $e) {
+                return view('Auth/Login', [
+                    'rememberedIdentifier' => $_COOKIE['remember_identifier'] ?? '',
+                    'validator' => $e->getValidator()
+                ]);
             }
-
-            // $this->debugRegistration('login', [
-            //     'request_body' => $request->getBody(),
-            //     'errors' => $loginModel->getAllErrors(),
-            //     'session_token' => $_SESSION['csrf_token'] ?? null,
-            //     'posted_token' => $_POST['csrf_token'] ?? null,
-            //     'turnstile_token' => $token ?? null,
-            //     'session_flash' => $_SESSION['flash_messages'] ?? [],
-            // ]);
-
-            return $this->render('Auth/Login', ['model' => $loginModel]);
+            flash('old_identifier', $validated['identifier']);
+            flash('error', 'Invalid credentials');
         }
-
-        return $this->render('Auth/Login', ['model' => $loginModel]);
+        return view('Auth/Login', [
+            'rememberedIdentifier' => $_COOKIE['remember_me'] ?? ''
+        ]);
     }
 
     public function register(Request $request, Response $response)
     {
         $this->setTitle('Register | Library Booking App');
         $this->setLayout('auth');
-        return $this->render('Auth/ChooseRegister');
+        return view('Auth/ChooseRegister');
     }
 
     public function registerMahasiswa(Request $request, Response $response)
     {
-        $user = new User();
-        $user->setScenario(User::SCENARIO_REGISTER);
-        $user->id_role = Role::getIdByName('mahasiswa');
-        $authService = App::$app->auth;
-
         $this->setTitle('Register Mahasiswa | Library Booking App');
         $this->setLayout('auth');
 
         if ($request->isPost()) {
+            $token = $request->input('cf-turnstile-response');
 
-            $token = $_POST['cf-turnstile-response'] ?? null;
-            $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
-
-            if (!$authService->verifyTurnstile($token, $remoteIp)) {
-                return $this->render('Auth/Mahasiswa', ['model' => $user]);
+            if (!$this->turnstile->verify($token, $request->ip())) {
+                flash('error', 'CAPTCHA verification failed.');
+                return view('Auth/Mahasiswa');
             }
 
-            $user->loadData($request->getBody());
-            $user->id_role = Role::getIdByName('mahasiswa');
+            try {
+                $validated = $request->validate([
+                    'nama' => ['required', 'string', 'min:3'],
+                    'nim' => ['required', 'string', 'min:10', 'max:10', 'unique:users,nim'],
+                    'email' => ['required', 'email', 'unique:users,email'],
+                    'password' => ['required', 'string', 'min:8', 'max:24'],
+                    'confirm_password' => ['required', 'string', 'match:password'],
+                    'jurusan' => ['required', 'string'],
+                    'nomor_hp' => ['required', 'numeric'],
+                ]);
 
-            if ($user->validate()) {
-                if ($authService->registerUser($user, 'mahasiswa')) {
-                    App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
-                    $response->redirect('/verify');
-                    return;
+                $registered = $this->auth->register([
+                    'nama' => $validated['nama'],
+                    'nim' => $validated['nim'],
+                    'email' => $validated['email'],
+                    'password' => $validated['password'],
+                    'jurusan' => $validated['jurusan'],
+                    'nomor_hp' => $validated['nomor_hp'],
+                ], 'mahasiswa');
+
+                $this->auth->sendVerificationOTP($registered);
+
+                if ($registered->id_user) {
+                    $this->logger->auth('registered', $registered->id_user, "Email: {$registered->email}");
                 }
+
+                flash('success', 'Registration successful! Check your email for verification code.');
+                redirect('/verify');
+            } catch (ValidationException $e) {
+                flash('error', 'Registration failed! Please try again.');
+                return view('Auth/Mahasiswa', [
+                    'validator' => $e->getValidator()
+                ]);
             }
-
-            // $this->debugRegistration('register_mahasiswa', [
-            //     'request_body'   => $request->getBody(),
-            //     'errors'         => $user->getAllErrors(),
-            //     'role_id'        => $user->id_role,
-            //     'session_token'  => $_SESSION['csrf_token'] ?? null,
-            //     'posted_token'   => $_POST['csrf_token'] ?? null,
-            //     'turnstile_token'=> $token ?? null,
-            //     'session_flash'  => $_SESSION['flash_messages'] ?? [],
-            // ]);
-
-            return $this->render('Auth/Mahasiswa', ['model' => $user]);
         }
-
-        return $this->render('Auth/Mahasiswa', ['model' => $user]);
+        return view('Auth/Mahasiswa');
     }
 
     public function registerDosen(Request $request, Response $response)
     {
-        $user = new User();
-        $user->setScenario(User::SCENARIO_REGISTER);
-        $user->id_role = Role::getIdByName('dosen');
-        $authService = App::$app->auth;
-
         $this->setTitle('Register Dosen | Library Booking App');
         $this->setLayout('auth');
 
         if ($request->isPost()) {
+            $token = $request->input('cf-turnstile-response');
 
-            $token = $_POST['cf-turnstile-response'] ?? null;
-            $remoteIp = $_SERVER['REMOTE_ADDR'] ?? null;
-
-            if (!$authService->verifyTurnstile($token, $remoteIp)) {
-                return $this->render('Auth/Dosen', ['model' => $user]);
+            if (!$this->turnstile->verify($token, $request->ip())) {
+                flash('error', 'CAPTCHA verification failed.');
+                return view('Auth/Dosen');
             }
 
-            $user->loadData($request->getBody());
-            $user->id_role = Role::getIdByName('dosen');
+            try {
+                $validated = $request->validate([
+                    'nama' => ['required', 'string', 'min:3'],
+                    'nip' => ['required', 'string', 'min:18', 'max:18', 'unique:users,nip'],
+                    'email' => ['required', 'email', 'unique:users,email'],
+                    'password' => ['required', 'string', 'min:8', 'max:24'],
+                    'confirm_password' => ['required', 'string', 'match:password'],
+                    'jurusan' => ['required', 'string'],
+                    'nomor_hp' => ['required', 'numeric'],
+                ]);
 
-            if ($user->validate()) {
-                if ($authService->registerUser($user, 'dosen')) {
-                    App::$app->session->setFlash('success', 'Registration successful! Check your email for verification code.');
-                    $response->redirect('/verify');
-                    return;
+                $registered = $this->auth->register([
+                    'nama' => $validated['nama'],
+                    'nip' => $validated['nip'],
+                    'email' => $validated['email'],
+                    'password' => $validated['password'],
+                    'jurusan' => $validated['jurusan'],
+                    'nomor_hp' => $validated['nomor_hp'],
+                ], 'dosen');
+
+                $this->auth->sendVerificationOTP($registered);
+
+                if ($registered->id_user) {
+                    $this->logger->auth('registered', $registered->id_user, "Email: {$registered->email}");
                 }
+
+                flash('success', 'Registration successful! Check your email for verification code.');
+                redirect('/verify');
+            } catch (ValidationException $e) {
+                flash('error', 'Registration failed! Please try again.');
+                return view('Auth/Dosen', [
+                    'validator' => $e->getValidator()
+                ]);
             }
-
-            // $this->debugRegistration('register_dosen', [
-            //     'request_body'   => $request->getBody(),
-            //     'errors'         => $user->getAllErrors(),
-            //     'role_id'        => $user->id_role,
-            //     'session_token'  => $_SESSION['csrf_token'] ?? null,
-            //     'posted_token'   => $_POST['csrf_token'] ?? null,
-            //     'turnstile_token'=> $token ?? null,
-            //     'session_flash'  => $_SESSION['flash_messages'] ?? [],
-            // ]);
-
-            return $this->render('Auth/Dosen', ['model' => $user]);
         }
-
-        return $this->render('Auth/Dosen', ['model' => $user]);
+        return view('Auth/Dosen');
     }
 
     public function logout(Request $request, Response $response)
     {
-        $currentUser = App::$app->user;
-        $userId = $currentUser instanceof User ? $currentUser->id_user : null;
-        App::$app->auth->logout();
-        App::$app->user = null;
+        $currentUser = $this->auth->user();
 
-        if ($userId) {
-            Logger::auth('logged out', $userId);
+        $this->auth->logout();
+
+        if ($currentUser) {
+            $this->logger->auth('logged out', $currentUser->id_user, "Email: {$currentUser->email}");
         }
 
-        $response->redirect('/');
+        flash('success', 'You have been logged out.');
+        redirect('/');
     }
-
-    // private function debugRegistration(string $label, array $context): void
-    // {
-    //     $enabled = filter_var($_ENV['AUTH_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    //     if (!$enabled) {
-    //         return;
-    //     }
-
-    //     echo '<pre>';
-    //     echo '[' . strtoupper($label) . ']' . PHP_EOL;
-    //     print_r($context);
-    //     echo '</pre>';
-    // }
 }

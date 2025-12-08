@@ -1,22 +1,12 @@
-<?php
-use App\Core\App;
-use App\Core\Csrf;
-use App\Models\User;
-/** @var User $model */
-
-$roles = $roles ?? [];
-$statuses = $statuses ?? [];
-?>
-
 <body>
   <h1>Create User</h1>
   <p><a href="/admin/users">Back to list</a></p>
 
-  <?php if ($message = App::$app->session->getFlash('success')): ?>
+  <?php if ($message = session('success')): ?>
     <p style="color: green;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
-  <?php if ($message = App::$app->session->getFlash('error')): ?>
+  <?php if ($message = session('error')): ?>
     <p style="color: red;"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
@@ -26,79 +16,57 @@ $statuses = $statuses ?? [];
       <legend>Identity</legend>
       <label>
         Nama
-        <input type="text" name="nama" value="<?= htmlspecialchars($model->nama ?? '') ?>">
+        <input type="text" name="nama" value="" required>
       </label>
-      <?php if ($model->hasError('nama')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('nama')) ?></p>
-      <?php endif; ?>
 
       <label>
         Email
-        <input type="email" name="email" value="<?= htmlspecialchars($model->email ?? '') ?>">
+        <input type="email" name="email" value="" required>
       </label>
-      <?php if ($model->hasError('email')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('email')) ?></p>
-      <?php endif; ?>
 
       <label>
         Phone Number
-        <input type="text" name="nomor_hp" value="<?= htmlspecialchars($model->nomor_hp ?? '') ?>">
+        <input type="text" name="nomor_hp" value="">
       </label>
-      <?php if ($model->hasError('nomor_hp')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('nomor_hp')) ?></p>
-      <?php endif; ?>
 
       <label>
         Jurusan
-        <input type="text" name="jurusan" value="<?= htmlspecialchars($model->jurusan ?? '') ?>">
+        <input type="text" name="jurusan" value="">
       </label>
-      <?php if ($model->hasError('jurusan')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('jurusan')) ?></p>
-      <?php endif; ?>
     </fieldset>
 
     <fieldset>
       <legend>Academic Identifier</legend>
       <label>
         NIM (Mahasiswa)
-        <input type="text" name="nim" value="<?= htmlspecialchars($model->nim ?? '') ?>">
+        <input type="text" name="nim" value="">
       </label>
-      <?php if ($model->hasError('nim')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('nim')) ?></p>
-      <?php endif; ?>
 
       <label>
         NIP (Dosen)
-        <input type="text" name="nip" value="<?= htmlspecialchars($model->nip ?? '') ?>">
+        <input type="text" name="nip" value="">
       </label>
-      <?php if ($model->hasError('nip')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('nip')) ?></p>
-      <?php endif; ?>
     </fieldset>
 
     <fieldset>
       <legend>Access & Status</legend>
       <label>
         Role
-        <select name="id_role">
+        <select name="id_role" required>
           <option value="">Select role</option>
           <?php foreach ($roles as $role): ?>
-            <?php $value = (string) ($role['id_role'] ?? ''); ?>
-            <option value="<?= htmlspecialchars($value) ?>" <?= (string) ($model->id_role ?? '') === $value ? 'selected' : '' ?>>
-              <?= htmlspecialchars($role['nama_role'] ?? 'Role') ?>
+            <option value="<?= htmlspecialchars($role->id_role) ?>">
+              <?= htmlspecialchars($role->nama_role) ?>
             </option>
           <?php endforeach; ?>
         </select>
       </label>
-      <?php if ($model->hasError('id_role')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('id_role')) ?></p>
-      <?php endif; ?>
 
       <label>
         Status
         <select name="status">
           <?php foreach ($statuses as $status): ?>
-            <option value="<?= htmlspecialchars($status) ?>" <?= ($model->status ?? '') === $status ? 'selected' : '' ?>>
+            <option value="<?= htmlspecialchars($status) ?>" <?= $status === 'active' ? 'selected' : '' ?>>
               <?= htmlspecialchars(ucwords($status)) ?>
             </option>
           <?php endforeach; ?>
@@ -107,8 +75,7 @@ $statuses = $statuses ?? [];
 
       <label>
         Peringatan
-        <input type="number" name="peringatan" min="0"
-          value="<?= htmlspecialchars((string) ($model->peringatan ?? 0)) ?>">
+        <input type="number" name="peringatan" min="0" value="0">
       </label>
     </fieldset>
 
@@ -116,19 +83,13 @@ $statuses = $statuses ?? [];
       <legend>Security</legend>
       <label>
         Password
-        <input type="password" name="password" value="">
+        <input type="password" name="password" required>
       </label>
-      <?php if ($model->hasError('password')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('password')) ?></p>
-      <?php endif; ?>
 
       <label>
         Confirm Password
-        <input type="password" name="confirm_password" value="">
+        <input type="password" name="confirm_password" required>
       </label>
-      <?php if ($model->hasError('confirm_password')): ?>
-        <p style="color: red;"><?= htmlspecialchars($model->getFirstError('confirm_password')) ?></p>
-      <?php endif; ?>
     </fieldset>
 
     <button type="submit">Save User</button>

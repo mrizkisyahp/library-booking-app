@@ -1,15 +1,4 @@
 <?php
-
-use App\Core\Csrf;
-use App\Models\Booking;
-use App\Models\Room;
-use App\Models\User;
-
-/** @var Booking $booking */
-/** @var Room|null $room */
-/** @var User|null $pic */
-$members = $members ?? [];
-
 $statusColors = [
     'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
     'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
@@ -18,11 +7,6 @@ $statusColors = [
     'cancelled' => 'bg-rose-100 text-rose-800 border-rose-200',
     'draft' => 'bg-slate-100 text-slate-800 border-slate-200',
 ];
-
-$roomName = $room?->nama_ruangan ?? ('Ruangan #' . htmlspecialchars((string) $booking->ruangan_id));
-$picName = $pic?->nama ?? 'Pengguna #' . htmlspecialchars((string) $booking->user_id);
-$picContact = $pic?->email ?? '-';
-$picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
 ?>
 
 <div class="p-4 bg-white shadow-md w-full ">
@@ -59,10 +43,10 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
     <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
         <div class="flex flex-col justify-start p-6">
             <p class="font-bold text-2xl mb-2">
-                <?= htmlspecialchars($room->nama_ruangan) ?>
+                <?= htmlspecialchars($booking->nama_ruangan) ?>
             </p>
             <p class="mb-2">
-                <?= htmlspecialchars($room->jenis_ruangan) ?>
+                <?= htmlspecialchars($booking->jenis_ruangan) ?>
             </p>
             <div class="w-full">
 
@@ -103,10 +87,11 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         <circle cx="10" cy="8" r="5" />
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
-                    <?= (int) $currentMembers ?> /
-                    <?= isset($maximumMembers) && $maximumMembers > 0 ? (int) $maximumMembers : '∞' ?> peserta
-                    <?php if (isset($requiredMembers) && $requiredMembers > 0): ?>
-                        · Min <?= (int) $requiredMembers ?>
+                    <?= (int) $booking->current_members ?> /
+                    <?= isset($booking->maximum_members) && $booking->maximum_members > 0 ? (int) $booking->maximum_members : '∞' ?>
+                    peserta
+                    <?php if (isset($booking->required_members) && $booking->required_members > 0): ?>
+                        · Min <?= (int) $booking->required_members ?>
                     <?php endif; ?>
                 </p>
 
@@ -137,25 +122,12 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                 ?>
                 <div class="px-4 py-2 mb-4 rounded-3xl font-regular border text-sm <?= $statusColor ?>">
                     Status:
-                    <?php
-                    // htmlspecialchars($statusLabel)
-                    ?>
-                    <!-- 🤡🤡🤡 -->
-                    <!-- if $booking['status'] == 'draft' && $requiredMembers == 0:
-                      echo ('(Menunggu Anggota)');
-                      elseif $booking['status'] == 'draft' && $requiredMembers > 0:
-                        echo ('(Siap Dikirim)');
-                      elseif $booking['status'] == 'pending':
-                        echo ('(Menunggu Konfirmasi)');
-                      elseif $booking['status'] == 'verified':
-                        echo ('(Terkonfirmasi)');
-                      elseif $booking['status'] == 'active':
-                        echo ('(Sedang berlangsung)');
-                      elseif $booking['status'] == 'completed':
-                        echo ('(Selesai)');
-                    endif; -->
-                    <?php if ($booking->status === 'draft'): ?>
+                    <?= htmlspecialchars($statusLabel) ?>
+                    <!-- status state -->
+                    <?php if ($booking->status === 'draft' && $booking->current_members < $booking->required_members): ?>
                         (Menunggu Anggota)
+                    <?php elseif ($booking->status === 'draft' && $booking->current_members >= $booking->required_members): ?>
+                        (Siap Dikirim)
                     <?php elseif ($booking->status === 'pending'): ?>
                         (Menunggu Konfirmasi)
                     <?php elseif ($booking->status === 'verified'): ?>
@@ -172,7 +144,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         class="inline-block bg-primary hover:bg-emerald-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all capitalize">
                         ubah rincian booking
                     </a>
-                    <?php if ($booking->role === 'PIC' && $statusKey === 'completed' && empty($booking['feedback_submitted'])): ?>
+                    <?php if ($isPic && $statusKey === 'completed' && empty($booking->id_feedback)): ?>
                         <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                             class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                             Isi Feedback
@@ -224,11 +196,11 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                         <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
                     </svg>
                     <span>
-                        <?= $currentMembers . ' / ' . $maximumMembers ?> Orang
+                        <?= $booking->current_members . ' / ' . $booking->maximum_members ?> Orang
                     </span>
                 </p>
 
-                <?php if (isset($maximumMembers) && $maximumMembers > 0 && $currentMembers >= $maximumMembers): ?>
+                <?php if (isset($booking->maximum_members) && $booking->maximum_members > 0 && $booking->current_members >= $booking->maximum_members): ?>
                     <div class="mb-4 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor"
@@ -246,8 +218,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 <?php endif; ?>
 
-                <?php $members = $booking->getMembers(); ?>
-                <?php if (empty($members)): ?>
+                <?php if (empty($allMembers)): ?>
                     <div class="text-center py-8">
                         <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -258,7 +229,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                        <?php foreach ($members as $member): ?>
+                        <?php foreach ($allMembers as $member): ?>
                             <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                                 <!-- <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +243,15 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                                             <?= htmlspecialchars($member['nama'] ?? 'Unknown') ?>
                                         </p>
                                         <p class="text-sm text-slate-500 truncate"><?= htmlspecialchars($member['email']) ?></p>
-                                        </span>
+                                        <?php if (!empty($member['is_owner'])): ?>
+                                            <span class="text-xs text-emerald-600 font-semibold flex items-center mt-1">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                PIC
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -280,14 +259,136 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 <?php endif; ?>
 
+                <!-- BELOM KELAR -->
             </div>
         </div>
     </div>
     <div class="w-full mb-8">
-        <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-            class="inline-block bg-red-600 hover:bg-red-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all capitalize">
-            Hapus draft booking
-        </a>
+        <div class="flex items-center justify-around w-full px-4">
+            <?php if ($booking->status === 'draft'): ?>
+                <form action="/bookings/submit" method="post">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+
+                    <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
+                        class="w-full bg-primary text-slate-500 px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
+                    </button>
+                </form>
+                <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
+                    class="inline-block bg-red-600 hover:bg-red-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all capitalize">
+                    Hapus draft booking
+                </a>
+            <?php endif; ?>
+            <?php if ($booking->status === 'pending'): ?>
+                <form action="/bookings/" method="post">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+
+                    <button type="submit"
+                        class="w-full bg-red-600 text-white px-8 py-4 rounded-xl border hover:bg-red-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        <span>Batalkan Pengajuan Draft</span>
+                    </button>
+                </form>
+            <?php endif; ?>
+
+            <?php if ($booking->status === 'verified'): ?>
+                <div class="text-2xl font-bold mb-4">
+                    Kode Kedatangan
+                </div>
+                <div>
+                    <span>Berlaku sampai </span>
+                    <span><?= htmlspecialchars($booking->waktu_mulai) ?></span>
+                </div>
+                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="checkinCode">
+                        <?= htmlspecialchars($booking->checkin_code) ?>
+                    </p>
+                    <div onclick="copyToken()"
+                        class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
+
+                        <span id="copyToast"
+                            class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
+                            Copied!
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-copy-icon lucide-copy size-4">
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($booking->status === 'active'): ?>
+                <div class="text-2xl font-bold mb-4">
+                    Waktu Tersisa
+                </div>
+                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                    <div class="text-2xl font-bold">
+                        <?php
+                        $datetime1 = new DateTime($booking->waktu_mulai);
+                        $datetime2 = new DateTime($booking->waktu_selesai);
+                        $interval = $datetime1->diff($datetime2);
+                        echo $interval->format('%H:%I:%S');
+                        ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($booking->status === 'completed' && empty($booking->id_feedback)): ?>
+                <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
+                    class="inline-block bg-primary hover:bg-emerald-700 font-regular text-white active:bg-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
+                    Isi Feedback (Wajib)
+                </a>
+            <?php endif ?>
+            <?php if ($booking->status === 'completed' && $booking->id_feedback): ?>
+                <div
+                    class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
+                    Seluruh rangkaian booking sudah diselesaikan
+                </div>
+            <?php endif ?>
+        </div>
+
+        <?php if ($isPic && $booking->status === 'verified'): ?>
+            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-4">
+                <h3 class="text-xl font-bold text-slate-800 mb-4">Aksi</h3>
+
+                <!-- Reschedule Button -->
+                <a href="/bookings/reschedule?id=<?= (int) $booking->id_booking ?>"
+                    class="w-full bg-amber-500 text-white px-8 py-4 rounded-xl hover:bg-amber-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Reschedule Booking
+                </a>
+
+                <!-- Cancel Booking -->
+                <form action="/bookings/cancel" method="post"
+                    onsubmit="return confirm('Yakin ingin membatalkan booking ini? Semua anggota akan dikeluarkan.');">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                    <button type="submit"
+                        class="w-full bg-red-500 text-white px-8 py-4 rounded-xl hover:bg-red-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Batalkan Booking
+                    </button>
+                </form>
+            </div>
+        <?php endif; ?>
     </div>
 
     <nav class="fixed left-0 bottom-0 right-0 bg-gray-100 text-white md:hidden z-999 rounded-t-4xl py-6 shadow-xl">
@@ -322,6 +423,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </button>
                 </form>
             <?php endif; ?>
+
             <?php if ($booking->status === 'verified'): ?>
                 <div class="text-2xl font-bold mb-4">
                     Kode Kedatangan
@@ -331,8 +433,8 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     <span><?= htmlspecialchars($booking->waktu_mulai + 15) ?></span>
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
-                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="inviteToken">
-                        <?= htmlspecialchars($booking->invite_token) ?>
+                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="checkinCode">
+                        <?= htmlspecialchars($booking->checkin_code) ?>
                     </p>
                     <div onclick="copyToken()"
                         class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
@@ -350,6 +452,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 </div>
             <?php endif; ?>
+
             <?php if ($booking->status === 'active'): ?>
                 <div class="text-2xl font-bold mb-4">
                     Waktu Tersisa
@@ -365,6 +468,7 @@ $picIdNumber = $pic?->nim ?: $pic?->nip ?: '-';
                     </div>
                 </div>
             <?php endif; ?>
+
             <?php if ($booking->status === 'completed' && $booking->feedback() === null): ?>
                 <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                     class="inline-block bg-primary hover:bg-emerald-700 font-regular text-white active:bg-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">

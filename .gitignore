@@ -14,5 +14,6 @@ public/uploads/kubaca/*
 Thumbs.db
 composer.lock
 Architechture.md
-Public/css/output.css
+Public/css/*
 public/css/*
+Booking Rules.txt

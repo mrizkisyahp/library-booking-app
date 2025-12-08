@@ -16,7 +16,10 @@ class Room extends DbModel
     public string $status_ruangan = 'available';
     public ?string $created_at = null;
     public ?string $updated_at = null;
-    public ?int $requires_special_approval = 0;
+    public ?string $deleted_at = null;
+    public ?bool $requires_special_approval = false;
+    public ?float $avg_rating = null;
+
     public static function tableName(): string
     {
         return 'ruangan';
@@ -39,6 +42,7 @@ class Room extends DbModel
             'status_ruangan',
             'created_at',
             'updated_at',
+            'deleted_at',
             'requires_special_approval',
         ];
     }
@@ -55,216 +59,210 @@ class Room extends DbModel
 
     public function rules(): array
     {
-        return [
-            'nama_ruangan' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3], [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_ruangan]],
-            'kapasitas_min' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
-            'kapasitas_max' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 1]],
-            'jenis_ruangan' => [self::RULE_REQUIRED],
-            'deskripsi_ruangan' => [self::RULE_REQUIRED],
-        ];
+        return [];
     }
 
 
-    public static function search(array $filters = []): array
-    {
-        [$sql, $params] = self::buildQuery($filters, [
-            'only_available' => true,
-        ]);
+    // public static function search(array $filters = []): array
+    // {
+    //     [$sql, $params] = self::buildQuery($filters, [
+    //         'only_available' => true,
+    //     ]);
 
-        $stmt = App::$app->db->prepare($sql . " ORDER BY nama_ruangan ASC");
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
+    //     $stmt = App::$app->db->prepare($sql . " ORDER BY nama_ruangan ASC");
+    //     foreach ($params as $key => $value) {
+    //         $stmt->bindValue($key, $value);
+    //     }
+    //     $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
-    }
+    //     return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    // }
 
-    public static function findPaginated(int $page, int $perPage, array $filters = [], array $options = [])
-    {
-        $offset = ($page - 1) * $perPage;
+    // public static function findPaginated(int $page, int $perPage, array $filters = [], array $options = [])
+    // {
+    //     $offset = ($page - 1) * $perPage;
 
-        $options = array_merge([
-            'only_available' => false,
-            'order' => 'ruangan.id_ruangan DESC',
-        ], $options);
+    //     $options = array_merge([
+    //         'only_available' => false,
+    //         'order' => 'ruangan.id_ruangan DESC',
+    //     ], $options);
 
-        [$baseSql, $params] = self::buildQuery($filters, $options);
-        $sql = $baseSql . " ORDER BY {$options['order']} LIMIT :limit OFFSET :offset";
+    //     [$baseSql, $params] = self::buildQuery($filters, $options);
+    //     $sql = $baseSql . " ORDER BY {$options['order']} LIMIT :limit OFFSET :offset";
 
-        $stmt = App::$app->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
+    //     $stmt = App::$app->db->prepare($sql);
+    //     foreach ($params as $key => $value) {
+    //         $stmt->bindValue($key, $value);
+    //     }
+    //     $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+    //     $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+    //     $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
-    }
+    //     return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    // }
 
-    public static function count(array $filters = []): int
-    {
-        [$baseSql, $params] = self::buildQuery($filters);
-        $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
+    // public static function count(array $filters = []): int
+    // {
+    //     [$baseSql, $params] = self::buildQuery($filters);
+    //     $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
 
-        $stmt = App::$app->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
+    //     $stmt = App::$app->db->prepare($sql);
+    //     foreach ($params as $key => $value) {
+    //         $stmt->bindValue($key, $value);
+    //     }
+    //     $stmt->execute();
 
-        return (int) $stmt->fetchColumn();
-    }
+    //     return (int) $stmt->fetchColumn();
+    // }
 
-    private static function buildQuery(array $filters, array $options = []): array
-    {
-        $options = array_merge([
-            'only_available' => false,
-        ], $options);
+    // private static function buildQuery(array $filters, array $options = []): array
+    // {
+    //     $options = array_merge([
+    //         'only_available' => false,
+    //     ], $options);
 
-        $sql = "SELECT * FROM ruangan WHERE 1=1";
-        $params = [];
+    //     $sql = "SELECT * FROM ruangan WHERE 1=1";
+    //     $params = [];
 
-        if (!empty($filters['keyword'])) {
-            $sql .= " AND (
-                nama_ruangan LIKE :keyword
-            )";
-            $params[':keyword'] = '%' . $filters['keyword'] . '%';
-        }
+    //     if (!empty($filters['keyword'])) {
+    //         $sql .= " AND (
+    //             nama_ruangan LIKE :keyword
+    //         )";
+    //         $params[':keyword'] = '%' . $filters['keyword'] . '%';
+    //     }
 
-        if (!empty($filters['nama_ruangan'])) {
-            $sql .= " AND nama_ruangan LIKE :nama";
-            $params[':nama'] = '%' . $filters['nama_ruangan'] . '%';
-        }
+    //     if (!empty($filters['nama_ruangan'])) {
+    //         $sql .= " AND nama_ruangan LIKE :nama";
+    //         $params[':nama'] = '%' . $filters['nama_ruangan'] . '%';
+    //     }
 
-        if (!empty($filters['jenis_ruangan'])) {
-            $sql .= " AND jenis_ruangan LIKE :jenis";
-            $params[':jenis'] = '%' . $filters['jenis_ruangan'] . '%';
-        }
+    //     if (!empty($filters['jenis_ruangan'])) {
+    //         $sql .= " AND jenis_ruangan LIKE :jenis";
+    //         $params[':jenis'] = '%' . $filters['jenis_ruangan'] . '%';
+    //     }
 
-        if (!empty($filters['kapasitas_min'])) {
-            $sql .= " AND kapasitas_min <= :kapasitas_min";
-            $params[':kapasitas_min'] = (int) $filters['kapasitas_min'];
-        }
+    //     if (!empty($filters['kapasitas_min'])) {
+    //         $sql .= " AND kapasitas_min <= :kapasitas_min";
+    //         $params[':kapasitas_min'] = (int) $filters['kapasitas_min'];
+    //     }
 
-        if (!empty($filters['kapasitas_max'])) {
-            $sql .= " AND kapasitas_max >= :kapasitas_max";
-            $params[':kapasitas_max'] = (int) $filters['kapasitas_max'];
-        }
+    //     if (!empty($filters['kapasitas_max'])) {
+    //         $sql .= " AND kapasitas_max >= :kapasitas_max";
+    //         $params[':kapasitas_max'] = (int) $filters['kapasitas_max'];
+    //     }
 
-        if (!empty($filters['status_ruangan'])) {
-            $sql .= " AND status_ruangan = :status";
-            $params[':status'] = $filters['status_ruangan'];
-        } elseif (!empty($options['only_available'])) {
-            $sql .= " AND status_ruangan = 'available'";
-        }
+    //     if (!empty($filters['status_ruangan'])) {
+    //         $sql .= " AND status_ruangan = :status";
+    //         $params[':status'] = $filters['status_ruangan'];
+    //     } elseif (!empty($options['only_available'])) {
+    //         $sql .= " AND status_ruangan = 'available'";
+    //     }
 
-        return [$sql, $params];
-    }
+    //     return [$sql, $params];
+    // }
 
-    public function isAvailable(): bool
-    {
-        return $this->status_ruangan === 'available';
-    }
+    // public function isAvailable(): bool
+    // {
+    //     return $this->status_ruangan === 'available';
+    // }
 
-    public static function getAvailableRooms(): array
-    {
-        $stmt = App::$app->db->prepare("
-            SELECT * FROM ruangan
-            WHERE status_ruangan = 'available'
-            ORDER BY nama_ruangan ASC
-        ");
-        $stmt->execute();
+    // public static function getAvailableRooms(): array
+    // {
+    //     $stmt = App::$app->db->prepare("
+    //         SELECT * FROM ruangan
+    //         WHERE status_ruangan = 'available'
+    //         ORDER BY nama_ruangan ASC
+    //     ");
+    //     $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
-    }
+    //     return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    // }
 
-    public function getFacilities(): array
-    {
-        if (empty($this->deskripsi_ruangan)) {
-            return [];
-        }
+    // public function getFacilities(): array
+    // {
+    //     if (empty($this->deskripsi_ruangan)) {
+    //         return [];
+    //     }
 
-        $parts = preg_split('/[\r\n;,]+/', $this->deskripsi_ruangan);
-        return array_values(array_filter(array_map('trim', $parts)));
-    }
+    //     $parts = preg_split('/[\r\n;,]+/', $this->deskripsi_ruangan);
+    //     return array_values(array_filter(array_map('trim', $parts)));
+    // }
 
-    public function getPhotoDataUris(): array
-    {
-        $dir = App::$ROOT_DIR . '/Public/uploads/Room_Photos/';
-        $slug = $this->slugify($this->nama_ruangan);
-        $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
-        $files = glob($pattern, GLOB_BRACE) ?: [];
-        sort($files);
+    // public function getPhotoDataUris(): array
+    // {
+    //     $dir = App::$ROOT_DIR . '/Public/uploads/Room_Photos/';
+    //     $slug = $this->slugify($this->nama_ruangan);
+    //     $pattern = $dir . $slug . '_*.{jpg,jpeg,png,webp,svg}';
+    //     $files = glob($pattern, GLOB_BRACE) ?: [];
+    //     sort($files);
 
-        $photos = [];
-        foreach ($files as $file) {
-            $mime = match (strtolower(pathinfo($file, PATHINFO_EXTENSION))) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'webp' => 'image/webp',
-                'svg' => 'image/svg+xml',
-                default => 'application/octet-stream',
-            };
-            $photos[] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file));
-        }
+    //     $photos = [];
+    //     foreach ($files as $file) {
+    //         $mime = match (strtolower(pathinfo($file, PATHINFO_EXTENSION))) {
+    //             'jpg', 'jpeg' => 'image/jpeg',
+    //             'png' => 'image/png',
+    //             'webp' => 'image/webp',
+    //             'svg' => 'image/svg+xml',
+    //             default => 'application/octet-stream',
+    //         };
+    //         $photos[] = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file));
+    //     }
 
-        return $photos;
-    }
+    //     return $photos;
+    // }
 
-    public function getThumbnail(): ?string
-    {
-        $photos = $this->getPhotoDataUris();
-        return $photos[0] ?? null;
-    }
+    // public function getThumbnail(): ?string
+    // {
+    //     $photos = $this->getPhotoDataUris();
+    //     return $photos[0] ?? null;
+    // }
 
-    public function getAvailabilityCalendar(int $days = 5): array
-    {
-        $start = date('Y-m-d');
-        $stmt = App::$app->db->prepare("
-            SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status
-            FROM booking
-            WHERE ruangan_id = :room
-              AND tanggal_penggunaan_ruang BETWEEN :start AND :end
-              AND status NOT IN ('draft', 'cancelled', 'noshow')
-            ORDER BY tanggal_penggunaan_ruang ASC, waktu_mulai ASC
-        ");
-        $stmt->bindValue(':room', $this->id_ruangan, \PDO::PARAM_INT);
-        $stmt->bindValue(':start', $start);
-        $stmt->bindValue(':end', date('Y-m-d', strtotime('+21 days')));
-        $stmt->execute();
+    // public function getAvailabilityCalendar(int $days = 5): array
+    // {
+    //     $start = date('Y-m-d');
+    //     $stmt = App::$app->db->prepare("
+    //         SELECT tanggal_penggunaan_ruang AS tanggal, waktu_mulai, waktu_selesai, status 
+    //         FROM booking
+    //         WHERE ruangan_id = :room
+    //           AND tanggal_penggunaan_ruang BETWEEN :start AND :end
+    //           AND status NOT IN ('draft', 'cancelled', 'noshow')
+    //         ORDER BY tanggal_penggunaan_ruang ASC, waktu_mulai ASC
+    //     ");
+    //     $stmt->bindValue(':room', $this->id_ruangan, \PDO::PARAM_INT);
+    //     $stmt->bindValue(':start', $start);
+    //     $stmt->bindValue(':end', date('Y-m-d', strtotime('+21 days')));
+    //     $stmt->execute();
 
-        $calendar = [];
-        $added = 0;
-        $offset = 0;
-        while ($added < $days) {
-            $date = date('Y-m-d', strtotime("+{$offset} days"));
-            $offset++;
+    //     $calendar = [];
+    //     $added = 0;
+    //     $offset = 0;
+    //     while ($added < $days) {
+    //         $date = date('Y-m-d', strtotime("+{$offset} days"));
+    //         $offset++;
 
-            $day = (int) date('N', strtotime($date));
-            if ($day === 6 || $day === 7) {
-                continue;
-            }
+    //         $day = (int) date('N', strtotime($date));
+    //         if ($day === 6 || $day === 7) {
+    //             continue;
+    //         }
 
-            $calendar[$date] = [];
-            $added++;
-        }
+    //         $calendar[$date] = [];
+    //         $added++;
+    //     }
 
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-            if (isset($calendar[$row['tanggal']])) {
-                $calendar[$row['tanggal']][] = $row;
-            }
-        }
+    //     foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+    //         if (isset($calendar[$row['tanggal']])) {
+    //             $calendar[$row['tanggal']][] = $row;
+    //         }
+    //     }
 
-        return $calendar;
-    }
+    //     return $calendar;
+    // }
 
-    public function slugify(string $name): string
-    {
-        $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $name);
-        return trim($slug, '_');
-    }
+    // public function slugify(string $name): string
+    // {
+    //     $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $name);
+    //     return trim($slug, '_');
+    // }
 
     // public function isRoomOccupied(int $roomId, int $dateAt, int $startAt, int $endAt): bool
     // {

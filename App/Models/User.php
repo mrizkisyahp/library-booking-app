@@ -32,12 +32,13 @@ class User extends DbModel
     public ?string $nomor_hp = null;
     public ?string $suspensi_terakhir = null;
     public ?string $masa_aktif = null;
-    public ?string $created_at = null;
-    public ?string $updated_at = null;
-    public string $identifier = '';
-    public string $scenario = self::SCENARIO_REGISTER;
     public ?string $password_reset_token = null;
     public ?string $password_reset_expires = null;
+    public ?string $created_at = null;
+    public ?string $updated_at = null;
+    public ?string $deleted_at = null;
+    public string $identifier = '';
+    public string $scenario = self::SCENARIO_REGISTER;
 
     public static function tableName(): string
     {
@@ -71,64 +72,6 @@ class User extends DbModel
 
     public function rules(): array
     {
-        if ($this->scenario === self::SCENARIO_LOGIN) {
-            return [
-                'identifier' => [self::RULE_REQUIRED],
-                'password' => [self::RULE_REQUIRED],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_VERIFY_OTP) {
-            return [
-                'code' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 6], [self::RULE_MAX, 'max' => 6]],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_RESET_REQUEST) {
-            return [
-                'email' => [self::RULE_REQUIRED, self::RULE_EMAIL],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_RESET_PASSWORD) {
-            return [
-                'code' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 6], [self::RULE_MAX, 'max' => 6]],
-                'new_password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]],
-                'confirm_new_password' => [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'new_password']],
-            ];
-        } elseif ($this->scenario === self::SCENARIO_REGISTER || $this->scenario === self::SCENARIO_UPDATE) {
-            $rules = [
-                'nama' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
-                'email' => [
-                    self::RULE_REQUIRED,
-                    self::RULE_EMAIL,
-                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
-                ],
-                'jurusan' => [self::RULE_REQUIRED],
-                'nomor_hp' => [self::RULE_REQUIRED, self::RULE_NUMBER],
-                'id_role' => [self::RULE_REQUIRED],
-            ];
-
-            if ($this->scenario === self::SCENARIO_REGISTER || $this->password !== '') {
-                $rules['password'] = [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 24]];
-                $rules['confirm_password'] = [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'password']];
-            }
-
-            if ((string) $this->id_role === '3') {
-                $rules['nim'] = [
-                    self::RULE_REQUIRED,
-                    self::RULE_NUMBER,
-                    [self::RULE_MIN, 'min' => 10],
-                    [self::RULE_MAX, 'max' => 10],
-                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
-                ];
-            } elseif ((string) $this->id_role === '2') {
-                $rules['nip'] = [
-                    self::RULE_REQUIRED,
-                    self::RULE_NUMBER,
-                    [self::RULE_MIN, 'min' => 18],
-                    [self::RULE_MAX, 'max' => 18],
-                    [self::RULE_UNIQUE, 'class' => self::class, 'except' => $this->id_user],
-                ];
-            }
-
-            return $rules;
-        }
-
         return [];
     }
 
@@ -136,19 +79,24 @@ class User extends DbModel
     {
         return [
             'id_user',
+            'id_role',
             'nama',
             'nim',
             'nip',
             'email',
             'password',
-            'id_role',
             'kubaca_img',
             'peringatan',
             'status',
             'jurusan',
             'nomor_hp',
+            'suspensi_terakhir',
+            'masa_aktif',
+            'password_reset_token',
+            'password_reset_expires',
             'created_at',
             'updated_at',
+            'deleted_at',
         ];
     }
 
@@ -177,106 +125,106 @@ class User extends DbModel
         return (string) $this->id_role === '3';
     }
 
-    public static function search(array $filters = []): array
-    {
-        [$sql, $params] = self::buildQuery($filters);
+    // public static function search(array $filters = []): array
+    // {
+    //     [$sql, $params] = self::buildQuery($filters);
 
-        $stmt = App::$app->db->prepare($sql . " ORDER BY users.id_user DESC");
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
+    //     $stmt = App::$app->db->prepare($sql . " ORDER BY users.id_user DESC");
+    //     foreach ($params as $key => $value) {
+    //         $stmt->bindValue($key, $value);
+    //     }
+    //     $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
-    }
+    //     return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    // }
 
-    public static function findPaginated(int $page, int $perPage, array $filters = [])
-    {
-        $offset = ($page - 1) * $perPage;
-        [$baseSql, $params] = self::buildQuery($filters);
+    // public static function findPaginated(int $page, int $perPage, array $filters = [])
+    // {
+    //     $offset = ($page - 1) * $perPage;
+    //     [$baseSql, $params] = self::buildQuery($filters);
 
-        $sql = $baseSql . " ORDER BY users.id_user DESC LIMIT :limit OFFSET :offset";
+    //     $sql = $baseSql . " ORDER BY users.id_user DESC LIMIT :limit OFFSET :offset";
 
-        $stmt = App::$app->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
+    //     $stmt = App::$app->db->prepare($sql);
+    //     foreach ($params as $key => $value) {
+    //         $stmt->bindValue($key, $value);
+    //     }
+    //     $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+    //     $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+    //     $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
-    }
+    //     return $stmt->fetchAll(\PDO::FETCH_CLASS, self::class);
+    // }
 
-    private static function buildQuery(array $filters): array
-    {
-        $sql = "
-        SELECT users.*, role.nama_role
-        FROM users
-        LEFT JOIN role ON users.id_role = role.id_role
-        WHERE 1=1
-    ";
-        $params = [];
+    // private static function buildQuery(array $filters): array
+    // {
+    //     $sql = "
+    //     SELECT users.*, role.nama_role
+    //     FROM users
+    //     LEFT JOIN role ON users.id_role = role.id_role
+    //     WHERE 1=1
+    // ";
+    //     $params = [];
 
-        if (!empty($filters['keyword'])) {
-            $sql .= " AND (
-            users.nama LIKE :keyword OR
-            users.email LIKE :keyword OR
-            users.nim LIKE :keyword OR
-            users.nip LIKE :keyword
-        )";
-            $params[':keyword'] = '%' . $filters['keyword'] . '%';
-        }
+    //     if (!empty($filters['keyword'])) {
+    //         $sql .= " AND (
+    //         users.nama LIKE :keyword OR
+    //         users.email LIKE :keyword OR
+    //         users.nim LIKE :keyword OR
+    //         users.nip LIKE :keyword
+    //     )";
+    //         $params[':keyword'] = '%' . $filters['keyword'] . '%';
+    //     }
 
-        if (!empty($filters['role'])) {
-            $sql .= " AND role.nama_role = :role";
-            $params[':role'] = (string) $filters['role'];
-        }
+    //     if (!empty($filters['role'])) {
+    //         $sql .= " AND role.nama_role = :role";
+    //         $params[':role'] = (string) $filters['role'];
+    //     }
 
-        if (!empty($filters['status'])) {
-            $sql .= " AND users.status = :status";
-            $params[':status'] = $filters['status'];
-        }
+    //     if (!empty($filters['status'])) {
+    //         $sql .= " AND users.status = :status";
+    //         $params[':status'] = $filters['status'];
+    //     }
 
-        return [$sql, $params];
-    }
+    //     return [$sql, $params];
+    // }
 
-    public static function count(array $filters = []): int
-    {
-        [$baseSql, $params] = self::buildQuery($filters);
-        $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
+    // public static function count(array $filters = []): int
+    // {
+    //     [$baseSql, $params] = self::buildQuery($filters);
+    //     $sql = "SELECT COUNT(*) FROM ({$baseSql}) AS filtered";
 
-        $stmt = App::$app->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
+    //     $stmt = App::$app->db->prepare($sql);
+    //     foreach ($params as $key => $value) {
+    //         $stmt->bindValue($key, $value);
+    //     }
+    //     $stmt->execute();
 
-        return (int) $stmt->fetchColumn();
-    }
+    //     return (int) $stmt->fetchColumn();
+    // }
 
-    public static function countActive(): int
-    {
-        $db = App::$app->db;
-        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'active'");
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
+    // public static function countActive(): int
+    // {
+    //     $db = App::$app->db;
+    //     $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'active'");
+    //     $stmt->execute();
+    //     return $stmt->fetchColumn();
+    // }
 
-    public static function countPending(): int
-    {
-        $db = App::$app->db;
-        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'pending kubaca'");
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
+    // public static function countPending(): int
+    // {
+    //     $db = App::$app->db;
+    //     $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'pending kubaca'");
+    //     $stmt->execute();
+    //     return $stmt->fetchColumn();
+    // }
 
-    public static function countSuspended(): int
-    {
-        $db = App::$app->db;
-        $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'suspended'");
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
+    // public static function countSuspended(): int
+    // {
+    //     $db = App::$app->db;
+    //     $stmt = $db->prepare("select COUNT(*) AS COUNT from users where status = 'suspended'");
+    //     $stmt->execute();
+    //     return $stmt->fetchColumn();
+    // }
 
 }

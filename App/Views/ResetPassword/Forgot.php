@@ -1,7 +1,10 @@
 <?php
-/** @var \App\Models\User $model */
+/** @var \App\Core\Validator\Validator|null $validator */
 use App\Core\App;
-use App\Core\Csrf;
+
+$validator = $validator ?? null;
+$token = $token ?? '';
+$email = $email ?? '';
 ?>
 
 <!-- Disini za buat styling css sama atur2 margin lah -->
@@ -24,22 +27,26 @@ use App\Core\Csrf;
       <p>Masukkan email untuk mendapatkan kode perubahan password</p>
 
       <div class="mt-6">
-        <form action="/forgot" method="post">
+        <form action="/forgot" method="post" id="forgotForm">
           <?= csrf_field() ?>
 
           <div>
 
             <div class="mt-9">
-              <input id="email" type="email" name="email" value="<?= htmlspecialchars($model->email ?? '') ?>"
-                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $model->hasError('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
-              <?php if ($model->hasError('email')): ?>
-                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($model->getFirstError('email')) ?></p>
+              <input id="email" type="email" name="email"
+                class="bg-white w-full px-3 py-2 rounded-lg border shadow-sm focus:outline-none focus:ring-2 <?= $validator?->hasError('email') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-2 transition-all' ?>" />
+              <?php if ($validator?->hasError('email')): ?>
+                <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('email')) ?></p>
               <?php endif; ?>
             </div>
 
-            <button type="submit"
-              class="px-8 py-2 w-full mt-4 bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all">
-              Kirim Kode
+            <div class="cf-turnstile mt-4 p-2 flex justify-center" data-sitekey="<?= config('TURNSTILE_SITE') ?>"
+              data-theme="light" data-size="normal" data-callback="onSuccess"></div>
+            <div class="mt-6"></div>
+            <button type="submit" id="submitBtn"
+              class="px-8 py-2 w-full mt-4 bg-primary text-white capitalize text-lg font-medium rounded-md shadow cursor-pointer hover:bg-emerald-700 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 active:bg-emerald-700 active:ring-2 active:ring-emerald-500 active:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
+              <span id="btnText">Kirim Kode</span>
+              <span id="btnLoading" class="hidden">Mengirim...</span>
             </button>
           </div>
       </div>
@@ -47,7 +54,7 @@ use App\Core\Csrf;
 
       <div class="mt-6 text-center text-sm">
         <div>
-          <a href="/login" class="italic capitalize text-gray-700 hover:underline active:underline">
+          <a href="javascript:history.back()" class="italic capitalize text-gray-700 hover:underline active:underline">
             ← Kembali ke halaman awal
           </a>
         </div>
@@ -58,3 +65,25 @@ use App\Core\Csrf;
     </div>
   </div>
 </div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+  document.getElementById('forgotForm').addEventListener('submit', function (e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoading = document.getElementById('btnLoading');
+
+    // Disable button to prevent double submission
+    submitBtn.disabled = true;
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+
+    // Re-enable after 5 seconds as fallback (in case of error)
+    setTimeout(function () {
+      submitBtn.disabled = false;
+      btnText.classList.remove('hidden');
+      btnLoading.classList.add('hidden');
+    }, 5000);
+  });
+</script>

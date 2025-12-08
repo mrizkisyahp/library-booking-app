@@ -2,258 +2,349 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
 use App\Core\Controller;
-use App\Core\Csrf;
-use App\Core\Middleware\AdminMiddleware;
 use App\Core\Request;
-use App\Core\Response;
-use App\Core\Services\AdminBookingService;
-use App\Models\Booking;
-use App\Models\User;
+use App\Core\Services\BookingServices;
+use Exception;
 
 class AdminBookingController extends Controller
 {
-    protected ?User $currentUser = null;
-    public function __construct()
-    {
-        $this->registerMiddleware(new AdminMiddleware());
-        $this->currentUser = App::$app->user instanceof User ? App::$app->user : null;
+    public function __construct(
+        private BookingServices $bookingServices,
+    ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Manajemen Booking | Library Booking App');
+        $filters = $request->query();
+        $page = (int) ($filters['page'] ?? 1);
+        $keyword = $request->input('keyword') ?? '';
+        $status = $request->input('status') ?? '';
 
-        $params = App::$app->request->getBody();
         $filters = [
-            'keyword' => $params['keyword'] ?? null,
-            'status' => $params['status'] ?? null,
-            'page' => (int) ($params['page'] ?? ($_GET['page'] ?? 1)),
+            'keyword' => $keyword,
+            'status' => $status,
         ];
 
-        $service = new AdminBookingService();
-        $result = $service->listAllBookings($filters);
+        $paginatedBookings = $this->bookingServices->getAllBookings($filters, 15, $page);
 
-        return $this->render('Admin/Bookings/Index', [
-            'bookings' => $result['data']['bookings'] ?? [],
+        return view('Admin/Bookings/Index', [
+            'bookings' => $paginatedBookings->items,
+            'pagination' => $paginatedBookings,
             'filters' => $filters,
-            'statusOptions' => $result['data']['statusOptions'] ?? $service->getStatusOptions(),
-            'totalBookings' => $result['data']['total'] ?? 0,
-            'currentPage' => $result['data']['currentPage'] ?? $filters['page'],
-            'perPage' => $result['data']['perPage'] ?? 20,
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Create Booking | Library Booking App');
+        $rooms = $this->bookingServices->getAllRooms();
+        $users = $this->bookingServices->getAllUsers();
 
-        $service = new AdminBookingService();
-        $options = $service->getFormSelections();
-
-        return $this->render('Admin/Bookings/Create', [
-            'booking' => new Booking(),
-            'rooms' => $options['rooms'] ?? [],
-            'users' => $options['users'] ?? [],
-            'errors' => [],
-            'old' => [],
+        return view('Admin/Bookings/Create', [
+            'rooms' => $rooms,
+            'users' => $users,
         ]);
     }
 
-    public function store(Request $request, Response $response)
+    public function store(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'CSRF token tidak valid.');
-            $response->redirect('/admin/bookings');
-            return;
+        try {
+            $data = $request->all();
+            $targetUserId = (int) $data['user_id'];
+
+            $booking = $this->bookingServices->adminCreateBooking($data, $targetUserId);
+
+            flash('success', 'Booking berhasil dibuat');
+            redirect('/admin/bookings/edit?id=' . $booking->id_booking);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $service = new AdminBookingService();
-        $result = $service->createBooking($request->getBody());
-        if (!$result['success']) {
-            error_log(print_r($result['data']['errors'] ?? [], true));
+    public function edit(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->query()['id'];
+            $data = $this->bookingServices->getBookingForUser($bookingId, 0, true);
+
+            $rooms = $this->bookingServices->getAllRooms();
+
+            return view('Admin/Bookings/Edit', [
+                'booking' => $data['booking'],
+                'members' => $data['allMembers'],
+                'rooms' => $rooms,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/bookings');
         }
+    }
 
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/bookings');
+    public function update(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $data = $request->all();
+            unset($data['booking_id'], $data['_token']);
 
-        if ($result['success']) {
-            $response->redirect('/admin/bookings');
-            return;
+            $this->bookingServices->adminUpdateBooking($bookingId, $data);
+
+            flash('success', 'Booking berhasil diupdate');
+            redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
 
-        $options = $service->getFormSelections();
-        $this->setLayout('main');
-        $this->setTitle('Create Booking | Library Booking App');
+    public function delete(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
 
-        return $this->render('Admin/Bookings/Create', [
-            'booking' => new Booking(),
-            'rooms' => $options['rooms'] ?? [],
-            'users' => $options['users'] ?? [],
-            'errors' => $result['errors'] ?? [],
-            'old' => $result['data']['payload'] ?? $request->getBody(),
+            $this->bookingServices->deleteBooking($bookingId);
+
+            flash('success', 'Booking berhasil dihapus');
+            redirect('/admin/bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+    public function detail(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->query()['id'];
+            $data = $this->bookingServices->getBookingForUser($bookingId, 0, true); // admin = true
+
+            return view('Admin/Bookings/Detail', [
+                'bookings' => $data['booking'],
+                'pic' => $data['pic'],
+                'members' => $data['members'],
+                'allMembers' => $data['allMembers'],
+            ]);
+
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/bookings');
+        }
+    }
+
+    public function verify(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $this->bookingServices->approveBooking($bookingId);
+
+            flash('success', 'Booking berhasil diverifikasi');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function reject(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
+
+            $this->bookingServices->rejectBooking($bookingId, $reason);
+
+            flash('success', 'Booking berhasil ditolak');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function complete(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->completeBooking($bookingId);
+
+            flash('success', 'Booking berhasil diselesaikan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+    public function activate(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $checkinCode = $request->all()['checkin_code'] ?? '';
+
+            $this->bookingServices->activateBooking($bookingId, $checkinCode);
+
+            flash('success', 'Booking berhasil diaktifkan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function cancel(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+            $reason = $request->all()['reason'] ?? 'Dibatalkan oleh admin';
+
+            $this->bookingServices->cancelBooking($bookingId, $user->id_user, $reason);
+
+            flash('success', 'Booking berhasil dibatalkan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function noshow(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->handleNoShow($bookingId);
+
+            flash('success', 'Booking ditandai sebagai no-show');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function blockedDates(Request $request)
+    {
+        $blockedDates = $this->bookingServices->getBlockedDates();
+        $rooms = $this->bookingServices->getAllRooms();
+
+        return view('Admin/Bookings/BlockedDates', [
+            'blockedDates' => $blockedDates,
+            'rooms' => $rooms,
         ]);
     }
 
-    public function edit(Request $request, Response $response)
+    public function blockDate(Request $request)
     {
-        $this->setLayout('main');
-        $this->setTitle('Edit Booking | Library Booking App');
+        try {
+            $user = auth()->user();
+            $data = $request->all();
+            $ruanganId = !empty($data['ruangan_id']) ? (int) $data['ruangan_id'] : null;
+            $this->bookingServices->blockDateRange(
+                $data['tanggal_begin'],
+                $data['tanggal_end'],
+                $ruanganId,
+                $data['alasan'] ?? 'Diblokir oleh admin',
+                $user->id_user
+            );
 
-        $bookingId = (int) ($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
-        $service = new AdminBookingService();
-        $booking = $service->getBookingById($bookingId);
-
-        if (!$booking) {
-            App::$app->session->setFlash('error', 'Booking tidak ditemukan.');
-            $response->redirect('/admin/bookings');
-            return;
+            flash('success', 'Tanggal berhasil diblokir');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        $options = $service->getFormSelections();
-        return $this->render('Admin/Bookings/Edit', [
-            'booking' => $booking,
-            'rooms' => $options['rooms'] ?? [],
-            'users' => $options['users'] ?? [],
-            'statusOptions' => $options['statusOptions'] ?? [],
-            'errors' => [],
-            'old' => [],
-        ]);
     }
 
-    public function update(Request $request, Response $response)
+    public function unblockDate(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'CSRF token tidak valid.');
-            $response->redirect('/admin/bookings');
-            return;
+        try {
+            $blockedDateId = (int) $request->all()['blocked_date_id'];
+            $this->bookingServices->unblockDate($blockedDateId);
+
+            flash('success', 'Tanggal berhasil di-unblock');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        $bookingId = (int) ($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
-        $service = new AdminBookingService();
-        $result = $service->updateBooking($bookingId, $request->getBody());
-
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-
-        if ($result['success']) {
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $booking = $service->getBookingById($bookingId);
-        $options = $service->getFormSelections();
-        $this->setLayout('main');
-        $this->setTitle('Edit Booking | Library Booking App');
-
-        return $this->render('Admin/Bookings/Edit', [
-            'booking' => $booking,
-            'rooms' => $options['rooms'] ?? [],
-            'users' => $options['users'] ?? [],
-            'statusOptions' => $options['statusOptions'] ?? [],
-            'errors' => $result['data']['errors'] ?? [],
-            'old' => $result['data']['payload'] ?? $request->getBody(),
-        ]);
     }
 
-    public function delete(Request $request, Response $response)
+    public function addMember(Request $request)
     {
-        if (!$request->isPost()) {
-            App::$app->session->setFlash('error', 'CSRF token tidak valid.');
-            $response->redirect('/admin/bookings');
-            return;
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $identifier = $request->all()['member_email'];
+
+            $this->bookingServices->addMemberByIdentifier($bookingId, $identifier);
+
+            flash('success', 'Anggota berhasil ditambahkan');
+            redirect('/admin/bookings/edit?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
+    }
+    public function kickMember(Request $request)
+    {
+        try {
+            $bookingId = (int) $request->all()['booking_id'];
+            $memberId = (int) $request->all()['user_id'];
 
-        $bookingId = (int) ($request->getBody()['id_booking'] ?? $request->getBody()['id'] ?? 0);
-        $service = new AdminBookingService();
-        $result = $service->deleteBooking($bookingId);
+            $this->bookingServices->kickMember($bookingId, $memberId, auth()->user()->id_user);
 
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/bookings');
+            flash('success', 'Anggota berhasil dikeluarkan');
+            redirect('/admin/bookings/edit?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
     }
 
-    public function detail(Request $request, Response $response)
+    public function showRescheduleForm(Request $request)
     {
-        $bookingId = (int) ($request->getBody()['id'] ?? $request->getBody()['id_booking'] ?? 0);
-        if ($bookingId <= 0) {
-            App::$app->session->setFlash('error', 'ID booking tidak valid.');
-            $response->redirect('/admin/bookings');
-            return;
+        try {
+            $bookingId = (int) $request->query('id');
+            $booking = $this->bookingServices->getBookingById($bookingId);
+
+            if (!$booking) {
+                flash('error', 'Booking tidak ditemukan');
+                redirect('/admin/bookings');
+            }
+
+            if ($booking->status !== 'verified') {
+                flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
+                redirect('/admin/bookings/detail?id=' . $bookingId);
+            }
+
+            return view('Admin/Bookings/Reschedule', [
+                'booking' => $booking,
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/bookings');
         }
-
-        $service = new AdminBookingService();
-        $result = $service->getAdminBookingDetail($bookingId);
-        if (!$result['success']) {
-            App::$app->session->setFlash('error', $result['message'] ?? 'Booking tidak dapat ditampilkan.');
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $this->setLayout('main');
-        $this->setTitle('Detail Booking | Library Booking App');
-
-        return $this->render('Admin/Bookings/Detail', $result['data']);
     }
 
-    public function verify(Request $request, Response $response)
+    public function reschedule(Request $request)
     {
-        $admin = $this->currentUser;
-        $id_booking = (int) ($request->getBody()['booking_id']);
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
 
-        $service = new AdminBookingService();
-        $result = $service->verifyBooking($id_booking, (int) $admin->id_user);
+            $newData = [
+                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $request->all()['waktu_mulai'],
+                'waktu_selesai' => $request->all()['waktu_selesai'],
+            ];
 
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/bookings');
-    }
+            $this->bookingServices->rescheduleBooking($bookingId, $newData, $user->id_user);
 
-    public function complete(Request $request, Response $response)
-    {
-        $admin = $this->currentUser;
-        $id_booking = (int) ($request->getBody()['booking_id']);
-
-        $service = new AdminBookingService();
-        $result = $service->markBookingCompleted($id_booking, (int) $admin->id_user);
-
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/bookings');
-    }
-
-    public function activate(Request $request, Response $response)
-    {
-        if (!$request->isPost()) {
-            $response->redirect('/admin/bookings');
-            return;
+            flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
+            redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
         }
-
-        $body = $request->getBody();
-        $bookingId = (int) ($body['booking_id'] ?? 0);
-        $code = $body['checkin_code'] ?? '';
-
-        $service = new AdminBookingService();
-        $result = $service->activateBooking($bookingId, $code, (int) ($this->currentUser?->id_user ?? 0));
-
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/bookings');
-    }
-
-    public function cancel(Request $request, Response $response)
-    {
-        if (!$request->isPost()) {
-            $response->redirect('/admin/bookings');
-            return;
-        }
-
-        $body = $request->getBody();
-        $bookingId = (int) ($body['booking_id'] ?? 0);
-        $reason = trim($body['reason'] ?? '');
-
-        $service = new AdminBookingService();
-        $result = $service->cancelBooking($bookingId, (int) ($this->currentUser?->id_user ?? 0), $reason ?: null);
-
-        App::$app->session->setFlash($result['success'] ? 'success' : 'error', $result['message'] ?? '');
-        $response->redirect('/admin/bookings');
     }
 }
