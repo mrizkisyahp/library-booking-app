@@ -72,6 +72,7 @@ $app->router->post('/feedback/store', [UserFeedbackController::class, 'store'], 
 
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->get('/admin/settings', [AdminDashboardController::class, 'settings'], ['middleware' => [new AdminMiddleware()]]);
 
 // Admin bookings
 $app->router->get('/admin/bookings', [AdminBookingController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
