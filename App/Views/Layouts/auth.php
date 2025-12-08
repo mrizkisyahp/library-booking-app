@@ -14,8 +14,8 @@ use App\Core\App;
 
 <body class="min-h-dvh bg-primary font-sans">
     {{content}}
+    <script src="src/script.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 
 </html>
-<script src="src/script.js"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

@@ -15,17 +15,15 @@ class TurnstileService
         if (!$this->enabled) {
             return true;
         }
-
         if (!$token || !$this->secretKey) {
+            error_log("Turnstile: Missing token ('$token') or secret key ('" . (empty($this->secretKey) ? 'EMPTY' : 'SET') . "')");
             return false;
         }
-
         $payload = http_build_query([
             'secret' => $this->secretKey,
             'response' => $token,
             'remoteip' => $remoteIp,
         ]);
-
         $context = stream_context_create([
             'http' => [
                 'method' => 'POST',
@@ -33,18 +31,18 @@ class TurnstileService
                 'content' => $payload,
             ],
         ]);
-
         $verify = @file_get_contents(
             'https://challenges.cloudflare.com/turnstile/v0/siteverify',
             false,
             $context
         );
-
         if ($verify === false) {
+            error_log("Turnstile: API request failed - " . error_get_last()['message'] ?? 'unknown');
             return false;
         }
-
         $result = json_decode($verify, true);
+        error_log("Turnstile response: " . print_r($result, true));
+
         return ($result['success'] ?? false) === true;
     }
 
