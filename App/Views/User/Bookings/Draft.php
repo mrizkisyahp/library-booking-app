@@ -302,6 +302,90 @@
             </div>
           </form>
 
+          <?php if ($isPic): ?>
+            <!-- Pending Members Section -->
+            <hr class="h-px py-4 text-gray-400 mt-6">
+            <p class="font-bold text-2xl mb-4">
+              Permintaan Bergabung
+            </p>
+
+            <!-- Static pending members for design preview -->
+            <div class="space-y-3 mb-6">
+              <!-- Pending Member 1 -->
+              <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Ahmad Fauzi</p>
+                    <p class="text-sm text-slate-500">ahmad.fauzi@student.polinema.ac.id</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button"
+                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Terima
+                  </button>
+                  <button type="button"
+                    class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Tolak
+                  </button>
+                </div>
+              </div>
+              <!-- Pending Member 2 -->
+              <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Siti Nurhaliza</p>
+                    <p class="text-sm text-slate-500">siti.nurhaliza@student.polinema.ac.id</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button"
+                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Terima
+                  </button>
+                  <button type="button"
+                    class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Tolak
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Empty state (toggle this when no pending members) -->
+            <!-- 
+  <div class="text-center py-6 bg-slate-50 rounded-xl">
+    <svg class="w-12 h-12 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+    <p class="text-slate-500 text-sm">Tidak ada permintaan bergabung</p>
+  </div>
+  -->
+          <?php endif; ?>
+
           <!-- Requirement Warning -->
           <?php if (!$canSubmit): ?>
             <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">

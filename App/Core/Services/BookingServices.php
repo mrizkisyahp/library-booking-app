@@ -77,7 +77,7 @@ class BookingServices
         $booking->tujuan = $data['tujuan'] ?? '';
         $booking->status = 'verified';
         $booking->checkin_code = $this->generateCheckinCode();
-        $booking->invite_token = bin2hex(random_bytes(16));
+        $booking->invite_token = $this->generateInviteToken();
 
         $booking->save();
         $this->logger->info('Admin Created Booking', [
@@ -164,7 +164,7 @@ class BookingServices
         $booking->waktu_selesai = $data['waktu_selesai'];
         $booking->tujuan = $data['tujuan'] ?? '';
         $booking->status = 'draft';
-        $booking->invite_token = bin2hex(random_bytes(16));
+        $booking->invite_token = $this->generateInviteToken();
         $booking->save();
 
         $this->logger->info('Booking Created', [
@@ -257,6 +257,10 @@ class BookingServices
     }
 
     private function generateCheckinCode(): string
+    {
+        return strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+    }
+    private function generateInviteToken(): string
     {
         return strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
     }
