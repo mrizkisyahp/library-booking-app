@@ -1,0 +1,168 @@
+[2025-11-09 00:06:09] [INFO] Running Seed.php
+[2025-11-09 00:06:09] [INFO] Role table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Users table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Ruangan table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Bookings table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Anggota Booking table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Feedback table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Peringatan table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Peringatan Mahasiswa table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Suspensi table seeded successfully!
+[2025-11-09 00:06:10] [INFO] Seeder completed successfully!
+[2025-11-09 00:15:51] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 00:16:02] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 00:16:18] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 00:16:29] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 00:16:58] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 00:17:08] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 00:17:28] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 00:17:38] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 00:25:15] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 00:25:27] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 00:25:46] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 00:25:58] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 00:26:03] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 00:26:19] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 00:26:37] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 00:36:15] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 00:44:18] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 00:44:36] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 00:44:55] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 00:45:27] [INFO] User #4 registered - Email: akumahasiswa@pnj.ac.id, Role: mahasiswa {"user_id":4,"action":"registered"}
+[2025-11-09 00:45:34] [INFO] User #4 email verified - Status changed to: verified {"user_id":4,"action":"email verified"}
+[2025-11-09 00:45:47] [INFO] User #4 logged in {"user_id":4,"action":"logged in"}
+[2025-11-09 00:46:06] [INFO] KuBaca image uploaded {"user_id":4,"filename":"kubaca_4_1762623966.png"}
+[2025-11-09 00:46:57] [INFO] Booking #10 draft created by User #4 {"user_id":4,"booking_id":10,"room_id":9,"usage_date":"2025-11-10","time":"06:46 - 09:46"}
+[2025-11-09 00:47:07] [INFO] Booking #10 member added by User #4 {"user_id":4,"booking_id":10,"member_email":"admin@pnj.ac.id","member_id":1}
+[2025-11-09 00:47:10] [INFO] Booking #10 member added by User #4 {"user_id":4,"booking_id":10,"member_email":"dosen@pnj.ac.id","member_id":2}
+[2025-11-09 00:47:13] [INFO] Booking #10 submitted to admin by User #4 {"user_id":4,"booking_id":10}
+[2025-11-09 00:47:17] [INFO] User #4 logged out {"user_id":4,"action":"logged out"}
+[2025-11-09 00:47:28] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 00:47:35] [INFO] Admin #1 verified booking - Booking #10 verified {"admin_id":1,"action":"verified booking"}
+[2025-11-09 00:47:39] [INFO] Admin #1 checked in booking - Booking #10 checked in with code: E489F81C {"admin_id":1,"action":"checked in booking"}
+[2025-11-09 00:47:42] [INFO] Admin #1 completed booking - Booking #10 marked as completed {"admin_id":1,"action":"completed booking"}
+[2025-11-09 00:47:44] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 00:48:18] [INFO] User #4 logged in {"user_id":4,"action":"logged in"}
+[2025-11-09 00:48:34] [INFO] Feedback submitted {"user_id":4,"booking_id":10,"rating":5}
+[2025-11-09 00:49:01] [INFO] User #4 logged out {"user_id":4,"action":"logged out"}
+[2025-11-09 10:32:49] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 10:39:25] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 10:39:59] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 16:54:57] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 17:11:30] [INFO] Running Seed.php
+[2025-11-09 17:11:30] [INFO] Role table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Users table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Ruangan table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Bookings table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Anggota Booking table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Feedback table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Peringatan table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Peringatan Mahasiswa table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Suspensi table seeded successfully!
+[2025-11-09 17:11:31] [INFO] Seeder completed successfully!
+[2025-11-09 17:32:08] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 17:32:21] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 17:32:52] [INFO] Booking #4 draft created by User #2 {"user_id":2,"booking_id":4,"room_id":5,"usage_date":"2025-11-10","time":"18:32 - 20:32"}
+[2025-11-09 17:35:59] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 17:36:12] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 17:38:28] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 17:38:45] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 17:39:25] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 17:39:35] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 17:40:48] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 17:41:19] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 18:08:01] [INFO] Booking #5 draft created by User #2 {"user_id":2,"booking_id":5,"room_id":9,"usage_date":"2025-11-10","time":"20:07 - 22:07"}
+[2025-11-09 18:15:33] [INFO] Booking #5 member added by User #2 {"user_id":2,"booking_id":5,"member_email":"dosen@pnj.ac.id","member_id":2}
+[2025-11-09 18:22:13] [INFO] Booking #6 draft created by User #2 {"user_id":2,"booking_id":6,"room_id":9,"usage_date":"2025-11-10","time":"18:22 - 21:22"}
+[2025-11-09 18:23:01] [INFO] Booking #6 member added by User #2 {"user_id":2,"booking_id":6,"member_email":"mahasiswa@stu.pnj.ac.id","member_id":3}
+[2025-11-09 18:23:42] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 18:23:54] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 18:24:11] [INFO] Booking #7 draft created by User #3 {"user_id":3,"booking_id":7,"room_id":9,"usage_date":"2025-11-10","time":"18:24 - 21:24"}
+[2025-11-09 18:24:16] [INFO] Booking #7 member added by User #3 {"user_id":3,"booking_id":7,"member_email":"dosen@pnj.ac.id","member_id":2}
+[2025-11-09 18:26:45] [INFO] Booking #8 draft created by User #3 {"user_id":3,"booking_id":8,"room_id":9,"usage_date":"2025-11-10","time":"18:26 - 20:26"}
+[2025-11-09 18:26:48] [INFO] Booking #8 member added by User #3 {"user_id":3,"booking_id":8,"member_email":"dosen@pnj.ac.id","member_id":2}
+[2025-11-09 18:26:53] [INFO] Booking #8 member added by User #3 {"user_id":3,"booking_id":8,"member_email":"admin@pnj.ac.id","member_id":1}
+[2025-11-09 18:26:58] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 18:27:10] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 18:27:49] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 18:27:59] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 18:35:28] [WARNING] Draft booking not found or invalid {"user_id":3,"booking_id":8,"booking_exists":"no","booking_status":"N\/A"}
+[2025-11-09 18:35:42] [INFO] Booking #9 draft created by User #3 {"user_id":3,"booking_id":9,"room_id":9,"usage_date":"2025-11-11","time":"18:35 - 21:00"}
+[2025-11-09 18:35:48] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 18:36:01] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 18:42:24] [ERROR] Unhandled exception {"error":"Call to a member function userCanAccess() on null","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\UserBookingController.php","line":136}
+[2025-11-09 18:42:34] [ERROR] Unhandled exception {"error":"Call to a member function userCanAccess() on null","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\UserBookingController.php","line":136}
+[2025-11-09 18:45:16] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 18:45:25] [WARNING] Draft booking not found or invalid {"user_id":3,"booking_id":4,"booking_exists":"no","booking_status":"N\/A"}
+[2025-11-09 18:45:37] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 18:45:48] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 18:45:51] [WARNING] Draft booking not found or invalid {"user_id":2,"booking_id":3,"booking_exists":"no","booking_status":"N\/A"}
+[2025-11-09 18:51:42] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 18:51:53] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 18:59:51] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 19:00:02] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 19:23:53] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 19:24:05] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 19:26:02] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 19:26:14] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 19:27:02] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 19:27:13] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 19:28:18] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 19:28:29] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 19:35:33] [INFO] Booking #9 submitted to admin by User #3 {"user_id":3,"booking_id":9}
+[2025-11-09 19:35:39] [WARNING] Draft booking not found or invalid {"user_id":3,"booking_id":9,"booking_exists":"yes","booking_status":"pending"}
+[2025-11-09 19:35:41] [WARNING] Draft booking not found or invalid {"user_id":3,"booking_id":9,"booking_exists":"yes","booking_status":"pending"}
+[2025-11-09 19:36:04] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 19:36:16] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 19:36:55] [INFO] Booking #10 draft created by User #2 {"user_id":2,"booking_id":10,"room_id":9,"usage_date":"2025-11-10","time":"19:36 - 21:36"}
+[2025-11-09 19:36:59] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 19:37:09] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 19:48:33] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 19:55:24] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 19:55:29] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 19:55:44] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 20:03:33] [INFO] Booking #10 member added by User #2 {"user_id":2,"booking_id":10,"member_email":"admin@pnj.ac.id","member_id":1}
+[2025-11-09 20:03:35] [INFO] Booking #10 member added by User #2 {"user_id":2,"booking_id":10,"member_email":"mahasiswa@stu.pnj.ac.id","member_id":3}
+[2025-11-09 20:05:26] [INFO] Booking #10 member added by User #2 {"user_id":2,"booking_id":10,"member_email":"lalala@pnj.ac.id","member_id":4}
+[2025-11-09 20:06:37] [INFO] Booking #10 member added by User #2 {"user_id":2,"booking_id":10,"member_email":"lelele@pnj.ac.id","member_id":5}
+[2025-11-09 20:08:07] [INFO] Booking #10 member added by User #2 {"user_id":2,"booking_id":10,"member_email":"lelele@pnj.ac.id","member_id":5}
+[2025-11-09 20:08:41] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 20:09:17] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 20:09:34] [INFO] Booking #10 member added by User #2 {"user_id":2,"booking_id":10,"member_email":"lelele@pnj.ac.id","member_id":5}
+[2025-11-09 20:12:56] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 20:13:06] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 20:19:47] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 20:32:05] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 20:33:34] [INFO] Running Seed.php
+[2025-11-09 20:33:34] [INFO] Role table seeded successfully!
+[2025-11-09 20:33:35] [INFO] Users table seeded successfully!
+[2025-11-09 20:33:35] [INFO] Ruangan table seeded successfully!
+[2025-11-09 20:33:35] [INFO] Seeder completed successfully!
+[2025-11-09 20:34:42] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 20:34:55] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 20:35:08] [INFO] Booking #1 draft created by User #3 {"user_id":3,"booking_id":1,"room_id":9,"usage_date":"2025-11-10","time":"20:35 - 23:35"}
+[2025-11-09 20:35:56] [INFO] Booking #1 member added by User #3 {"user_id":3,"booking_id":1,"member_email":"dosen@pnj.ac.id","member_id":2}
+[2025-11-09 20:36:02] [INFO] Booking #1 member added by User #3 {"user_id":3,"booking_id":1,"member_email":"admin@pnj.ac.id","member_id":1}
+[2025-11-09 20:36:15] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 20:36:25] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 20:37:15] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 20:37:25] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 20:37:44] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 20:37:55] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 20:38:53] [INFO] Booking #1 submitted to admin by User #3 {"user_id":3,"booking_id":1}
+[2025-11-09 20:39:00] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 20:39:11] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 20:39:18] [INFO] Admin #1 verified booking - Booking #1 verified {"admin_id":1,"action":"verified booking"}
+[2025-11-09 20:39:27] [INFO] Admin #1 checked in booking - Booking #1 checked in with code: 6E5B71B7 {"admin_id":1,"action":"checked in booking"}
+[2025-11-09 20:39:29] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 20:39:39] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 20:40:08] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 20:40:18] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-09 20:40:21] [INFO] Admin #1 completed booking - Booking #1 marked as completed {"admin_id":1,"action":"completed booking"}
+[2025-11-09 20:40:29] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-09 20:40:40] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 20:40:48] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-09 20:40:58] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-09 20:41:08] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-09 20:41:19] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-09 20:41:28] [INFO] Feedback submitted {"user_id":3,"booking_id":1,"rating":5}

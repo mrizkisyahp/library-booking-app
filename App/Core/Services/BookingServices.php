@@ -1239,4 +1239,27 @@ class BookingServices
             throw new Exception('Anda memiliki feedback yang belum diisi. Harap isi feedback terlebih dahulu sebelum membuat booking baru.');
         }
     }
+
+    public function deleteDraft(int $bookingId, int $userId): void
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if ((int) $booking->user_id !== $userId) {
+            throw new Exception('Hanya PIC yang dapat menghapus draft');
+        }
+
+        if ($booking->status !== 'draft') {
+            throw new Exception('Hanya booking dengan status draft yang dapat dihapus');
+        }
+
+        $this->bookingRepo->delete($bookingId);
+        $this->logger->info('Draft Deleted', [
+            'booking_id' => $bookingId,
+            'deleted_by' => $userId,
+        ]);
+    }
 }

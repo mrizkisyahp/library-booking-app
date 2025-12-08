@@ -1,0 +1,47 @@
+[2025-11-11 07:43:30] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-11 07:45:14] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-11 07:45:24] [INFO] Booking #27 submitted to admin by User #3 {"user_id":3,"booking_id":27}
+[2025-11-11 07:45:27] [INFO] User #2 logged out {"user_id":2,"action":"logged out"}
+[2025-11-11 07:45:38] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-11 07:45:58] [INFO] Admin #1 verified booking - Booking #27 verified {"admin_id":1,"action":"verified booking"}
+[2025-11-11 07:46:13] [WARNING] Booking Owner not found while sending approval email {"booking_id":27,"user_id":3}
+[2025-11-11 07:46:13] [INFO] Admin #1 checked in booking - Booking #27 checked in with code: 4E6310 {"admin_id":1,"action":"checked in booking"}
+[2025-11-11 07:46:26] [WARNING] Booking Owner not found while sending approval email {"booking_id":27,"user_id":3}
+[2025-11-11 07:46:26] [INFO] Admin #1 completed booking - Booking #27 marked as completed {"admin_id":1,"action":"completed booking"}
+[2025-11-11 07:48:14] [INFO] Booking #29 draft created by User #3 {"user_id":3,"booking_id":29,"room_id":9,"usage_date":"2025-11-11","time":"09:00 - 12:00","status":"draft"}
+[2025-11-11 07:54:47] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-11 07:59:12] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-11 08:03:55] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-11 08:19:11] [INFO] User #3 logged in {"user_id":3,"action":"logged in"}
+[2025-11-11 08:19:37] [INFO] KuBaca image uploaded {"user_id":3,"filename":"kubaca_3_1762823977.jpg"}
+[2025-11-11 08:20:28] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-11 08:20:31] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-11 08:20:35] [ERROR] Unhandled exception {"error":"Call to undefined method App\\Models\\User::findAll()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\AdminUserController.php","line":25}
+[2025-11-11 08:33:17] [ERROR] Unhandled exception {"error":"Call to undefined method App\\Models\\User::findAll()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\AdminUserController.php","line":25}
+[2025-11-11 08:46:26] [ERROR] Unhandled exception {"error":"Call to undefined method App\\Models\\User::findAll()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\AdminUserController.php","line":25}
+[2025-11-11 08:46:28] [ERROR] Unhandled exception {"error":"Call to undefined method App\\Models\\User::findAll()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\AdminUserController.php","line":25}
+[2025-11-11 10:28:10] [ERROR] Unhandled exception {"error":"Call to undefined method App\\Models\\User::findAll()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\AdminUserController.php","line":25}
+[2025-11-11 10:45:52] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-11 10:53:48] [ERROR] Unhandled exception {"error":"syntax error, unexpected token \"endforeach\", expecting end of file","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":236}
+[2025-11-11 10:53:49] [ERROR] Unhandled exception {"error":"syntax error, unexpected token \"endforeach\", expecting end of file","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":236}
+[2025-11-11 10:54:05] [ERROR] Unhandled exception {"error":"syntax error, unexpected token \"endforeach\", expecting end of file","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":236}
+[2025-11-11 10:55:03] [ERROR] Unhandled exception {"error":"syntax error, unexpected token \"endforeach\", expecting end of file","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":236}
+[2025-11-11 11:22:50] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":297}
+[2025-11-11 11:22:55] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":297}
+[2025-11-11 11:23:21] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":297}
+[2025-11-11 11:24:22] [ERROR] Unhandled exception {"error":"error_log(): Argument #1 ($message) must be of type string, array given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Controllers\\AdminUserController.php","line":26}
+[2025-11-11 11:24:47] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":297}
+[2025-11-11 11:29:06] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":292}
+[2025-11-11 11:29:33] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":292}
+[2025-11-11 11:30:41] [ERROR] Unhandled exception {"error":"count(): Argument #1 ($value) must be of type Countable|array, null given","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":292}
+[2025-11-11 12:24:30] [INFO] Running Seed.php
+[2025-11-11 12:24:30] [INFO] Role table seeded successfully!
+[2025-11-11 12:24:42] [INFO] Users table seeded successfully!
+[2025-11-11 12:24:42] [INFO] Ruangan table seeded successfully!
+[2025-11-11 12:24:42] [INFO] Seeder completed successfully!
+[2025-11-11 12:26:57] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-11 12:27:02] [INFO] User #24 logged in {"user_id":24,"action":"logged in"}
+[2025-11-11 12:27:13] [INFO] KuBaca image uploaded {"user_id":24,"filename":"kubaca_24_1762838833.jpg"}
+[2025-11-11 12:27:15] [INFO] User #24 logged out {"user_id":24,"action":"logged out"}
+[2025-11-11 12:27:20] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-11 12:27:39] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}

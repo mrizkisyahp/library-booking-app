@@ -1,0 +1,36 @@
+[2025-11-14 00:17:08] [INFO] User #38 updated_by_admin - Email: mahasiswa6@stu.pnj.ac.id, Role: mahasiswa, Status: active {"user_id":38,"action":"updated_by_admin"}
+[2025-11-14 00:17:31] [INFO] User #38 updated_by_admin - Email: mahasiswa6@stu.pnj.ac.id, Role: mahasiswa, Status: active {"user_id":38,"action":"updated_by_admin"}
+[2025-11-14 00:22:50] [INFO] User #38 deleted_by_admin - Email: mahasiswa6@stu.pnj.ac.id {"user_id":38,"action":"deleted_by_admin"}
+[2025-11-14 00:22:56] [INFO] User #37 deleted_by_admin - Email: mahasiswa4@stu.pnj.ac.id {"user_id":37,"action":"deleted_by_admin"}
+[2025-11-14 00:26:56] [INFO] User #36 updated_by_admin - Email: mahasiswa3@stu.pnj.ac.id, Role: mahasiswa, Status: pending kubaca {"user_id":36,"action":"updated_by_admin"}
+[2025-11-14 00:28:31] [INFO] User #36 kubaca_rejected - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_rejected"}
+[2025-11-14 00:28:42] [INFO] User #36 kubaca_approved - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_approved"}
+[2025-11-14 00:29:10] [INFO] User #36 kubaca_rejected - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_rejected"}
+[2025-11-14 00:29:15] [INFO] User #36 kubaca_approved - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_approved"}
+[2025-11-14 08:20:32] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-14 08:21:32] [INFO] User #36 updated_by_admin - Email: mahasiswa3@stu.pnj.ac.id, Role: mahasiswa, Status: active {"user_id":36,"action":"updated_by_admin"}
+[2025-11-14 08:21:32] [INFO] User #36 updated_by_admin - Email: mahasiswa3@stu.pnj.ac.id, Role: mahasiswa, Status: active {"user_id":36,"action":"updated_by_admin"}
+[2025-11-14 08:23:36] [INFO] User #36 updated_by_admin - Email: mahasiswa3@stu.pnj.ac.id, Role: mahasiswa, Status: active {"user_id":36,"action":"updated_by_admin"}
+[2025-11-14 08:26:25] [INFO] User #36 kubaca_rejected - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_rejected"}
+[2025-11-14 08:27:04] [INFO] User #36 kubaca_approved - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_approved"}
+[2025-11-14 08:27:08] [INFO] User #36 kubaca_rejected - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_rejected"}
+[2025-11-14 08:27:23] [INFO] User #36 kubaca_approved - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_approved"}
+[2025-11-14 08:27:26] [INFO] User #36 kubaca_rejected - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_rejected"}
+[2025-11-14 08:27:46] [INFO] User #36 kubaca_approved - Admin admin@pnj.ac.id updated status. {"user_id":36,"action":"kubaca_approved"}
+[2025-11-14 08:28:44] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-14 08:29:09] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}
+[2025-11-14 08:29:56] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-14 12:20:19] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-14 12:20:20] [ERROR] Unhandled exception {"error":"syntax error, unexpected token \"<\", expecting end of file","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":6}
+[2025-11-14 12:21:46] [ERROR] Unhandled exception {"error":"Cannot use object of type App\\Models\\User as array","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":191}
+[2025-11-14 12:22:16] [ERROR] Unhandled exception {"error":"Cannot use object of type App\\Models\\User as array","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":191}
+[2025-11-14 12:23:25] [ERROR] Unhandled exception {"error":"Cannot use object of type App\\Models\\User as array","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":191}
+[2025-11-14 12:25:01] [ERROR] Unhandled exception {"error":"syntax error, unexpected token \"<\", expecting end of file","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Users\\Index.php","line":7}
+[2025-11-14 12:34:04] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-14 12:34:16] [INFO] User #31 logged in {"user_id":31,"action":"logged in"}
+[2025-11-14 12:36:07] [INFO] User #31 logged out {"user_id":31,"action":"logged out"}
+[2025-11-14 12:36:24] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-11-14 13:11:52] [ERROR] Unhandled exception {"error":"Call to a member function hasError() on null","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Admin\\Rooms\\Create.php","line":59}
+[2025-11-14 13:32:02] [INFO] User #12 created_by_admin - Nama: halo aku bagus, Kapasitas: 3 - 5, Jenis: Ruang Diskusi, Deskripsi: rara {"user_id":12,"action":"created_by_admin"}
+[2025-11-14 13:45:10] [INFO] User #31 logged in {"user_id":31,"action":"logged in"}
+[2025-11-14 14:00:31] [INFO] User #36 updated_by_admin - Email: mahasiswa3@stu.pnj.ac.id, Role: mahasiswa, Status: active {"user_id":36,"action":"updated_by_admin"}

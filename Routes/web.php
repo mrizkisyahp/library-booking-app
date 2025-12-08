@@ -65,6 +65,7 @@ $app->router->get('/bookings/detail', [UserBookingController::class, 'detail'], 
 $app->router->get('/bookings/reschedule', [UserBookingController::class, 'showRescheduleForm'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/bookings/reschedule/confirm', [UserBookingController::class, 'confirmReschedule'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/reschedule', [UserBookingController::class, 'reschedule'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/bookings/delete-draft', [UserBookingController::class, 'deleteDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 
 // Feedback routes (authenticated)
 $app->router->get('/feedback/create', [UserFeedbackController::class, 'create'], ['middleware' => [new AuthMiddleware()]]);
@@ -128,5 +129,4 @@ $app->router->post('/admin/rooms/deactivate-all', [AdminRoomController::class, '
 // Admin feedback
 $app->router->get('/admin/feedback', [AdminFeedbackController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->get('/admin/feedback/detail', [AdminFeedbackController::class, 'detail'], ['middleware' => [new AdminMiddleware()]]);
-
 $app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

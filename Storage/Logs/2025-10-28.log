@@ -1,0 +1,7 @@
+[2025-10-28 08:58:10] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-10-28 09:19:36] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-10-28 09:21:23] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-10-28 09:21:27] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-10-28 11:35:26] [INFO] User #1 logged in {"user_id":1,"action":"logged in"}
+[2025-10-28 11:36:20] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-10-28 11:38:15] [INFO] User #2 logged in {"user_id":2,"action":"logged in"}

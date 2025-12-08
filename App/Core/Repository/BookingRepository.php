@@ -110,7 +110,21 @@ class BookingRepository
             $query->where('r.nama_ruangan', 'LIKE', '%' . $filters['keyword'] . '%')
                 ->orWhere('u.nama', 'LIKE', '%' . $filters['keyword'] . '%');
         }
-        return $query->orderBy('b.tanggal_penggunaan_ruang', 'desc')->orderBy('b.created_at', 'asc')
+        return $query
+            ->whereNotIn('b.status', ['draft'])
+            ->orderBy('b.tanggal_penggunaan_ruang', 'desc')
+            ->orderBy("CASE b.status 
+                WHEN 'pending' THEN 1 
+                WHEN 'verified' THEN 2 
+                WHEN 'active' THEN 3 
+                WHEN 'completed' THEN 4 
+                WHEN 'draft' THEN 5 
+                WHEN 'cancelled' THEN 6 
+                WHEN 'expired' THEN 7 
+                WHEN 'no_show' THEN 8 
+                ELSE 9 
+            END", 'asc')
+            ->orderBy('b.created_at', 'asc')
             ->paginate($perPage, $page);
     }
 

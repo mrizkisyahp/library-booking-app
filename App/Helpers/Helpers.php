@@ -327,3 +327,12 @@ if (!function_exists('room_facilities')) {
         return array_values(array_filter(array_map('trim', $parts)));
     }
 }
+
+if (!function_exists('print_request')) {
+    function print_request(array $data): void
+    {
+        foreach ($data as $key => $value) {
+            error_log($key . ': ' . $value);
+        }
+    }
+}

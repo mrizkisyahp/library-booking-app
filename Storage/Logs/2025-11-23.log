@@ -1,0 +1,1 @@
+[2025-11-23 14:30:26] [ERROR] Unhandled exception {"error":"Call to undefined method App\\Models\\User::fromArray()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Core\\Database\\QueryBuilder.php","line":259}

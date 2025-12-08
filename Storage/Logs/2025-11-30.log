@@ -1,0 +1,15 @@
+[2025-11-30 14:12:06] [ERROR] Unhandled Exception {"error":"Call to undefined function hasError()","file":"C:\\xampp\\htdocs\\PBL\\library-booking-app\\App\\Views\\Auth\\Login.php","line":38}
+[2025-11-30 14:12:51] [INFO] User #3 Logged in - Email: mahasiswa@stu.pnj.ac.id {"user_id":3,"action":"Logged in"}
+[2025-11-30 14:14:29] [INFO] User #3 logged out {"user_id":3,"action":"logged out"}
+[2025-11-30 14:14:35] [INFO] User #11 Logged in - Email: budi.santoso@stu.pnj.ac.id {"user_id":11,"action":"Logged in"}
+[2025-11-30 14:52:21] [INFO] User #11 logged out {"user_id":11,"action":"logged out"}
+[2025-11-30 15:08:17] [INFO] User #1 Logged in - Email: admin@pnj.ac.id {"user_id":1,"action":"Logged in"}
+[2025-11-30 15:08:19] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-30 15:34:40] [INFO] User #1 Logged in - Email: admin@pnj.ac.id {"user_id":1,"action":"Logged in"}
+[2025-11-30 15:34:42] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-30 15:54:38] [INFO] User #1 Logged in - Email: admin@pnj.ac.id {"user_id":1,"action":"Logged in"}
+[2025-11-30 15:54:40] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-30 15:55:00] [INFO] User #1 Logged in - Email: admin@pnj.ac.id {"user_id":1,"action":"Logged in"}
+[2025-11-30 15:55:01] [INFO] User #1 logged out {"user_id":1,"action":"logged out"}
+[2025-11-30 16:16:06] [INFO] User #1 Logged in - Email: admin@pnj.ac.id {"user_id":1,"action":"Logged in"}
+[2025-11-30 16:16:10] [INFO] User #1 logged out - Email: admin@pnj.ac.id {"user_id":1,"action":"logged out"}
