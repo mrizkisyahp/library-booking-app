@@ -189,31 +189,6 @@ function copyToken() {
     });
 }
 
-// charts
-document.addEventListener("DOMContentLoaded", () => {
-    const ctx = document.getElementById("bookingChart");
-
-    const labels = window.chartData.map(item => item.date);
-    const data = window.chartData.map(item => item.count);
-
-    new Chart(ctx, {
-        type: "line",
-        data: {
-            labels,
-            datasets: [{
-                label: "Jumlah Booking",
-                data,
-                borderWidth: 3,
-                tension: 0.3,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-        }
-    });
-});
-
 document.addEventListener('DOMContentLoaded', function () {
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');

@@ -1,3 +1,15 @@
+<?php
+/** ============================================
+ *  SAFETY FALLBACK (AGAR TIDAK ADA WARNING)
+ *  =============================================
+ */
+$filters     = $filters     ?? ['start_date' => '', 'end_date' => '', 'status' => ''];
+$summary     = $summary     ?? ['total' => 0, 'completed' => 0, 'cancelled' => 0];
+$chartData   = $chartData   ?? ['labels' => [], 'values' => []];
+$reportRows  = $reportRows  ?? [];
+
+?>
+
 <div class="min-h-dvh">
 
     <div class="rounded-2xl p-4 mx-auto max-w-7xl">
@@ -12,20 +24,20 @@
 
 
         <!-- FILTER PANEL -->
-        <form method="get" action="/admin/report"
+        <form method="get" action="/admin/reports"
             class="grid grid-cols-1 gap-4 md:grid-cols-4 bg-white p-6 rounded-2xl shadow">
 
             <!-- Start Date -->
             <div>
                 <label class="block text-sm text-slate-600 mb-2">Tanggal Mulai</label>
-                <input type="date" name="start_date" value="<?= $filters['start_date'] ?? '' ?>"
+                <input type="date" name="start_date" value="<?= htmlspecialchars($filters['start_date']) ?>"
                     class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-slate-50">
             </div>
 
             <!-- End Date -->
             <div>
                 <label class="block text-sm text-slate-600 mb-2">Tanggal Akhir</label>
-                <input type="date" name="end_date" value="<?= $filters['end_date'] ?? '' ?>"
+                <input type="date" name="end_date" value="<?= htmlspecialchars($filters['end_date']) ?>"
                     class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-slate-50">
             </div>
 
@@ -34,11 +46,9 @@
                 <label class="block text-sm text-slate-600 mb-2">Status</label>
                 <select name="status" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-slate-50">
                     <option value="">Semua</option>
-                    <?php
-                    $statuses = ['active', 'completed', 'cancelled'];
-                    foreach ($statuses as $st):
-                    ?>
-                        <option value="<?= $st ?>" <?= ($filters['status'] ?? '') === $st ? 'selected' : '' ?>>
+                    <?php foreach (['active', 'completed', 'cancelled'] as $st): ?>
+                        <option value="<?= $st ?>"
+                            <?= $filters['status'] === $st ? 'selected' : '' ?>>
                             <?= ucfirst($st) ?>
                         </option>
                     <?php endforeach; ?>
@@ -59,46 +69,57 @@
 
             <div class="p-6 rounded-2xl bg-white shadow border">
                 <h3 class="text-sm text-gray-500">Total Booking</h3>
-                <p class="text-3xl font-bold text-primary mt-1">100</p>
+                <p class="text-3xl font-bold text-primary mt-1">
+                    <?= (int)$summary['total'] ?>
+                </p>
             </div>
 
             <div class="p-6 rounded-2xl bg-white shadow border">
                 <h3 class="text-sm text-gray-500">Selesai</h3>
-                <p class="text-3xl font-bold text-emerald-600 mt-1">666</p>
+                <p class="text-3xl font-bold text-emerald-600 mt-1">
+                    <?= (int)$summary['completed'] ?>
+                </p>
             </div>
 
             <div class="p-6 rounded-2xl bg-white shadow border">
                 <h3 class="text-sm text-gray-500">Dibatalkan</h3>
-                <p class="text-3xl font-bold text-red-500 mt-1">999</p>
+                <p class="text-3xl font-bold text-red-500 mt-1">
+                    <?= (int)$summary['cancelled'] ?>
+                </p>
             </div>
 
         </div>
+
 
         <!-- CHART -->
         <div class="bg-white shadow rounded-2xl p-6 mt-6">
             <h2 class="text-xl font-bold mb-4">Grafik Aktivitas Booking</h2>
 
-            <canvas id="bookingChart" class="w-full h-72"></canvas>
+            <canvas id="bookingChart" class="w-full h-full"></canvas>
 
             <script>
                 window.chartData = <?= json_encode($chartData) ?>;
             </script>
+
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script src="/js/report-chart.js"></script>
+
         </div>
+
 
         <!-- EXPORT BUTTONS -->
         <div class="flex gap-3 mt-6">
-            <a href="/admin/report/export?type=csv"
+            <a href="/admin/reports/export?type=csv"
                class="px-4 py-3 bg-primary text-white rounded-xl shadow hover:bg-emerald-700 transition">
-               Export CSV
+                Export CSV
             </a>
 
-            <a href="/admin/report/export?type=pdf"
+            <a href="/admin/reports/export?type=pdf"
                class="px-4 py-3 bg-red-600 text-white rounded-xl shadow hover:bg-red-700 transition">
-               Export PDF
+                Export PDF
             </a>
         </div>
+
 
         <!-- TABLE -->
         <div class="mt-6 bg-white p-6 rounded-2xl shadow overflow-x-auto">
@@ -117,20 +138,27 @@
                 </thead>
 
                 <tbody>
-                    <?php
-                        $report = [4];
-                        foreach ($report as $row): ?>
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="py-3 px-3">ABCDEFU</td>
-                            <td class="py-3 px-3">Gayle</td>
-                            <td class="py-3 px-3">Room for happiness</td>
-                            <td class="py-3 px-3 capitalize">Single</td>
-                            <td class="py-3 px-3">1945</td>
+                    <?php if (empty($reportRows)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center py-6 text-slate-500">
+                                Tidak ada data laporan
+                            </td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach ($reportRows as $row): ?>
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="py-3 px-3"><?= htmlspecialchars($row['kode_booking']) ?></td>
+                                <td class="py-3 px-3"><?= htmlspecialchars($row['user_name']) ?></td>
+                                <td class="py-3 px-3"><?= htmlspecialchars($row['room_name']) ?></td>
+                                <td class="py-3 px-3 capitalize"><?= htmlspecialchars($row['status']) ?></td>
+                                <td class="py-3 px-3"><?= htmlspecialchars($row['tanggal']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
 
             </table>
+
         </div>
 
     </div>
