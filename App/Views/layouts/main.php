@@ -185,8 +185,11 @@ $user = App::$app->user;
         </ul>
     </aside>
     <!-- Main Content -->
-    <main class="py-12 md:pt-0 min-h-dvh">
-        <div class=" bg-primary md:bg-slate-100">
+    <main class="py-12 md:pt-0 min-h-dvh pl-28">
+        <div class="mx-auto bg-primary md:bg-slate-100">
+            <div class="bg-white top-0 left-0 w-full h-40 fixed -z-10">
+
+            </div>
             <!-- Flash Messages -->
             <?php if ($m = App::$app->session->getFlash('success')): ?>
                 <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">

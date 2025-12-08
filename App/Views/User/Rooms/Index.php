@@ -26,12 +26,12 @@ $roomTypes = [
 <div class="min-h-dvh bg-slate-100">
     <!-- Header -->
     <div class="w-full bg-white p-6 mb-8">
-        <div class="mb-4  max-w-7xl mx-auto md:px-6">
+        <div class="mb-4 mx-auto md:px-6 ">
             <h2 class="text-4xl font-bold text-slate-800 mb-2">Cari Ruangan</h2>
             <p class="text-slate-600">Cari ruangan yang ingin dipinjam</p>
         </div>
         <!-- Form tempat input#filterToggle, search, tombol filter -->
-        <form method="get" action="/rooms" class="relative mb-4 max-w-7xl mx-auto md:px-6">
+        <form method="get" action="/rooms" class="relative mb-4 mx-auto md:px-6">
             <?= csrf_field() ?>
 
             <!-- Toggle Modal -->
@@ -46,7 +46,8 @@ $roomTypes = [
                 </svg>
 
                 <input type="text" name="nama_ruangan" value="<?= htmlspecialchars($filters['nama_ruangan'] ?? '') ?>"
-                    placeholder="Cari nama ruangan..." class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-slate-100
+                    placeholder="Cari nama ruangan..."
+                    class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-slate-100
                 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition-all placeholder-gray-500" />
             </div>
 
@@ -91,7 +92,8 @@ $roomTypes = [
                     <div class="group relative">
                         <label class="block text-sm text-slate-700 mb-2">Tanggal</label>
 
-                        <div class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
+                        <div
+                            class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
                             transition-all duration-300 group-hover:border-gray-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200 focus-within:shadow-md">
 
                             <label for="tanggal_peminjaman"
@@ -109,8 +111,7 @@ $roomTypes = [
 
                             <input id="tanggal_peminjaman" type="date" name="tanggal"
                                 value="<?= htmlspecialchars($filters['tanggal'] ?? '') ?>"
-                                class="flex-1 bg-transparent appearance-none text-slate-700 cursor-pointer focus:outline-none transition-all duration-200 placeholder-gray-400"
-                            >
+                                class="flex-1 bg-transparent appearance-none text-slate-700 cursor-pointer focus:outline-none transition-all duration-200 placeholder-gray-400">
                         </div>
                     </div>
 
@@ -267,9 +268,9 @@ $roomTypes = [
         </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:ml-32 px-6 ">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 px-6 mb-8">
         <!-- loop ruangan -->
-         <div class="md:col-span-3 md:grid md:grid-cols-3 gap-4 mx-auto space-y-6">
+        <div class="md:col-span-3 md:grid md:grid-cols-3 gap-4 mx-auto space-y-6 p-6">
             <?php foreach ($rooms as $room): ?>
                 <?php $thumbnail = $room->getThumbnail(); ?>
                 <div class="bg-white rounded-3xl shadow-lg h-fit ">
@@ -290,56 +291,59 @@ $roomTypes = [
                             <?php endif; ?>
                             <div class="">
                                 <div>
-                                <p>
-                                    <?php if ($thumbnail): ?>
-                                        <img src="<?= $thumbnail ?>" alt="<?= htmlspecialchars($room->nama_ruangan) ?>"
-                                            class="w-full h-full object-cover rounded-t-3xl">
-                                    <?php else: ?>
-                                    <div class="w-48 bg-linear-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                                        <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                <?php endif; ?>
-                                </p>
-                                <div class="p-6 mb-6">
-                                    <p class="font-bold text-4xl">
-                                        <?= htmlspecialchars($room->nama_ruangan) ?>
-                                    </p>
-                                    <p class="text-gray-400 mb-4">
-                                        <?= htmlspecialchars($room->jenis_ruangan) ?>
-                                    </p>
-                                    <div class="flex items-center gap-4">
-                                        <p class="flex gap-4 items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                class="lucide lucide-users-round-icon lucide-users-round size-4">
-                                                <path d="M18 21a8 8 0 0 0-16 0" />
-                                                <circle cx="10" cy="8" r="5" />
-                                                <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                                    <p>
+                                        <?php if ($thumbnail): ?>
+                                            <img src="<?= $thumbnail ?>" alt="<?= htmlspecialchars($room->nama_ruangan) ?>"
+                                                class="w-full h-full object-cover rounded-t-3xl">
+                                        <?php else: ?>
+                                        <div
+                                            class="w-48 bg-linear-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                                            <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            <span>
-                                                <span class="font-semibold"><?= (int) $room->kapasitas_min ?> -
-                                                    <?= (int) $room->kapasitas_max ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    </p>
+                                    <div class="p-6 mb-6">
+                                        <p class="font-bold text-4xl">
+                                            <?= htmlspecialchars($room->nama_ruangan) ?>
+                                        </p>
+                                        <p class="text-gray-400 mb-4">
+                                            <?= htmlspecialchars($room->jenis_ruangan) ?>
+                                        </p>
+                                        <div class="flex items-center gap-4">
+                                            <p class="flex gap-4 items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-users-round-icon lucide-users-round size-4">
+                                                    <path d="M18 21a8 8 0 0 0-16 0" />
+                                                    <circle cx="10" cy="8" r="5" />
+                                                    <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                                                </svg>
+                                                <span>
+                                                    <span class="font-semibold"><?= (int) $room->kapasitas_min ?> -
+                                                        <?= (int) $room->kapasitas_max ?>
+                                                    </span>
+                                                    orang
                                                 </span>
-                                                orang
-                                            </span>
-                                        </p>
-                                        <p class="flex items-center gap-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round" class="lucide lucide-star-icon lucide-star size-4">
-                                                <path
-                                                    d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
-                                            </svg>
-                                            <span>
-                                                ['RATING 5']
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <!-- <p class="mb-4">
+                                            </p>
+                                            <p class="flex items-center gap-4">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-star-icon lucide-star size-4">
+                                                    <path
+                                                        d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+                                                </svg>
+                                                <span>
+                                                    ['RATING 5']
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <!-- <p class="mb-4">
                                         <?php $facilities = $room->getFacilities(); ?>
                                         <?php if (!empty($facilities)): ?>
                                             <div class="flex items-start text-slate-600">
@@ -355,15 +359,15 @@ $roomTypes = [
                                     </p> -->
                                     </div>
                                     <div class="p-4 mt-4">
-                                    <a href="/rooms/show?id_ruangan=<?= (int) $room->id_ruangan ?>"
-                                        class="inline-flex items-center text-white rounded-2xl p-4 w-full justify-center capitalize bg-primary hover:bg-emerald-700 font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 group">
-                                        Lihat Detail ruangan
-                                        <svg class="w-5 h-5 ml-1 transform group-hover:translate-x-1 transition-transform"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                    </a>
+                                        <a href="/rooms/show?id_ruangan=<?= (int) $room->id_ruangan ?>"
+                                            class="inline-flex items-center text-white rounded-2xl p-4 w-full justify-center capitalize bg-primary hover:bg-emerald-700 font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 group">
+                                            Lihat Detail ruangan
+                                            <svg class="w-5 h-5 ml-1 transform group-hover:translate-x-1 transition-transform"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -372,7 +376,7 @@ $roomTypes = [
                 </div>
             <?php endforeach; ?>
         </div>
-                <form method="get" action="/rooms" class="relative mb-4 max-w-7xl mx-auto md:px-6">
+        <form method="get" action="/rooms" class="relative mb-4 max-w-7xl mx-auto md:px-6">
             <?= csrf_field() ?>
 
             <div class="border border-gray-200 bg-white
@@ -389,26 +393,18 @@ $roomTypes = [
                     <div class="group relative">
                         <label class="block text-sm text-slate-700 mb-2">Tanggal</label>
 
-                        <div class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
+                        <div
+                            class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
                             transition-all duration-300 group-hover:border-gray-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200 focus-within:shadow-md">
 
                             <label for="tanggal_peminjaman"
                                 class="cursor-pointer text-gray-400 group-focus-within:text-emerald-600 group-hover:text-gray-500">
 
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                    class="size-6 text-gray-400 group-focus-within:text-emerald-600 transition">
-                                    <path d="M8 2v4" />
-                                    <path d="M16 2v4" />
-                                    <rect width="18" height="18" x="3" y="4" rx="2" />
-                                    <path d="M3 10h18" />
-                                </svg> -->
                             </label>
 
                             <input id="tanggal_peminjaman" type="date" name="tanggal"
                                 value="<?= htmlspecialchars($filters['tanggal'] ?? '') ?>"
-                                class="flex-1 bg-transparent appearance-none text-slate-700 cursor-pointer focus:outline-none transition-all duration-200 placeholder-gray-400"
-                            >
+                                class="flex-1 bg-transparent appearance-none text-slate-700 cursor-pointer focus:outline-none transition-all duration-200 placeholder-gray-400">
                         </div>
                     </div>
 
@@ -421,12 +417,7 @@ $roomTypes = [
                             transition-all duration-300 group-hover:border-gray-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200 focus-within:shadow-md">
 
                             <label for="waktu_mulai">
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                    class="size-6 text-gray-400 group-focus-within:text-emerald-600 transition">
-                                    <path d="M12 6v6l4 2" />
-                                    <circle cx="12" cy="12" r="10" />
-                                </svg> -->
+
                             </label>
 
                             <input type="time" name="waktu_mulai" id="waktu_mulai"
@@ -490,5 +481,5 @@ $roomTypes = [
                     </div>
                 </div>
             </div>
-</form>
+        </form>
     </div>
