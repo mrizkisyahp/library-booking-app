@@ -217,6 +217,22 @@ class UserBookingController extends Controller
         }
     }
 
+    public function deleteDraft(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->deleteDraft($bookingId, $user->id_user);
+
+            flash('success', 'Draft booking berhasil dihapus');
+            redirect('/my-bookings');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
     public function showRescheduleForm(Request $request)
     {
         try {

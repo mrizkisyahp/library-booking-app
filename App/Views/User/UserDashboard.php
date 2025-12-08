@@ -14,6 +14,31 @@
       </div>
     </div>
 
+    <!-- Kubaca warning -->
+    <?php if (auth()->user()->status === 'pending kubaca' || auth()->user()->status === 'rejected'): ?>
+      <div class="w-full mb-4">
+        <div
+          class="inline-block bg-yellow-300 border-2 border-yellow-600 font-regular text-sm text-black w-full px-6 py-4 rounded-3xl text-left mb-4 font-regular tracking-wide">
+          <p class="text-2xl font-bold uppercase my-4">
+            Peringatan!
+          </p>
+          <p class="mb-4">
+            <?php if (auth()->user()->status === 'pending kubaca'): ?>
+              <?php if (!empty(auth()->user()->kubaca_img)): ?>
+                Akun Anda sedang menunggu verifikasi admin. Terima kasih telah mengupload KuBaca!
+              <?php else: ?>
+                Untuk membuat booking, kamu harus verifikasi akun dengan mengunggah bukti KuBacaPNJ di <a href="/profile"
+                  class="font-semibold underline hover:text-gray-900">Profil</a>!
+              <?php endif; ?>
+            <?php else: ?>
+              Verifikasi KuBaca Anda ditolak. Silakan upload ulang di <a href="/profile"
+                class="font-semibold underline hover:text-gray-900">Profil</a>!
+            <?php endif; ?>
+          </p>
+        </div>
+      </div>
+    <?php endif; ?>
+
     <!-- Pending Feedback Warning -->
     <?php if (!empty($feedbacks ?? [])): ?>
       <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-5 shadow-md">
@@ -62,7 +87,7 @@
             </h2>
 
             <!-- Flash Messages -->
-            <?php if ($m = session('success')): ?>
+            <?php if ($m = flash('success')): ?>
               <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
                 <div class="flex items-center gap-3">
                   <svg class="w-6 h-6 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +99,7 @@
               </div>
             <?php endif; ?>
 
-            <?php if ($m = session('error')): ?>
+            <?php if ($m = flash('error')): ?>
               <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
                 <div class="flex items-center gap-3">
                   <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +111,7 @@
               </div>
             <?php endif; ?>
 
-            <?php if ($m = session('warning')): ?>
+            <?php if ($m = flash('warning')): ?>
               <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 shadow-sm">
                 <div class="flex items-center gap-3">
                   <svg class="w-6 h-6 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +123,7 @@
               </div>
             <?php endif; ?>
 
-            <?php if ($m = session('info')): ?>
+            <?php if ($m = flash('info')): ?>
               <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
                 <div class="flex items-center gap-3">
                   <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -72,7 +72,7 @@ class AdminUserController extends Controller
     public function edit(Request $request)
     {
         try {
-            $id = (int) $request->query()['id'];
+            $id = (int) $request->query()['id_user'];
             $user = $this->userServices->getUserById($id);
 
             return view('Admin/Users/Edit', [
@@ -162,9 +162,10 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->all()['id_user'];
-            $this->userServices->approveKubaca($id);
+            $masa_aktif = $request->all()['masa_aktif'];
+            $this->userServices->approveKubaca($id, $masa_aktif);
 
-            flash('success', 'KuBaca berhasil disetujui, user sekarang aktif');
+            flash('success', "KuBaca berhasil disetujui, user sekarang aktif sampai {$masa_aktif}");
             back();
         } catch (Exception $e) {
             flash('error', $e->getMessage());

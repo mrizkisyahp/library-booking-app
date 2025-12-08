@@ -14,4 +14,9 @@ class AdminDashboardController extends Controller
         $data = $this->dashboardService->getAdminDashboardData();
         return $this->render('Admin/AdminDashboard', $data);
     }
+
+    public function settings(Request $request)
+    {
+        return $this->render('Admin/Settings/Index');
+    }
 }

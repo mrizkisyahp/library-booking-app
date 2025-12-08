@@ -158,7 +158,7 @@ class UserServices
 
     // ==================== KUBACA ====================
 
-    public function approveKubaca(int $id): void
+    public function approveKubaca(int $id, string $masa_aktif): void
     {
         $user = $this->userRepo->findById($id);
         if (!$user) {
@@ -169,7 +169,7 @@ class UserServices
             throw new Exception('User tidak dalam status pending kubaca');
         }
 
-        $this->userRepo->update($id, ['status' => 'active']);
+        $this->userRepo->update($id, ['status' => 'active', 'masa_aktif' => $masa_aktif]);
 
         $this->logger->info('Admin approved kubaca for user', ['user_id' => $id]);
     }

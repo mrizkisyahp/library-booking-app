@@ -322,12 +322,18 @@
       </div>
     </div>
   </div>
-  <div class="w-full mb-8">
-    <a href="/bookings/draft?id=<?= (int) $booking->id_booking ?>"
-      class="inline-block bg-red-600 hover:bg-red-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all capitalize">
-      Hapus draft booking
-    </a>
-  </div>
+  <?php if ($isPic): ?>
+    <div class="w-full mb-8">
+      <form action="/bookings/delete-draft" method="post" onsubmit="return confirm('Yakin ingin menghapus draft ini?');">
+        <?= csrf_field() ?>
+        <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+        <button type="submit"
+          class="inline-block bg-red-600 hover:bg-red-700 font-regular text-sm text-white w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all capitalize">
+          Hapus draft booking
+        </button>
+      </form>
+    </div>
+  <?php endif; ?>
   <?php if ($isPic): ?>
     <div class="bg-white rounded-2xl shadow-lg p-4 mb-12 hidden md:block">
       <form action="/bookings/submit" method="post">
@@ -364,11 +370,10 @@
     </div>
   </nav>
 
-  <div class="bg-white rounded-2xl shadow-lg p-8">
-    <?php if ($isPic): ?>
+  <?php if ($isPic && $booking->status !== 'draft'): ?>
+    <div class="bg-white rounded-2xl shadow-lg p-8">
       <!-- Cancel Booking (PIC only) -->
-      <form action="/bookings/cancel" method="post"
-        onsubmit="return confirm('Yakin ingin membatalkan booking ini? Semua anggota akan dikeluarkan.');">
+      <form action="/bookings/cancel" method="post" onsubmit="return confirm('Yakin ingin membatalkan booking ini?');">
         <?= csrf_field() ?>
         <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
         <button type="submit"

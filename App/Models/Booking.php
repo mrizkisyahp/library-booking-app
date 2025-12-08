@@ -16,6 +16,7 @@ class Booking extends DbModel
     public string $waktu_selesai = '';
     public string $tujuan = '';
     public string $status = 'draft'; // draft, pending, verified, active, completed, cancelled, expired, no_show
+    public ?string $alasan_reject = null;
     public ?string $checkin_code = null;
     public ?string $invite_token = null;
     public ?string $created_at = null;
@@ -52,6 +53,7 @@ class Booking extends DbModel
             'waktu_selesai',
             'tujuan',
             'status',
+            'alasan_reject',
             'checkin_code',
             'invite_token',
             'has_been_rescheduled',

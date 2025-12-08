@@ -28,6 +28,7 @@ class User extends DbModel
     public ?string $kubaca_img = null;
     public int $peringatan = 0;
     public string $status = 'pending';
+    public ?string $alasan_reject = null;
     public ?string $jurusan = null;
     public ?string $nomor_hp = null;
     public ?string $suspensi_terakhir = null;
@@ -88,6 +89,7 @@ class User extends DbModel
             'kubaca_img',
             'peringatan',
             'status',
+            'alasan_reject',
             'jurusan',
             'nomor_hp',
             'suspensi_terakhir',
