@@ -397,9 +397,6 @@
   .-z-10 {
     z-index: calc(10 * -1);
   }
-  .z-0 {
-    z-index: 0;
-  }
   .z-10 {
     z-index: 10;
   }
@@ -609,9 +606,6 @@
   .h-72 {
     height: calc(var(--spacing) * 72);
   }
-  .h-\[80vh\] {
-    height: 80vh;
-  }
   .h-dvh {
     height: 100dvh;
   }
@@ -674,9 +668,6 @@
   }
   .w-48 {
     width: calc(var(--spacing) * 48);
-  }
-  .w-dvh {
-    width: 100dvh;
   }
   .w-fit {
     width: fit-content;
@@ -1131,9 +1122,6 @@
   .bg-amber-100 {
     background-color: var(--color-amber-100);
   }
-  .bg-black {
-    background-color: var(--color-black);
-  }
   .bg-black\/30 {
     background-color: color-mix(in srgb, #000 30%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1493,6 +1481,9 @@
   .p-12 {
     padding: calc(var(--spacing) * 12);
   }
+  .px-0 {
+    padding-inline: calc(var(--spacing) * 0);
+  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -1510,6 +1501,9 @@
   }
   .px-12 {
     padding-inline: calc(var(--spacing) * 12);
+  }
+  .py-0 {
+    padding-block: calc(var(--spacing) * 0);
   }
   .py-1 {
     padding-block: calc(var(--spacing) * 1);
@@ -1546,12 +1540,6 @@
   }
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
-  }
-  .pl-1 {
-    padding-left: calc(var(--spacing) * 1);
-  }
-  .pl-2 {
-    padding-left: calc(var(--spacing) * 2);
   }
   .pl-12 {
     padding-left: calc(var(--spacing) * 12);
@@ -1959,10 +1947,6 @@
     --tw-duration: 300ms;
     transition-duration: 300ms;
   }
-  .duration-400 {
-    --tw-duration: 400ms;
-    transition-duration: 400ms;
-  }
   .duration-500 {
     --tw-duration: 500ms;
     transition-duration: 500ms;
@@ -2198,11 +2182,6 @@
   .checked\:bg-emerald-600 {
     &:checked {
       background-color: var(--color-emerald-600);
-    }
-  }
-  .checked\:text-white {
-    &:checked {
-      color: var(--color-white);
     }
   }
   .focus-within\:border-emerald-500 {
@@ -2550,14 +2529,6 @@
       }
     }
   }
-  .focus\:scale-125 {
-    &:focus {
-      --tw-scale-x: 125%;
-      --tw-scale-y: 125%;
-      --tw-scale-z: 125%;
-      scale: var(--tw-scale-x) var(--tw-scale-y);
-    }
-  }
   .focus\:border-emerald-500 {
     &:focus {
       border-color: var(--color-emerald-500);
@@ -2767,11 +2738,6 @@
       }
     }
   }
-  .md\:col-span-2 {
-    @media (width >= 48rem) {
-      grid-column: span 2 / span 2;
-    }
-  }
   .md\:col-span-3 {
     @media (width >= 48rem) {
       grid-column: span 3 / span 3;
@@ -2780,11 +2746,6 @@
   .md\:mt-0 {
     @media (width >= 48rem) {
       margin-top: calc(var(--spacing) * 0);
-    }
-  }
-  .md\:ml-32 {
-    @media (width >= 48rem) {
-      margin-left: calc(var(--spacing) * 32);
     }
   }
   .md\:block {
