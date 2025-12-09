@@ -271,7 +271,7 @@ $validator = $validator ?? null;
             </li>
             <li class="flex items-start">
               <span class="flex-shrink-0 w-3 h-3 rounded-full bg-blue-500 mr-2 mt-1"></span>
-              <span><strong>Dosen</strong> - Dapat booking ruangan</span>
+              <span><strong>Dosen/Tendik</strong> - Dapat booking ruangan</span>
             </li>
             <li class="flex items-start">
               <span class="flex-shrink-0 w-3 h-3 rounded-full bg-emerald-500 mr-2 mt-1"></span>

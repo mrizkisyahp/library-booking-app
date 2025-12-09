@@ -60,6 +60,8 @@ class AuthController extends Controller
                     'rememberedIdentifier' => $_COOKIE['remember_identifier'] ?? '',
                     'validator' => $e->getValidator()
                 ]);
+            } catch (\Exception $e) {
+                flash('error', $e->getMessage());
             }
             flash('old_identifier', $validated['identifier']);
             flash('error', 'Invalid credentials');
@@ -172,6 +174,7 @@ class AuthController extends Controller
                     'password' => ['required', 'string', 'min:8', 'max:24'],
                     'confirm_password' => ['required', 'string', 'match:password'],
                     'jurusan' => ['required', 'string'],
+                    'role' => ['required', 'in:dosen,tendik'],
                     'nomor_hp' => ['required', 'numeric'],
                 ]);
 
@@ -182,7 +185,7 @@ class AuthController extends Controller
                     'password' => $validated['password'],
                     'jurusan' => $validated['jurusan'],
                     'nomor_hp' => $validated['nomor_hp'],
-                ], 'dosen');
+                ], $validated['role']);
 
                 $this->auth->sendVerificationOTP($registered);
 

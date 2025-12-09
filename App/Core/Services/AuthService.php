@@ -7,6 +7,7 @@ use App\Core\Repository\RoleRepository;
 use App\Core\Session;
 use App\Core\Response;
 use App\Models\User;
+use Exception;
 
 class AuthService
 {
@@ -64,7 +65,7 @@ class AuthService
         }
 
         if (in_array($user->status, ['suspended', 'nonaktif', 'pending verification'], true)) {
-            return false;
+            throw new Exception('Your account is suspended or nonactive');
         }
 
         $this->cache->delete($attemptKey);
@@ -119,7 +120,7 @@ class AuthService
     {
         $roleId = $this->roleRepo->findIdByName($role);
         if (!$roleId) {
-            throw new \Exception("Invalid role: {$role}");
+            throw new Exception("Invalid role: {$role}");
         }
 
         $data['id_role'] = $roleId;
@@ -181,7 +182,7 @@ class AuthService
             return false;
         }
 
-        $newStatus = $user->isDosen() ? 'active' : 'pending kubaca';
+        $newStatus = $user->isDosen() || $user->isTendik() ? 'active' : 'pending kubaca';
 
         $updated = $this->userRepo->update($userId, ['status' => $newStatus]);
 
@@ -239,7 +240,7 @@ class AuthService
         // Rate limiting: prevent sending multiple reset emails within 5 minutes
         $rateLimitKey = 'password_reset_' . $user->id_user;
         $lastSent = $this->cache->get($rateLimitKey);
-        
+
         if ($lastSent) {
             $this->logger->auth('password reset rate limited', $user->id_user);
             return false;
@@ -271,7 +272,7 @@ class AuthService
         $hashedToken = hash('sha256', $token);
 
         $user = $this->userRepo->findByResetToken($hashedToken);
-        
+
         return $user;
     }
 

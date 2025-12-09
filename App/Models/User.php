@@ -127,6 +127,11 @@ class User extends DbModel
         return (string) $this->id_role === '3';
     }
 
+    public function isTendik(): bool
+    {
+        return (string) $this->id_role === '4';
+    }
+
     // public static function search(array $filters = []): array
     // {
     //     [$sql, $params] = self::buildQuery($filters);

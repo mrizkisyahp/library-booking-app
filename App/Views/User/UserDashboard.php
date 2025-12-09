@@ -72,103 +72,127 @@
       </div>
     <?php endif; ?>
 
-    <!-- Booking Invitation Notifications (Static Design) -->
-    <div class="mb-6 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-5 shadow-md">
-      <div class="flex items-start">
-        <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-        <div class="ml-4 flex-1">
-          <h3 class="font-semibold text-blue-800 mb-3">Undangan Booking</h3>
-
-          <!-- Invitation Item 1 -->
-          <div class="bg-white rounded-xl p-4 mb-3 border border-blue-200 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div>
-                <p class="font-semibold text-slate-800 mb-1">
-                  <span class="text-blue-600">Ahmad Fauzi</span> mengundang Anda untuk bergabung
-                </p>
-                <div class="text-sm text-slate-600 space-y-1">
-                  <p class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    <strong>Lentera Edukasi</strong> - Bimbingan & Konseling
-                  </p>
-                  <p class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Selasa, 10 Desember 2025 • 08:15 - 10:55
-                  </p>
+    <!-- Booking Invitation Notifications -->
+    <?php if (!empty($pendingInvitations)): ?>
+      <div class="mb-6 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-5 shadow-md">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <div class="ml-4 flex-1">
+            <h3 class="font-semibold text-blue-800 mb-3">Undangan Booking</h3>
+            <?php foreach ($pendingInvitations as $invitation): ?>
+              <div class="bg-white rounded-xl p-4 mb-3 border border-blue-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <p class="font-semibold text-slate-800 mb-1">
+                      <span class="text-blue-600"><?= htmlspecialchars($invitation['invited_by_name']) ?></span> mengundang
+                      Anda untuk bergabung
+                    </p>
+                    <div class="text-sm text-slate-600 space-y-1">
+                      <p class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <strong><?= htmlspecialchars($invitation['nama_ruangan']) ?></strong> -
+                        <?= htmlspecialchars($invitation['jenis_ruangan']) ?>
+                      </p>
+                      <p class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <?= htmlspecialchars(formatTanggal($invitation['tanggal_penggunaan_ruang'])) ?> •
+                        <?= htmlspecialchars(formatWaktu($invitation['waktu_mulai'])) ?> -
+                        <?= htmlspecialchars(formatWaktu($invitation['waktu_selesai'])) ?>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <form action="/invitations/accept" method="post">
+                      <?= csrf_field() ?>
+                      <input type="hidden" name="invitation_id" value="<?= (int) $invitation['id_invitation'] ?>">
+                      <button type="submit"
+                        class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Terima
+                      </button>
+                    </form>
+                    <form action="/invitations/reject" method="post">
+                      <?= csrf_field() ?>
+                      <input type="hidden" name="invitation_id" value="<?= (int) $invitation['id_invitation'] ?>">
+                      <button type="submit"
+                        class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Tolak
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
-              <div class="flex gap-2">
-                <button type="button"
-                  class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Terima
-                </button>
-                <button type="button"
-                  class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Tolak
-                </button>
-              </div>
-            </div>
-          </div>
-          <!-- Invitation Item 2 -->
-          <div class="bg-white rounded-xl p-4 border border-blue-200 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div>
-                <p class="font-semibold text-slate-800 mb-1">
-                  <span class="text-blue-600">Siti Nurhaliza</span> mengundang Anda untuk bergabung
-                </p>
-                <div class="text-sm text-slate-600 space-y-1">
-                  <p class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    <strong>Ruang Audio Visual</strong> - Audio Visual
-                  </p>
-                  <p class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Rabu, 11 Desember 2025 • 13:15 - 16:00
-                  </p>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button type="button"
-                  class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Terima
-                </button>
-                <button type="button"
-                  class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Tolak
-                </button>
-              </div>
-            </div>
+            <?php endforeach; ?>
           </div>
         </div>
       </div>
-    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($myJoinRequests)): ?>
+      <!-- My Pending Join Requests -->
+      <div class="mb-6 bg-purple-50 border-l-4 border-purple-400 rounded-lg p-5 shadow-md">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-purple-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="ml-4 flex-1">
+            <h3 class="font-semibold text-purple-800 mb-3">Permintaan Bergabung Anda</h3>
+            <p class="text-sm text-purple-600 mb-4">Menunggu persetujuan dari PIC</p>
+            <?php foreach ($myJoinRequests as $request): ?>
+              <div class="bg-white rounded-xl p-4 mb-3 border border-purple-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <p class="font-semibold text-slate-800 mb-1">
+                      <?= htmlspecialchars($request['nama_ruangan']) ?>
+                    </p>
+                    <div class="text-sm text-slate-600 space-y-1">
+                      <p class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        PIC: <?= htmlspecialchars($request['pic_nama']) ?>
+                      </p>
+                      <p class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <?= date('l, d F Y', strtotime($request['tanggal_penggunaan_ruang'])) ?>
+                        • <?= substr($request['waktu_mulai'], 0, 5) ?> - <?= substr($request['waktu_selesai'], 0, 5) ?>
+                      </p>
+                    </div>
+                  </div>
+                  <form action="/invitations/cancel-request" method="post">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="invitation_id" value="<?= (int) $request['id_invitation'] ?>">
+                    <button type="submit"
+                      class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                      Batalkan
+                    </button>
+                  </form>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </div>
+    <?php endif; ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Content -->

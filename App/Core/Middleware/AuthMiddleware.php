@@ -28,6 +28,15 @@ class AuthMiddleware extends Middleware
             redirect('/login');
             return false;
         }
+
+        $user = user();
+        if ($user && in_array($user->status, ['suspended', 'nonaktif'], true)) {
+            auth()->logout();
+            flash('error', 'Your account is suspended or inactive.');
+            redirect('/login');
+            return false;
+        }
+
         return true;
     }
 }

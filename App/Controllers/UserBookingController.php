@@ -5,12 +5,13 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Services\BookingServices;
+use App\Core\Services\InvitationService;
 use Exception;
 
 class UserBookingController extends Controller
 {
     public function __construct(
-        private BookingServices $bookingServices
+        private BookingServices $bookingServices,
     ) {
     }
 
@@ -49,6 +50,9 @@ class UserBookingController extends Controller
                 $user->id_role === 1,
             );
 
+            $pendingInvitations = $this->bookingServices->getPendingInvitedByPic($bookingId, $data['booking']->user_id);
+            $joinRequests = $this->bookingServices->getPendingJoinRequests($bookingId);
+
             return view('User/Bookings/Draft', [
                 'booking' => $data['booking'],
                 'pic' => $data['pic'],
@@ -57,6 +61,8 @@ class UserBookingController extends Controller
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
                 'canSubmit' => $data['canSubmit'],
+                'pendingInvitations' => $pendingInvitations,
+                'joinRequests' => $joinRequests,
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
@@ -80,23 +86,6 @@ class UserBookingController extends Controller
         }
     }
 
-    public function addMember(Request $request)
-    {
-        try {
-            $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
-            $memberUserId = (int) $request->all()['member_user_id'];
-
-            $this->bookingServices->addMember($bookingId, $memberUserId, $user->id_user);
-
-            flash('success', 'Anggota berhasil ditambahkan');
-            back();
-        } catch (Exception $e) {
-            flash('error', $e->getMessage());
-            back();
-        }
-    }
-
     public function showJoinForm(Request $request)
     {
         $prefill = $request->query()['code'] ?? '';
@@ -109,10 +98,15 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $token = $request->all()['invite_token'];
 
-            $bookingId = $this->bookingServices->joinViaInviteToken($token, $user->id_user);
+            $result = $this->bookingServices->joinViaInviteToken($token, $user->id_user);
 
-            flash('success', 'Berhasil bergabung dengan booking');
-            redirect('/bookings/draft?id=' . $bookingId);
+            if ($result['auto_joined']) {
+                flash('success', 'Undangan diterima! Anda sekarang menjadi anggota booking');
+                redirect('/bookings/draft?id=' . $result['booking_id']);
+            } else {
+                flash('success', 'Permintaan bergabung telah dikirim. Menunggu persetujuan PIC.');
+                redirect('/dashboard');
+            }
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -402,6 +396,136 @@ class UserBookingController extends Controller
 
             flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
             redirect('/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function send(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->all();
+
+            $invitedUser = $this->bookingServices->findUserByIdentifier($data['identifier']);
+
+            if (!$invitedUser) {
+                throw new Exception('User tidak ditemukan');
+            }
+
+            $autoApproved = $this->bookingServices->sendInvitation(
+                (int) $data['booking_id'],
+                (int) $invitedUser->id_user,
+                $user->id_user
+            );
+
+            if ($autoApproved) {
+                flash('success', 'User sudah ditambahkan sebagai anggota (permintaan sebelumnya disetujui)');
+            } else {
+                flash('success', 'Undangan berhasil dikirim');
+            }
+
+            redirect('/bookings/draft?id=' . $data['booking_id']);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/bookings/draft?id=' . $data['booking_id']);
+        }
+    }
+
+    public function accept(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $invitationId = (int) $request->all()['invitation_id'];
+
+            $bookingId = $this->bookingServices->acceptInvitation($invitationId, $user->id_user);
+
+            flash('success', 'Undangan diterima! Anda sekarang menjadi anggota booking');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function reject(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $invitationId = (int) $request->all()['invitation_id'];
+
+            $this->bookingServices->rejectInvitation($invitationId, $user->id_user);
+
+            flash('success', 'Undangan ditolak');
+            redirect('/dashboard');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function cancel(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $invitationId = (int) $request->all()['invitation_id'];
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->cancelInvitation($invitationId, $user->id_user);
+
+            flash('success', 'Undangan dibatalkan');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function approveJoinRequest(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $invitationId = (int) $request->all()['invitation_id'];
+
+            $bookingId = (int) $request->all()['booking_id'];
+            $this->bookingServices->approveJoinRequest($invitationId, $user->id_user);
+
+            flash('success', 'Permintaan bergabung diterima');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function rejectJoinRequest(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $invitationId = (int) $request->all()['invitation_id'];
+            $bookingId = (int) $request->all()['booking_id'];
+
+            $this->bookingServices->rejectJoinRequest($invitationId, $user->id_user);
+
+            flash('success', 'Permintaan bergabung ditolak');
+            redirect('/bookings/draft?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function cancelJoinRequest(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $invitationId = (int) $request->all()['invitation_id'];
+
+            $this->bookingServices->cancelJoinRequest($invitationId, $user->id_user);
+
+            flash('success', 'Permintaan bergabung dibatalkan');
+            redirect('/dashboard');
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();

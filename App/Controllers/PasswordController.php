@@ -44,7 +44,7 @@ class PasswordController extends Controller
                 } else {
                     flash('success', 'If that email exists, a password reset link has been sent. Please check your inbox.');
                 }
-                
+
                 return redirect('/forgot');
             } catch (ValidationException $e) {
                 return view('ResetPassword/Forgot', [
@@ -89,6 +89,7 @@ class PasswordController extends Controller
                 );
 
                 if ($success) {
+                    auth()->logout();
                     flash('success', 'Password reset successful! You can now login with your new password.');
                     return redirect('/login');
                 }

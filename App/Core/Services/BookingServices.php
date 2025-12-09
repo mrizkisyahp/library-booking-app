@@ -3,6 +3,7 @@
 namespace App\Core\Services;
 
 use App\Core\Repository\BookingRepository;
+use App\Core\Repository\InvitationRepository;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Exception;
@@ -24,7 +25,8 @@ class BookingServices
     public function __construct(
         private BookingRepository $bookingRepo,
         private Logger $logger,
-        private FeedbackRepository $feedbackRepo
+        private FeedbackRepository $feedbackRepo,
+        private InvitationRepository $invitationRepo
     ) {
     }
 
@@ -339,6 +341,8 @@ class BookingServices
 
         $this->validateMinimumCapacity($bookingId);
 
+        $this->invitationRepo->rejectAllPendingForBooking($bookingId);
+
         $this->transitionTo($bookingId, 'pending', 'Submitted by PIC for approval');
     }
 
@@ -401,7 +405,7 @@ class BookingServices
         $this->addMember($bookingId, $user->id_user, auth()->user()->id_user);
     }
 
-    public function joinViaInviteToken(string $token, int $userId): int
+    public function joinViaInviteToken(string $token, int $userId): array
     {
         $booking = $this->bookingRepo->findByInviteToken($token);
 
@@ -421,29 +425,64 @@ class BookingServices
             throw new Exception('Anda sudah terdaftar dalam booking ini');
         }
 
-        $this->validateMemberCanJoin($userId, $booking->id_booking);
+        $existing = $this->invitationRepo->findByBookingAndUser($booking->id_booking, $userId);
 
+        // Case 1: Already requested via token (self-request pending)
+        if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id === null) {
+            throw new Exception('Anda sudah mengajukan permintaan bergabung');
+        }
+
+        // Case 2: PIC already invited this user - auto accept!
+        if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id !== null) {
+            $this->validateMemberCanJoin($userId, $booking->id_booking);
+            $this->invitationRepo->accept($existing->id_invitation);
+            $this->bookingRepo->addMember($booking->id_booking, $userId);
+            $this->logger->info('User auto-accepted PIC invitation via token', [
+                'booking_id' => $booking->id_booking,
+                'user_id' => $userId,
+            ]);
+            return ['booking_id' => $booking->id_booking, 'auto_joined' => true];
+        }
+
+        // Check pending limit
+        $userPendingCount = $this->invitationRepo->countPendingForUser($userId);
+        if ($userPendingCount >= 3) {
+            throw new Exception('Anda sudah memiliki 3 undangan yang belum direspon');
+        }
+
+        // Check capacity
         $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
         if (!$room) {
             throw new Exception('Ruangan tidak ditemukan');
         }
-
         $currentMemberCount = $this->bookingRepo->getMemberCount($booking->id_booking);
-        $totalParticipants = $currentMemberCount + 1 + 1;
-
+        $pendingCount = count($this->invitationRepo->getPendingForBooking($booking->id_booking));
+        $totalParticipants = $currentMemberCount + $pendingCount + 1 + 1;
         if ($totalParticipants > $room['kapasitas_max']) {
             throw new Exception("Kapasitas maksimal {$room['kapasitas_max']} orang sudah tercapai");
         }
 
-        $this->bookingRepo->addMember($booking->id_booking, $userId);
+        // Case 3: Old invitation exists (accepted/rejected) - reset as self-request
+        if ($existing) {
+            $existing->status = 'pending';
+            $existing->invited_by_user_id = null;
+            $existing->save();
+        } else {
+            // Case 4: No existing - create new self-request
+            $this->invitationRepo->create([
+                'booking_id' => $booking->id_booking,
+                'invited_user_id' => $userId,
+                'invited_by_user_id' => null,
+                'status' => 'pending',
+            ]);
+        }
 
-        $this->logger->info('Member added to booking', [
+        $this->logger->info('User requested to join via invite token', [
             'booking_id' => $booking->id_booking,
-            'member_user_id' => $userId,
-            'added_by' => $userId,
+            'user_id' => $userId,
         ]);
 
-        return $booking->id_booking;
+        return ['booking_id' => $booking->id_booking, 'auto_joined' => false];
     }
 
     public function leaveBooking(int $bookingId, int $userId): void
@@ -570,6 +609,10 @@ class BookingServices
         //     $timeStr = implode(' ', $parts);
         //     throw new Exception("Check-in belum dibuka. Mulai dalam {$timeStr}");
         // }
+
+        $booking->checkin_code = null;
+        $booking->invite_token = null;
+        $booking->save();
 
         $this->transitionTo($bookingId, 'active', 'Checked in by admin');
     }
@@ -1084,8 +1127,8 @@ class BookingServices
         }
 
         if ($room['status_ruangan'] === 'adminOnly') {
-            if (!$user->isAdmin() && !$user->isDosen()) {
-                throw new Exception('Ruangan ini hanya dapat dipinjam oleh Admin atau Dosen');
+            if (!$user->isAdmin() && !$user->isDosen() && !$user->isTendik()) {
+                throw new Exception('Ruangan ini hanya dapat dipinjam oleh Admin, Dosen, atau Tendik');
             }
         }
     }
@@ -1215,9 +1258,9 @@ class BookingServices
         $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
 
         if ($room && $room['status_ruangan'] === 'adminOnly') {
-            $isAdminOrDosen = $member['id_role'] === 1 || $member['id_role'] === 2;
+            $isAdminOrDosen = $member['id_role'] === 1 || $member['id_role'] === 2 || $member['id_role'] === 4;
             if (!$isAdminOrDosen) {
-                throw new Exception('Ruangan ini hanya dapat digunakan oleh Admin atau Dosen');
+                throw new Exception('Ruangan ini hanya dapat digunakan oleh Admin, Dosen, atau Tendik');
             }
         }
     }
@@ -1347,6 +1390,303 @@ class BookingServices
         $booking->save();
         $this->logger->info('Pending Booking Reverted to Draft', [
             'booking_id' => $bookingId,
+            'user_id' => $userId,
+        ]);
+    }
+
+    public function sendInvitation(int $bookingId, int $invitedUserId, int $invitedByUserId): bool
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if ($booking->status !== 'draft') {
+            throw new Exception('Hanya booking draft yang dapat mengundang anggota');
+        }
+
+        if ((int) $booking->user_id !== $invitedByUserId) {
+            throw new Exception('Hanya PIC yang dapat mengundang anggota');
+        }
+
+        if ($invitedUserId === $invitedByUserId) {
+            throw new Exception('Tidak dapat mengundang diri sendiri');
+        }
+
+        $userPendingCount = $this->invitationRepo->countPendingForUser($invitedUserId);
+        if ($userPendingCount >= 3) {
+            throw new Exception('User sudah memiliki 3 undangan yang belum direspon');
+        }
+
+        if ($this->bookingRepo->isMemberOfBooking($bookingId, $invitedUserId)) {
+            throw new Exception('User sudah menjadi anggota booking ini');
+        }
+
+        $existing = $this->invitationRepo->findByBookingAndUser($bookingId, $invitedUserId);
+
+        // Case 1: Already invited by PIC
+        if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id !== null) {
+            throw new Exception('Undangan sudah dikirim ke User ini');
+        }
+
+        // Case 2: User already requested via token - auto approve!
+        if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id === null) {
+            $this->validateMemberCanJoin($invitedUserId, $bookingId);
+            $this->invitationRepo->accept($existing->id_invitation);
+            $this->bookingRepo->addMember($bookingId, $invitedUserId);
+            $this->logger->info('PIC auto-approved user join request', [
+                'booking_id' => $bookingId,
+                'user_id' => $invitedUserId,
+                'approved_by' => $invitedByUserId,
+            ]);
+            return true;
+        }
+
+        // Check pending limit
+        $userPendingCount = $this->invitationRepo->countPendingForUser($invitedUserId);
+        if ($userPendingCount >= 3) {
+            throw new Exception('User sudah memiliki 3 undangan yang belum direspon');
+        }
+
+        // Check capacity
+        $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
+        if (!$room) {
+            throw new Exception('Ruangan tidak ditemukan');
+        }
+        $currentMemberCount = $this->bookingRepo->getMemberCount($bookingId);
+        $pendingCount = count($this->invitationRepo->getPendingForBooking($bookingId));
+        $totalParticipants = $currentMemberCount + $pendingCount + 1 + 1;
+        if ($totalParticipants > $room['kapasitas_max']) {
+            throw new Exception("Kapasitas maksimal {$room['kapasitas_max']} orang sudah tercapai");
+        }
+
+        // Case 3: Old invitation exists - reset as PIC invite
+        if ($existing) {
+            $existing->status = 'pending';
+            $existing->invited_by_user_id = $invitedByUserId;
+            $existing->save();
+        } else {
+            // Case 4: No existing - create new PIC invitation
+            $this->invitationRepo->create([
+                'booking_id' => $bookingId,
+                'invited_user_id' => $invitedUserId,
+                'invited_by_user_id' => $invitedByUserId,
+                'status' => 'pending',
+            ]);
+        }
+
+        $this->logger->info('Invitation sent', [
+            'booking_id' => $bookingId,
+            'invited_user_id' => $invitedUserId,
+            'invited_by_user_id' => $invitedByUserId,
+        ]);
+
+        return false;
+    }
+
+    public function acceptInvitation(int $invitationId, int $userId): int
+    {
+        $invitation = $this->invitationRepo->findById($invitationId);
+
+        if (!$invitation) {
+            throw new Exception('Undangan tidak ditemukan');
+        }
+
+        if ((int) $invitation->invited_user_id !== $userId) {
+            throw new Exception('Undangan ini bukan untuk Anda');
+        }
+
+        if ($invitation->status !== 'pending') {
+            throw new Exception('Undangan sudah diproses');
+        }
+
+        $booking = $this->bookingRepo->findById($invitation->booking_id);
+        if (!$booking || $booking->status !== 'draft') {
+            throw new Exception('Booking tidak ditemukan atau tidak dalam status draft');
+        }
+
+        $this->validateMemberCanJoin($userId, $booking->id_booking);
+        $this->invitationRepo->accept($invitationId);
+        $this->bookingRepo->addMember($invitation->booking_id, $userId);
+
+        $this->logger->info('Invitation accepted', [
+            'invitation_id' => $invitationId,
+            'user_id' => $userId,
+            'booking_id' => $invitation->booking_id,
+        ]);
+
+        return $invitation->booking_id;
+    }
+
+    public function rejectInvitation(int $invitationId, int $userId): void
+    {
+        $invitation = $this->invitationRepo->findById($invitationId);
+
+        if (!$invitation) {
+            throw new Exception('Undangan tidak ditemukan');
+        }
+
+        if ((int) $invitation->invited_user_id !== $userId) {
+            throw new Exception('Undangan ini bukan untuk Anda');
+        }
+
+        if ($invitation->status !== 'pending') {
+            throw new Exception('Undangan sudah diproses');
+        }
+
+        $this->invitationRepo->reject($invitationId);
+
+        $this->logger->info('Invitation rejected', [
+            'invitation_id' => $invitationId,
+            'user_id' => $userId,
+            'booking_id' => $invitation->booking_id,
+        ]);
+    }
+
+    public function cancelInvitation(int $invitationId, int $picUserId): void
+    {
+        $invitation = $this->invitationRepo->findById($invitationId);
+
+        if (!$invitation) {
+            throw new Exception('Undangan tidak ditemukan');
+        }
+
+        if ((int) $invitation->invited_by_user_id !== $picUserId) {
+            throw new Exception('Hanya PIC yang dapat membatalkan undangan');
+        }
+
+        if ($invitation->status !== 'pending') {
+            throw new Exception('Undangan sudah diproses');
+        }
+
+        $booking = $this->bookingRepo->findById($invitation->booking_id);
+        if ($booking && $booking->status !== 'draft') {
+            throw new Exception('Tidak dapat membatalkan undangan - booking sudah diproses');
+        }
+
+        $this->invitationRepo->delete($invitationId);
+
+        $this->logger->info('Invitation cancelled', [
+            'invitation_id' => $invitationId,
+            'pic_user_id' => $picUserId,
+            'booking_id' => $invitation->booking_id,
+        ]);
+    }
+
+    public function getPendingForUser(int $userId): array
+    {
+        return $this->invitationRepo->getPendingForUser($userId);
+    }
+
+    public function getPendingForBooking(int $bookingId): array
+    {
+        return $this->invitationRepo->getPendingForBooking($bookingId);
+    }
+
+    public function findUserByIdentifier(string $identifier): ?object
+    {
+        return $this->invitationRepo->findUserByIdentifier($identifier);
+    }
+
+    public function getPendingInvitedByPic(int $bookingId, int $picUserId): array
+    {
+        return $this->invitationRepo->getPendingInvitedByPic($bookingId, $picUserId);
+    }
+    public function getPendingJoinRequests(int $bookingId): array
+    {
+        return $this->invitationRepo->getPendingJoinRequests($bookingId);
+    }
+
+    public function approveJoinRequest(int $invitationId, int $picUserId): void
+    {
+        $invitation = $this->invitationRepo->findById($invitationId);
+
+        if (!$invitation) {
+            throw new Exception('Permintaan tidak ditemukan');
+        }
+
+        if ($invitation->invited_by_user_id !== null) {
+            throw new Exception('Ini bukan permintaan bergabung');
+        }
+
+        $booking = $this->bookingRepo->findById($invitation->booking_id);
+
+        if ($booking->status !== 'draft') {
+            throw new Exception('Booking tidak dalam status draft');
+        }
+
+        if (!$booking || (int) $booking->user_id !== $picUserId) {
+            throw new Exception('Hanya PIC yang dapat menyetujui permintaan');
+        }
+
+
+        if ($invitation->status !== 'pending') {
+            throw new Exception('Permintaan sudah diproses');
+        }
+
+        $this->validateMemberCanJoin($invitation->invited_user_id, $booking->id_booking);
+        $this->invitationRepo->accept($invitationId);
+        $this->bookingRepo->addMember($invitation->booking_id, $invitation->invited_user_id);
+
+        $this->logger->info('Join request approved', [
+            'invitation_id' => $invitationId,
+            'user_id' => $invitation->invited_user_id,
+            'approved_by' => $picUserId,
+        ]);
+    }
+    public function rejectJoinRequest(int $invitationId, int $picUserId): void
+    {
+        $invitation = $this->invitationRepo->findById($invitationId);
+
+        if (!$invitation) {
+            throw new Exception('Permintaan tidak ditemukan');
+        }
+
+        $booking = $this->bookingRepo->findById($invitation->booking_id);
+        if (!$booking || (int) $booking->user_id !== $picUserId) {
+            throw new Exception('Hanya PIC yang dapat menolak permintaan');
+        }
+
+        if ($invitation->status !== 'pending') {
+            throw new Exception('Permintaan sudah diproses');
+        }
+
+        $this->invitationRepo->reject($invitationId);
+        $this->logger->info('Join request rejected', [
+            'invitation_id' => $invitationId,
+            'rejected_by' => $picUserId,
+        ]);
+    }
+
+    public function getMyPendingJoinRequests(int $userId): array
+    {
+        return $this->invitationRepo->getMyPendingJoinRequests($userId);
+    }
+
+    public function cancelJoinRequest(int $invitationId, int $userId): void
+    {
+        $invitation = $this->invitationRepo->findById($invitationId);
+
+        if (!$invitation) {
+            throw new Exception('Permintaan tidak ditemukan');
+        }
+
+        if ((int) $invitation->invited_user_id !== $userId) {
+            throw new Exception('Ini bukan permintaan Anda');
+        }
+
+        if ($invitation->invited_by_user_id !== null) {
+            throw new Exception('Ini bukan permintaan bergabung');
+        }
+
+        if ($invitation->status !== 'pending') {
+            throw new Exception('Permintaan sudah diproses');
+        }
+
+        $this->invitationRepo->delete($invitationId);
+        $this->logger->info('User cancelled their join request', [
+            'invitation_id' => $invitationId,
             'user_id' => $userId,
         ]);
     }

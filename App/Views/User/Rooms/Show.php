@@ -283,7 +283,7 @@
             <?php endforeach; ?>
           </select>
         </div>
-        <?php if (auth()->user()->isDosen()): ?>
+        <?php if (auth()->user()->isDosen() || auth()->user()->isTendik()): ?>
           <div class="border-t pt-6 space-y-6">
             <h4 class="font-semibold text-slate-800 text-lg">Informasi Tambahan (Dosen/Pegawai)</h4>
 
