@@ -40,6 +40,43 @@ $statusColors = [
             </div>
         </div>
     <?php endif; ?>
+
+    <?php if ($rescheduleRequest): ?>
+        <div class="w-full mb-4">
+            <div class="bg-amber-100 border-2 border-amber-400 rounded-3xl px-6 py-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-lg font-bold text-amber-800">Permintaan Reschedule Pending</p>
+                </div>
+                <p class="text-sm text-amber-700 mb-2">Anda telah mengajukan perubahan jadwal. Menunggu persetujuan admin.
+                </p>
+                <div class="bg-white rounded-xl p-3 text-sm">
+                    <p class="text-slate-600">Jadwal yang diajukan:</p>
+                    <p class="font-bold text-slate-800">
+                        <?= date('l, d F Y', strtotime($rescheduleRequest->requested_tanggal)) ?> |
+                        <?= substr($rescheduleRequest->requested_waktu_mulai, 0, 5) ?> -
+                        <?= substr($rescheduleRequest->requested_waktu_selesai, 0, 5) ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+    <?php elseif ($booking->has_been_rescheduled): ?>
+        <div class="w-full mb-4">
+            <div class="bg-slate-100 border-2 border-slate-300 rounded-3xl px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm text-slate-600">Booking ini di-reschedule!</p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
         <div class="flex flex-col justify-start p-6">
             <p class="font-bold text-2xl mb-2">
@@ -363,14 +400,34 @@ $statusColors = [
                 <h3 class="text-xl font-bold text-slate-800 mb-4">Aksi</h3>
 
                 <!-- Reschedule Button -->
-                <a href="/bookings/reschedule?id=<?= (int) $booking->id_booking ?>"
-                    class="w-full bg-amber-500 text-white px-8 py-4 rounded-xl hover:bg-amber-600 transition-all font-semibold shadow-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Reschedule Booking
-                </a>
+                <?php if (!$rescheduleRequest && !$booking->has_been_rescheduled): ?>
+                    <a href="/bookings/reschedule?id=<?= (int) $booking->id_booking ?>"
+                        class="w-full bg-amber-500 text-white px-8 py-4 rounded-xl hover:bg-amber-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Reschedule Booking
+                    </a>
+                <?php elseif ($rescheduleRequest): ?>
+                    <div
+                        class="w-full bg-amber-200 text-amber-700 px-8 py-4 rounded-xl font-semibold shadow-lg flex items-center justify-center cursor-not-allowed">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Menunggu Persetujuan Reschedule
+                    </div>
+                <?php elseif ($booking->has_been_rescheduled): ?>
+                    <div
+                        class="w-full bg-slate-300 text-slate-500 px-8 py-4 rounded-xl font-semibold shadow-lg flex items-center justify-center cursor-not-allowed">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        Sudah Pernah Reschedule
+                    </div>
+                <?php endif; ?>
 
                 <!-- Cancel Booking -->
                 <form action="/bookings/cancel" method="post"

@@ -79,7 +79,7 @@ class UserBookingController extends Controller
             $this->bookingServices->submitForApproval($bookingId, $user->id_user);
 
             flash('success', 'Booking berhasil diajukan untuk persetujuan admin');
-            redirect('/my-bookings');
+            redirect('/bookings/detail?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -196,6 +196,8 @@ class UserBookingController extends Controller
                 $user->id_role === 1,
             );
 
+            $rescheduleRequest = $this->bookingServices->getPendingRescheduleRequest($bookingId);
+
             return view('User/Bookings/Detail', [
                 'booking' => $data['booking'],
                 'pic' => $data['pic'],
@@ -204,6 +206,7 @@ class UserBookingController extends Controller
                 'canSubmit' => $data['canSubmit'],
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
+                'rescheduleRequest' => $rescheduleRequest,
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
@@ -299,7 +302,7 @@ class UserBookingController extends Controller
             $this->bookingServices->cancelPending($bookingId, $user->id_user);
 
             flash('success', 'Booking berhasil dibatalkan');
-            redirect('/my-bookings');
+            redirect('/bookings/draft?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -392,9 +395,9 @@ class UserBookingController extends Controller
                 'waktu_selesai' => $request->all()['waktu_selesai'],
             ];
 
-            $this->bookingServices->rescheduleBooking($bookingId, $newData, $user->id_user);
+            $this->bookingServices->createRescheduleRequest($bookingId, $newData, $user->id_user);
 
-            flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
+            flash('success', 'Permintaan reschedule terkirim. Menunggu persetujuan admin.');
             redirect('/bookings/detail?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());

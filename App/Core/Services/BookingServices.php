@@ -4,11 +4,14 @@ namespace App\Core\Services;
 
 use App\Core\Repository\BookingRepository;
 use App\Core\Repository\InvitationRepository;
+use App\Core\Repository\FeedbackRepository;
+use App\Core\Repository\RescheduleRepository;
 use App\Models\Booking;
+use App\Models\RescheduleRequest;
 use Carbon\Carbon;
 use Exception;
 use App\Core\Paginator;
-use App\Core\Repository\FeedbackRepository;
+
 
 class BookingServices
 {
@@ -26,7 +29,8 @@ class BookingServices
         private BookingRepository $bookingRepo,
         private Logger $logger,
         private FeedbackRepository $feedbackRepo,
-        private InvitationRepository $invitationRepo
+        private InvitationRepository $invitationRepo,
+        private RescheduleRepository $rescheduleRepo
     ) {
     }
 
@@ -822,6 +826,135 @@ class BookingServices
             'new_date' => "{$newData['tanggal_penggunaan_ruang']} {$newData['waktu_mulai']}",
             'rescheduled_by' => $userId,
         ]);
+    }
+
+    public function createRescheduleRequest(int $bookingId, array $newData, int $userId): RescheduleRequest
+    {
+        $booking = $this->bookingRepo->findById($bookingId);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        if ((int) $booking->user_id !== $userId) {
+            throw new Exception('Hanya PIC yang bisa mengajukan reschedule');
+        }
+
+        if ($booking->status !== 'verified') {
+            throw new Exception('Hanya booking dengan status verified yang dapat di reschedule');
+        }
+
+        $existingRequest = $this->rescheduleRepo->findPendingByBookingId($bookingId);
+
+        if ($existingRequest) {
+            throw new Exception('Sudah ada permintaan reschedule yang menunggu persetujuan');
+        }
+
+        if ($booking->has_been_rescheduled ?? false) {
+            throw new Exception('Booking hanya dapat di reschedule 1 kali');
+        }
+
+        $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
+        $now = Carbon::now();
+
+        if ($now->gte($startDateTime)) {
+            throw new Exception("Tidak dapat reschedule booking yang sudah dimulai");
+        }
+
+        if ($now->diffInMinutes($startDateTime, false) < 15) {
+            throw new Exception('Tidak dapat reschedule kurang dari 15 menit sebelum waktu mulai');
+        }
+
+        $validationData = array_merge([
+            'ruangan_id' => $booking->ruangan_id,
+            'tujuan' => $booking->tujuan,
+        ], $newData);
+
+        $this->validateRescheduleRules($validationData);
+        $this->validateNoTimeConflicts($validationData, $booking->user_id, $bookingId);
+
+        $request = $this->rescheduleRepo->create([
+            'booking_id' => $bookingId,
+            'requested_tanggal' => $newData['tanggal_penggunaan_ruang'],
+            'requested_waktu_mulai' => $newData['waktu_mulai'],
+            'requested_waktu_selesai' => $newData['waktu_selesai'],
+            'requested_by' => $userId,
+            'status' => 'pending',
+        ]);
+
+        $this->logger->info('Reschedule Request Created', [
+            'booking_id' => $bookingId,
+            'request_id' => $request->id_request,
+            'requested_by' => $userId,
+        ]);
+        return $request;
+    }
+
+    public function approveRescheduleRequest(int $requestId, int $adminId): void
+    {
+        $request = $this->rescheduleRepo->findById($requestId);
+
+        if (!$request) {
+            throw new Exception('Permintaan reschedule tidak ditemukan');
+        }
+
+        if ($request->status !== 'pending') {
+            throw new Exception('Permintaan sudah di proses');
+        }
+
+        $booking = $this->bookingRepo->findById($request->booking_id);
+
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        $booking->tanggal_penggunaan_ruang = $request->requested_tanggal;
+        $booking->waktu_mulai = $request->requested_waktu_mulai;
+        $booking->waktu_selesai = $request->requested_waktu_selesai;
+        $booking->has_been_rescheduled = true;
+        $booking->status = 'pending';
+        $booking->checkin_code = null;
+        $booking->save();
+
+        $this->rescheduleRepo->approve($requestId, $adminId);
+
+        $this->logger->info('Reschedule Request Approved', [
+            'request_id' => $requestId,
+            'booking_id' => $request->booking_id,
+            'approved_by' => $adminId,
+        ]);
+    }
+
+    public function rejectRescheduleRequest(int $requestId, int $adminId, string $reason): void
+    {
+        $request = $this->rescheduleRepo->findById($requestId);
+
+        if (!$request) {
+            throw new Exception('Permintaan reschedule tidak ditemukan');
+        }
+
+        if ($request->status !== 'pending') {
+            throw new Exception('Permintaan sudah diproses');
+        }
+
+        $this->rescheduleRepo->reject($requestId, $adminId, $reason);
+
+        $this->logger->info('Reschedule Request Rejected', [
+            'request_id' => $requestId,
+            'booking_id' => $request->booking_id,
+            'rejected_by' => $adminId,
+            'reason' => $reason,
+        ]);
+    }
+
+    public function getPendingRescheduleRequest(int $bookingId): ?RescheduleRequest
+    {
+        return $this->rescheduleRepo->findPendingByBookingId($bookingId);
+    }
+
+    public function getAllPendingRescheduleRequests(): array
+    {
+        return $this->rescheduleRepo->getAllPending();
     }
 
     public function applyNoShowPenalty(int $userId): void

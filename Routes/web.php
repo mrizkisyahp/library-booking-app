@@ -111,6 +111,8 @@ $app->router->post('/admin/bookings/kick', [AdminBookingController::class, 'kick
 $app->router->get('/admin/bookings/reschedule', [AdminBookingController::class, 'showRescheduleForm'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->post('/admin/bookings/reschedule', [AdminBookingController::class, 'reschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->post('/admin/bookings/reschedule/approve', [AdminBookingController::class, 'approveReschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/bookings/reschedule/reject', [AdminBookingController::class, 'rejectReschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin users
 $app->router->get('/admin/users', [AdminUserController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

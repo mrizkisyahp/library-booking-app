@@ -118,11 +118,14 @@ class AdminBookingController extends Controller
             $bookingId = (int) $request->query()['id'];
             $data = $this->bookingServices->getBookingForUser($bookingId, 0, true); // admin = true
 
+            $rescheduleRequest = $this->bookingServices->getPendingRescheduleRequest($bookingId);
+
             return view('Admin/Bookings/Detail', [
                 'bookings' => $data['booking'],
                 'pic' => $data['pic'],
                 'members' => $data['members'],
                 'allMembers' => $data['allMembers'],
+                'rescheduleRequest' => $rescheduleRequest,
             ]);
 
         } catch (Exception $e) {
@@ -342,6 +345,39 @@ class AdminBookingController extends Controller
 
             flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
             redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function approveReschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $requestId = (int) $request->all()['request_id'];
+
+            $this->bookingServices->approveRescheduleRequest($requestId, $user->id_user);
+
+            flash('success', 'Permintaan reschedule disetujui. Booking kembali ke status pending.');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function rejectReschedule(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $requestId = (int) $request->all()['request_id'];
+            $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
+
+            $this->bookingServices->rejectRescheduleRequest($requestId, $user->id_user, $reason);
+
+            flash('success', 'Permintaan reschedule ditolak.');
+            back();
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
