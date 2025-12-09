@@ -28,6 +28,8 @@ $app->router->post('/login', [AuthController::class, 'login'], ['middleware' => 
 $app->router->get('/register', [AuthController::class, 'register'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->get('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->post('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/register/mahasiswa/validate-step1', [AuthController::class, 'validateMahasiswaStep1'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->post('/register/dosen/validate-step1', [AuthController::class, 'validateDosenStep1'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->get('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->post('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/verify', [VerifyController::class, 'verify']);

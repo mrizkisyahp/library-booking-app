@@ -168,10 +168,99 @@ function togglePassword(id) {
 }
 
 //multi step register form
-function nextStep() {
-    document.getElementById('step1').classList.add('hidden');
-    document.getElementById('step2').classList.remove('hidden');
+async function nextStep() {
+    const nimInput = document.getElementById('nim');
+    const nipInput = document.getElementById('nip');
+    const emailInput = document.getElementById('email');
+    const btn = document.querySelector('#step1 button');
+    if (btn) btn.disabled = true;
+
+    const isMahasiswa = nimInput !== null;
+    const isDosen = nipInput !== null;
+
+    clearError('email');
+    if (isMahasiswa) clearError('nim');
+    if (isDosen) clearError('nip');
+
+    let url, body;
+    if (isMahasiswa) {
+        url = '/register/mahasiswa/validate-step1';
+        body = { nim: nimInput.value, email: emailInput.value };
+    } else if (isDosen) {
+        url = '/register/dosen/validate-step1';
+        body = { nip: nipInput.value, email: emailInput.value };
+    } else {
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        return;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        const result = await response.json();
+
+        if (result.valid) {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        } else if (result.errors) {
+            if (result.errors.nim) showError('nim', result.errors.nim[0]);
+            if (result.errors.nip) showError('nip', result.errors.nip[0]);
+            if (result.errors.email) showError('email', result.errors.email[0]);
+        }
+    } catch (err) {
+        console.error('Validation error:', err);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
+
+function showError(fieldId, message) {
+    const input = document.getElementById(fieldId);
+    if (!input) return;
+
+    input.classList.add('border-red-500');
+    input.classList.remove('border-gray-300');
+
+    let errorEl = document.getElementById(fieldId + '_error');
+    if (errorEl) errorEl.remove();
+
+    errorEl = document.createElement('p');
+    errorEl.id = fieldId + '_error';
+    errorEl.className = 'mt-1 text-sm text-red-600';
+    input.insertAdjacentElement('afterend', errorEl);
+    errorEl.textContent = message;
+}
+
+function clearError(fieldId) {
+    const input = document.getElementById(fieldId);
+    if (!input) return;
+
+    input.classList.remove('border-red-500');
+    input.classList.add('border-gray-300');
+
+    const errorEl = document.getElementById(fieldId + '_error');
+    if (errorEl) errorEl.remove();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const step1Inputs = document.querySelectorAll('#step1 input');
+    step1Inputs.forEach(input => {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nextStep();
+            }
+        });
+    });
+});
 
 function prevStep() {
     document.getElementById('step2').classList.add('hidden');

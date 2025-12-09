@@ -16,11 +16,13 @@
   "type": "commonjs",
   "main": "tailwind.config.js",
   "scripts": {
+    "start": "concurrently -n php,mail,css -c blue,magenta,yellow \"php -S localhost:8000 -t public\" \".\\\\Mailpit\\\\mailpit.exe --smtp :1025\" \"npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --watch\"",
     "dev": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --watch",
     "build": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --minify"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.1",
     "postcss": "^8.5.6"
   },
   "dependencies": {

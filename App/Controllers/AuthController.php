@@ -127,6 +127,30 @@ class AuthController extends Controller
         return view('Auth/Mahasiswa');
     }
 
+    public function validateMahasiswaStep1(Request $request, Response $response)
+    {
+        $body = $request->json();
+
+        $request->validate([
+            'nim' => ['required', 'string', 'min:10', 'max:10', 'unique:users,nim'],
+            'email' => ['required', 'email', 'unique:users,email'],
+        ]);
+
+        return $response->json(['valid' => true]);
+    }
+
+    public function validateDosenStep1(Request $request, Response $response)
+    {
+        $body = $request->json();
+
+        $request->validate([
+            'nip' => ['required', 'string', 'min:18', 'max:18', 'unique:users,nip'],
+            'email' => ['required', 'email', 'unique:users,email'],
+        ]);
+
+        return $response->json(['valid' => true]);
+    }
+
     public function registerDosen(Request $request, Response $response)
     {
         $this->setTitle('Register Dosen | Library Booking App');

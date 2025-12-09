@@ -22,7 +22,7 @@ class Session
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
-
+            ini_set('session.gc_maxlifetime', $lifetime);
             session_start();
         }
 
