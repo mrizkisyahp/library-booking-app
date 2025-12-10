@@ -179,7 +179,7 @@
                             </div>
                         </div>
                     <?php endif; ?>
-                <?php elseif (auth()->user()->isDosen() && $user->status === 'active'): ?>
+                <?php elseif ((auth()->user()->isDosen() || auth()->user()->isTendik()) && $user->status === 'active'): ?>
                     <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-4">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">

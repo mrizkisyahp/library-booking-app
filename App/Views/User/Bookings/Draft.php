@@ -285,105 +285,110 @@
 
         <?php if ($isPic): ?>
           <!-- Add Member Form -->
-          <form action="/bookings/member" method="post" class="border-t pt-6">
+          <form action="/invitations/send" method="post" class="border-t pt-6">
             <?= csrf_field() ?>
             <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
             <label class="block text-sm font-semibold text-slate-700 mb-2">Tambah Anggota</label>
             <div class="flex gap-3">
-              <input type="email" name="member_email" required placeholder="Email anggota"
-                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+              <input type="text" name="identifier" placeholder="NIM / NIP / Email"
+                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all text-sm"
+                required>
               <button type="submit"
                 class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold whitespace-nowrap">
                 <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Kirim Link Undangan
+                Undang
               </button>
             </div>
           </form>
 
-          <?php if ($isPic): ?>
-            <!-- Pending Members Section -->
+          <?php if ($isPic && !empty($pendingInvitations)): ?>
+            <!-- Section 1: Invitations sent by PIC (waiting for user response) -->
+            <hr class="h-px py-4 text-gray-400 mt-6">
+            <p class="font-bold text-2xl mb-4">
+              Menunggu Konfirmasi
+            </p>
+            <p class="text-sm text-slate-500 mb-4">Undangan yang Anda kirim, menunggu respon dari user</p>
+            <div class="space-y-3 mb-6">
+              <?php foreach ($pendingInvitations as $invitation): ?>
+                <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                      <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-slate-800"><?= htmlspecialchars($invitation['nama']) ?></p>
+                      <p class="text-sm text-slate-500"><?= htmlspecialchars($invitation['email']) ?></p>
+                    </div>
+                  </div>
+                  <form action="/invitations/cancel" method="post">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="invitation_id" value="<?= (int) $invitation['id_invitation'] ?>">
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                    <button type="submit"
+                      class="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                      Batalkan
+                    </button>
+                  </form>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+          <?php if ($isPic && !empty($joinRequests)): ?>
+            <!-- Section 2: Join requests (users who used invite token) -->
             <hr class="h-px py-4 text-gray-400 mt-6">
             <p class="font-bold text-2xl mb-4">
               Permintaan Bergabung
             </p>
-
-            <!-- Static pending members for design preview -->
+            <p class="text-sm text-slate-500 mb-4">User yang ingin bergabung via kode undangan</p>
             <div class="space-y-3 mb-6">
-              <!-- Pending Member 1 -->
-              <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
-                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+              <?php foreach ($joinRequests as $request): ?>
+                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-slate-800"><?= htmlspecialchars($request['nama']) ?></p>
+                      <p class="text-sm text-slate-500"><?= htmlspecialchars($request['email']) ?></p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="font-semibold text-slate-800">Ahmad Fauzi</p>
-                    <p class="text-sm text-slate-500">ahmad.fauzi@student.polinema.ac.id</p>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button type="button"
-                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Terima
-                  </button>
-                  <button type="button"
-                    class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Tolak
-                  </button>
-                </div>
-              </div>
-              <!-- Pending Member 2 -->
-              <div class="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-200">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
-                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="font-semibold text-slate-800">Siti Nurhaliza</p>
-                    <p class="text-sm text-slate-500">siti.nurhaliza@student.polinema.ac.id</p>
+                  <div class="flex gap-2">
+                    <form action="/invitations/approve" method="post">
+                      <?= csrf_field() ?>
+                      <input type="hidden" name="invitation_id" value="<?= (int) $request['id_invitation'] ?>">
+                      <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                      <button type="submit"
+                        class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Terima
+                      </button>
+                    </form>
+                    <form action="/invitations/reject-request" method="post">
+                      <?= csrf_field() ?>
+                      <input type="hidden" name="invitation_id" value="<?= (int) $request['id_invitation'] ?>">
+                      <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                      <button type="submit"
+                        class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Tolak
+                      </button>
+                    </form>
                   </div>
                 </div>
-                <div class="flex gap-2">
-                  <button type="button"
-                    class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Terima
-                  </button>
-                  <button type="button"
-                    class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Tolak
-                  </button>
-                </div>
-              </div>
+              <?php endforeach; ?>
             </div>
-            <!-- Empty state (toggle this when no pending members) -->
-            <!-- 
-  <div class="text-center py-6 bg-slate-50 rounded-xl">
-    <svg class="w-12 h-12 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-    <p class="text-slate-500 text-sm">Tidak ada permintaan bergabung</p>
-  </div>
-  -->
           <?php endif; ?>
 
           <!-- Requirement Warning -->
@@ -426,7 +431,7 @@
       <form action="/bookings/submit" method="post"
         onsubmit="return confirm('Anda yakin ingin mengirimkan pengajuan ini?')">
         <?= csrf_field() ?>
-        <input type=" hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+        <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
         <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
           class="w-full bg-primary text-gray-500 px-8 py-4 rounded-xl hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">

@@ -110,6 +110,15 @@ class Request
         return strtolower((string) $requestedWith) === 'xmlhttprequest' || str_contains($accept, 'application/json');
     }
 
+    public function json(): array
+    {
+        if ($this->isAjax()) {
+            $input = file_get_contents('php://input');
+            return json_decode($input, true) ?? [];
+        }
+        return $this->getBody();
+    }
+
     public function boolean(string $key, bool $default = false): bool
     {
         $value = $this->input($key, $default);
@@ -129,7 +138,8 @@ class Request
     public function validate(array $rules, array $messages = []): array
     {
         $validator = new \App\Core\Validator\Validator();
-        return $validator->validate($this->getBody(), $rules, $messages);
+        $data = $this->isAjax() ? $this->json() : $this->getBody();
+        return $validator->validate($data, $rules, $messages);
     }
 
     public function ip(): string

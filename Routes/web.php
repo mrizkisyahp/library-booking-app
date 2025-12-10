@@ -21,6 +21,7 @@ use App\Core\Middleware\CsrfMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Controllers\AdminReportController;
 
+
 // Auth routes (public)
 $app->router->get('/', [AuthController::class, 'login'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->get('/login', [AuthController::class, 'login'], ['middleware' => [new GuestMiddleware()]]);
@@ -28,6 +29,8 @@ $app->router->post('/login', [AuthController::class, 'login'], ['middleware' => 
 $app->router->get('/register', [AuthController::class, 'register'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->get('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->post('/register/mahasiswa', [AuthController::class, 'registerMahasiswa'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/register/mahasiswa/validate-step1', [AuthController::class, 'validateMahasiswaStep1'], ['middleware' => [new GuestMiddleware()]]);
+$app->router->post('/register/dosen/validate-step1', [AuthController::class, 'validateDosenStep1'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->get('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new GuestMiddleware()]]);
 $app->router->post('/register/dosen', [AuthController::class, 'registerDosen'], ['middleware' => [new GuestMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/verify', [VerifyController::class, 'verify']);
@@ -54,7 +57,6 @@ $app->router->get('/rooms/show', [UserRoomController::class, 'show'], ['middlewa
 $app->router->get('/bookings/draft', [UserBookingController::class, 'showDraft'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/bookings/draft', [UserBookingController::class, 'createDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/submit', [UserBookingController::class, 'submitDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
-$app->router->post('/bookings/member', [UserBookingController::class, 'addMember'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/bookings/join', [UserBookingController::class, 'showJoinForm'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/bookings/join', [UserBookingController::class, 'joinByLink'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/my-bookings', [UserBookingController::class, 'showMyBooking'], ['middleware' => [new AuthMiddleware()]]);
@@ -69,6 +71,15 @@ $app->router->post('/bookings/delete-draft', [UserBookingController::class, 'del
 $app->router->get('/bookings/edit-draft', [UserBookingController::class, 'showEditDraft'], ['middleware' => [new AuthMiddleware()]]);
 $app->router->post('/bookings/update-draft', [UserBookingController::class, 'updateDraft'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/bookings/cancel-pending', [UserBookingController::class, 'cancelPending'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+
+// Invitation routes
+$app->router->post('/invitations/send', [UserBookingController::class, 'send'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/invitations/accept', [UserBookingController::class, 'accept'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/invitations/reject', [UserBookingController::class, 'reject'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/invitations/cancel', [UserBookingController::class, 'cancel'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/invitations/approve', [UserBookingController::class, 'approveJoinRequest'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/invitations/reject-request', [UserBookingController::class, 'rejectJoinRequest'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/invitations/cancel-request', [UserBookingController::class, 'cancelJoinRequest'], ['middleware' => [new AuthMiddleware(), new CsrfMiddleware()]]);
 
 // Feedback routes (authenticated)
 $app->router->get('/feedback/create', [UserFeedbackController::class, 'create'], ['middleware' => [new AuthMiddleware()]]);
@@ -100,6 +111,8 @@ $app->router->post('/admin/bookings/kick', [AdminBookingController::class, 'kick
 $app->router->get('/admin/bookings/reschedule', [AdminBookingController::class, 'showRescheduleForm'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->post('/admin/bookings/reschedule', [AdminBookingController::class, 'reschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->post('/admin/bookings/reschedule/approve', [AdminBookingController::class, 'approveReschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/bookings/reschedule/reject', [AdminBookingController::class, 'rejectReschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin users
 $app->router->get('/admin/users', [AdminUserController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);

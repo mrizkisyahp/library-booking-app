@@ -6,12 +6,12 @@ $validator = $validator ?? null;
 <div class="flex items-center justify-center min-h-dvh mx-4">
   <div>
     <div class="px-4 md:px-0 py-8">
-      <p class="text-4xl md:text-2xl text-white font-semibold capitalize">Buat Akun Dosen</p>
+      <p class="text-4xl md:text-2xl text-white font-semibold capitalize">Buat Akun Dosen/Tendik</p>
     </div>
 
     <div class="container w-fit mx-auto align-middle px-12 py-6 bg-gray-100 rounded-md shadow border border-gray-300">
       <div class="text-left py-2">
-        <h2 class="text-4xl font-semibold capitalize">Registrasi Dosen</h2>
+        <h2 class="text-4xl font-semibold capitalize">Registrasi Dosen/Tendik</h2>
       </div>
 
       <?php if ($m = flash('success')): ?>
@@ -124,7 +124,7 @@ $validator = $validator ?? null;
               ?>
               <label for="jurusan"
                 class="block text-sm font-medium <?= $validator?->hasError('jurusan') ? 'text-red-700' : 'text-gray-700' ?> mb-2">
-                Jurusan
+                Unit Kerja/Jurusan
               </label>
               <select id="jurusan" name="jurusan"
                 class="w-full px-3 py-2 rounded-lg border shadow-sm bg-white focus:outline-none focu:ring-2 <?= $validator?->hasError('jurusan') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-emerald-500 focus:ring-offset-2 focus:border-emerald-500 transition-all' ?>">

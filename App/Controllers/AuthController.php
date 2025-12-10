@@ -60,6 +60,8 @@ class AuthController extends Controller
                     'rememberedIdentifier' => $_COOKIE['remember_identifier'] ?? '',
                     'validator' => $e->getValidator()
                 ]);
+            } catch (\Exception $e) {
+                flash('error', $e->getMessage());
             }
             flash('old_identifier', $validated['identifier']);
             flash('error', 'Email atau password salah. Silakan coba lagi.');
@@ -127,6 +129,30 @@ class AuthController extends Controller
         return view('Auth/Mahasiswa');
     }
 
+    public function validateMahasiswaStep1(Request $request, Response $response)
+    {
+        $body = $request->json();
+
+        $request->validate([
+            'nim' => ['required', 'string', 'min:10', 'max:10', 'unique:users,nim'],
+            'email' => ['required', 'email', 'unique:users,email'],
+        ]);
+
+        return $response->json(['valid' => true]);
+    }
+
+    public function validateDosenStep1(Request $request, Response $response)
+    {
+        $body = $request->json();
+
+        $request->validate([
+            'nip' => ['required', 'string', 'min:18', 'max:18', 'unique:users,nip'],
+            'email' => ['required', 'email', 'unique:users,email'],
+        ]);
+
+        return $response->json(['valid' => true]);
+    }
+
     public function registerDosen(Request $request, Response $response)
     {
         $this->setTitle('Register Dosen | Library Booking App');
@@ -148,6 +174,7 @@ class AuthController extends Controller
                     'password' => ['required', 'string', 'min:8', 'max:24'],
                     'confirm_password' => ['required', 'string', 'match:password'],
                     'jurusan' => ['required', 'string'],
+                    'role' => ['required', 'in:dosen,tendik'],
                     'nomor_hp' => ['required', 'numeric'],
                 ]);
 
@@ -158,7 +185,7 @@ class AuthController extends Controller
                     'password' => $validated['password'],
                     'jurusan' => $validated['jurusan'],
                     'nomor_hp' => $validated['nomor_hp'],
-                ], 'dosen');
+                ], $validated['role']);
 
                 $this->auth->sendVerificationOTP($registered);
 

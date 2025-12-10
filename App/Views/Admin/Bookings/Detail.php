@@ -38,6 +38,61 @@ $statusColors = [
     <p class="text-slate-600">Periksa detail booking sebelum melakukan verifikasi.</p>
   </div>
 
+  <?php if ($rescheduleRequest): ?>
+    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 shadow-lg">
+      <div class="flex items-start gap-4">
+        <div class="p-3 bg-amber-100 rounded-xl">
+          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-bold text-amber-800">Permintaan Reschedule Menunggu</h3>
+          <p class="text-sm text-amber-700 mt-1">User meminta untuk mengubah jadwal booking ini:</p>
+          <div class="mt-3 p-3 bg-white rounded-lg border border-amber-200">
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-slate-500">Tanggal Baru</p>
+                <p class="font-bold text-slate-800">
+                  <?= date('l, d F Y', strtotime($rescheduleRequest->requested_tanggal)) ?></p>
+              </div>
+              <div>
+                <p class="text-slate-500">Waktu Baru</p>
+                <p class="font-bold text-slate-800">
+                  <?= substr($rescheduleRequest->requested_waktu_mulai, 0, 5) ?> -
+                  <?= substr($rescheduleRequest->requested_waktu_selesai, 0, 5) ?>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-4">
+            <form action="/admin/bookings/reschedule/approve" method="post">
+              <?= csrf_field() ?>
+              <input type="hidden" name="request_id" value="<?= $rescheduleRequest->id_request ?>">
+              <button type="submit"
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors">
+                Setujui
+              </button>
+            </form>
+            <form action="/admin/bookings/reschedule/reject" method="post" class="flex-1">
+              <?= csrf_field() ?>
+              <input type="hidden" name="request_id" value="<?= $rescheduleRequest->id_request ?>">
+              <div class="flex gap-2">
+                <input type="text" name="reason" placeholder="Alasan penolakan..."
+                  class="flex-1 px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <button type="submit"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors">
+                  Tolak
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-6">
       <div class="bg-white rounded-2xl shadow-lg p-8 space-y-5">
