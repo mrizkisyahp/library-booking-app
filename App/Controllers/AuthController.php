@@ -30,7 +30,7 @@ class AuthController extends Controller
             $remoteIp = $request->ip();
 
             if (!$this->turnstile->verify($token, $remoteIp)) {
-                flash('error', 'Captcha verification failed. Please try again.');
+                flash('error', 'Verifikasi CAPTCHA gagal. Silakan coba lagi.');
                 return view('Auth/Login', [
                     'rememberedIdentifier' => $_COOKIE['remember_identifier'] ?? ''
                 ]);
@@ -52,7 +52,7 @@ class AuthController extends Controller
                         $this->logger->auth('Logged in', $currentUser->id_user, "Email: {$currentUser->email}");
                     }
 
-                    flash('success', 'Login successful!');
+                    flash('success', 'Login berhasil!');
                     redirect($roleName === 'admin' ? '/admin' : '/dashboard');
                 }
             } catch (ValidationException $e) {
@@ -62,7 +62,7 @@ class AuthController extends Controller
                 ]);
             }
             flash('old_identifier', $validated['identifier']);
-            flash('error', 'Invalid credentials');
+            flash('error', 'Email atau password salah. Silakan coba lagi.');
         }
         return view('Auth/Login', [
             'rememberedIdentifier' => $_COOKIE['remember_me'] ?? ''
@@ -85,7 +85,7 @@ class AuthController extends Controller
             $token = $request->input('cf-turnstile-response');
 
             if (!$this->turnstile->verify($token, $request->ip())) {
-                flash('error', 'CAPTCHA verification failed.');
+                flash('error', 'Verifikasi CAPTCHA gagal. Silakan coba lagi.');
                 return view('Auth/Mahasiswa');
             }
 
@@ -115,10 +115,10 @@ class AuthController extends Controller
                     $this->logger->auth('registered', $registered->id_user, "Email: {$registered->email}");
                 }
 
-                flash('success', 'Registration successful! Check your email for verification code.');
+                flash('success', 'Registrasi berhasil. Silakan cek kode verifikasi di email-mu!');
                 redirect('/verify');
             } catch (ValidationException $e) {
-                flash('error', 'Registration failed! Please try again.');
+                flash('error', 'Registrasi gagal. Silakan coba lagi.');
                 return view('Auth/Mahasiswa', [
                     'validator' => $e->getValidator()
                 ]);
@@ -136,7 +136,7 @@ class AuthController extends Controller
             $token = $request->input('cf-turnstile-response');
 
             if (!$this->turnstile->verify($token, $request->ip())) {
-                flash('error', 'CAPTCHA verification failed.');
+                flash('error', 'Verifikasi CAPTCHA gagal. Silakan coba lagi.');
                 return view('Auth/Dosen');
             }
 
@@ -166,10 +166,10 @@ class AuthController extends Controller
                     $this->logger->auth('registered', $registered->id_user, "Email: {$registered->email}");
                 }
 
-                flash('success', 'Registration successful! Check your email for verification code.');
+                flash('success', 'Registrasi berhasil. Silakan cek kode verifikasi di email-mu!');
                 redirect('/verify');
             } catch (ValidationException $e) {
-                flash('error', 'Registration failed! Please try again.');
+                flash('error', 'Registrasi gagal. Silakan coba lagi.');
                 return view('Auth/Dosen', [
                     'validator' => $e->getValidator()
                 ]);
@@ -188,7 +188,7 @@ class AuthController extends Controller
             $this->logger->auth('logged out', $currentUser->id_user, "Email: {$currentUser->email}");
         }
 
-        flash('success', 'You have been logged out.');
+        flash('success', 'Kamu berhasil logout.');
         redirect('/');
     }
 }

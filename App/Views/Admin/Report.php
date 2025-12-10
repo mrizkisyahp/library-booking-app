@@ -1,8 +1,5 @@
 <?php
-/** ============================================
- *  SAFETY FALLBACK (AGAR TIDAK ADA WARNING)
- *  =============================================
- */
+// default values/safety fallback
 $filters     = $filters     ?? ['start_date' => '', 'end_date' => '', 'status' => ''];
 $summary     = $summary     ?? ['total' => 0, 'completed' => 0, 'cancelled' => 0];
 $chartData   = $chartData   ?? ['labels' => [], 'values' => []];
@@ -23,7 +20,7 @@ $reportRows  = $reportRows  ?? [];
         </div>
 
 
-        <!-- FILTER PANEL -->
+        <!-- filtres -->
         <form method="get" action="/admin/reports"
             class="grid grid-cols-1 gap-4 md:grid-cols-4 bg-white p-6 rounded-2xl shadow">
 
@@ -55,7 +52,7 @@ $reportRows  = $reportRows  ?? [];
                 </select>
             </div>
 
-            <!-- Button -->
+            <!-- Appluy -->
             <div class="flex items-end">
                 <button class="w-full bg-primary text-white px-4 py-3 rounded-xl hover:bg-emerald-700 transition">
                     Terapkan
@@ -64,7 +61,7 @@ $reportRows  = $reportRows  ?? [];
 
         </form>
 
-        <!-- SUMMARY BOX -->
+        <!-- hasil $getSummary -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
 
             <div class="p-6 rounded-2xl bg-white shadow border">
@@ -90,21 +87,46 @@ $reportRows  = $reportRows  ?? [];
 
         </div>
 
+        <!-- CHIP PEMILIHAN CHART -->
+        <div class="flex gap-3 mt-6 flex-wrap">
+            <?php
+                $chips = [
+                    'booking'  => 'Booking per Hari',
+                    'room'     => 'Ruangan Terpopuler',
+                    'feedback' => 'Feedback Terbanyak',
+                    'hours'    => 'Jam Sibuk'
+                ];
+            ?>
+
+            <?php foreach ($chips as $key => $label): ?>
+                <a href="/admin/reports?chart_type=<?= $key ?>"
+                class="px-4 py-2 rounded-full border transition
+                        <?= ($chartType === $key)
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-white border-gray-300 text-slate-600 hover:bg-gray-100'
+                        ?>">
+                    <?= $label ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
 
         <!-- CHART -->
         <div class="bg-white shadow rounded-2xl p-6 mt-6">
-            <h2 class="text-xl font-bold mb-4">Grafik Aktivitas Booking</h2>
+            <h2 class="text-xl font-bold mb-4">
+                <?= isset($chips[(string)$chartType]) ? $chips[(string)$chartType] : 'Grafik Aktivitas' ?>
+            </h2>
 
-            <canvas id="bookingChart" class="w-full h-full"></canvas>
+            <canvas id="bookingChart" class="w-full max-h-96"></canvas>
 
             <script>
                 window.chartData = <?= json_encode($chartData) ?>;
+                window.activeChartType = "<?= $chartType ?>";
             </script>
 
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="/js/chart.umd.min.js"></script>
             <script src="/js/report-chart.js"></script>
-
         </div>
+
 
 
         <!-- EXPORT BUTTONS -->

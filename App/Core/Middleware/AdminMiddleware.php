@@ -13,13 +13,13 @@ class AdminMiddleware extends Middleware
     public function handle(Request $request, Response $response): bool
     {
         if (auth()->guest()) {
-            flash('error', 'Please login to access this page.');
+            flash('error', 'Mohon login terlebih dahulu sebelum mengakses halaman ini.');
             redirect('/login');
             return false;
         }
 
         if (!auth()->user() instanceof User || !auth()->user()->isAdmin()) {
-            flash('error', 'Access denied. Admin only.');
+            flash('error', 'Akses ditolak, anda bukan admin.');
             redirect('/dashboard');
             return false;
         }

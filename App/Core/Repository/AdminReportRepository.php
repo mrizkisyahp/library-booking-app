@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Core\Repository;
 
 use App\Core\App;
@@ -7,124 +6,245 @@ use PDO;
 
 class AdminReportRepository
 {
-    private PDO $conn;
+    /** @var PDO|object */
+    private $db;
 
     public function __construct()
     {
-        // Ambil koneksi PDO murni, bukan wrapper
-        $this->conn = App::$app->db->pdo;
+        $this->db = App::$app->db;
     }
 
-    /**
-     * Query summary total booking per status
-     */
-    public function fetchSummary(array $filters): array
+    // Returns associative array with total, completed, cancelled counts
+    public function fetchSummary(array $filters = []): array
     {
-        $sql = "SELECT
-                    COUNT(*) AS total,
-                    SUM(CASE WHEN status = 'completed' THEN 1 END) AS completed,
-                    SUM(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled
-                FROM booking
-                WHERE 1=1";
-
+        $where = [];
         $params = [];
 
-        if (!empty($filters['start_date'])) {
-            $sql .= " AND tanggal_penggunaan_ruang >= :start";
-            $params[':start'] = $filters['start_date'];
-        }
-
-        if (!empty($filters['end_date'])) {
-            $sql .= " AND tanggal_penggunaan_ruang <= :end";
-            $params[':end'] = $filters['end_date'];
-        }
-
         if (!empty($filters['status'])) {
-            $sql .= " AND status = :status";
+            $where[] = 'b.status = :status';
             $params[':status'] = $filters['status'];
         }
+        if (!empty($filters['start_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) >= :start_date';
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) <= :end_date';
+            $params[':end_date'] = $filters['end_date'];
+        }
 
-        $stmt = $this->conn->prepare($sql);
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        // total
+        $sqlTotal = "SELECT COUNT(*) AS total FROM booking b $whereSql";
+        $stmt = $this->db->prepare($sqlTotal);
         $stmt->execute($params);
+        $total = (int)($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        // completed
+        $sqlCompleted = "SELECT COUNT(*) AS completed FROM booking b " . ($where ? $whereSql . " AND b.status = 'completed'" : "WHERE b.status = 'completed'");
+        $stmt = $this->db->prepare($sqlCompleted);
+        $stmt->execute($params);
+        $completed = (int)($stmt->fetch(PDO::FETCH_ASSOC)['completed'] ?? 0);
+
+        // cancelled
+        $sqlCancelled = "SELECT COUNT(*) AS cancelled FROM booking b " . ($where ? $whereSql . " AND b.status = 'cancelled'" : "WHERE b.status = 'cancelled'");
+        $stmt = $this->db->prepare($sqlCancelled);
+        $stmt->execute($params);
+        $cancelled = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cancelled'] ?? 0);
+
+        return ['total' => $total, 'completed' => $completed, 'cancelled' => $cancelled];
     }
 
-    /**
-     * Query data untuk chart
-     * (Jumlah booking per tanggal)
-     */
-    public function fetchChartData(array $filters): array
+    //* Returns rows grouped by date: tanggal (YYYY-MM-DD) and count
+    public function fetchBookingCountsByDate(array $filters = []): array
     {
-        $sql = "SELECT
-                    tanggal_penggunaan_ruang AS date,
-                    COUNT(*) AS total
-                FROM booking
-                WHERE 1=1";
-
+        $where = [];
         $params = [];
 
-        if (!empty($filters['start_date'])) {
-            $sql .= " AND tanggal_penggunaan_ruang >= :start";
-            $params[':start'] = $filters['start_date'];
-        }
-
-        if (!empty($filters['end_date'])) {
-            $sql .= " AND tanggal_penggunaan_ruang <= :end";
-            $params[':end'] = $filters['end_date'];
-        }
-
         if (!empty($filters['status'])) {
-            $sql .= " AND status = :status";
+            $where[] = 'b.status = :status';
             $params[':status'] = $filters['status'];
         }
+        if (!empty($filters['start_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) >= :start_date';
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) <= :end_date';
+            $params[':end_date'] = $filters['end_date'];
+        }
 
-        $sql .= " GROUP BY tanggal_penggunaan_ruang ORDER BY tanggal_penggunaan_ruang ASC";
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        $stmt = $this->conn->prepare($sql);
+        $sql = "
+            SELECT
+                DATE(b.tanggal_penggunaan_ruang) AS tanggal,
+                COUNT(*) AS count
+            FROM booking b
+            $whereSql
+            GROUP BY DATE(b.tanggal_penggunaan_ruang)
+            ORDER BY DATE(b.tanggal_penggunaan_ruang) ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Query tabel detail booking
-     */
-    public function fetchTableData(array $filters): array
+    public function fetchTopRooms(array $filters): array
     {
-        $sql = "SELECT
-                    b.id_booking,
-                    u.nama AS user_name,
-                    r.nama_ruangan AS room_name,
-                    b.status,
-                    b.tanggal_penggunaan_ruang
-                FROM booking b
-                INNER JOIN users u ON b.user_id = u.id_user
-                INNER JOIN ruangan r ON b.ruangan_id = r.id_ruangan
-                WHERE 1=1";
-
+        $where = [];
         $params = [];
 
-        if (!empty($filters['start_date'])) {
-            $sql .= " AND b.tanggal_penggunaan_ruang >= :start";
-            $params[':start'] = $filters['start_date'];
+        // filter tanggal
+        if ($filters['start_date']) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) >= :start_date";
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if ($filters['end_date']) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) <= :end_date";
+            $params[':end_date'] = $filters['end_date'];
         }
 
-        if (!empty($filters['end_date'])) {
-            $sql .= " AND b.tanggal_penggunaan_ruang <= :end";
-            $params[':end'] = $filters['end_date'];
-        }
+        $whereSQL = $where ? "WHERE " . implode(" AND ", $where) : "";
 
-        if (!empty($filters['status'])) {
-            $sql .= " AND b.status = :status";
-            $params[':status'] = $filters['status'];
-        }
+        $sql = "
+            SELECT r.nama_ruangan AS label, COUNT(b.id_booking) AS value
+            FROM booking b
+            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
+            $whereSQL
+            GROUP BY r.id_ruangan
+            ORDER BY value DESC
+            LIMIT 10
+        ";
 
-        $sql .= " ORDER BY b.tanggal_penggunaan_ruang DESC";
-
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value')
+        ];
+    }
+
+    public function fetchTopFeedback(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if ($filters['start_date']) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) >= :start_date";
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if ($filters['end_date']) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) <= :end_date";
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSQL = $where ? "WHERE " . implode(" AND ", $where) : "";
+
+        $sql = "
+            SELECT r.nama_ruangan AS label, COUNT(f.id_feedback) AS value
+            FROM feedback f
+            JOIN booking b ON b.id_booking = f.booking_id
+            JOIN ruangan r ON r.id_ruangan = b.ruangan_id
+            $whereSQL
+            GROUP BY r.id_ruangan
+            ORDER BY value DESC
+            LIMIT 10
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+        ];
+    }
+
+    public function fetchBusyHours(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if ($filters['start_date']) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) >= :start_date";
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if ($filters['end_date']) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) <= :end_date";
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSQL = $where ? "WHERE " . implode(" AND ", $where) : "";
+
+        $sql = "
+            SELECT HOUR(b.waktu_mulai) AS hour, COUNT(*) AS value
+            FROM booking b
+            $whereSQL
+            GROUP BY HOUR(b.waktu_mulai)
+            ORDER BY hour ASC;
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_map(fn($r) => $r['hour'] . ':00', $rows),
+            'values' => array_column($rows, 'value')
+        ];
+    }
+
+
+
+
+    /**
+     * Fetch detailed report rows (code, user, room, status, tanggal)
+     */
+    public function fetchReportRows(array $filters = []): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'b.status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['start_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) >= :start_date';
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) <= :end_date';
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        // kode_booking: create a readable code if actual column doesn't exist
+        $sql = "
+            SELECT
+                CONCAT('BKG', b.id_booking) AS kode_booking,
+                u.nama AS user_name,
+                r.nama_ruangan AS room_name,
+                b.status,
+                DATE(b.tanggal_penggunaan_ruang) AS tanggal
+            FROM booking b
+            LEFT JOIN users u ON b.user_id = u.id_user
+            LEFT JOIN ruangan r ON b.ruangan_id = r.id_ruangan
+            $whereSql
+            ORDER BY b.tanggal_penggunaan_ruang DESC, b.created_at DESC
+            LIMIT 1000
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

@@ -24,7 +24,7 @@ class AuthMiddleware extends Middleware
         }
 
         if (auth()->guest()) {
-            flash('error', 'Please login to access this page.');
+            flash('error', 'Mohon login untuk mengakses halaman ini.');
             redirect('/login');
             return false;
         }

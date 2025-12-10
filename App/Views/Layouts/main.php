@@ -14,7 +14,7 @@ use App\Core\App;
 
 <body class="min-h-dvh bg-slate-100">
     <!-- sidebar -->
-    <aside class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10">
+    <aside class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10 border-r border-emerald-700">
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
             <!-- Logo -->

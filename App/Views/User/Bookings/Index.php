@@ -152,16 +152,16 @@ $roomTypes = [
                             <?php foreach ($roomTypes as $roomType):
                                 $safeId = 'rt_' . preg_replace('/[^a-z0-9]+/i', '_', strtolower($roomType));
                                 ?>
-                                <label for="<?= $safeId ?>" class="flex items-center gap-2 bg-slate-100 py-2 px-4 border-2
-                            border-gray-300 rounded-2xl cursor-pointer hover:bg-slate-200
-                            transition-all active:scale-95">
-
+                                                                <div class="relative">
                                     <input id="<?= $safeId ?>" type="checkbox" name="jenis_ruangan[]"
-                                        value="<?= htmlspecialchars($roomType) ?>" class="size-4 accent-emerald-600"
+                                        value="<?= htmlspecialchars($roomType) ?>" class="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                         <?= in_array($roomType, $filters['jenis_ruangan'] ?? []) ? 'checked' : '' ?> />
 
-                                    <span class="text-sm"><?= htmlspecialchars($roomType) ?></span>
-                                </label>
+                                    <label for="<?= $safeId ?>"
+                                        class="peer-checked:bg-primary peer-checked:border-emerald-600 peer-checked:text-white flex items-center bg-slate-100 py-2 px-4 border-2 border-gray-300 rounded-2xl cursor-pointer ">
+                                        <span class="text-sm"><?= htmlspecialchars($roomType) ?></span>
+                                    </label>
+                                </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -338,7 +338,7 @@ $roomTypes = [
                         class="w-full border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition">
                 </div>
 
-                <!-- TYPES -->
+                <!-- jenis ruangan -->
                 <div>
                     <p class="text-sm font-medium text-slate-700 mb-2">Jenis Ruangan</p>
 
@@ -346,16 +346,16 @@ $roomTypes = [
                         <?php foreach ($roomTypes as $roomType):
                             $safeId = 'rt_' . preg_replace('/[^a-z0-9]+/i', '_', strtolower($roomType));
                         ?>
-                            <label for="<?= $safeId ?>"
-                                class="flex items-center gap-2 bg-slate-100 py-2 px-4 border-2 border-gray-300 rounded-2xl cursor-pointer hover:bg-slate-200 active:scale-95 transition">
-
+                            <div class="relative">
                                 <input id="<?= $safeId ?>" type="checkbox" name="jenis_ruangan[]"
-                                    value="<?= htmlspecialchars($roomType) ?>"
-                                    class="size-4 accent-emerald-600"
+                                    value="<?= htmlspecialchars($roomType) ?>" class="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                     <?= in_array($roomType, $filters['jenis_ruangan'] ?? []) ? 'checked' : '' ?> />
 
-                                <span class="text-sm"><?= htmlspecialchars($roomType) ?></span>
-                            </label>
+                                <label for="<?= $safeId ?>"
+                                    class="peer-checked:bg-primary peer-checked:border-emerald-600 peer-checked:text-white flex items-center bg-slate-100 py-2 px-4 border-2 border-gray-300 rounded-2xl cursor-pointer ">
+                                    <span class="text-sm"><?= htmlspecialchars($roomType) ?></span>
+                                </label>
+                            </div>
                         <?php endforeach; ?>
                     </div>
                 </div>

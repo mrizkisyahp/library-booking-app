@@ -136,7 +136,7 @@ class App
             'uri' => $this->request->getPath(),
             'method' => $this->request->method()
         ]);
-        $this->renderError('errors/404', $e, 'Page not found');
+        $this->renderError('errors/404', $e, 'Halaman tidak ditemukan');
     }
 
     private function handleForbiddenException(ForbiddenException $e): void
@@ -147,7 +147,7 @@ class App
             'method' => $this->request->method(),
             'user_id' => $this->user?->id_user ?? null
         ]);
-        $this->renderError('errors/403', $e, 'Access forbidden');
+        $this->renderError('errors/403', $e, 'Akses ditolak');
     }
 
     private function handleValidationException(ValidationException $e): void
@@ -196,10 +196,10 @@ class App
             'trace' => $e->getTraceAsString()
         ]);
 
-        $this->renderError('errors/500', $e, 'An unexpected error occurred');
+        $this->renderError('errors/500', $e, 'Sebuah error tidak terduga terjadi');
     }
 
-    private function renderError(string $view, \Throwable $e, string $defaultMessage = 'An error occurred'): void
+    private function renderError(string $view, \Throwable $e, string $defaultMessage = 'Sebuah error terjadi'): void
     {
         $isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
 

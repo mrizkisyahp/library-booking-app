@@ -58,48 +58,48 @@ class Validator
     {
         switch ($name) {
             case 'required':
-                return ($value === null || $value === '') ? 'This field is required' : null;
+                return ($value === null || $value === '') ? 'Kolom ini wajib diisi' : null;
 
             case 'string':
-                return ($value === null || is_string($value)) ? null : 'Must be a string';
+                return ($value === null || is_string($value)) ? null : 'Harus berbentuk huruf';
 
             case 'int':
             case 'integer':
-                return filter_var($value, FILTER_VALIDATE_INT) !== false ? null : 'Must be an integer';
+                return filter_var($value, FILTER_VALIDATE_INT) !== false ? null : 'Harus berbentuk angka';
 
             case 'numeric':
-                return is_numeric($value) ? null : 'Must be a number';
+                return is_numeric($value) ? null : 'Harus berbentuk angka numerik';
 
             case 'email':
                 return $this->validatePNJEmail($value);
 
             case 'min':
                 $min = (int) ($params[0] ?? 0);
-                return (strlen((string) $value) < $min) ? "Minimum {$min} characters." : null;
+                return (strlen((string) $value) < $min) ? "Minimal {$min} karakter." : null;
 
             case 'max':
                 $max = (int) ($params[0] ?? 0);
-                return (strlen((string) $value) > $max) ? "Maximum {$max} characters." : null;
+                return (strlen((string) $value) > $max) ? "Maksimal {$max} karakter." : null;
 
             case 'between':
                 $min = (int) ($params[0] ?? 0);
                 $max = (int) ($params[1] ?? 0);
                 $len = strlen((string) $value);
-                return ($len < $min || $len > $max) ? "Between {$min} and {$max} characters." : null;
+                return ($len < $min || $len > $max) ? "Diantara {$min} dan {$max} karakter." : null;
 
             case 'in':
-                return in_array($value, $params, true) ? null : 'Invalid value.';
+                return in_array($value, $params, true) ? null : 'Nilai tidak valid.';
 
             case 'confirmed':
                 $other = $data[$field . '_confirmation'] ?? null;
-                return ($value === $other) ? null : 'Confirmation does not match.';
+                return ($value === $other) ? null : 'Konfirmasi tidak cocok.';
 
             case 'regex':
                 $pattern = $params[0] ?? '';
                 if (!$pattern) {
                     return null;
                 }
-                return preg_match($pattern, (string) $value) === 1 ? null : 'Invalid format.';
+                return preg_match($pattern, (string) $value) === 1 ? null : 'Format tidak valid.';
 
             case 'exists':
                 return $this->validateExists($field, $value, $params);
@@ -108,7 +108,7 @@ class Validator
                 return $this->validateUnique($field, $value, $params);
 
             case 'date':
-                return (strtotime((string) $value) !== false) ? null : 'Must be a valid date.';
+                return (strtotime((string) $value) !== false) ? null : 'Harus berbentuk tanggal valid.';
 
             case 'after':
                 $other = $params[0] ?? null;
@@ -117,7 +117,7 @@ class Validator
                 $otherValue = $data[$other] ?? null;
                 $ts = strtotime((string) $value);
                 $tsOther = strtotime((string) $otherValue);
-                return ($ts !== false && $tsOther !== false && $ts > $tsOther) ? null : "Must be after {$other}.";
+                return ($ts !== false && $tsOther !== false && $ts > $tsOther) ? null : "Harus setelah {$other}.";
 
             case 'before':
                 $other = $params[0] ?? null;
@@ -126,7 +126,7 @@ class Validator
                 $otherValue = $data[$other] ?? null;
                 $ts = strtotime((string) $value);
                 $tsOther = strtotime((string) $otherValue);
-                return ($ts !== false && $tsOther !== false && $ts < $tsOther) ? null : "Must be before {$other}.";
+                return ($ts !== false && $tsOther !== false && $ts < $tsOther) ? null : "Harus sebelum {$other}.";
 
             case 'match':
                 $matchField = $params[0] ?? null;
@@ -134,7 +134,7 @@ class Validator
                     return null;
                 }
                 $matchValue = $data[$matchField] ?? null;
-                return ($value === $matchValue) ? null : "The {$field} must match {$matchField}.";
+                return ($value === $matchValue) ? null : "{$field} harus cocok dengan {$matchField}.";
 
             default:
                 return null;
@@ -144,7 +144,7 @@ class Validator
     private function validatePNJEmail($value): ?string
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return 'Use a valid Email';
+            return 'Gunakan email yang valid.';
         }
 
         $domain = strtolower(substr(strrchr($value, '@'), 1));
@@ -154,7 +154,7 @@ class Validator
         $valid = in_array($domain, $allowed, true)
             || preg_match('/^(' . implode('|', $departments) . ')\.pnj\.ac\.id$/', $domain);
 
-        return $valid ? null : 'Use a valid PNJ Email';
+        return $valid ? null : 'Gunakan email PNJ yang valid!';
     }
 
     private function validateExists(string $field, $value, array $params): ?string
@@ -169,7 +169,7 @@ class Validator
         $qb = new QueryBuilder(App::$app->db->pdo);
         $count = $qb->table($table)->where($column, $value)->count();
 
-        return $count > 0 ? null : "{$field} does not exist.";
+        return $count > 0 ? null : "{$field} tidak ditemukan.";
     }
 
     private function validateUnique(string $field, $value, array $params): ?string
@@ -192,7 +192,7 @@ class Validator
 
         $count = $query->count();
 
-        return $count === 0 ? null : "The {$field} has already been taken.";
+        return $count === 0 ? null : "{$field} sudah digunakan.";
     }
 
     public function getErrors(): array

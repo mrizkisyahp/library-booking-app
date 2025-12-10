@@ -17,7 +17,8 @@
   "main": "tailwind.config.js",
   "scripts": {
     "dev": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --watch",
-    "build": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --minify"
+    "build": "npx @tailwindcss/cli -i ./Public/src/input.css -o ./Public/css/output.css --minify",
+    "copy:chart": "cp node_modules/chart.js/dist/chart.umd.min.js public/js/chart.umd.min.js"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
