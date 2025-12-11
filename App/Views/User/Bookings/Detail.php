@@ -9,7 +9,7 @@ $statusColors = [
 ];
 ?>
 
-<div class="p-4 bg-white shadow-md w-full ">
+<div class="p-4 bg-white shadow-md w-full">
     <div class="flex items-center gap-4 py-4">
         <div class="flex items-center gap-4 ">
             <a href="/dashboard">
@@ -77,7 +77,7 @@ $statusColors = [
         </div>
     <?php endif; ?>
 
-    <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6">
+    <div class="rounded-3xl border border-gray-200 bg-white shadow-md mb-6 max-w-7xl mx-auto">
         <div class="flex flex-col justify-start p-6">
             <p class="font-bold text-2xl mb-2">
                 <?= htmlspecialchars($booking->nama_ruangan) ?>
@@ -297,7 +297,9 @@ $statusColors = [
             </div>
         </div>
     </div>
-    <div class="w-full mb-8">
+
+    <!-- Info status desktop -->
+    <div class="w-full mb-8 hidden md:block">
         <div class="flex items-center justify-around w-full px-4">
             <?php if ($booking->status === 'draft'): ?>
                 <form action="/bookings/submit" method="post"
@@ -306,7 +308,7 @@ $statusColors = [
                     <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
                     <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
-                        class="w-full bg-primary text-slate-500 px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+                        class="w-full bg-primary text-white px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:text-slate-500 flex items-center justify-center">
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -320,20 +322,52 @@ $statusColors = [
                 </a>
             <?php endif; ?>
             <?php if ($booking->status === 'pending'): ?>
-                <form action="/bookings/cancel-pending" method="post"
-                    onsubmit="return confirm('Anda yakin ingin membatalkan pengajuan ini?')">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                <!-- button modal batalkan draft booking -->
+                <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>#modal-cancel-draft"
+                    class="w-fit bg-red-600 text-white px-8 py-4 rounded-xl hover:bg-red-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-circle-x-icon lucide-circle-x size-6">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m15 9-6 6" />
+                        <path d="m9 9 6 6" />
+                    </svg>
+                    Batalkan pengajuan draft
+                </a>
 
-                    <button type="submit"
-                        class="w-full bg-red-600 text-white px-8 py-4 rounded-xl border hover:bg-red-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                        </svg>
-                        <span>Batalkan Pengajuan Draft</span>
-                    </button>
-                </form>
+                <!-- modal menu batalkan draft booking-->
+                <div id="modal-cancel-draft"
+                    class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999 backdrop-blur-xs">
+
+                    <div
+                        class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
+
+                        <h1 class="text-4xl font-bold text-slate-800 mb-2">
+                            Peringatan
+                        </h1>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Apakah Kamu yakin untuk menghapus Draft?
+                        </p>
+
+                        <form action="/bookings/cancel-pending" method="post" class="space-y-3">
+                            <?= csrf_field() ?>
+
+                            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+
+                            <div class="flex items-center gap-4 mt-6 text-center">
+                                <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>"
+                                    class="w-full bg-slate-200 text-black p-4 rounded-2xl hover:bg-slate-300 transition-all font-regular border border-slate-400 shadow cursor-pointer">
+                                    Tidak
+                                </a>
+
+                                <button type="submit"
+                                    class="w-full bg-rose-500 text-white p-4 rounded-2xl hover:bg-rose-600 transition-all font-regular border border-rose-700 shadow cursor-pointer">
+                                    Ya, Hapus
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             <?php endif; ?>
 
             <?php if ($booking->status === 'verified'): ?>
@@ -447,38 +481,77 @@ $statusColors = [
         <?php endif; ?>
     </div>
 
+    <!-- nav overlay mobile -->
     <nav class="fixed left-0 bottom-0 right-0 bg-gray-100 text-white md:hidden z-999 rounded-t-4xl py-6 shadow-xl">
         <div class="flex items-center justify-around w-full px-4">
-            <!-- <?php if ($booking->status !== 'draft'): ?>
+            <?php if ($booking->status === 'draft'): ?>
             <form action="/bookings/submit" method="post">
                 <?= csrf_field() ?>
                 <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
                 <button type="submit"
                 <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
-                class="w-full bg-primary text-slate-500 px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center">
+                class="w-full bg-primary text-white px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:text-slate-500 flex items-center justify-center">
                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
                 <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
                 </button>
             </form>
-        <?php endif; ?> -->
-            <?php if ($booking->status === 'pending'): ?>
-                <form action="/bookings/" method="post">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+        <?php endif; ?>
 
-                    <button type="submit"
-                        class="w-full bg-red-600 text-white px-8 py-4 rounded-xl border hover:bg-red-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                        </svg>
-                        <span>Batalkan Pengajuan Draft</span>
-                    </button>
-                </form>
+            <?php if ($booking->status === 'pending'): ?>
+
+                <!-- button modal batalkan draft booking -->
+                <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>#modal-cancel-draft-mobile"
+                    class="w-full bg-red-600 text-white px-8 py-4 rounded-xl hover:bg-red-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-circle-x-icon lucide-circle-x size-6">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m15 9-6 6" />
+                        <path d="m9 9 6 6" />
+                    </svg>
+                    Batalkan pengajuan draft
+                </a>
+
+
+                <!-- modal menu batalkan draft booking-->
+                <div id="modal-cancel-draft-mobile"
+                    class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999 backdrop-blur-xs">
+
+                    <div
+                        class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
+
+                        <h1 class="text-4xl font-bold text-slate-800 mb-2">
+                            Peringatan
+                        </h1>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Apakah Kamu yakin untuk menghapus Draft?
+                        </p>
+
+                        <form action="/bookings/cancel-pending" method="post" class="space-y-3">
+                            <?= csrf_field() ?>
+
+                            <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+
+                            <div class="flex items-center gap-4 mt-6 text-center">
+                                <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>"
+                                    class="w-full bg-slate-200 text-black p-4 rounded-2xl hover:bg-slate-300 transition-all font-regular border border-slate-400 shadow cursor-pointer">
+                                    Tidak
+                                </a>
+
+                                <button type="submit"
+                                    class="w-full bg-rose-500 text-white p-4 rounded-2xl hover:bg-rose-600 transition-all font-regular border border-rose-700 shadow cursor-pointer">
+                                    Ya, Hapus
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             <?php endif; ?>
+
 
             <?php if ($booking->status === 'verified'): ?>
                 <div class="text-2xl font-bold mb-4">
@@ -530,7 +603,15 @@ $statusColors = [
                     class="inline-block bg-primary hover:bg-emerald-700 font-regular text-white active:bg-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                     Isi Feedback (Wajib)
                 </a>
-            <?php else: ?>
+            <?php endif; ?>
+
+            <?php if ($booking->status === 'cancelled'): ?>
+                <div class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
+                    Booking telah dibatalkan
+                </div>
+            <?php endif; ?>
+
+            <?php if ($booking->status === 'completed' && $booking->id_feedback): ?>
                 <div
                     class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
                     Seluruh rangkaian booking sudah diselesaikan
@@ -539,4 +620,68 @@ $statusColors = [
         </div>
     </nav>
 
+    <!-- Pagination -->
+    <?php
+    $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
+    ?>
+    <div class="bg-white rounded-2xl shadow-lg p-6 max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-slate-600">
+                Menampilkan <span
+                    class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+                sampai <span
+                    class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+                dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota booking
+            </p>
+            <div class="flex gap-2 items-center">
+                <!-- First Page -->
+                <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = 1; ?>
+                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        Awal
+                    </a>
+                <?php endif; ?>
+                <!-- Previous -->
+                <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        ← Sebelumnya
+                    </a>
+                <?php endif; ?>
+                <!-- Page Numbers -->
+                <div class="flex gap-1">
+                    <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                        <?php $paginationQuery['page'] = $i; ?>
+                        <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                    <?= $i === $pagination->currentPage
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+                <!-- Next -->
+                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        Selanjutnya →
+                    </a>
+                <?php endif; ?>
+                <!-- Last Page -->
+                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        Akhir
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+

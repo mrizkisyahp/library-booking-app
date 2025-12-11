@@ -198,6 +198,18 @@ class UserBookingController extends Controller
 
             $rescheduleRequest = $this->bookingServices->getPendingRescheduleRequest($bookingId);
 
+            $page = (int) ($request->query()['page'] ?? 1);
+
+            $filters = [
+                'nama_ruangan' => $request->input('nama_ruangan') ?? '',
+                'tanggal' => $request->input('tanggal') ?? '',
+                'waktu_mulai' => $request->input('waktu_mulai') ?? '',
+                'kapasitas_min' => $request->input('kapasitas_min') ?? '',
+                'jenis_ruangan' => $request->input('jenis_ruangan') ?? [],
+            ];
+
+            $bookings = $this->bookingServices->getBookingsByUser($user->id_user, $filters, 1, $page);
+
             return view('User/Bookings/Detail', [
                 'booking' => $data['booking'],
                 'pic' => $data['pic'],
@@ -207,6 +219,10 @@ class UserBookingController extends Controller
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
                 'rescheduleRequest' => $rescheduleRequest,
+
+                'bookings' => $bookings->items,
+                'pagination' => $bookings,
+                'filters' => $filters,
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
