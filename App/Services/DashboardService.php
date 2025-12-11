@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\BookingRepository;
-use App\Core\Repository\UserRepository;
-use App\Core\Repository\RoomRepository;
+use App\Repositories\BookingRepository;
+use App\Repositories\UserRepository;
+use App\Repositories\RoomRepository;
 
 class DashboardService
 {

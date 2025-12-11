@@ -19,6 +19,7 @@ class QueryBuilder
     protected array $havings = [];
     protected ?string $modelClass = null;
     protected array $eagerLoad = [];
+    protected bool $lockForUpdate = false;
 
     public function __construct(PDO $pdo)
     {
@@ -74,6 +75,10 @@ class QueryBuilder
             $sql .= " OFFSET {$this->offsetValue}";
         }
 
+        if ($this->lockForUpdate) {
+            $sql .= " FOR UPDATE";
+        }
+
         return $sql;
     }
 
@@ -125,6 +130,12 @@ class QueryBuilder
         }
 
         $this->eagerLoad = array_merge($this->eagerLoad, $relations);
+        return $this;
+    }
+
+    public function lockForUpdate(): static
+    {
+        $this->lockForUpdate = true;
         return $this;
     }
 

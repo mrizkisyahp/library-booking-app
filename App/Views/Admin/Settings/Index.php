@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h3 class="text-xl font-semibold text-gray-900">Jam Operasional</h3>
-                <p class="text-sm text-gray-500">Sesi booking yang tersedia</p>
+                <p class="text-sm text-gray-500">Jadwal perpustakaan dan sesi booking</p>
             </div>
         </div>
         <div class="space-y-4">
@@ -30,21 +30,43 @@
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">Sesi Booking</label>
-                <div class="space-y-2">
-                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium text-gray-900">Sesi 1</span>
-                            <span class="text-blue-700 font-semibold">08:15 - 10:55</span>
-                        </div>
-                        <p class="text-xs text-gray-600 mt-1">Pagi (2 jam 40 menit)</p>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Jam Perpustakaan</label>
+                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg mb-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-900">Buka - Tutup</span>
+                        <span class="text-emerald-700 font-bold">08:00 - 16:20</span>
                     </div>
-                    <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium text-gray-900">Sesi 2</span>
-                            <span class="text-purple-700 font-semibold">13:15 - 16:00</span>
-                        </div>
-                        <p class="text-xs text-gray-600 mt-1">Siang (2 jam 45 menit)</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <div class="p-2 bg-slate-50 rounded-lg text-center">
+                        <p class="text-xs text-gray-500">Buffer Awal</p>
+                        <p class="font-semibold text-gray-900">15 menit</p>
+                    </div>
+                    <div class="p-2 bg-slate-50 rounded-lg text-center">
+                        <p class="text-xs text-gray-500">Buffer Akhir</p>
+                        <p class="font-semibold text-gray-900">20 menit</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500">Booking tersedia 08:15 - 16:00 (dengan buffer)</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Waktu Booking</label>
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="font-medium text-blue-800">Free-form Booking</span>
+                    </div>
+                    <p class="text-sm text-blue-700">
+                        User dapat memilih waktu booking secara bebas dalam jam operasional,
+                        selama tidak melewati jam istirahat.
+                    </p>
+                    <div class="mt-3 p-2 bg-white rounded-lg">
+                        <p class="text-xs text-gray-600">
+                            <strong>Contoh valid:</strong> 08:30-10:30, 09:00-10:45, 12:30-14:00 (Sen-Kam), 13:30-15:00
+                        </p>
                     </div>
                 </div>
             </div>
@@ -107,6 +129,20 @@
                 </div>
                 <span class="text-lg font-bold text-gray-900">7 hari kerja</span>
             </div>
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-gray-700">No-Show Grace Period</p>
+                    <p class="text-xs text-gray-500">Toleransi telat check-in</p>
+                </div>
+                <span class="text-lg font-bold text-gray-900">10 menit</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-gray-700">Reschedule Limit</p>
+                    <p class="text-xs text-gray-500">Maksimal reschedule per booking</p>
+                </div>
+                <span class="text-lg font-bold text-gray-900">1 kali</span>
+            </div>
         </div>
     </div>
 
@@ -139,6 +175,13 @@
                     <p class="text-xs text-gray-500">Lama akun aktif setelah approval</p>
                 </div>
                 <span class="text-lg font-bold text-emerald-600">365 hari</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-gray-700">Max Pending Invitations</p>
+                    <p class="text-xs text-gray-500">Undangan pending per user</p>
+                </div>
+                <span class="text-lg font-bold text-gray-900">3</span>
             </div>
             <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                 <p class="text-xs text-amber-800">

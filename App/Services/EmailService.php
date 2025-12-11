@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
 use App\Core\App;
 use App\Models\User;
@@ -130,6 +130,25 @@ class EmailService
         return $this->send($user->email, $user->nama, $subject, $body);
     }
 
+    // send submitted notif
+    public function sendBookingSubmitted(User $user, $booking): bool
+    {
+        $subject = 'Booking Submitted | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Reservasi ruangan kamu telah berhasil disubmit dan sedang menunggu persetujuan admin.</p>
+            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
+            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
+            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            <p>Kami akan segera memberitahu kamu status reservasi ini.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+
+
     // send feedback notif
     public function sendFeedbackRequest(User $user, $booking): bool
     {
@@ -206,4 +225,61 @@ class EmailService
         return $this->send($user->email, $user->nama, $subject, $body);
     }
 
+    public function sendInvitation(User $user, $booking, User $inviter): bool
+    {
+        $subject = 'Undangan Bergabung ke Booking | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p><strong>{$inviter->nama}</strong> mengundang kamu untuk bergabung dalam booking ruangan.</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+            <p>Silakan login ke aplikasi untuk menerima atau menolak undangan ini.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+    public function sendJoinRequestApproved(User $user, $booking): bool
+    {
+        $subject = 'Permintaan Bergabung Disetujui | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Permintaan kamu untuk bergabung ke booking telah disetujui oleh PIC.</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+    public function sendRescheduleApproved(User $user, $booking): bool
+    {
+        $subject = 'Reschedule Approved | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Permintaan reschedule booking kamu telah disetujui.</p>
+            <p><strong>Jadwal Baru:</strong></p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+            <p>Booking kamu sekarang berstatus <strong>Pending</strong> (menunggu verifikasi ulang jika diperlukan) atau <strong>Verified</strong>.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+    public function sendRescheduleRejected(User $user, $booking, string $reason): bool
+    {
+        $subject = 'Reschedule Rejected | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Permintaan reschedule booking kamu ditolak.</p>
+            <p><strong>Alasan:</strong> {$reason}</p>
+            <p>Jadwal booking kamu tetap seperti sediakala (jika belum expired/cancel).</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
 }

@@ -109,6 +109,21 @@ class Database
         return $this->pdo->prepare($sql);
     }
 
+    public function beginTransaction(): bool
+    {
+        return $this->pdo->beginTransaction();
+    }
+
+    public function commit(): bool
+    {
+        return $this->pdo->commit();
+    }
+
+    public function rollback(): bool
+    {
+        return $this->pdo->rollBack();
+    }
+
     protected function log($message): void
     {
         echo '[' . date('Y-m-d H:i:s') . '] - ' . $message . PHP_EOL;

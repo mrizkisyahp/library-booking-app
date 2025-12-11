@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\RoomService;
+use App\Services\RoomService;
 
 class UserRoomController extends Controller
 {

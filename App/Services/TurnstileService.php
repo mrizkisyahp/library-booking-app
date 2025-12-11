@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
 class TurnstileService
 {

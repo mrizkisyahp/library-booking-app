@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\FeedbackService;
+use App\Services\FeedbackService;
 use Exception;
 
 class UserFeedbackController extends Controller

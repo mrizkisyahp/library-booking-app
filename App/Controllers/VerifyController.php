@@ -7,8 +7,8 @@ use App\Core\Exceptions\ValidationException;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
-use App\Core\Services\AuthService;
-use App\Core\Services\TurnstileService;
+use App\Services\AuthService;
+use App\Services\TurnstileService;
 
 class VerifyController extends Controller
 {

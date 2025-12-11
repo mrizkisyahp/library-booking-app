@@ -4,14 +4,14 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\DashboardService;
-use App\Core\Services\BookingServices;
+use App\Services\DashboardService;
+use App\Services\BookingService;
 
 class UserDashboardController extends Controller
 {
     public function __construct(
         private DashboardService $dashboardService,
-        private BookingServices $bookingServices,
+        private BookingService $bookingService,
     ) {
     }
     public function index(Request $request)
@@ -22,8 +22,8 @@ class UserDashboardController extends Controller
         $bookings = $data['bookings'];
         $user = $data['user'];
         $feedbacks = $data['pendingFeedbacks'];
-        $pendingInvitations = $this->bookingServices->getPendingForUser($user->id_user);
-        $myJoinRequests = $this->bookingServices->getMyPendingJoinRequests($user->id_user);
+        $pendingInvitations = $this->bookingService->getPendingForUser($user->id_user);
+        $myJoinRequests = $this->bookingService->getMyPendingJoinRequests($user->id_user);
 
         return view('User/UserDashboard', [
             'bookings' => $bookings,

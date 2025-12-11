@@ -106,41 +106,51 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200">
-            <?php foreach ($availability as $day): ?>
-              <tr class="hover:bg-slate-50 transition-colors">
+            <?php
+            $availabilityRowColors = [
+              'available' => 'bg-green-50 hover:bg-green-100',
+              'blocked' => 'bg-red-50 hover:bg-red-100',
+            ];
+
+            foreach ($availability as $day):
+              $rowColor = $availabilityRowColors[$day['availability_status']] ?? 'hover:bg-slate-50';
+              ?>
+              <tr class="transition-colors <?= $rowColor ?>">
                 <td class="px-4 py-4 font-medium text-slate-700">
                   <?= htmlspecialchars($day['day_short']) ?>, <?= htmlspecialchars($day['day_number']) ?>
                   <?= htmlspecialchars($day['month']) ?>
                 </td>
                 <td class="px-4 py-4">
-                  <?php if (empty($day['bookings'])): ?>
-                    <span
-                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <?php if ($day['is_blocked']): ?>
+                    <!-- Blocked Date -->
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2 text-red-800 font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        Blocked
+                      </div>
+                      <div class="text-sm text-slate-600 italic">
+                        Reason: <?= htmlspecialchars($day['blocking_reason']) ?>
+                      </div>
+                    </div>
+                  <?php elseif (empty($day['bookings'])): ?>
+                    <!-- Available -->
+                    <div class="flex items-center gap-2 text-green-800 font-semibold">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                       </svg>
-                      Tersedia Sepanjang Hari
-                    </span>
-                  <?php else: ?>
-                    <div class="space-y-2">
+                      Available
+                    </div>
+                    <!-- Show existing bookings if any -->
+                  <?php elseif (!empty($day['bookings'])): ?>
+                    <div class="space-y-1 mt-2">
+                      <div class="text-xs text-slate-500">Booked slots:</div>
                       <?php foreach ($day['bookings'] as $booking): ?>
-                        <?php
-                        $slotStatusColors = [
-                          'pending' => 'bg-yellow-100 text-yellow-800',
-                          'verified' => 'bg-blue-100 text-blue-800',
-                          'active' => 'bg-red-100 text-red-800',
-                          'completed' => 'bg-gray-100 text-gray-800'
-                        ];
-                        $slotColor = $slotStatusColors[strtolower($booking['status_booking'])] ?? 'bg-gray-100 text-gray-800';
-                        ?>
-                        <div class="flex items-center gap-2">
-                          <span class="text-slate-600 font-medium">
-                            <?= htmlspecialchars(substr($booking['waktu_mulai'], 0, 5)) ?> -
-                            <?= htmlspecialchars(substr($booking['waktu_selesai'], 0, 5)) ?>
-                          </span>
-                          <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium <?= $slotColor ?>">
-                            <?= htmlspecialchars(ucfirst($booking['status_booking'])) ?>
-                          </span>
+                        <div class="text-sm text-slate-600">
+                          <?= htmlspecialchars(substr($booking['waktu_mulai'], 0, 5)) ?> -
+                          <?= htmlspecialchars(substr($booking['waktu_selesai'], 0, 5)) ?>
                         </div>
                       <?php endforeach; ?>
                     </div>

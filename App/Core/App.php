@@ -5,12 +5,27 @@ namespace App\Core;
 use App\Core\Exceptions\NotFoundException;
 use App\Core\Exceptions\ForbiddenException;
 use App\Core\Exceptions\ValidationException;
-use App\Core\Services\AuthService;
-use App\Core\Services\Logger;
-use App\Core\Repository\UserRepository;
-use App\Core\Services\TurnstileService;
-use App\Core\Services\EmailService;
-use App\Core\Services\CacheService;
+use App\Services\AuthService;
+use App\Services\Logger;
+use App\Services\TurnstileService;
+use App\Services\EmailService;
+use App\Services\CacheService;
+use App\Services\BookingService;
+use App\Services\UserService;
+use App\Services\ProfileService;
+use App\Services\RoomService;
+use App\Services\DashboardService;
+use App\Services\AdminReportService;
+use App\Services\FeedbackService;
+
+use App\Repositories\UserRepository;
+use App\Repositories\BookingRepository;
+use App\Repositories\RoomRepository;
+use App\Repositories\FeedbackRepository;
+use App\Repositories\InvitationRepository;
+use App\Repositories\AdminReportRepository;
+use App\Repositories\RescheduleRepository;
+use App\Repositories\RoleRepository;
 use App\Models\User;
 
 class App
@@ -63,6 +78,45 @@ class App
             UserRepository::class,
             fn($c) => new UserRepository($this->db)
         );
+        $this->container->singleton(BookingRepository::class, fn($c) => new BookingRepository($this->db));
+        $this->container->singleton(
+            RoomRepository::class,
+            fn($c) => new RoomRepository(
+                $c->make(Database::class),
+                $c->make(BookingRepository::class)
+            )
+        );
+        $this->container->singleton(FeedbackRepository::class, fn($c) => new FeedbackRepository($this->db));
+        $this->container->singleton(InvitationRepository::class, fn($c) => new InvitationRepository($this->db));
+        $this->container->singleton(AdminReportRepository::class, fn($c) => new AdminReportRepository($this->db));
+        $this->container->singleton(RescheduleRepository::class, fn($c) => new RescheduleRepository($this->db));
+        $this->container->singleton(RoleRepository::class, fn($c) => new RoleRepository($this->db));
+
+        // Services
+        $this->container->singleton(BookingService::class, function ($c) {
+            return new BookingService(
+                $c->make(BookingRepository::class),
+                $c->make(Logger::class),
+                $c->make(FeedbackRepository::class),
+                $c->make(InvitationRepository::class),
+                $c->make(RescheduleRepository::class),
+                $this->db,
+                $c->make(EmailService::class)
+            );
+        });
+        $this->container->singleton(UserService::class, function ($c) {
+            return new UserService($c->make(UserRepository::class), $c->make(Logger::class));
+        });
+        $this->container->singleton(ProfileService::class, fn($c) => new ProfileService($c->make(UserRepository::class)));
+        $this->container->singleton(RoomService::class, fn($c) => new RoomService($c->make(RoomRepository::class)));
+        $this->container->singleton(DashboardService::class, fn($c) => new DashboardService(
+            $c->make(BookingRepository::class),
+            $c->make(UserRepository::class),
+            $c->make(RoomRepository::class)
+        ));
+        $this->container->singleton(AdminReportService::class, fn($c) => new AdminReportService($c->make(AdminReportRepository::class)));
+        $this->container->singleton(FeedbackService::class, fn($c) => new FeedbackService($c->make(FeedbackRepository::class), $c->make(BookingRepository::class)));
+
 
         $this->container->singleton(
             TurnstileService::class,

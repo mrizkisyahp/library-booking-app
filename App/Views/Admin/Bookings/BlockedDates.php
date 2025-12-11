@@ -42,7 +42,7 @@ use App\Core\App;
                     Blokir Tanggal
                 </h2>
 
-                <form action="/admin/blocked-dates" method="post" class="space-y-4">
+                <form action="/admin/blocked-dates/preview" method="post" class="space-y-4">
                     <?= csrf_field() ?>
 
                     <div>
@@ -58,17 +58,54 @@ use App\Core\App;
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Ruangan (Opsional)</label>
-                        <select name="ruangan_id"
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
-                            <option value="">Semua Ruangan</option>
-                            <?php foreach ($rooms as $room): ?>
-                                <option value="<?= (int) $room->id_ruangan ?>"><?= htmlspecialchars($room->nama_ruangan) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <p class="text-xs text-slate-500 mt-1">Kosongkan untuk memblokir semua ruangan</p>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Ruangan yang Diblokir</label>
+
+                        <!-- Select All / Deselect All -->
+                        <div class="mb-3 flex gap-2">
+                            <button type="button" id="selectAllRooms"
+                                class="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
+                                Pilih Semua
+                            </button>
+                            <button type="button" id="deselectAllRooms"
+                                class="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
+                                Batal Semua
+                            </button>
+                        </div>
+
+                        <!-- Room Checkboxes -->
+                        <div
+                            class="max-h-48 overflow-y-auto border-2 border-gray-200 rounded-xl p-3 space-y-2 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-200 transition-all">
+                            <?php if (empty($rooms)): ?>
+                                <p class="text-sm text-slate-500 italic">Tidak ada ruangan tersedia</p>
+                            <?php else: ?>
+                                <?php foreach ($rooms as $room): ?>
+                                    <label
+                                        class="flex items-center p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors">
+                                        <input type="checkbox" name="ruangan_ids[]" value="<?= (int) $room->id_ruangan ?>"
+                                            class="room-checkbox w-4 h-4 text-red-500 border-gray-300 rounded focus:ring-red-500 focus:ring-2 transition-all">
+                                        <span class="ml-3 text-sm font-medium text-slate-700">
+                                            <?= htmlspecialchars($room->nama_ruangan) ?>
+                                        </span>
+                                    </label>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">
+                            <strong>Tidak pilih apapun</strong> = memblokir <strong>semua ruangan</strong>
+                        </p>
                     </div>
+
+                    <script>
+                        // Select All functionality
+                        document.getElementById('selectAllRooms')?.addEventListener('click', function () {
+                            document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = true);
+                        });
+
+                        // Deselect All functionality
+                        document.getElementById('deselectAllRooms')?.addEventListener('click', function () {
+                            document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
+                        });
+                    </script>
 
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan</label>

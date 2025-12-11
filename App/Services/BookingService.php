@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\BookingRepository;
-use App\Core\Repository\InvitationRepository;
-use App\Core\Repository\FeedbackRepository;
-use App\Core\Repository\RescheduleRepository;
+use App\Repositories\BookingRepository;
+use App\Repositories\InvitationRepository;
+use App\Repositories\FeedbackRepository;
+use App\Repositories\RescheduleRepository;
 use App\Models\Booking;
+use App\Models\User;
 use App\Models\RescheduleRequest;
 use Carbon\Carbon;
 use Exception;
 use App\Core\Paginator;
+use App\Core\Database;
 
 
-class BookingServices
+class BookingService
 {
     private const STATE_TRANSITIONS = [
         'draft' => ['pending', 'cancelled', 'expired'],
@@ -30,7 +32,9 @@ class BookingServices
         private Logger $logger,
         private FeedbackRepository $feedbackRepo,
         private InvitationRepository $invitationRepo,
-        private RescheduleRepository $rescheduleRepo
+        private RescheduleRepository $rescheduleRepo,
+        private Database $db,
+        private EmailService $emailService
     ) {
     }
 
@@ -45,6 +49,52 @@ class BookingServices
     public function getAllBookings(array $filters = [], int $perPage = 15, int $page = 1): Paginator
     {
         return $this->bookingRepo->getAllBookings($filters, $perPage, $page);
+    }
+
+    public function getTodayBookings(array $filters = [], int $perPage = 15, int $page = 1): Paginator
+    {
+        return $this->bookingRepo->getTodayBookings($filters, $perPage, $page);
+    }
+
+    public function getStatusCounts(): array
+    {
+        $counts = $this->bookingRepo->getBookingCountByStatus();
+        return [
+            'pending' => $counts['pending'] ?? 0,
+            'verified' => $counts['verified'] ?? 0,
+            'active' => $counts['active'] ?? 0,
+            'completed' => $counts['completed'] ?? 0,
+            'cancelled' => $counts['cancelled'] ?? 0,
+            'expired' => $counts['expired'] ?? 0,
+            'no_show' => $counts['no_show'] ?? 0,
+        ];
+    }
+
+    public function getUnreadCounts(array $lastViewed): array
+    {
+        $statuses = ['draft', 'pending', 'verified', 'active', 'completed', 'cancelled', 'expired', 'no_show'];
+        $unread = [];
+
+        foreach ($statuses as $status) {
+            $timestamp = $lastViewed[$status] ?? '2000-01-01 00:00:00';
+            $unread[$status] = $this->bookingRepo->getCountByStatusSince($status, $timestamp);
+        }
+
+        return $unread;
+    }
+
+    public function getTodayStatusCounts(): array
+    {
+        $counts = $this->bookingRepo->getTodayBookingCountByStatus();
+        return [
+            'pending' => $counts['pending'] ?? 0,
+            'verified' => $counts['verified'] ?? 0,
+            'active' => $counts['active'] ?? 0,
+            'completed' => $counts['completed'] ?? 0,
+            'cancelled' => $counts['cancelled'] ?? 0,
+            'expired' => $counts['expired'] ?? 0,
+            'no_show' => $counts['no_show'] ?? 0,
+        ];
     }
     public function getBookingMembers(int $bookingId): array
     {
@@ -329,74 +379,105 @@ class BookingServices
 
     public function submitForApproval(int $bookingId, int $userId): void
     {
-        $booking = $this->bookingRepo->findById($bookingId);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
+
+            if (!$booking) {
+                throw new Exception('Booking tidak ditemukan');
+            }
+
+            if ((int) $booking->user_id !== $userId) {
+                throw new Exception('Hanya PIC yang dapat submit booking');
+            }
+
+            if ($booking->status !== 'draft') {
+                throw new Exception('Hanya booking dengan status draft yang bisa di submit');
+            }
+
+            // Lock room to ensure capacity/status consistency during check? 
+            // Capacity is on room.
+            $this->bookingRepo->findByRoomIdWithLock($booking->ruangan_id);
+
+            $this->validateMinimumCapacity($bookingId);
+
+            $this->invitationRepo->rejectAllPendingForBooking($bookingId);
+
+            $this->transitionTo($bookingId, 'pending', 'Submitted by PIC for approval');
+
+            // Send notification
+            $user = $this->bookingRepo->findUserById($userId);
+            if ($user) {
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingSubmitted($this->hydrateUser($user), (object) $bookingDetails);
+                }
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-
-        if ((int) $booking->user_id !== $userId) {
-            throw new Exception('Hanya PIC yang dapat submit booking');
-        }
-
-        if ($booking->status !== 'draft') {
-            throw new Exception('Hanya booking dengan status draft yang bisa di submit');
-        }
-
-        $this->validateMinimumCapacity($bookingId);
-
-        $this->invitationRepo->rejectAllPendingForBooking($bookingId);
-
-        $this->transitionTo($bookingId, 'pending', 'Submitted by PIC for approval');
     }
 
     public function addMember(int $bookingId, int $memberUserId, int $requestingUserId): void
     {
-        $booking = $this->bookingRepo->findById($bookingId);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception("Booking tidak ditemukan");
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
+
+            if (!$booking) {
+                throw new Exception("Booking tidak ditemukan");
+            }
+
+            $isAdmin = auth()->user()->id_role === 1;
+
+            if (!$isAdmin && (int) $booking->user_id !== $requestingUserId) {
+                throw new Exception('Hanya PIC yang dapat menambahkan anggota');
+            }
+
+            if (!$isAdmin && $booking->status !== 'draft') {
+                throw new Exception('Hanya booking dengan status draft yang bisa menambahkan anggota');
+            }
+
+            if ($memberUserId === (int) $booking->user_id) {
+                throw new Exception('PIC tidak dapat menambahkan diri sendiri sebagai anggota');
+            }
+
+            if ($this->bookingRepo->isMemberOfBooking($bookingId, $memberUserId)) {
+                throw new Exception('Anggota sudah terdaftar dalam booking');
+            }
+
+            $this->validateMemberCanJoin($memberUserId, $bookingId);
+
+            $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
+            if (!$room) {
+                throw new Exception('Ruangan tidak ditemukan');
+            }
+
+            $currentMemberCount = $this->bookingRepo->getMemberCount($bookingId);
+            $totalParticipants = $currentMemberCount + 1 + 1; // Existing members + New member + PIC
+
+            if ($totalParticipants > $room['kapasitas_max']) {
+                throw new Exception("Kapasitas maksimal {$room['kapasitas_max']} orang sudah tercapai");
+            }
+
+            $this->bookingRepo->addMember($bookingId, $memberUserId);
+
+            $this->logger->info('Member added to booking', [
+                'booking_id' => $bookingId,
+                'member_user_id' => $memberUserId,
+                'added_by' => $requestingUserId,
+            ]);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-
-        $isAdmin = auth()->user()->id_role === 1;
-
-        if (!$isAdmin && (int) $booking->user_id !== $requestingUserId) {
-            throw new Exception('Hanya PIC yang dapat menambahkan anggota');
-        }
-
-        if (!$isAdmin && $booking->status !== 'draft') {
-            throw new Exception('Hanya booking dengan status draft yang bisa menambahkan anggota');
-        }
-
-        if ($memberUserId === (int) $booking->user_id) {
-            throw new Exception('PIC tidak dapat menambahkan diri sendiri sebagai anggota');
-        }
-
-        if ($this->bookingRepo->isMemberOfBooking($bookingId, $memberUserId)) {
-            throw new Exception('Anggota sudah terdaftar dalam booking');
-        }
-
-        $this->validateMemberCanJoin($memberUserId, $bookingId);
-
-        $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
-        if (!$room) {
-            throw new Exception('Ruangan tidak ditemukan');
-        }
-
-        $currentMemberCount = $this->bookingRepo->getMemberCount($bookingId);
-        $totalParticipants = $currentMemberCount + 1 + 1;
-
-        if ($totalParticipants > $room['kapasitas_max']) {
-            throw new Exception("Kapasitas maksimal {$room['kapasitas_max']} orang sudah tercapai");
-        }
-
-        $this->bookingRepo->addMember($bookingId, $memberUserId);
-
-        $this->logger->info('Member added to booking', [
-            'booking_id' => $bookingId,
-            'member_user_id' => $memberUserId,
-            'added_by' => $requestingUserId,
-        ]);
     }
 
     public function addMemberByIdentifier(int $bookingId, string $identifier): void
@@ -411,82 +492,96 @@ class BookingServices
 
     public function joinViaInviteToken(string $token, int $userId): array
     {
-        $booking = $this->bookingRepo->findByInviteToken($token);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception('Kode undangan tidak valid');
-        }
+            $booking = $this->bookingRepo->findByInviteToken($token);
 
-        if ($booking->status !== 'draft') {
-            throw new Exception('Tidak dapat bergabung - booking sudah ' . $booking->status);
-        }
+            if (!$booking) {
+                throw new Exception('Kode undangan tidak valid');
+            }
 
-        if ($userId === (int) $booking->user_id) {
-            throw new Exception('Anda adalah PIC dari booking ini');
-        }
+            // Lock the booking to prevent race conditions on capacity
+            $lockedBooking = $this->bookingRepo->findByIdWithLock($booking->id_booking);
 
-        if ($this->bookingRepo->isMemberOfBooking($booking->id_booking, $userId)) {
-            throw new Exception('Anda sudah terdaftar dalam booking ini');
-        }
+            if ($lockedBooking->status !== 'draft') {
+                throw new Exception('Tidak dapat bergabung - booking sudah ' . $lockedBooking->status);
+            }
 
-        $existing = $this->invitationRepo->findByBookingAndUser($booking->id_booking, $userId);
+            if ($userId === (int) $lockedBooking->user_id) {
+                throw new Exception('Anda adalah PIC dari booking ini');
+            }
 
-        // Case 1: Already requested via token (self-request pending)
-        if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id === null) {
-            throw new Exception('Anda sudah mengajukan permintaan bergabung');
-        }
+            if ($this->bookingRepo->isMemberOfBooking($lockedBooking->id_booking, $userId)) {
+                throw new Exception('Anda sudah terdaftar dalam booking ini');
+            }
 
-        // Case 2: PIC already invited this user - auto accept!
-        if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id !== null) {
-            $this->validateMemberCanJoin($userId, $booking->id_booking);
-            $this->invitationRepo->accept($existing->id_invitation);
-            $this->bookingRepo->addMember($booking->id_booking, $userId);
-            $this->logger->info('User auto-accepted PIC invitation via token', [
-                'booking_id' => $booking->id_booking,
+            $existing = $this->invitationRepo->findByBookingAndUser($lockedBooking->id_booking, $userId);
+
+            // Case 1: Already requested via token (self-request pending)
+            if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id === null) {
+                throw new Exception('Anda sudah mengajukan permintaan bergabung');
+            }
+
+            // Case 2: PIC already invited this user - auto accept!
+            if ($existing && $existing->status === 'pending' && $existing->invited_by_user_id !== null) {
+                $this->validateMemberCanJoin($userId, $lockedBooking->id_booking);
+                $this->invitationRepo->accept($existing->id_invitation);
+                $this->bookingRepo->addMember($lockedBooking->id_booking, $userId);
+                $this->logger->info('User auto-accepted PIC invitation via token', [
+                    'booking_id' => $lockedBooking->id_booking,
+                    'user_id' => $userId,
+                ]);
+
+                $this->db->commit();
+                return ['booking_id' => $lockedBooking->id_booking, 'auto_joined' => true];
+            }
+
+            // Check pending limit
+            $userPendingCount = $this->invitationRepo->countPendingForUser($userId);
+            if ($userPendingCount >= 3) {
+                throw new Exception('Anda sudah memiliki 3 undangan yang belum direspon');
+            }
+
+            // Check capacity
+            $room = $this->bookingRepo->findByRoomId($lockedBooking->ruangan_id);
+            if (!$room) {
+                throw new Exception('Ruangan tidak ditemukan');
+            }
+            $currentMemberCount = $this->bookingRepo->getMemberCount($lockedBooking->id_booking);
+            $pendingCount = count($this->invitationRepo->getPendingForBooking($lockedBooking->id_booking));
+            $totalParticipants = $currentMemberCount + $pendingCount + 1 + 1;
+            if ($totalParticipants > $room['kapasitas_max']) {
+                throw new Exception("Kapasitas maksimal {$room['kapasitas_max']} orang sudah tercapai");
+            }
+
+            // Case 3: Old invitation exists (accepted/rejected) - reset as self-request
+            if ($existing) {
+                $existing->status = 'pending';
+                $existing->invited_by_user_id = null;
+                $existing->save();
+            } else {
+                // Case 4: No existing - create new self-request
+                $this->invitationRepo->create([
+                    'booking_id' => $lockedBooking->id_booking,
+                    'invited_user_id' => $userId,
+                    'invited_by_user_id' => null,
+                    'status' => 'pending',
+                ]);
+            }
+
+            $this->logger->info('User requested to join via invite token', [
+                'booking_id' => $lockedBooking->id_booking,
                 'user_id' => $userId,
             ]);
-            return ['booking_id' => $booking->id_booking, 'auto_joined' => true];
-        }
 
-        // Check pending limit
-        $userPendingCount = $this->invitationRepo->countPendingForUser($userId);
-        if ($userPendingCount >= 3) {
-            throw new Exception('Anda sudah memiliki 3 undangan yang belum direspon');
-        }
+            $this->db->commit();
+            return ['booking_id' => $lockedBooking->id_booking, 'auto_joined' => false];
 
-        // Check capacity
-        $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
-        if (!$room) {
-            throw new Exception('Ruangan tidak ditemukan');
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-        $currentMemberCount = $this->bookingRepo->getMemberCount($booking->id_booking);
-        $pendingCount = count($this->invitationRepo->getPendingForBooking($booking->id_booking));
-        $totalParticipants = $currentMemberCount + $pendingCount + 1 + 1;
-        if ($totalParticipants > $room['kapasitas_max']) {
-            throw new Exception("Kapasitas maksimal {$room['kapasitas_max']} orang sudah tercapai");
-        }
-
-        // Case 3: Old invitation exists (accepted/rejected) - reset as self-request
-        if ($existing) {
-            $existing->status = 'pending';
-            $existing->invited_by_user_id = null;
-            $existing->save();
-        } else {
-            // Case 4: No existing - create new self-request
-            $this->invitationRepo->create([
-                'booking_id' => $booking->id_booking,
-                'invited_user_id' => $userId,
-                'invited_by_user_id' => null,
-                'status' => 'pending',
-            ]);
-        }
-
-        $this->logger->info('User requested to join via invite token', [
-            'booking_id' => $booking->id_booking,
-            'user_id' => $userId,
-        ]);
-
-        return ['booking_id' => $booking->id_booking, 'auto_joined' => false];
     }
 
     public function leaveBooking(int $bookingId, int $userId): void
@@ -551,34 +646,75 @@ class BookingServices
 
     public function approveBooking(int $bookingId): void
     {
-        $booking = $this->bookingRepo->findById($bookingId);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
+
+            if (!$booking) {
+                throw new Exception('Booking tidak ditemukan');
+            }
+
+            if ($booking->status !== 'pending') {
+                throw new Exception('Booking tidak dapat diapprove - status booking adalah ' . $booking->status);
+            }
+
+            // Lock the room to prevent race conditions (double booking)
+            $this->bookingRepo->findByRoomIdWithLock($booking->ruangan_id);
+
+            $this->revalidateBookingForApproval($bookingId);
+
+            $this->transitionTo($bookingId, 'verified', 'Approved by admin');
+
+            // Send notification
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $userObj = $this->hydrateUser($user);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingValidated($userObj, (object) $bookingDetails);
+                }
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-
-        if ($booking->status !== 'pending') {
-            throw new Exception('Booking tidak dapat diapprove - status booking adalah ' . $booking->status);
-        }
-
-        $this->revalidateBookingForApproval($bookingId);
-
-        $this->transitionTo($bookingId, 'verified', 'Approved by admin');
     }
 
     public function rejectBooking(int $bookingId, string $reason = 'Rejected by admin'): void
     {
-        $booking = $this->bookingRepo->findById($bookingId);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
+
+            if (!$booking) {
+                throw new Exception('Booking tidak ditemukan');
+            }
+
+            if ($booking->status !== 'pending') {
+                throw new Exception('Hanya booking dengan status pending yang dapat di reject');
+            }
+
+            $this->transitionTo($bookingId, 'cancelled', $reason);
+
+            // Send notification
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $userObj = $this->hydrateUser($user);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingCancelled($userObj, (object) $bookingDetails, $reason);
+                }
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-
-        if ($booking->status !== 'pending') {
-            throw new Exception('Hanya booking dengan status pending yang dapat di reject');
-        }
-
-        $this->transitionTo($bookingId, 'cancelled', $reason);
     }
 
     public function activateBooking(int $bookingId, string $checkinCode): void
@@ -683,42 +819,52 @@ class BookingServices
 
     public function cancelBooking(int $bookingId, int $userId, string $reason = 'Cancelled by user'): void
     {
-        $booking = $this->bookingRepo->findById($bookingId);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
-        }
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
 
-        $user = $this->bookingRepo->findUserById($userId);
-        $isAdmin = $user && $user['id_role'] === 1;
-
-        if (!$isAdmin && (int) $booking->user_id !== $userId) {
-            throw new Exception('Hanya PIC atau Admin yang dapat membatalkan booking');
-        }
-
-        if (in_array($booking->status, ['completed', 'cancelled', 'no_show'])) {
-            throw new Exception('Booking tidak dapat dibatalkan');
-        }
-
-        if ($booking->status === 'active') {
-            throw new Exception('Booking yang sudah aktif tidak dapat dibatalkan');
-        }
-
-        if ($booking->status === 'verified' && !$isAdmin) {
-            $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
-            $now = Carbon::now();
-
-            $minutesUntilStart = $now->diffInMinutes($startDateTime, false);
-
-            if ($minutesUntilStart < 15) {
-                throw new Exception('Tidak dapat membatalkan booking kurang dari 15 menit sebelum waktu mulai');
+            if (!$booking) {
+                throw new Exception('Booking tidak ditemukan');
             }
 
-            $this->applyLateCancellationPenalty($booking->user_id);
+            $user = $this->bookingRepo->findUserById($userId);
+            $isAdmin = $user && $user['id_role'] === 1;
+
+            if (!$isAdmin && (int) $booking->user_id !== $userId) {
+                throw new Exception('Hanya PIC atau Admin yang dapat membatalkan booking');
+            }
+
+            if (in_array($booking->status, ['completed', 'cancelled', 'no_show'])) {
+                throw new Exception('Booking tidak dapat dibatalkan');
+            }
+
+            if ($booking->status === 'active') {
+                throw new Exception('Booking yang sudah aktif tidak dapat dibatalkan');
+            }
+
+            if ($booking->status === 'verified' && !$isAdmin) {
+                $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
+                $now = Carbon::now();
+
+                $minutesUntilStart = $now->diffInMinutes($startDateTime, false);
+
+                if ($minutesUntilStart < 15) {
+                    throw new Exception('Tidak dapat membatalkan booking kurang dari 15 menit sebelum waktu mulai');
+                }
+
+                $this->applyLateCancellationPenalty($booking->user_id);
+            }
+
+            $this->transitionTo($bookingId, 'cancelled', $reason);
+
+
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-
-
-        $this->transitionTo($bookingId, 'cancelled', $reason);
     }
 
     public function expireDraft(int $bookingId): void
@@ -767,65 +913,74 @@ class BookingServices
 
     public function rescheduleBooking(int $bookingId, array $newData, int $userId): void
     {
-        $booking = $this->bookingRepo->findById($bookingId);
+        try {
+            $this->db->beginTransaction();
 
-        if (!$booking) {
-            throw new Exception('Booking tidak ditemukan');
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
+
+            if (!$booking) {
+                throw new Exception('Booking tidak ditemukan');
+            }
+
+            $user = $this->bookingRepo->findUserById($userId);
+            $isAdmin = $user && $user['id_role'] === 1;
+
+            if (!$isAdmin && (int) $booking->user_id !== $userId) {
+                throw new Exception('Hanya PIC atau Admin yang dapat reschedule booking');
+            }
+
+            if ($booking->status !== 'verified') {
+                throw new Exception('Hanya booking dengan status verified yang dapat di reschedule');
+            }
+
+            $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
+            $now = Carbon::now();
+
+            if ($now->gte($startDateTime)) {
+                throw new Exception('Tidak dapat reschedule booking yang sudah dimulai');
+            }
+
+            $minutesUntilStart = $now->diffInMinutes($startDateTime, false);
+
+            if ($minutesUntilStart < 15) {
+                throw new Exception('Tidak dapat reschedule kurang dari 15 menit sebelum waktu mulai');
+            }
+
+            if ($booking->has_been_rescheduled ?? false) {
+                throw new Exception('Booking hanya dapat di-reschedule 1 kali');
+            }
+
+            // Merge existing booking data with new reschedule data for validation
+            $validationData = array_merge([
+                'ruangan_id' => $booking->ruangan_id,
+                'tujuan' => $booking->tujuan,
+            ], $newData);
+
+            // Use auth()->user() for validation as validateBookingRules expects a user object
+            $this->validateRescheduleRules($validationData);
+            $this->validateNoTimeConflicts($validationData, $booking->user_id, $bookingId);
+
+            $booking->tanggal_penggunaan_ruang = $newData['tanggal_penggunaan_ruang'];
+            $booking->waktu_mulai = $newData['waktu_mulai'];
+            $booking->waktu_selesai = $newData['waktu_selesai'];
+            $booking->has_been_rescheduled = true;
+
+            $booking->status = 'pending';
+            $booking->checkin_code = null;
+            $booking->save();
+
+            $this->logger->info('Booking Rescheduled', [
+                'booking_id' => $bookingId,
+                'old_date' => $startDateTime->format('Y-m-d H:i'),
+                'new_date' => "{$newData['tanggal_penggunaan_ruang']} {$newData['waktu_mulai']}",
+                'rescheduled_by' => $userId,
+            ]);
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
-
-        $user = $this->bookingRepo->findUserById($userId);
-        $isAdmin = $user && $user['id_role'] === 1;
-
-        if (!$isAdmin && (int) $booking->user_id !== $userId) {
-            throw new Exception('Hanya PIC atau Admin yang dapat reschedule booking');
-        }
-
-        if ($booking->status !== 'verified') {
-            throw new Exception('Hanya booking dengan status verified yang dapat di reschedule');
-        }
-
-        $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
-        $now = Carbon::now();
-
-        if ($now->gte($startDateTime)) {
-            throw new Exception('Tidak dapat reschedule booking yang sudah dimulai');
-        }
-
-        $minutesUntilStart = $now->diffInMinutes($startDateTime, false);
-
-        if ($minutesUntilStart < 15) {
-            throw new Exception('Tidak dapat reschedule kurang dari 15 menit sebelum waktu mulai');
-        }
-
-        if ($booking->has_been_rescheduled ?? false) {
-            throw new Exception('Booking hanya dapat di-reschedule 1 kali');
-        }
-
-        // Merge existing booking data with new reschedule data for validation
-        $validationData = array_merge([
-            'ruangan_id' => $booking->ruangan_id,
-            'tujuan' => $booking->tujuan,
-        ], $newData);
-
-        // Use auth()->user() for validation as validateBookingRules expects a user object
-        $this->validateRescheduleRules($validationData);
-        $this->validateNoTimeConflicts($validationData, $booking->user_id, $bookingId);
-
-        $booking->tanggal_penggunaan_ruang = $newData['tanggal_penggunaan_ruang'];
-        $booking->waktu_mulai = $newData['waktu_mulai'];
-        $booking->waktu_selesai = $newData['waktu_selesai'];
-        $booking->has_been_rescheduled = true;
-
-        $booking->status = 'pending';
-        $booking->checkin_code = null;
-        $booking->save();
-
-        $this->logger->info('Booking Rescheduled', [
-            'booking_id' => $bookingId,
-            'old_date' => $startDateTime->format('Y-m-d H:i'),
-            'new_date' => "{$newData['tanggal_penggunaan_ruang']} {$newData['waktu_mulai']}",
-            'rescheduled_by' => $userId,
-        ]);
     }
 
     public function createRescheduleRequest(int $bookingId, array $newData, int $userId): RescheduleRequest
@@ -923,6 +1078,12 @@ class BookingServices
             'booking_id' => $request->booking_id,
             'approved_by' => $adminId,
         ]);
+
+        // Send Notification
+        $user = $this->bookingRepo->findUserById($booking->user_id);
+        if ($user) {
+            $this->emailService->sendRescheduleApproved($this->hydrateUser($user), (object) $booking);
+        }
     }
 
     public function rejectRescheduleRequest(int $requestId, int $adminId, string $reason): void
@@ -945,6 +1106,15 @@ class BookingServices
             'rejected_by' => $adminId,
             'reason' => $reason,
         ]);
+
+        // Send Notification
+        $booking = $this->bookingRepo->findById($request->booking_id);
+        if ($booking) {
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $this->emailService->sendRescheduleRejected($this->hydrateUser($user), (object) $booking, $reason);
+            }
+        }
     }
 
     public function getPendingRescheduleRequest(int $bookingId): ?RescheduleRequest
@@ -1039,7 +1209,11 @@ class BookingServices
         return false;
     }
 
-    public function blockDateRange(string $dateBegin, string $dateEnd, ?int $ruanganId, string $reason, int $adminId): void
+    /**
+     * Block date range for multiple rooms
+     * @param array $ruanganIds Array of room IDs (empty = all rooms)
+     */
+    public function blockDateRange(string $dateBegin, string $dateEnd, array $ruanganIds, string $reason, int $adminId): void
     {
         $begin = Carbon::parse($dateBegin);
         $end = Carbon::parse($dateEnd);
@@ -1048,15 +1222,85 @@ class BookingServices
             throw new Exception('Tanggal akhir harus setelah tanggal awal');
         }
 
-        $this->bookingRepo->blockDateRange($begin->format('Y-m-d'), $end->format('Y-m-d'), $ruanganId, $reason, $adminId);
+        $this->bookingRepo->blockDateRange($begin->format('Y-m-d'), $end->format('Y-m-d'), $ruanganIds, $reason, $adminId);
 
         $this->logger->info('Date Range Blocked', [
             'date_begin' => $begin->format('Y-m-d'),
             'date_end' => $end->format('Y-m-d'),
-            'ruangan_id' => $ruanganId,
+            'ruangan_ids' => $ruanganIds,
             'reason' => $reason,
             'blocked_by' => $adminId,
         ]);
+    }
+
+    /**
+     * Get affected bookings by date range and room IDs
+     */
+    public function getAffectedBookings(string $dateBegin, string $dateEnd, array $ruanganIds = []): array
+    {
+        return $this->bookingRepo->findAffectedBookingsByDateRange($dateBegin, $dateEnd, $ruanganIds);
+    }
+
+    /**
+     * Block date range and cancel affected bookings
+     */
+    public function blockDateRangeWithCancellation(string $dateBegin, string $dateEnd, array $ruanganIds, string $reason, int $adminId): array
+    {
+        $begin = Carbon::parse($dateBegin);
+        $end = Carbon::parse($dateEnd);
+
+        if ($end->lt($begin)) {
+            throw new Exception('Tanggal akhir harus setelah tanggal awal');
+        }
+
+        // Get affected bookings before blocking
+        $affectedBookings = $this->bookingRepo->findAffectedBookingsByDateRange(
+            $begin->format('Y-m-d'),
+            $end->format('Y-m-d'),
+            $ruanganIds
+        );
+
+        // Block the dates
+        $this->blockDateRange($dateBegin, $dateEnd, $ruanganIds, $reason, $adminId);
+
+        // Cancel affected bookings and send emails
+        foreach ($affectedBookings as $booking) {
+            // Update booking status to cancelled
+            $this->transitionTo($booking['id_booking'], 'cancelled', "Ruangan diblokir: $reason");
+
+            // Get full User object for email
+            $user = User::Query()->where('id_user', $booking['user_id'])->first();
+            if ($user) {
+                // Send cancellation email
+                try {
+                    // Create booking object from array for email template
+                    $bookingObj = (object) [
+                        'booking_code' => 'N/A',
+                        'booking_date' => date('d M Y', strtotime($booking['tanggal_penggunaan_ruang'])),
+                        'start_time' => substr($booking['waktu_mulai'], 0, 5),
+                        'end_time' => substr($booking['waktu_selesai'], 0, 5),
+                    ];
+
+                    $this->emailService->sendBookingCancelled(
+                        $user,
+                        $bookingObj,
+                        "Ruangan {$booking['nama_ruangan']} diblokir pada periode " . $begin->format('d M Y') . " - " . $end->format('d M Y') . ". Alasan: $reason"
+                    );
+
+                    $this->logger->info('Cancellation email sent', [
+                        'booking_id' => $booking['id_booking'],
+                        'email' => $user->email
+                    ]);
+                } catch (Exception $e) {
+                    $this->logger->error('Failed to send cancellation email', [
+                        'booking_id' => $booking['id_booking'],
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+
+        return $affectedBookings;
     }
 
     public function unblockDate(int $blockedDateId): void
@@ -1140,17 +1384,20 @@ class BookingServices
         $startDateTime = Carbon::parse("$dateStr {$data['waktu_mulai']}");
         $endDateTime = Carbon::parse("$dateStr {$data['waktu_selesai']}");
 
-        $session1Start = Carbon::parse("$dateStr 08:15");
-        $session1End = Carbon::parse("$dateStr 10:55");
-        $session2Start = Carbon::parse("$dateStr 13:15");
-        $session2End = Carbon::parse("$dateStr 16:00");
+        // Operating hours: 08:15 - 16:00 (with 15min start buffer and 20min end buffer from 08:00-16:20)
+        $operatingStart = Carbon::parse("$dateStr 08:15");
+        $operatingEnd = Carbon::parse("$dateStr 16:00");
 
-        $inSession1 = $startDateTime->gte($session1Start) && $endDateTime->lte($session1End);
-        $inSession2 = $startDateTime->gte($session2Start) && $endDateTime->lte($session2End);
-
-        if (!$inSession1 && !$inSession2) {
-            throw new Exception('Booking harus dalam sesi 1 (08:15-10:55) atau sesi 2 (13:15-16:00)');
+        // Free-form booking: just check if within operating hours
+        if ($startDateTime->lt($operatingStart)) {
+            throw new Exception('Booking tidak bisa dimulai sebelum jam 08:15');
         }
+
+        if ($endDateTime->gt($operatingEnd)) {
+            throw new Exception('Booking harus selesai sebelum jam 16:00');
+        }
+
+        // Break time validation is handled separately by validateBreakTime()
     }
 
     private function validateBreakTime(array $data): void
@@ -1607,6 +1854,19 @@ class BookingServices
                 'invited_by_user_id' => $invitedByUserId,
                 'status' => 'pending',
             ]);
+
+            // Send Email
+            $invitedUser = $this->bookingRepo->findUserById($invitedUserId);
+            $inviter = $this->bookingRepo->findUserById($invitedByUserId);
+            $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+
+            if ($invitedUser && $inviter && $bookingDetails) {
+                $this->emailService->sendInvitation(
+                    $this->hydrateUser($invitedUser),
+                    (object) $bookingDetails,
+                    $this->hydrateUser($inviter)
+                );
+            }
         }
 
         $this->logger->info('Invitation sent', [
@@ -1822,5 +2082,16 @@ class BookingServices
             'invitation_id' => $invitationId,
             'user_id' => $userId,
         ]);
+    }
+
+    private function hydrateUser(array $data): User
+    {
+        $user = new User();
+        foreach ($data as $key => $value) {
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
+        }
+        return $user;
     }
 }

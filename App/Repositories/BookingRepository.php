@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Repository;
+namespace App\Repositories;
 
 use App\Core\QueryBuilder;
 use App\Models\Feedback;
@@ -21,6 +21,11 @@ class BookingRepository
         return Booking::Query()->where('id_booking', $id)->first();
     }
 
+    public function findByIdWithLock(int $id): ?Booking
+    {
+        return Booking::Query()->lockForUpdate()->where('id_booking', $id)->first();
+    }
+
     public function findByIdWithDetails(int $id): ?Booking
     {
         return $this->baseBookingQuery()
@@ -37,6 +42,12 @@ class BookingRepository
     {
         $qb = new QueryBuilder($this->database->pdo);
         return $qb->table('ruangan')->where('id_ruangan', $roomId)->first();
+    }
+
+    public function findByRoomIdWithLock(int $roomId): ?array
+    {
+        $qb = new QueryBuilder($this->database->pdo);
+        return $qb->table('ruangan')->where('id_ruangan', $roomId)->lockForUpdate()->first();
     }
 
     public function getUserActiveBookings(int $userId, int $limit = 1): array
@@ -78,6 +89,62 @@ class BookingRepository
             $counts[$row['status']] = (int) $row['count'];
         }
         return $counts;
+    }
+
+    public function getTodayBookingCountByStatus(): array
+    {
+        $today = date('Y-m-d');
+        $qb = new QueryBuilder($this->database->pdo);
+        $results = $qb->table('booking')
+            ->select(['status', 'COUNT(*) as count'])
+            ->whereRaw("DATE(created_at) = ?", [$today])
+            ->groupBy('status')
+            ->get();
+
+        $counts = [];
+        foreach ($results as $row) {
+            $counts[$row['status']] = (int) $row['count'];
+        }
+        return $counts;
+    }
+
+    public function getCountByStatusSince(string $status, string $timestamp): int
+    {
+        return Booking::Query()
+            ->where('status', $status)
+            ->where('created_at', '>', $timestamp)
+            ->count();
+    }
+
+    public function getTodayBookings(array $filters = [], int $perPage = 15, int $page = 1): Paginator
+    {
+        $today = date('Y-m-d');
+        $query = $this->baseBookingQuery()
+            ->whereRaw("DATE(b.created_at) = ?", [$today]);
+
+        if (!empty($filters['status'])) {
+            $query->where('b.status', $filters['status']);
+        }
+
+        if (!empty($filters['keyword'])) {
+            $query->where('r.nama_ruangan', 'LIKE', '%' . $filters['keyword'] . '%')
+                ->orWhere('u.nama', 'LIKE', '%' . $filters['keyword'] . '%');
+        }
+
+        return $query
+            ->whereNotIn('b.status', ['draft'])
+            ->orderBy("CASE b.status 
+                WHEN 'pending' THEN 1 
+                WHEN 'verified' THEN 2 
+                WHEN 'active' THEN 3 
+                WHEN 'completed' THEN 4 
+                WHEN 'cancelled' THEN 5 
+                WHEN 'expired' THEN 6 
+                WHEN 'no_show' THEN 7 
+                ELSE 8 
+            END", 'asc')
+            ->orderBy('b.waktu_mulai', 'asc')
+            ->paginate($perPage, $page);
     }
 
     public function getRecentBookings(int $limit = 10): array
@@ -332,17 +399,74 @@ class BookingRepository
         return false;
     }
 
-    public function blockDateRange(string $dateBegin, string $dateEnd, ?int $ruanganId, string $reason, int $userId): void
+    /**
+     * Block date range for multiple rooms or all rooms
+     * @param array $ruanganIds Array of room IDs to block (empty = all rooms)
+     */
+    public function blockDateRange(string $dateBegin, string $dateEnd, array $ruanganIds, string $reason, int $userId): void
     {
         $qb = new QueryBuilder($this->database->pdo);
 
-        $qb->table('blocked_dates')->insert([
-            'tanggal_begin' => $dateBegin,
-            'tanggal_end' => $dateEnd,
-            'ruangan_id' => $ruanganId,
-            'alasan' => $reason,
-            'created_by' => $userId
-        ]);
+        // If no specific rooms selected, block "all rooms" (ruangan_id = null)
+        if (empty($ruanganIds)) {
+            $qb->table('blocked_dates')->insert([
+                'tanggal_begin' => $dateBegin,
+                'tanggal_end' => $dateEnd,
+                'ruangan_id' => null,
+                'alasan' => $reason,
+                'created_by' => $userId
+            ]);
+        } else {
+            // Block each selected room
+            foreach ($ruanganIds as $roomId) {
+                $qb = new QueryBuilder($this->database->pdo); // Reset for each insert
+                $qb->table('blocked_dates')->insert([
+                    'tanggal_begin' => $dateBegin,
+                    'tanggal_end' => $dateEnd,
+                    'ruangan_id' => (int) $roomId,
+                    'alasan' => $reason,
+                    'created_by' => $userId
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Find bookings affected by a date range block
+     * Returns bookings that overlap with the blocked date range
+     */
+    public function findAffectedBookingsByDateRange(string $dateBegin, string $dateEnd, array $ruanganIds = []): array
+    {
+        $qb = new QueryBuilder($this->database->pdo);
+
+        $query = $qb->table('booking b')
+            ->select([
+                'b.id_booking',
+                'b.user_id',
+                'b.ruangan_id',
+                'b.tanggal_penggunaan_ruang',
+                'b.waktu_mulai',
+                'b.waktu_selesai',
+                'b.status',
+                'r.nama_ruangan',
+                'u.nama as user_nama',
+                'u.email as user_email'
+            ])
+            ->join('ruangan r', 'b.ruangan_id', '=', 'r.id_ruangan')
+            ->join('users u', 'b.user_id', '=', 'u.id_user')
+            ->where('b.tanggal_penggunaan_ruang', '>=', $dateBegin)
+            ->where('b.tanggal_penggunaan_ruang', '<=', $dateEnd)
+            ->whereIn('b.status', ['pending', 'verified', 'active']);
+
+        // If specific rooms are being blocked, filter by those rooms only
+        // If empty array (all rooms), no additional filter needed
+        if (!empty($ruanganIds)) {
+            $query->whereIn('b.ruangan_id', $ruanganIds);
+        }
+
+        return $query->orderBy('b.tanggal_penggunaan_ruang', 'asc')
+            ->orderBy('b.waktu_mulai', 'asc')
+            ->get();
     }
 
     public function unblockDate(int $blockedDateId): void

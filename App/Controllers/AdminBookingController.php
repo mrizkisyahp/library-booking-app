@@ -4,13 +4,13 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\BookingServices;
+use App\Services\BookingService;
 use Exception;
 
 class AdminBookingController extends Controller
 {
     public function __construct(
-        private BookingServices $bookingServices,
+        private BookingService $bookingService,
     ) {
     }
 
@@ -20,25 +20,41 @@ class AdminBookingController extends Controller
         $page = (int) ($filters['page'] ?? 1);
         $keyword = $request->input('keyword') ?? '';
         $status = $request->input('status') ?? '';
+        $view = $request->input('view') ?? 'today'; // 'all' or 'today' - default is today
 
         $filters = [
             'keyword' => $keyword,
             'status' => $status,
         ];
 
-        $paginatedBookings = $this->bookingServices->getAllBookings($filters, 15, $page);
+        // Determine which method to call based on view type
+        if ($view === 'today') {
+            $paginatedBookings = $this->bookingService->getTodayBookings($filters, 15, $page);
+        } else {
+            $paginatedBookings = $this->bookingService->getAllBookings($filters, 15, $page);
+        }
+
+        // Get status counts for filter buttons (based on current view)
+        if ($view === 'today') {
+            $statusCounts = $this->bookingService->getTodayStatusCounts();
+        } else {
+            $statusCounts = $this->bookingService->getStatusCounts();
+        }
 
         return view('Admin/Bookings/Index', [
             'bookings' => $paginatedBookings->items,
             'pagination' => $paginatedBookings,
             'filters' => $filters,
+            'activeView' => $view,
+            'activeStatus' => $status,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
     public function create(Request $request)
     {
-        $rooms = $this->bookingServices->getAllRooms();
-        $users = $this->bookingServices->getAllUsers();
+        $rooms = $this->bookingService->getAllRooms();
+        $users = $this->bookingService->getAllUsers();
 
         return view('Admin/Bookings/Create', [
             'rooms' => $rooms,
@@ -52,7 +68,7 @@ class AdminBookingController extends Controller
             $data = $request->all();
             $targetUserId = (int) $data['user_id'];
 
-            $booking = $this->bookingServices->adminCreateBooking($data, $targetUserId);
+            $booking = $this->bookingService->adminCreateBooking($data, $targetUserId);
 
             flash('success', 'Booking berhasil dibuat');
             redirect('/admin/bookings/edit?id=' . $booking->id_booking);
@@ -66,9 +82,9 @@ class AdminBookingController extends Controller
     {
         try {
             $bookingId = (int) $request->query()['id'];
-            $data = $this->bookingServices->getBookingForUser($bookingId, 0, true);
+            $data = $this->bookingService->getBookingForUser($bookingId, 0, true);
 
-            $rooms = $this->bookingServices->getAllRooms();
+            $rooms = $this->bookingService->getAllRooms();
 
             return view('Admin/Bookings/Edit', [
                 'booking' => $data['booking'],
@@ -88,7 +104,7 @@ class AdminBookingController extends Controller
             $data = $request->all();
             unset($data['booking_id'], $data['_token']);
 
-            $this->bookingServices->adminUpdateBooking($bookingId, $data);
+            $this->bookingService->adminUpdateBooking($bookingId, $data);
 
             flash('success', 'Booking berhasil diupdate');
             redirect('/admin/bookings/detail?id=' . $bookingId);
@@ -103,7 +119,7 @@ class AdminBookingController extends Controller
         try {
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->deleteBooking($bookingId);
+            $this->bookingService->deleteBooking($bookingId);
 
             flash('success', 'Booking berhasil dihapus');
             redirect('/admin/bookings');
@@ -116,9 +132,9 @@ class AdminBookingController extends Controller
     {
         try {
             $bookingId = (int) $request->query()['id'];
-            $data = $this->bookingServices->getBookingForUser($bookingId, 0, true); // admin = true
+            $data = $this->bookingService->getBookingForUser($bookingId, 0, true); // admin = true
 
-            $rescheduleRequest = $this->bookingServices->getPendingRescheduleRequest($bookingId);
+            $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
             return view('Admin/Bookings/Detail', [
                 'bookings' => $data['booking'],
@@ -138,7 +154,7 @@ class AdminBookingController extends Controller
     {
         try {
             $bookingId = (int) $request->all()['booking_id'];
-            $this->bookingServices->approveBooking($bookingId);
+            $this->bookingService->approveBooking($bookingId);
 
             flash('success', 'Booking berhasil diverifikasi');
             back();
@@ -154,7 +170,7 @@ class AdminBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
 
-            $this->bookingServices->rejectBooking($bookingId, $reason);
+            $this->bookingService->rejectBooking($bookingId, $reason);
 
             flash('success', 'Booking berhasil ditolak');
             back();
@@ -169,7 +185,7 @@ class AdminBookingController extends Controller
         try {
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->completeBooking($bookingId);
+            $this->bookingService->completeBooking($bookingId);
 
             flash('success', 'Booking berhasil diselesaikan');
             back();
@@ -184,7 +200,7 @@ class AdminBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $checkinCode = $request->all()['checkin_code'] ?? '';
 
-            $this->bookingServices->activateBooking($bookingId, $checkinCode);
+            $this->bookingService->activateBooking($bookingId, $checkinCode);
 
             flash('success', 'Booking berhasil diaktifkan');
             back();
@@ -201,7 +217,7 @@ class AdminBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $reason = $request->all()['reason'] ?? 'Dibatalkan oleh admin';
 
-            $this->bookingServices->cancelBooking($bookingId, $user->id_user, $reason);
+            $this->bookingService->cancelBooking($bookingId, $user->id_user, $reason);
 
             flash('success', 'Booking berhasil dibatalkan');
             back();
@@ -216,7 +232,7 @@ class AdminBookingController extends Controller
         try {
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->handleNoShow($bookingId);
+            $this->bookingService->handleNoShow($bookingId);
 
             flash('success', 'Booking ditandai sebagai no-show');
             back();
@@ -228,8 +244,8 @@ class AdminBookingController extends Controller
 
     public function blockedDates(Request $request)
     {
-        $blockedDates = $this->bookingServices->getBlockedDates();
-        $rooms = $this->bookingServices->getAllRooms();
+        $blockedDates = $this->bookingService->getBlockedDates();
+        $rooms = $this->bookingService->getAllRooms();
 
         return view('Admin/Bookings/BlockedDates', [
             'blockedDates' => $blockedDates,
@@ -237,22 +253,76 @@ class AdminBookingController extends Controller
         ]);
     }
 
+    /**
+     * Preview affected bookings before blocking dates
+     */
+    public function previewBlockDate(Request $request)
+    {
+        try {
+            $data = $request->all();
+
+            // Get room IDs from form (array or empty)
+            $ruanganIds = !empty($data['ruangan_ids']) ? array_map('intval', $data['ruangan_ids']) : [];
+
+            // Get affected bookings
+            $affectedBookings = $this->bookingService->getAffectedBookings(
+                $data['tanggal_begin'],
+                $data['tanggal_end'],
+                $ruanganIds
+            );
+
+            // Get room names for display
+            $rooms = $this->bookingService->getAllRooms();
+            $selectedRooms = [];
+            if (empty($ruanganIds)) {
+                $selectedRooms = ['Semua Ruangan'];
+            } else {
+                foreach ($rooms as $room) {
+                    if (in_array($room->id_ruangan, $ruanganIds)) {
+                        $selectedRooms[] = $room->nama_ruangan;
+                    }
+                }
+            }
+
+            return view('Admin/Bookings/PreviewBlockDates', [
+                'affectedBookings' => $affectedBookings,
+                'dateBegin' => $data['tanggal_begin'],
+                'dateEnd' => $data['tanggal_end'],
+                'ruanganIds' => $ruanganIds,
+                'selectedRooms' => $selectedRooms,
+                'alasan' => $data['alasan'] ?? '',
+            ]);
+
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    /**
+     * Confirm and execute blocking with cancellations
+     */
     public function blockDate(Request $request)
     {
         try {
             $user = auth()->user();
             $data = $request->all();
-            $ruanganId = !empty($data['ruangan_id']) ? (int) $data['ruangan_id'] : null;
-            $this->bookingServices->blockDateRange(
+
+            // Get room IDs from form
+            $ruanganIds = !empty($data['ruangan_ids']) ? array_map('intval', $data['ruangan_ids']) : [];
+
+            // Block dates and cancel affected bookings
+            $cancelledBookings = $this->bookingService->blockDateRangeWithCancellation(
                 $data['tanggal_begin'],
                 $data['tanggal_end'],
-                $ruanganId,
+                $ruanganIds,
                 $data['alasan'] ?? 'Diblokir oleh admin',
                 $user->id_user
             );
 
-            flash('success', 'Tanggal berhasil diblokir');
-            back();
+            $count = count($cancelledBookings);
+            flash('success', "Tanggal berhasil diblokir. {$count} booking dibatalkan dan notifikasi email dikirim.");
+            redirect('/admin/blocked-dates');
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -263,7 +333,7 @@ class AdminBookingController extends Controller
     {
         try {
             $blockedDateId = (int) $request->all()['blocked_date_id'];
-            $this->bookingServices->unblockDate($blockedDateId);
+            $this->bookingService->unblockDate($blockedDateId);
 
             flash('success', 'Tanggal berhasil di-unblock');
             back();
@@ -279,7 +349,7 @@ class AdminBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $identifier = $request->all()['member_email'];
 
-            $this->bookingServices->addMemberByIdentifier($bookingId, $identifier);
+            $this->bookingService->addMemberByIdentifier($bookingId, $identifier);
 
             flash('success', 'Anggota berhasil ditambahkan');
             redirect('/admin/bookings/edit?id=' . $bookingId);
@@ -294,7 +364,7 @@ class AdminBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $memberId = (int) $request->all()['user_id'];
 
-            $this->bookingServices->kickMember($bookingId, $memberId, auth()->user()->id_user);
+            $this->bookingService->kickMember($bookingId, $memberId, auth()->user()->id_user);
 
             flash('success', 'Anggota berhasil dikeluarkan');
             redirect('/admin/bookings/edit?id=' . $bookingId);
@@ -308,7 +378,7 @@ class AdminBookingController extends Controller
     {
         try {
             $bookingId = (int) $request->query('id');
-            $booking = $this->bookingServices->getBookingById($bookingId);
+            $booking = $this->bookingService->getBookingById($bookingId);
 
             if (!$booking) {
                 flash('error', 'Booking tidak ditemukan');
@@ -341,7 +411,7 @@ class AdminBookingController extends Controller
                 'waktu_selesai' => $request->all()['waktu_selesai'],
             ];
 
-            $this->bookingServices->rescheduleBooking($bookingId, $newData, $user->id_user);
+            $this->bookingService->rescheduleBooking($bookingId, $newData, $user->id_user);
 
             flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
             redirect('/admin/bookings/detail?id=' . $bookingId);
@@ -357,7 +427,7 @@ class AdminBookingController extends Controller
             $user = auth()->user();
             $requestId = (int) $request->all()['request_id'];
 
-            $this->bookingServices->approveRescheduleRequest($requestId, $user->id_user);
+            $this->bookingService->approveRescheduleRequest($requestId, $user->id_user);
 
             flash('success', 'Permintaan reschedule disetujui. Booking kembali ke status pending.');
             back();
@@ -374,7 +444,7 @@ class AdminBookingController extends Controller
             $requestId = (int) $request->all()['request_id'];
             $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
 
-            $this->bookingServices->rejectRescheduleRequest($requestId, $user->id_user, $reason);
+            $this->bookingService->rejectRescheduleRequest($requestId, $user->id_user, $reason);
 
             flash('success', 'Permintaan reschedule ditolak.');
             back();
