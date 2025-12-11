@@ -2,19 +2,19 @@
 namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\ProfileServices;
+use App\Services\ProfileService;
 use Exception;
 class ProfileController extends Controller
 {
     public function __construct(
-        private ProfileServices $profileServices,
+        private ProfileService $profileService,
     ) {
     }
     public function index(Request $request)
     {
         $userId = auth()->id();
 
-        $user = $this->profileServices->getCurrentUserProfile($userId);
+        $user = $this->profileService->getCurrentUserProfile($userId);
 
         return view('Profile/index', [
             'user' => $user,
@@ -27,7 +27,7 @@ class ProfileController extends Controller
 
             $file = $request->file('kubaca_img');
 
-            $this->profileServices->uploadKubaca($userId, $file);
+            $this->profileService->uploadKubaca($userId, $file);
 
             flash('success', 'KuBaca berhasil diupload. Menunggu verifikasi admin.');
         } catch (Exception $e) {
@@ -39,7 +39,7 @@ class ProfileController extends Controller
     public function detail(Request $request)
     {
         $userId = auth()->id();
-        $user = $this->profileServices->getCurrentUserProfile($userId);
+        $user = $this->profileService->getCurrentUserProfile($userId);
 
         return view('Profile/Detail', [
             'user' => $user,
@@ -49,7 +49,7 @@ class ProfileController extends Controller
     public function resetPassword(Request $request)
     {
         $userId = auth()->id();
-        $user = $this->profileServices->getCurrentUserProfile($userId);
+        $user = $this->profileService->getCurrentUserProfile($userId);
 
         return view('Profile/ResetPassword', [
             'user' => $user,
@@ -64,7 +64,7 @@ class ProfileController extends Controller
     public function verifikasi(Request $request)
     {
         $userId = auth()->id();
-        $user = $this->profileServices->getCurrentUserProfile($userId);
+        $user = $this->profileService->getCurrentUserProfile($userId);
 
         return view('Profile/Verifikasi', [
             'user' => $user,

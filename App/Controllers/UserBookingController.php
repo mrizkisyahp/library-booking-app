@@ -4,14 +4,13 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\BookingServices;
-use App\Core\Services\InvitationService;
+use App\Services\BookingService;
 use Exception;
 
 class UserBookingController extends Controller
 {
     public function __construct(
-        private BookingServices $bookingServices,
+        private BookingService $bookingService,
     ) {
     }
 
@@ -23,10 +22,10 @@ class UserBookingController extends Controller
             $data['user_id'] = $user->id_user;
             $data['ruangan_id'] = (int) trim($data['ruangan_id']);
 
-            $this->bookingServices->validateBookingRules($data, $user);
-            $this->bookingServices->validateNoTimeConflicts($data, $user->id_user);
+            $this->bookingService->validateBookingRules($data, $user);
+            $this->bookingService->validateNoTimeConflicts($data, $user->id_user);
 
-            $booking = $this->bookingServices->createDraft($data);
+            $booking = $this->bookingService->createDraft($data);
 
             flash('success', 'Draft booking berhasil dibuat');
             redirect('/bookings/draft?id=' . $booking->id_booking);
@@ -44,14 +43,14 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->query()['id'];
 
-            $data = $this->bookingServices->getBookingForUser(
+            $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
             );
 
-            $pendingInvitations = $this->bookingServices->getPendingInvitedByPic($bookingId, $data['booking']->user_id);
-            $joinRequests = $this->bookingServices->getPendingJoinRequests($bookingId);
+            $pendingInvitations = $this->bookingService->getPendingInvitedByPic($bookingId, $data['booking']->user_id);
+            $joinRequests = $this->bookingService->getPendingJoinRequests($bookingId);
 
             return view('User/Bookings/Draft', [
                 'booking' => $data['booking'],
@@ -76,7 +75,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->submitForApproval($bookingId, $user->id_user);
+            $this->bookingService->submitForApproval($bookingId, $user->id_user);
 
             flash('success', 'Booking berhasil diajukan untuk persetujuan admin');
             redirect('/bookings/detail?id=' . $bookingId);
@@ -98,7 +97,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $token = $request->all()['invite_token'];
 
-            $result = $this->bookingServices->joinViaInviteToken($token, $user->id_user);
+            $result = $this->bookingService->joinViaInviteToken($token, $user->id_user);
 
             if ($result['auto_joined']) {
                 flash('success', 'Undangan diterima! Anda sekarang menjadi anggota booking');
@@ -126,7 +125,7 @@ class UserBookingController extends Controller
             'jenis_ruangan' => $request->input('jenis_ruangan') ?? [],
         ];
 
-        $bookings = $this->bookingServices->getBookingsByUser($user->id_user, $filters, 15, $page);
+        $bookings = $this->bookingService->getBookingsByUser($user->id_user, $filters, 15, $page);
         return view('User/Bookings/Index', [
             'bookings' => $bookings->items,
             'pagination' => $bookings,
@@ -141,7 +140,7 @@ class UserBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $reason = $request->all()['reason'] ?? 'Dibatalkan oleh user';
 
-            $this->bookingServices->cancelBooking($bookingId, $user->id_user, $reason);
+            $this->bookingService->cancelBooking($bookingId, $user->id_user, $reason);
 
             flash('success', 'Booking berhasil dibatalkan');
             redirect('/my-bookings');
@@ -157,7 +156,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->leaveBooking($bookingId, $user->id_user);
+            $this->bookingService->leaveBooking($bookingId, $user->id_user);
 
             flash('success', 'Berhasil meninggalkan booking');
             redirect('/my-bookings');
@@ -174,7 +173,7 @@ class UserBookingController extends Controller
             $bookingId = (int) $request->all()['booking_id'];
             $memberId = (int) $request->all()['user_id'];
 
-            $this->bookingServices->kickMember($bookingId, $memberId, $user->id_user);
+            $this->bookingService->kickMember($bookingId, $memberId, $user->id_user);
 
             flash('success', 'Anggota berhasil dikeluarkan');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -190,13 +189,13 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->query('id');
 
-            $data = $this->bookingServices->getBookingForUser(
+            $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
             );
 
-            $rescheduleRequest = $this->bookingServices->getPendingRescheduleRequest($bookingId);
+            $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
             $page = (int) ($request->query()['page'] ?? 1);
 
@@ -208,7 +207,7 @@ class UserBookingController extends Controller
                 'jenis_ruangan' => $request->input('jenis_ruangan') ?? [],
             ];
 
-            $bookings = $this->bookingServices->getBookingsByUser($user->id_user, $filters, 1, $page);
+            $bookings = $this->bookingService->getBookingsByUser($user->id_user, $filters, 1, $page);
 
             return view('User/Bookings/Detail', [
                 'booking' => $data['booking'],
@@ -236,7 +235,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->query('id');
 
-            $data = $this->bookingServices->getBookingForUser(
+            $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
@@ -254,7 +253,7 @@ class UserBookingController extends Controller
                 redirect('/bookings/draft?id=' . $bookingId);
             }
 
-            $rooms = $this->bookingServices->getAllRooms();
+            $rooms = $this->bookingService->getAllRooms();
             return view('User/Bookings/EditDraft', [
                 'booking' => $booking,
                 'rooms' => $rooms,
@@ -279,11 +278,11 @@ class UserBookingController extends Controller
                 'tujuan' => $request->all()['tujuan'],
             ];
 
-            $this->bookingServices->validateUpdateDraftRules($data, $bookingId);
+            $this->bookingService->validateUpdateDraftRules($data, $bookingId);
 
-            $this->bookingServices->validateNoTimeConflicts($data, $user->id_user, $bookingId);
+            $this->bookingService->validateNoTimeConflicts($data, $user->id_user, $bookingId);
 
-            $this->bookingServices->updateDraft($bookingId, $data, $user->id_user);
+            $this->bookingService->updateDraft($bookingId, $data, $user->id_user);
 
             flash('success', 'Draft booking berhasil diperbarui');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -299,7 +298,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->deleteDraft($bookingId, $user->id_user);
+            $this->bookingService->deleteDraft($bookingId, $user->id_user);
 
             flash('success', 'Draft booking berhasil dihapus');
             redirect('/my-bookings');
@@ -315,7 +314,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->cancelPending($bookingId, $user->id_user);
+            $this->bookingService->cancelPending($bookingId, $user->id_user);
 
             flash('success', 'Booking berhasil dibatalkan');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -331,7 +330,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $bookingId = (int) $request->query('id');
 
-            $data = $this->bookingServices->getBookingForUser(
+            $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
@@ -369,7 +368,7 @@ class UserBookingController extends Controller
             $newStart = $request->all()['waktu_mulai'];
             $newEnd = $request->all()['waktu_selesai'];
 
-            $data = $this->bookingServices->getBookingForUser(
+            $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
@@ -411,7 +410,7 @@ class UserBookingController extends Controller
                 'waktu_selesai' => $request->all()['waktu_selesai'],
             ];
 
-            $this->bookingServices->createRescheduleRequest($bookingId, $newData, $user->id_user);
+            $this->bookingService->createRescheduleRequest($bookingId, $newData, $user->id_user);
 
             flash('success', 'Permintaan reschedule terkirim. Menunggu persetujuan admin.');
             redirect('/bookings/detail?id=' . $bookingId);
@@ -427,13 +426,13 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $data = $request->all();
 
-            $invitedUser = $this->bookingServices->findUserByIdentifier($data['identifier']);
+            $invitedUser = $this->bookingService->findUserByIdentifier($data['identifier']);
 
             if (!$invitedUser) {
                 throw new Exception('User tidak ditemukan');
             }
 
-            $autoApproved = $this->bookingServices->sendInvitation(
+            $autoApproved = $this->bookingService->sendInvitation(
                 (int) $data['booking_id'],
                 (int) $invitedUser->id_user,
                 $user->id_user
@@ -458,7 +457,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $invitationId = (int) $request->all()['invitation_id'];
 
-            $bookingId = $this->bookingServices->acceptInvitation($invitationId, $user->id_user);
+            $bookingId = $this->bookingService->acceptInvitation($invitationId, $user->id_user);
 
             flash('success', 'Undangan diterima! Anda sekarang menjadi anggota booking');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -474,7 +473,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $invitationId = (int) $request->all()['invitation_id'];
 
-            $this->bookingServices->rejectInvitation($invitationId, $user->id_user);
+            $this->bookingService->rejectInvitation($invitationId, $user->id_user);
 
             flash('success', 'Undangan ditolak');
             redirect('/dashboard');
@@ -491,7 +490,7 @@ class UserBookingController extends Controller
             $invitationId = (int) $request->all()['invitation_id'];
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->cancelInvitation($invitationId, $user->id_user);
+            $this->bookingService->cancelInvitation($invitationId, $user->id_user);
 
             flash('success', 'Undangan dibatalkan');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -508,7 +507,7 @@ class UserBookingController extends Controller
             $invitationId = (int) $request->all()['invitation_id'];
 
             $bookingId = (int) $request->all()['booking_id'];
-            $this->bookingServices->approveJoinRequest($invitationId, $user->id_user);
+            $this->bookingService->approveJoinRequest($invitationId, $user->id_user);
 
             flash('success', 'Permintaan bergabung diterima');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -525,7 +524,7 @@ class UserBookingController extends Controller
             $invitationId = (int) $request->all()['invitation_id'];
             $bookingId = (int) $request->all()['booking_id'];
 
-            $this->bookingServices->rejectJoinRequest($invitationId, $user->id_user);
+            $this->bookingService->rejectJoinRequest($invitationId, $user->id_user);
 
             flash('success', 'Permintaan bergabung ditolak');
             redirect('/bookings/draft?id=' . $bookingId);
@@ -541,7 +540,7 @@ class UserBookingController extends Controller
             $user = auth()->user();
             $invitationId = (int) $request->all()['invitation_id'];
 
-            $this->bookingServices->cancelJoinRequest($invitationId, $user->id_user);
+            $this->bookingService->cancelJoinRequest($invitationId, $user->id_user);
 
             flash('success', 'Permintaan bergabung dibatalkan');
             redirect('/dashboard');

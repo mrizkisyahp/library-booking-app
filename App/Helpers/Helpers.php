@@ -62,7 +62,7 @@ if (!function_exists('view')) {
 }
 
 if (!function_exists('auth')) {
-    function auth(): \App\Core\Services\AuthService
+    function auth(): \App\Services\AuthService
     {
         return App::$app->auth;
     }
@@ -267,7 +267,7 @@ if (!function_exists('formatTanggal')) {
 if (!function_exists('getRemainingAttempts')) {
     function getRemainingAttempts(string $identifier, string $type = 'login'): int
     {
-        $cache = app()->container->make(\App\Core\Services\CacheService::class);
+        $cache = app()->container->make(\App\Services\CacheService::class);
 
         $cacheKey = match ($type) {
             'login' => 'login_attempts_' . md5($identifier),

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\RoomRepository;
+use App\Repositories\RoomRepository;
 use App\Models\Room;
 use App\Core\Paginator;
 

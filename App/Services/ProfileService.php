@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\UserRepository;
+use App\Repositories\UserRepository;
 use App\Models\User;
 use Exception;
 
-class ProfileServices
+class ProfileService
 {
     public function __construct(
         private UserRepository $userRepo,

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\UserRepository;
-use App\Core\Repository\RoleRepository;
+use App\Repositories\UserRepository;
+use App\Repositories\RoleRepository;
 use App\Core\Session;
 use App\Core\Response;
 use App\Models\User;

@@ -4,12 +4,12 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\UserServices;
+use App\Services\UserService;
 use Exception;
 
 class AdminUserController extends Controller
 {
-    public function __construct(private UserServices $userServices)
+    public function __construct(private UserService $userService)
     {
     }
 
@@ -22,29 +22,29 @@ class AdminUserController extends Controller
         ];
         $page = (int) ($request->query()['page'] ?? 1);
 
-        $paginator = $this->userServices->getAllUsers($filters, 15, $page);
+        $paginator = $this->userService->getAllUsers($filters, 15, $page);
 
         return view('Admin/Users/Index', [
             'users' => $paginator->items,
             'paginator' => $paginator,
             'filters' => $filters,
-            'stats' => $this->userServices->getStats(),
-            'roles' => $this->userServices->getAllRoles(),
-            'statuses' => $this->userServices->getAllStatuses(),
+            'stats' => $this->userService->getStats(),
+            'roles' => $this->userService->getAllRoles(),
+            'statuses' => $this->userService->getAllStatuses(),
         ]);
     }
 
     public function create(Request $request)
     {
         return view('Admin/Users/Create', [
-            'roles' => $this->userServices->getAllRoles(),
+            'roles' => $this->userService->getAllRoles(),
         ]);
     }
 
     public function store(Request $request)
     {
         try {
-            $this->userServices->createUser($request->all());
+            $this->userService->createUser($request->all());
 
             flash('success', 'User berhasil dibuat');
             redirect('/admin/users');
@@ -58,7 +58,7 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->query()['id'];
-            $user = $this->userServices->getUserById($id);
+            $user = $this->userService->getUserById($id);
 
             return view('Admin/Users/Show', [
                 'user' => $user,
@@ -73,11 +73,11 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->query()['id_user'];
-            $user = $this->userServices->getUserById($id);
+            $user = $this->userService->getUserById($id);
 
             return view('Admin/Users/Edit', [
                 'user' => $user,
-                'roles' => $this->userServices->getAllRoles(),
+                'roles' => $this->userService->getAllRoles(),
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
@@ -92,7 +92,7 @@ class AdminUserController extends Controller
             $data = $request->all();
             unset($data['id_user']);
 
-            $this->userServices->updateUser($id, $data);
+            $this->userService->updateUser($id, $data);
 
             flash('success', 'User berhasil diupdate');
             redirect('/admin/users');
@@ -106,7 +106,7 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->all()['id_user'];
-            $this->userServices->deleteUser($id);
+            $this->userService->deleteUser($id);
 
             flash('success', 'User berhasil dihapus');
             redirect('/admin/users');
@@ -120,7 +120,7 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->all()['id_user'];
-            $this->userServices->suspendUser($id);
+            $this->userService->suspendUser($id);
 
             flash('success', 'User berhasil disuspend');
             back();
@@ -134,7 +134,7 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->all()['id_user'];
-            $this->userServices->unsuspendUser($id);
+            $this->userService->unsuspendUser($id);
 
             flash('success', 'User berhasil diaktifkan kembali');
             back();
@@ -148,7 +148,7 @@ class AdminUserController extends Controller
     {
         try {
             $id = (int) $request->all()['id_user'];
-            $newPassword = $this->userServices->resetPassword($id);
+            $newPassword = $this->userService->resetPassword($id);
 
             flash('success', 'Password berhasil direset. Password baru: ' . $newPassword);
             back();
@@ -163,7 +163,7 @@ class AdminUserController extends Controller
         try {
             $id = (int) $request->all()['id_user'];
             $masa_aktif = $request->all()['masa_aktif'];
-            $this->userServices->approveKubaca($id, $masa_aktif);
+            $this->userService->approveKubaca($id, $masa_aktif);
 
             flash('success', "KuBaca berhasil disetujui, user sekarang aktif sampai {$masa_aktif}");
             back();
@@ -179,7 +179,7 @@ class AdminUserController extends Controller
             $id = (int) $request->all()['id_user'];
             $reason = $request->all()['reason'] ?? '';
 
-            $this->userServices->rejectKubaca($id, $reason);
+            $this->userService->rejectKubaca($id, $reason);
 
             flash('success', 'KuBaca ditolak');
             back();

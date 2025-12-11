@@ -1,17 +1,20 @@
 <?php
 
-namespace App\Core\Repository;
+namespace App\Repositories;
 
 use App\Models\Room;
 use App\Models\Booking;
 use App\Core\Paginator;
 use App\Core\Database;
 use App\Core\QueryBuilder;
+use App\Repositories\BookingRepository;
+use Carbon\Carbon;
 
 class RoomRepository
 {
     public function __construct(
-        private Database $database
+        private Database $database,
+        private BookingRepository $bookingRepository
     ) {
     }
 
@@ -135,16 +138,19 @@ class RoomRepository
 
     public function getAvailability(int $roomId, int $days = 7): array
     {
-        $startDate = new \DateTime();
-        $endDate = new \DateTime();
+        $startDate = Carbon::today();
+        $endDate = $startDate->copy();
+
+        // Calculate end date (skip weekends)
         $addedDays = 0;
         while ($addedDays < $days) {
-            $endDate->modify('+1 day');
-            if ((int) $endDate->format('N') < 6) { // Mon–Fri
+            $endDate->addDay();
+            if ($endDate->isWeekday()) {
                 $addedDays++;
             }
         }
 
+        // Get bookings for the period
         $bookings = Booking::query()
             ->where('ruangan_id', $roomId)
             ->where('tanggal_penggunaan_ruang', '>=', $startDate->format('Y-m-d'))
@@ -154,42 +160,68 @@ class RoomRepository
             ->orderBy('waktu_mulai', 'ASC')
             ->get();
 
-        $calendar = [];
-        $added = 0;
-        $offset = 0;
+        // Get blocked dates for the period
+        $blockedDatesData = $this->bookingRepository->getBlockedDates();
+        $blockedDates = [];
+        $blockingReasons = [];
 
-        while ($added < $days) {
-            $date = (new \DateTime())->modify("+{$offset} days");
-            $offset++;
+        foreach ($blockedDatesData as $blocked) {
+            if ($blocked['ruangan_id'] == $roomId || $blocked['ruangan_id'] === null) {
+                $begin = Carbon::parse($blocked['tanggal_begin']);
+                $end = Carbon::parse($blocked['tanggal_end']);
 
-            $dayOfWeek = (int) $date->format('N');
-            if ($dayOfWeek === 6 || $dayOfWeek === 7) {
-                continue;
+                // Add all dates in the blocked range
+                for ($date = $begin->copy(); $date->lte($end); $date->addDay()) {
+                    $dateKey = $date->format('Y-m-d');
+                    $blockedDates[] = $dateKey;
+                    $blockingReasons[$dateKey] = $blocked['alasan'] ?? 'Blocked by admin';
+                }
             }
-
-            $dateStr = $date->format('Y-m-d');
-            $calendar[$dateStr] = [
-                'date' => $dateStr,
-                'day' => $date->format('l'),
-                'day_short' => $date->format('D'),
-                'day_number' => $date->format('d'),
-                'month' => $date->format('M'),
-                'bookings' => [],
-            ];
-            $added++;
         }
 
-        foreach ($bookings as $booking) {
-            if (isset($calendar[$booking->tanggal_penggunaan_ruang])) {
-                $calendar[$booking->tanggal_penggunaan_ruang]['bookings'][] = [
-                    'waktu_mulai' => $booking->waktu_mulai,
-                    'waktu_selesai' => $booking->waktu_selesai,
-                    'status_booking' => $booking->status,
+        $calendar = [];
+        $currentDate = Carbon::today();
+
+        while (count($calendar) < $days) {
+            // Skip weekends
+            if ($currentDate->isWeekday()) {
+                $dateStr = $currentDate->format('Y-m-d');
+
+                // Determine availability status
+                $isBlocked = in_array($dateStr, $blockedDates);
+                $dayBookings = [];
+
+                foreach ($bookings as $booking) {
+                    if ($booking->tanggal_penggunaan_ruang === $dateStr) {
+                        $dayBookings[] = [
+                            'waktu_mulai' => $booking->waktu_mulai,
+                            'waktu_selesai' => $booking->waktu_selesai,
+                            'status_booking' => $booking->status,
+                        ];
+                    }
+                }
+
+                // Determine availability status (only 2 states: available or blocked)
+                $isBlocked = in_array($dateStr, $blockedDates);
+                $availabilityStatus = $isBlocked ? 'blocked' : 'available';
+
+                $calendar[] = [
+                    'date' => $dateStr,
+                    'day' => $currentDate->format('l'),
+                    'day_short' => $currentDate->format('D'),
+                    'day_number' => $currentDate->format('d'),
+                    'month' => $currentDate->format('M'),
+                    'bookings' => $dayBookings,
+                    'availability_status' => $availabilityStatus,
+                    'is_blocked' => $isBlocked,
+                    'blocking_reason' => $isBlocked ? ($blockingReasons[$dateStr] ?? 'Blocked') : null,
                 ];
             }
+
+            $currentDate->addDay();
         }
 
-        return array_values($calendar);
+        return $calendar;
     }
 
     public function getRoomAverageRating(int $roomId): ?float

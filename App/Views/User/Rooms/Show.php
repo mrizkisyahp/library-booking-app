@@ -96,8 +96,8 @@
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
-        </div>
-    </div>
+      </div>
+  </div>
 </div>
 
 <!-- Availability Calendar -->

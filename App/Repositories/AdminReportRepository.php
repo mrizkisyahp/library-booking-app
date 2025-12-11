@@ -1,17 +1,17 @@
 <?php
-namespace App\Core\Repository;
+namespace App\Repositories;
 
-use App\Core\App;
+use App\Core\Database;
 use PDO;
 
 class AdminReportRepository
 {
-    /** @var PDO|object */
+    /** @var PDO */
     private $db;
 
-    public function __construct()
+    public function __construct(Database $database)
     {
-        $this->db = App::$app->db;
+        $this->db = $database->pdo;
     }
 
     // Returns associative array with total, completed, cancelled counts
@@ -39,19 +39,19 @@ class AdminReportRepository
         $sqlTotal = "SELECT COUNT(*) AS total FROM booking b $whereSql";
         $stmt = $this->db->prepare($sqlTotal);
         $stmt->execute($params);
-        $total = (int)($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+        $total = (int) ($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
         // completed
         $sqlCompleted = "SELECT COUNT(*) AS completed FROM booking b " . ($where ? $whereSql . " AND b.status = 'completed'" : "WHERE b.status = 'completed'");
         $stmt = $this->db->prepare($sqlCompleted);
         $stmt->execute($params);
-        $completed = (int)($stmt->fetch(PDO::FETCH_ASSOC)['completed'] ?? 0);
+        $completed = (int) ($stmt->fetch(PDO::FETCH_ASSOC)['completed'] ?? 0);
 
         // cancelled
         $sqlCancelled = "SELECT COUNT(*) AS cancelled FROM booking b " . ($where ? $whereSql . " AND b.status = 'cancelled'" : "WHERE b.status = 'cancelled'");
         $stmt = $this->db->prepare($sqlCancelled);
         $stmt->execute($params);
-        $cancelled = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cancelled'] ?? 0);
+        $cancelled = (int) ($stmt->fetch(PDO::FETCH_ASSOC)['cancelled'] ?? 0);
 
         return ['total' => $total, 'completed' => $completed, 'cancelled' => $cancelled];
     }

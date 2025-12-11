@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\UserRepository;
+use App\Repositories\UserRepository;
 use App\Core\Paginator;
-use App\Core\Services\Logger;
+use App\Services\Logger;
 use App\Models\Role;
 use Exception;
 
-class UserServices
+class UserService
 {
     public function __construct(
         private UserRepository $userRepo,

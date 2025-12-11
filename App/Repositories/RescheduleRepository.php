@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Repository;
+namespace App\Repositories;
 
 use App\Core\Database;
 use App\Models\RescheduleRequest;

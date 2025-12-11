@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\FeedbackRepository;
-use App\Core\Repository\BookingRepository;
+use App\Repositories\FeedbackRepository;
+use App\Repositories\BookingRepository;
 use Exception;
 
 class FeedbackService

@@ -5,9 +5,9 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Response;
-use App\Core\Services\AuthService;
-use App\Core\Services\TurnstileService;
-use App\Core\Services\Logger;
+use App\Services\AuthService;
+use App\Services\TurnstileService;
+use App\Services\Logger;
 use App\Core\Exceptions\ValidationException;
 
 class AuthController extends Controller

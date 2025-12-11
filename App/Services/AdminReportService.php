@@ -1,15 +1,15 @@
 <?php
-namespace App\Core\Services;
+namespace App\Services;
 
-use App\Core\Repository\AdminReportRepository;
+use App\Repositories\AdminReportRepository;
 
-class AdminReportServices
+class AdminReportService
 {
     private AdminReportRepository $repo;
 
-    public function __construct(?AdminReportRepository $repo = null)
+    public function __construct(AdminReportRepository $repo)
     {
-        $this->repo = $repo ?? new AdminReportRepository();
+        $this->repo = $repo;
     }
 
     public function getSummary(array $filters): array

@@ -1,7 +1,6 @@
 <?php
 
 $statusColors = [
-  'draft' => 'bg-gray-100 text-gray-800 border border-gray-300',
   'pending' => 'bg-yellow-100 text-yellow-800 border border-yellow-300',
   'verified' => 'bg-blue-100 text-blue-800 border border-blue-300',
   'active' => 'bg-emerald-100 text-emerald-800 border border-emerald-300',
@@ -12,7 +11,6 @@ $statusColors = [
 ];
 
 $statusOptions = [
-  'draft' => 'Draft',
   'pending' => 'Pending',
   'verified' => 'Verified',
   'active' => 'Active',
@@ -137,6 +135,54 @@ $statusOptions = [
   </section>
 
 
+  <!-- Booking Management Tabs & Status Filters Combined -->
+  <section class="bg-white shadow rounded-lg border border-gray-100 mb-6">
+    <!-- Main Tabs: Today / All -->
+    <div class="flex gap-6 px-6 pt-4 border-b border-gray-200">
+      <button onclick="location.href='/admin/bookings?view=today'"
+        class="px-4 py-3 font-semibold transition-all relative <?= $activeView === 'today' ? 'text-emerald-600' : 'text-gray-600 hover:text-gray-800' ?>">
+        Booking Today
+        <?php if ($activeView === 'today'): ?>
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
+        <?php endif; ?>
+      </button>
+      <button onclick="location.href='/admin/bookings?view=all'"
+        class="px-4 py-3 font-semibold transition-all relative <?= $activeView === 'all' ? 'text-emerald-600' : 'text-gray-600 hover:text-gray-800' ?>">
+        All Booking
+        <?php if ($activeView === 'all'): ?>
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
+        <?php endif; ?>
+      </button>
+    </div>
+
+    <!-- Status Filters -->
+    <div class="flex gap-6 px-6 py-3 bg-gray-50 border-b border-gray-200">
+      <?php
+      $statusFilters = [
+        'pending' => ['label' => 'Pending', 'count' => $statusCounts['pending'] ?? 0],
+        'verified' => ['label' => 'Verified', 'count' => $statusCounts['verified'] ?? 0],
+        'active' => ['label' => 'Active', 'count' => $statusCounts['active'] ?? 0],
+        'completed' => ['label' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
+        'cancelled' => ['label' => 'Cancelled', 'count' => $statusCounts['cancelled'] ?? 0],
+        'expired' => ['label' => 'Expired', 'count' => $statusCounts['expired'] ?? 0],
+        'no_show' => ['label' => 'No Show', 'count' => $statusCounts['no_show'] ?? 0],
+      ];
+
+      foreach ($statusFilters as $statusKey => $config):
+        $isActive = ($activeStatus === $statusKey);
+        ?>
+        <a href="/admin/bookings?status=<?= $statusKey ?>&view=<?= htmlspecialchars($activeView) ?>"
+          class="relative px-2 py-2 font-medium transition-all <?= $isActive ? 'text-gray-900' : 'text-gray-600 hover:text-gray-800' ?>">
+          <?= $config['label'] ?> (<?= $config['count'] ?>)
+          <?php if ($isActive): ?>
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
+          <?php endif; ?>
+        </a>
+      <?php endforeach; ?>
+    </div>
+  </section>
+
+
 
   <?php if (empty($bookings)): ?>
     <!-- Empty State -->
@@ -241,6 +287,7 @@ $statusOptions = [
 <?php if ($pagination->total > 0): ?>
   <?php
   $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
+  $paginationQuery['view'] = $activeView; // Preserve view tab
   ?>
   <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">

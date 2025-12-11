@@ -1,4 +1,6 @@
 <?php
+/** @var \App\Models\Booking $bookings */
+
 $statusColors = [
   'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
   'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
@@ -55,7 +57,8 @@ $statusColors = [
               <div>
                 <p class="text-slate-500">Tanggal Baru</p>
                 <p class="font-bold text-slate-800">
-                  <?= date('l, d F Y', strtotime($rescheduleRequest->requested_tanggal)) ?></p>
+                  <?= date('l, d F Y', strtotime($rescheduleRequest->requested_tanggal)) ?>
+                </p>
               </div>
               <div>
                 <p class="text-slate-500">Waktu Baru</p>

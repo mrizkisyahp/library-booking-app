@@ -2,7 +2,7 @@
 namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
-use App\Core\Services\DashboardService;
+use App\Services\DashboardService;
 class AdminDashboardController extends Controller
 {
     public function __construct(
