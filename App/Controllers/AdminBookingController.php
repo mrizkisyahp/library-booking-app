@@ -81,14 +81,20 @@ class AdminBookingController extends Controller
     public function edit(Request $request)
     {
         try {
-            $bookingId = (int) $request->query()['id'];
-            $data = $this->bookingService->getBookingForUser($bookingId, 0, true);
+            $bookingId = (int) $request->query('id');
+            $page = (int) $request->query('page', 1);
+            $perPage = 6;
+
+            $data = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
 
             $rooms = $this->bookingService->getAllRooms();
 
             return view('Admin/Bookings/Edit', [
                 'booking' => $data['booking'],
-                'members' => $data['allMembers'],
+                'members' => $data['allMembers'], // Paginator (view iterates items directly if updated, or we use standard loop)
+                'allMembers' => $data['allMembers'],
+                'pic' => $data['pic'],
+                'pagination' => $data['allMembers'], // Alias for pagination snippet
                 'rooms' => $rooms,
             ]);
         } catch (Exception $e) {
@@ -131,19 +137,21 @@ class AdminBookingController extends Controller
     public function detail(Request $request)
     {
         try {
-            $bookingId = (int) $request->query()['id'];
-            $data = $this->bookingService->getBookingForUser($bookingId, 0, true); // admin = true
+            $bookingId = (int) $request->query('id'); // Using query('id') based on prev pattern
+            $page = (int) $request->query('page', 1);
+            $perPage = 6;
+
+            $data = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
 
             $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
             return view('Admin/Bookings/Detail', [
                 'bookings' => $data['booking'],
                 'pic' => $data['pic'],
-                'members' => $data['members'],
-                'allMembers' => $data['allMembers'],
-                'rescheduleRequest' => $rescheduleRequest,
+                'allMembers' => $data['allMembers'], // Paginator object
+                'pagination' => $data['allMembers'], // Alias for pagination UI
+                'rescheduleRequest' => $rescheduleRequest
             ]);
-
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             redirect('/admin/bookings');

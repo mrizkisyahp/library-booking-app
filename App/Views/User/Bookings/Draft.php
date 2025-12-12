@@ -224,7 +224,7 @@
           </div>
         <?php endif; ?>
 
-        <?php if (empty($allMembers)): ?>
+        <?php if ($allMembers->total == 0): ?>
           <div class="text-center py-8">
             <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -234,7 +234,7 @@
           </div>
         <?php else: ?>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            <?php foreach ($allMembers as $member): ?>
+            <?php foreach ($allMembers->items as $member): ?>
               <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                 <!-- <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,8 +247,7 @@
                     <p class="font-semibold text-slate-800 truncate capitalize">
                       <?= htmlspecialchars($member['nama'] ?? 'Unknown') ?>
                     </p>
-                    <p class="text-sm text-slate-500 truncate"><?= htmlspecialchars($member['email']) ?></p>
-                    </span>
+                    <p class="text-sm text-slate-500 truncate"><?= htmlspecialchars($member['email'] ?? '') ?></p>
                   </div>
 
                   <?php if (!empty($member['is_owner'])): ?>
@@ -281,6 +280,72 @@
               </div>
             <?php endforeach; ?>
           </div>
+
+          <!-- Pagination -->
+          <?php if ($allMembers->lastPage > 1): ?>
+            <?php
+            $pagination = $allMembers;
+            $paginationQuery = $_GET;
+            $paginationQuery['id'] = $booking->id_booking;
+            ?>
+            <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-sm text-slate-600">
+                  Menampilkan <span
+                    class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+                  sampai <span
+                    class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+                  dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota
+                </p>
+                <div class="flex gap-2 items-center">
+                  <!-- First Page -->
+                  <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = 1; ?>
+                    <a href="/bookings/draft?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Awal
+                    </a>
+                  <?php endif; ?>
+                  <!-- Previous -->
+                  <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                    <a href="/bookings/draft?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      ← Sebelumnya
+                    </a>
+                  <?php endif; ?>
+                  <!-- Page Numbers -->
+                  <div class="flex gap-1">
+                    <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                      <?php $paginationQuery['page'] = $i; ?>
+                      <a href="/bookings/draft?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                            <?= $i === $pagination->currentPage
+                              ? 'bg-emerald-600 text-white shadow-md'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+                        <?= $i ?>
+                      </a>
+                    <?php endfor; ?>
+                  </div>
+                  <!-- Next -->
+                  <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                    <a href="/bookings/draft?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Selanjutnya →
+                    </a>
+                  <?php endif; ?>
+                  <!-- Last Page -->
+                  <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                    <a href="/bookings/draft?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Akhir
+                    </a>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+          <?php endif; ?>
         <?php endif; ?>
 
         <?php if ($isPic): ?>

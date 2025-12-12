@@ -1,6 +1,7 @@
 <?php
 /** @var \App\Models\Booking $bookings */
 
+
 $statusColors = [
   'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
   'verified' => 'bg-blue-100 text-blue-800 border-blue-200',
@@ -175,10 +176,10 @@ $statusColors = [
             </svg>
             Anggota
           </h3>
-          <span class="text-sm text-slate-500"><?= count($allMembers) ?> anggota terdaftar</span>
+          <span class="text-sm text-slate-500"><?= $allMembers->total ?> anggota terdaftar</span>
         </div>
 
-        <?php if (empty($allMembers)): ?>
+        <?php if ($allMembers->total == 0): ?>
           <p class="text-sm text-slate-500">Belum ada anggota yang ditambahkan.</p>
         <?php else: ?>
           <div class="overflow-hidden border border-slate-100 rounded-2xl">
@@ -192,7 +193,7 @@ $statusColors = [
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
-                <?php foreach ($allMembers as $member): ?>
+                <?php foreach ($allMembers->items as $member): ?>
                   <tr>
                     <td class="px-4 py-3 text-sm font-semibold text-slate-800">
                       <?= htmlspecialchars($member['nama'] ?? '-') ?>
@@ -210,6 +211,72 @@ $statusColors = [
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <?php if ($allMembers->lastPage > 1): ?>
+            <?php
+            $pagination = $allMembers;
+            $paginationQuery = $_GET;
+            $paginationQuery['id'] = $bookings->id_booking;
+            ?>
+            <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-sm text-slate-600">
+                  Menampilkan <span
+                    class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+                  sampai <span
+                    class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+                  dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota
+                </p>
+                <div class="flex gap-2 items-center">
+                  <!-- First Page -->
+                  <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = 1; ?>
+                    <a href="/admin/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Awal
+                    </a>
+                  <?php endif; ?>
+                  <!-- Previous -->
+                  <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                    <a href="/admin/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      ← Sebelumnya
+                    </a>
+                  <?php endif; ?>
+                  <!-- Page Numbers -->
+                  <div class="flex gap-1">
+                    <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                      <?php $paginationQuery['page'] = $i; ?>
+                      <a href="/admin/bookings/detail?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                            <?= $i === $pagination->currentPage
+                              ? 'bg-emerald-600 text-white shadow-md'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+                        <?= $i ?>
+                      </a>
+                    <?php endfor; ?>
+                  </div>
+                  <!-- Next -->
+                  <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                    <a href="/admin/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Selanjutnya →
+                    </a>
+                  <?php endif; ?>
+                  <!-- Last Page -->
+                  <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                    <a href="/admin/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                      class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                      Akhir
+                    </a>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+          <?php endif; ?>
         <?php endif; ?>
       </div>
     </div>
@@ -308,7 +375,6 @@ $statusColors = [
 <div id="imagePopUp" class="hidden fixed inset-0 items-center justify-center bg-black/40 backdrop-blur-md z-50">
   <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 transition-all scale-95 opacity-0 duration-300">
 
-    <!-- HELP OVER HERE -->
 
     <img id="popUpImage" src="<?= !empty($pic['kubaca']) ? $pic['kubaca'] : '' ?> " alt="Pop-up Image"
       class="w-full h-64 object-cover rounded-md mb-4">

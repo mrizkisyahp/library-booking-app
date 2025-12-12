@@ -458,6 +458,13 @@ class QueryBuilder
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function fromRaw(string $sql, array $bindings = []): static
+    {
+        $this->table = "($sql) as subquery";
+        $this->bindings = array_merge($this->bindings, $bindings);
+        return $this;
+    }
+
     public function paginate(int $perPage = 15, int $page = 1): Paginator
     {
         $total = $this->count();

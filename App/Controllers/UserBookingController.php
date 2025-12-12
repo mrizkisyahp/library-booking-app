@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
+use App\Repositories\InvitationRepository;
 use App\Services\BookingService;
 use Exception;
 
@@ -11,6 +12,7 @@ class UserBookingController extends Controller
 {
     public function __construct(
         private BookingService $bookingService,
+        private InvitationRepository $invitationRepo,
     ) {
     }
 
@@ -41,22 +43,26 @@ class UserBookingController extends Controller
     {
         try {
             $user = auth()->user();
-            $bookingId = (int) $request->query()['id'];
+            $bookingId = (int) $request->query('id');
+            $page = (int) $request->query('page', 1);
+            $perPage = 6;
 
             $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
+                $page,
+                $perPage
             );
 
-            $pendingInvitations = $this->bookingService->getPendingInvitedByPic($bookingId, $data['booking']->user_id);
-            $joinRequests = $this->bookingService->getPendingJoinRequests($bookingId);
+            $pendingInvitations = $this->invitationRepo->getPendingForBooking($bookingId);
+            $joinRequests = $this->invitationRepo->getPendingJoinRequests($bookingId);
 
             return view('User/Bookings/Draft', [
                 'booking' => $data['booking'],
-                'pic' => $data['pic'],
-                'members' => $data['members'],
-                'allMembers' => $data['allMembers'],
+                'allMembers' => $data['allMembers'], // Paginator
+                'pagination' => $data['allMembers'], // Alias for pagination UI
+                'pic' => $data['pic'], // User object
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
                 'canSubmit' => $data['canSubmit'],
@@ -187,41 +193,29 @@ class UserBookingController extends Controller
     {
         try {
             $user = auth()->user();
-            $bookingId = (int) $request->query('id');
+            $bookingId = (int) $request->query('id'); // Fixed syntax from query()['id'] if present
+            $page = (int) $request->query('page', 1);
+            $perPage = 6;
 
             $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
+                $page,
+                $perPage
             );
 
             $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
-            $page = (int) ($request->query()['page'] ?? 1);
-
-            $filters = [
-                'nama_ruangan' => $request->input('nama_ruangan') ?? '',
-                'tanggal' => $request->input('tanggal') ?? '',
-                'waktu_mulai' => $request->input('waktu_mulai') ?? '',
-                'kapasitas_min' => $request->input('kapasitas_min') ?? '',
-                'jenis_ruangan' => $request->input('jenis_ruangan') ?? [],
-            ];
-
-            $bookings = $this->bookingService->getBookingsByUser($user->id_user, $filters, 1, $page);
-
             return view('User/Bookings/Detail', [
                 'booking' => $data['booking'],
+                'allMembers' => $data['allMembers'], // Paginator object
+                'pagination' => $data['allMembers'], // Alias for pagination UI
                 'pic' => $data['pic'],
-                'members' => $data['members'],
-                'allMembers' => $data['allMembers'],
-                'canSubmit' => $data['canSubmit'],
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
+                'canSubmit' => $data['canSubmit'],
                 'rescheduleRequest' => $rescheduleRequest,
-
-                'bookings' => $bookings->items,
-                'pagination' => $bookings,
-                'filters' => $filters,
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());

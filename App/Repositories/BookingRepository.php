@@ -225,42 +225,33 @@ class BookingRepository
             ->paginate($perPage, $page);
     }
 
-    public function getBookingMembers(int $bookingId): array
+    public function getBookingMembers(int $bookingId, int $page = 1, int $perPage = 6): Paginator
     {
         $qb = new QueryBuilder($this->database->pdo);
 
         // Get booking to find PIC
         $booking = $this->findById($bookingId);
         if (!$booking) {
-            return [];
+            return new Paginator([], 0, $perPage, 1, 0);
         }
 
-        // Get members from anggota_booking
-        $members = $qb->table('anggota_booking ab')
-            ->select(['u.id_user', 'u.nama', 'u.email', 'u.nim', 'u.nip', 'u.kubaca_img', '0 as is_owner'])
-            ->join('users u', 'ab.user_id', '=', 'u.id_user')
-            ->where('ab.booking_id', $bookingId)
-            ->get();
+        $picUserId = $booking->user_id;
 
-        // Add PIC at the beginning
-        $qb2 = new QueryBuilder($this->database->pdo);
-        $pic = $qb2->table('users')
-            ->select(['id_user', 'nama', 'email', 'nim', 'nip', 'kubaca_img'])
-            ->where('id_user', $booking->user_id)
-            ->first();
+        $unionSql = "
+        SELECT u.id_user, u.nama, u.email, u.nim, u.nip, u.kubaca_img,
+               1 as is_owner, 0 as sort_order
+        FROM users u WHERE u.id_user = ?
+        UNION ALL
+        SELECT u.id_user, u.nama, u.email, u.nim, u.nip, u.kubaca_img,
+               0 as is_owner, 1 as sort_order
+        FROM anggota_booking ab
+        JOIN users u ON ab.user_id = u.id_user
+        WHERE ab.booking_id = ?
+        ORDER BY sort_order ASC, nama ASC
+    ";
 
-        if ($pic) {
-            array_unshift($members, [
-                'id_user' => $pic['id_user'],
-                'nama' => $pic['nama'],
-                'email' => $pic['email'],
-                'nim' => $pic['nim'],
-                'nip' => $pic['nip'],
-                'kubaca_img' => $pic['kubaca_img'],
-                'is_owner' => 1,
-            ]);
-        }
-        return $members;
+        return $qb->fromRaw($unionSql, [$booking->user_id, $bookingId])
+            ->paginate($perPage, $page);
     }
 
     public function findConflictingBookings(int $roomId, string $date, ?int $excludeId = null): array

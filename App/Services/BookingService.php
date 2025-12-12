@@ -96,10 +96,6 @@ class BookingService
             'no_show' => $counts['no_show'] ?? 0,
         ];
     }
-    public function getBookingMembers(int $bookingId): array
-    {
-        return $this->bookingRepo->getBookingMembers($bookingId);
-    }
     public function getBlockedDates(): array
     {
         return $this->bookingRepo->getBlockedDates();
@@ -232,7 +228,7 @@ class BookingService
         return $booking;
     }
 
-    public function getBookingForUser(int $bookingId, int $userId, bool $isAdmin = false): array
+    public function getBookingForUser(int $bookingId, int $userId, bool $isAdmin = false, int $page = 1, int $perPage = 6): array
     {
         $booking = $this->bookingRepo->findById($bookingId);
 
@@ -248,29 +244,20 @@ class BookingService
             throw new Exception('Anda tidak memiliki akses ke booking ini');
         }
 
-        $members = $this->bookingRepo->getBookingMembers($bookingId);
+        // Fetch PIC details explicitly
+        $pic = $this->bookingRepo->findUserById($booking->user_id);
 
-        $pic = null;
-        $otherMembers = [];
-        foreach ($members as $member) {
-            if ($member['is_owner'] == 1) {
-                $pic = $member;
-            } else {
-                $otherMembers[] = $member;
-            }
-        }
+        $allMembers = $this->bookingRepo->getBookingMembers($bookingId, $page, $perPage);
 
-        $allMembers = $pic ? array_merge([$pic], $otherMembers) : $otherMembers;
         $canSubmit = $bookings->status === 'draft' && ($bookings->required_members <= 0 || $bookings->current_members >= $bookings->required_members);
 
         return [
             'booking' => $bookings,
-            'pic' => $pic,
-            'members' => $otherMembers,
             'isPic' => $isPic,
             'isMember' => $isMember,
             'canSubmit' => $canSubmit,
             'allMembers' => $allMembers,
+            'pic' => $pic,
         ];
     }
 

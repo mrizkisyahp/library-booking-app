@@ -252,7 +252,7 @@ $statusColors = [
                     </div>
                 <?php endif; ?>
 
-                <?php if (empty($allMembers)): ?>
+                <?php if (empty($allMembers->items)): ?>
                     <div class="text-center py-8">
                         <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -263,7 +263,7 @@ $statusColors = [
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                        <?php foreach ($allMembers as $member): ?>
+                        <?php foreach ($allMembers->items as $member): ?>
                             <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                                 <!-- <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,6 +291,72 @@ $statusColors = [
                             </div>
                         <?php endforeach; ?>
                     </div>
+
+                    <!-- Pagination -->
+                    <?php if ($allMembers->lastPage > 1): ?>
+                        <?php
+                        $pagination = $allMembers;
+                        $paginationQuery = $_GET;
+                        $paginationQuery['id'] = $booking->id_booking;
+                        ?>
+                        <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <p class="text-sm text-slate-600">
+                                    Menampilkan <span
+                                        class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+                                    sampai <span
+                                        class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+                                    dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota
+                                </p>
+                                <div class="flex gap-2 items-center">
+                                    <!-- First Page -->
+                                    <?php if ($pagination->currentPage > 1): ?>
+                                        <?php $paginationQuery['page'] = 1; ?>
+                                        <a href="/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                                            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                                            Awal
+                                        </a>
+                                    <?php endif; ?>
+                                    <!-- Previous -->
+                                    <?php if ($pagination->currentPage > 1): ?>
+                                        <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                                        <a href="/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                                            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                                            ← Sebelumnya
+                                        </a>
+                                    <?php endif; ?>
+                                    <!-- Page Numbers -->
+                                    <div class="flex gap-1">
+                                        <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                                            <?php $paginationQuery['page'] = $i; ?>
+                                            <a href="/bookings/detail?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                            <?= $i === $pagination->currentPage
+                                ? 'bg-emerald-600 text-white shadow-md'
+                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+                                                <?= $i ?>
+                                            </a>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <!-- Next -->
+                                    <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                                        <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                                        <a href="/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                                            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                                            Selanjutnya →
+                                        </a>
+                                    <?php endif; ?>
+                                    <!-- Last Page -->
+                                    <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                                        <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                                        <a href="/bookings/detail?<?= http_build_query($paginationQuery) ?>"
+                                            class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                                            Akhir
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <!-- BELOM KELAR -->
@@ -485,20 +551,20 @@ $statusColors = [
     <nav class="fixed left-0 bottom-0 right-0 bg-gray-100 text-white md:hidden z-999 rounded-t-4xl py-6 shadow-xl">
         <div class="flex items-center justify-around w-full px-4">
             <?php if ($booking->status === 'draft'): ?>
-            <form action="/bookings/submit" method="post">
-                <?= csrf_field() ?>
-                <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
+                <form action="/bookings/submit" method="post">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
 
-                <button type="submit"
-                <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
-                class="w-full bg-primary text-white px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:text-slate-500 flex items-center justify-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-                <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
-                </button>
-            </form>
-        <?php endif; ?>
+                    <button type="submit" <?= ($booking->status !== 'draft' || !$canSubmit) ? 'disabled' : '' ?>
+                        class="w-full bg-primary text-white px-8 py-4 rounded-xl border hover:bg-emerald-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:border-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:text-slate-500 flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        <?= $canSubmit ? 'Kirim ke Admin' : 'Lengkapi Anggota Terlebih Dahulu' ?>
+                    </button>
+                </form>
+            <?php endif; ?>
 
             <?php if ($booking->status === 'pending'): ?>
 
@@ -606,7 +672,8 @@ $statusColors = [
             <?php endif; ?>
 
             <?php if ($booking->status === 'cancelled'): ?>
-                <div class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
+                <div
+                    class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
                     Booking telah dibatalkan
                 </div>
             <?php endif; ?>
@@ -620,68 +687,4 @@ $statusColors = [
         </div>
     </nav>
 
-    <!-- Pagination -->
-    <?php
-    $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
-    ?>
-    <div class="bg-white rounded-2xl shadow-lg p-6 max-w-7xl mx-auto">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-sm text-slate-600">
-                Menampilkan <span
-                    class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
-                sampai <span
-                    class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
-                dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota booking
-            </p>
-            <div class="flex gap-2 items-center">
-                <!-- First Page -->
-                <?php if ($pagination->currentPage > 1): ?>
-                    <?php $paginationQuery['page'] = 1; ?>
-                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
-                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                        Awal
-                    </a>
-                <?php endif; ?>
-                <!-- Previous -->
-                <?php if ($pagination->currentPage > 1): ?>
-                    <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
-                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
-                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                        ← Sebelumnya
-                    </a>
-                <?php endif; ?>
-                <!-- Page Numbers -->
-                <div class="flex gap-1">
-                    <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
-                        <?php $paginationQuery['page'] = $i; ?>
-                        <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
-                    <?= $i === $pagination->currentPage
-                        ? 'bg-emerald-600 text-white shadow-md'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
-                            <?= $i ?>
-                        </a>
-                    <?php endfor; ?>
-                </div>
-                <!-- Next -->
-                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
-                    <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
-                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
-                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                        Selanjutnya →
-                    </a>
-                <?php endif; ?>
-                <!-- Last Page -->
-                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
-                    <?php $paginationQuery['page'] = $pagination->lastPage; ?>
-                    <a href="/bookings/detail?id=<?= (int) $booking->id_booking ?>?<?= http_build_query($paginationQuery) ?>"
-                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                        Akhir
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
 </div>
-
-

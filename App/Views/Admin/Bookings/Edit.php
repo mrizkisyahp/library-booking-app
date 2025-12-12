@@ -136,7 +136,7 @@
             <?php endif; ?>
           </div>
         </div>
-        <?php if (empty($members)): ?>
+        <?php if ($members->total == 0): ?>
           <div class="text-center py-8">
             <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -146,7 +146,7 @@
           </div>
         <?php else: ?>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            <?php foreach ($members as $member): ?>
+            <?php foreach ($members->items as $member): ?>
               <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                 <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                   <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,6 +178,55 @@
               </div>
             <?php endforeach; ?>
           </div>
+
+          <!-- Pagination -->
+          <?php if ($allMembers->lastPage > 1): ?>
+            <?php
+            $pagination = $allMembers;
+            $paginationQuery = $_GET;
+            $paginationQuery['id'] = $booking->id_booking;
+            ?>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-6 p-4 bg-slate-50 rounded-xl">
+              <p class="text-sm text-slate-600">
+                Menampilkan <span
+                  class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+                sampai <span
+                  class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+                dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota
+              </p>
+              <div class="flex gap-2 items-center">
+                <?php if ($pagination->currentPage > 1): ?>
+                  <?php $paginationQuery['page'] = 1; ?>
+                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">Awal</a>
+                <?php endif; ?>
+                <?php if ($pagination->currentPage > 1): ?>
+                  <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">←</a>
+                <?php endif; ?>
+                <div class="flex gap-1">
+                  <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                    <?php $paginationQuery['page'] = $i; ?>
+                    <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-all <?= $i === $pagination->currentPage ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100' ?>">
+                      <?= $i ?>
+                    </a>
+                  <?php endfor; ?>
+                </div>
+                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                  <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">→</a>
+                <?php endif; ?>
+                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                  <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">Akhir</a>
+                <?php endif; ?>
+              </div>
+            </div>
+          <?php endif; ?>
         <?php endif; ?>
         <!-- Add Member Form -->
         <form action="/admin/bookings/add" method="post" class="border-t pt-6">
