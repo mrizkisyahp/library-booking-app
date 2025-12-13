@@ -12,14 +12,14 @@ use App\Core\App;
     <link href="css/output.css" rel="stylesheet">
 </head>
 
-<body class="min-h-dvh bg-slate-100">
+<body class="min-h-dvh bg-slate-100 select-none">
     <!-- sidebar -->
     <aside class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10 border-r border-emerald-700">
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
             <!-- Logo -->
             <li class="w-full px-3">
-                <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all"
+                <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all "
                     <?php if (auth()->guest()): ?>
                         href="/"
                     <?php else: ?>

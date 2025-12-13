@@ -19,12 +19,12 @@
 <div class="max-w-7xl mx-auto">
     <!-- Room thumbnail -->
     <div class="my-6">
-        <div class="grid grid-cols-4 gap-4 mb-4">
+        <div class="flex overflow-auto snap-x snap-mandatory h-[50dvh] gap-4 mb-4 py-2">
             <?php if (!empty($photos)): ?>
                 <?php foreach ($photos as $photo): ?>
                     <img src="<?= $photo ?>" alt="Foto
                              <?= htmlspecialchars($room->nama_ruangan) ?>"
-                        class="object-cover h-full rounded-3xl shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                        class=" snap-center object-cover h-full rounded-3xl shadow-md hover:shadow-lg transition-shadow cursor-pointer mx-4">
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
