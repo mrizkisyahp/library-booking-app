@@ -3,11 +3,17 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Services\ProfileService;
+use App\Core\Exceptions\ValidationException;
+use App\Services\AuthService;
+use App\Services\TurnstileService;
+
 use Exception;
 class ProfileController extends Controller
 {
     public function __construct(
         private ProfileService $profileService,
+        private AuthService $auth,
+        private TurnstileService $turnstile
     ) {
     }
     public function index(Request $request)
@@ -50,6 +56,36 @@ class ProfileController extends Controller
     {
         $userId = auth()->id();
         $user = $this->profileService->getCurrentUserProfile($userId);
+
+                if ($request->isPost()) {
+            $token = $request->input('cf-turnstile-response');
+            $remoteIp = $request->ip();
+
+            if (!$this->turnstile->verify($token, $remoteIp)) {
+                flash('error', 'Verifikasi CAPTCHA gagal. Silakan coba lagi.');
+                return redirect('/forgot');
+            }
+
+            try {
+                $validated = $request->validate([
+                    'email' => ['required', 'email']
+                ]);
+
+                $sent = $this->auth->sendPasswordResetLink($validated['email']);
+
+                if (!$sent) {
+                    flash('info', 'Jika email tersebut terdaftar, password reset link tidak dapat dikirim. Silakan coba lagi.');
+                } else {
+                    flash('success', 'Jika email tersebut terdaftar, password reset link telah dikirim.');
+                }
+
+                return redirect('/forgot');
+            } catch (ValidationException $e) {
+                return view('ResetPassword/Forgot', [
+                    'validator' => $e->getValidator()
+                ]);
+            }
+        }
 
         return view('Profile/ResetPassword', [
             'user' => $user,

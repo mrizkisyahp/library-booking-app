@@ -28,7 +28,7 @@ class PasswordController extends Controller
             $remoteIp = $request->ip();
 
             if (!$this->turnstile->verify($token, $remoteIp)) {
-                flash('error', 'CAPTCHA Verification failed');
+                flash('error', 'Verifikasi CAPTCHA gagal. Silakan coba lagi.');
                 return redirect('/forgot');
             }
 
@@ -40,9 +40,9 @@ class PasswordController extends Controller
                 $sent = $this->auth->sendPasswordResetLink($validated['email']);
 
                 if (!$sent) {
-                    flash('info', 'If that email exists, a password reset link has been sent. Please check your inbox and wait 5 minutes before requesting another.');
+                    flash('info', 'Jika email tersebut terdaftar, password reset link tidak dapat dikirim. Silakan coba lagi.');
                 } else {
-                    flash('success', 'If that email exists, a password reset link has been sent. Please check your inbox.');
+                    flash('success', 'Jika email tersebut terdaftar, password reset link telah dikirim.');
                 }
 
                 return redirect('/forgot');
@@ -64,14 +64,14 @@ class PasswordController extends Controller
         $token = $request->query('token') ?? $request->input('token');
 
         if (!$token) {
-            flash('error', 'Invalid or missing reset token.');
+            flash('error', 'Tautan reset password tidak valid. Silakan coba lagi.');
             return redirect('/forgot');
         }
 
         $user = $this->auth->verifyResetToken($token);
 
         if (!$user) {
-            flash('error', 'Invalid or expired reset link. Please request a new one.');
+            flash('error', 'Tautan reset password tidak valid. Silakan coba lagi.');
             return redirect('/forgot');
         }
 
@@ -90,10 +90,10 @@ class PasswordController extends Controller
 
                 if ($success) {
                     auth()->logout();
-                    flash('success', 'Password reset successful! You can now login with your new password.');
+                    flash('success', 'Pengaturan password berhasil diubah. Silakan login kembali.');
                     return redirect('/login');
                 }
-                flash('error', 'Failed to reset password. Please try again.');
+                flash('error', 'Gagal mengubah pengaturan password. Silakan coba lagi.');
                 return redirect('/forgot');
             } catch (ValidationException $e) {
                 return view('ResetPassword/Reset', [
