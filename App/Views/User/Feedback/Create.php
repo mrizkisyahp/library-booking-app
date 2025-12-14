@@ -1,5 +1,14 @@
+<?php $validator = $validator ?? null; ?>
+
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
   <div class="max-w-2xl mx-auto">
+    <!-- Flash Messages -->
+    <?php if ($message = flash('error')): ?>
+      <div class="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6">
+        <?= htmlspecialchars($message) ?>
+      </div>
+    <?php endif; ?>
+
     <!-- Header -->
     <div class="mb-8">
       <h2 class="text-4xl font-bold text-slate-800 mb-2">Berikan Feedback</h2>
@@ -60,7 +69,7 @@
         <div class="flex gap-2" id="star-rating">
           <?php for ($i = 1; $i <= 5; $i++): ?>
             <label class="cursor-pointer">
-              <input type="radio" name="rating" value="<?= $i ?>" class="peer hidden" required>
+              <input type="radio" name="rating" value="<?= $i ?>" class="peer hidden" required <?= old('rating') == $i ? 'checked' : '' ?>>
               <svg class="w-12 h-12 text-gray-300 peer-checked:text-yellow-400 hover:text-yellow-300 transition-colors"
                 fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -69,6 +78,9 @@
             </label>
           <?php endfor; ?>
         </div>
+        <?php if ($validator?->hasError('rating')): ?>
+          <p class="mt-2 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('rating')) ?></p>
+        <?php endif; ?>
         <p class="text-xs text-slate-500 mt-2">1 = Sangat Buruk, 5 = Sangat Baik</p>
       </div>
       <!-- Comment -->

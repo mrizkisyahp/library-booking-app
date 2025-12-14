@@ -1,3 +1,7 @@
+<?php
+$validator = $validator ?? null;
+?>
+
 <div class="max-w-5xl mx-auto">
   <!-- Back Button -->
   <div class="mb-6">
@@ -35,7 +39,8 @@
 
         <!-- PIC Selection -->
         <div class="bg-white rounded-2xl shadow-lg p-8">
-          <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+          <h3
+            class="text-xl font-bold mb-6 flex items-center <?= $validator?->hasError('user_id') ? 'text-red-700' : 'text-slate-800' ?>">
             <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -43,14 +48,24 @@
             Pilih PIC (Penanggung Jawab)
           </h3>
           <select name="user_id" required
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+            class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('user_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
             <option value="">-- Pilih User --</option>
             <?php foreach ($users as $user): ?>
-              <option value="<?= $user->id_user ?>">
+              <option value="<?= $user->id_user ?>" <?= old('user_id') == $user->id_user ? 'selected' : '' ?>>
                 <?= htmlspecialchars($user->nama) ?> (<?= htmlspecialchars($user->email) ?>)
               </option>
             <?php endforeach; ?>
           </select>
+          <?php if ($validator?->hasError('user_id')): ?>
+            <p class="mt-2 text-sm text-red-600 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd" />
+              </svg>
+              <?= htmlspecialchars($validator->getFirstError('user_id')) ?>
+            </p>
+          <?php endif; ?>
         </div>
         <!-- Booking Details -->
         <div class="bg-white rounded-2xl shadow-lg p-8">
@@ -69,17 +84,28 @@
                   d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Ruangan</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= $validator?->hasError('ruangan_id') ? 'text-red-700' : 'text-slate-600' ?>">Ruangan</label>
                 <select name="ruangan_id" required
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('ruangan_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
                   <option value="">-- Pilih Ruangan --</option>
                   <?php foreach ($rooms as $room): ?>
-                    <option value="<?= $room->id_ruangan ?>">
+                    <option value="<?= $room->id_ruangan ?>" <?= old('ruangan_id') == $room->id_ruangan ? 'selected' : '' ?>>
                       <?= htmlspecialchars($room->nama_ruangan) ?>
                       (Min: <?= $room->kapasitas_min ?>, Max: <?= $room->kapasitas_max ?>)
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <?php if ($validator?->hasError('ruangan_id')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <?= htmlspecialchars($validator->getFirstError('ruangan_id')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
             <!-- Date -->
@@ -89,9 +115,22 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Tanggal Penggunaan</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tanggal_penggunaan_ruang') ? 'text-red-700' : 'text-slate-600' ?>">Tanggal
+                  Penggunaan</label>
                 <input type="date" name="tanggal_penggunaan_ruang" required
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  value="<?= htmlspecialchars(old('tanggal_penggunaan_ruang') ?? '') ?>"
+                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('tanggal_penggunaan_ruang') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
+                <?php if ($validator?->hasError('tanggal_penggunaan_ruang')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <?= htmlspecialchars($validator->getFirstError('tanggal_penggunaan_ruang')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
             <!-- Time -->
@@ -101,14 +140,37 @@
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Waktu</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= ($validator?->hasError('waktu_mulai') || $validator?->hasError('waktu_selesai')) ? 'text-red-700' : 'text-slate-600' ?>">Waktu</label>
                 <div class="flex gap-4">
                   <input type="time" name="waktu_mulai" required placeholder="Mulai"
-                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                    value="<?= htmlspecialchars(old('waktu_mulai') ?? '') ?>"
+                    class="flex-1 px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('waktu_mulai') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
                   <span class="flex items-center text-slate-400">-</span>
                   <input type="time" name="waktu_selesai" required placeholder="Selesai"
-                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                    value="<?= htmlspecialchars(old('waktu_selesai') ?? '') ?>"
+                    class="flex-1 px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('waktu_selesai') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
                 </div>
+                <?php if ($validator?->hasError('waktu_mulai')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <strong>Waktu Mulai:</strong>&nbsp;<?= htmlspecialchars($validator->getFirstError('waktu_mulai')) ?>
+                  </p>
+                <?php elseif ($validator?->hasError('waktu_selesai')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <strong>Waktu
+                      Selesai:</strong>&nbsp;<?= htmlspecialchars($validator->getFirstError('waktu_selesai')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
             <!-- Purpose -->
@@ -118,9 +180,21 @@
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Tujuan Penggunaan</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tujuan') ? 'text-red-700' : 'text-slate-600' ?>">Tujuan
+                  Penggunaan</label>
                 <textarea name="tujuan" required rows="3" placeholder="Jelaskan tujuan penggunaan ruangan..."
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all resize-none"></textarea>
+                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all resize-none <?= $validator?->hasError('tujuan') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>"><?= htmlspecialchars(old('tujuan') ?? '') ?></textarea>
+                <?php if ($validator?->hasError('tujuan')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <?= htmlspecialchars($validator->getFirstError('tujuan')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
           </div>

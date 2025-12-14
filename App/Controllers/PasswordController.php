@@ -34,7 +34,7 @@ class PasswordController extends Controller
 
             try {
                 $validated = $request->validate([
-                    'email' => ['required', 'email']
+                    'email' => 'required|email'
                 ]);
 
                 $sent = $this->auth->sendPasswordResetLink($validated['email']);
@@ -78,9 +78,9 @@ class PasswordController extends Controller
         if ($request->isPost()) {
             try {
                 $validated = $request->validate([
-                    'token' => ['required', 'string'],
-                    'new_password' => ['required', 'min:8'],
-                    'confirm_new_password' => ['required', 'match:new_password']
+                    'token' => 'required|string',
+                    'new_password' => 'required|min:8',
+                    'confirm_new_password' => 'required|match:new_password'
                 ]);
 
                 $success = $this->auth->resetPasswordWithToken(

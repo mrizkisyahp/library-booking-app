@@ -1,3 +1,4 @@
+<?php $validator = $validator ?? null; ?>
 <div class="max-w-5xl mx-auto">
   <!-- Back Button -->
   <div class="mb-6">
@@ -56,15 +57,26 @@
                   d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Ruangan</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= $validator?->hasError('ruangan_id') ? 'text-red-700' : 'text-slate-600' ?>">Ruangan</label>
                 <select name="ruangan_id"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('ruangan_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
                   <?php foreach ($rooms as $room): ?>
-                    <option value="<?= $room->id_ruangan ?>" <?= $booking->ruangan_id == $room->id_ruangan ? 'selected' : '' ?>>
+                    <option value="<?= $room->id_ruangan ?>" <?= (old('ruangan_id') ?? $booking->ruangan_id) == $room->id_ruangan ? 'selected' : '' ?>>
                       <?= htmlspecialchars($room->nama_ruangan) ?>
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <?php if ($validator?->hasError('ruangan_id')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <?= htmlspecialchars($validator->getFirstError('ruangan_id')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
             <!-- Date -->
@@ -74,9 +86,22 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Tanggal Penggunaan</label>
-                <input type="date" name="tanggal_penggunaan_ruang" value="<?= $booking->tanggal_penggunaan_ruang ?>"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                <label
+                  class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tanggal_penggunaan_ruang') ? 'text-red-700' : 'text-slate-600' ?>">Tanggal
+                  Penggunaan</label>
+                <input type="date" name="tanggal_penggunaan_ruang"
+                  value="<?= htmlspecialchars(old('tanggal_penggunaan_ruang') ?? $booking->tanggal_penggunaan_ruang) ?>"
+                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('tanggal_penggunaan_ruang') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
+                <?php if ($validator?->hasError('tanggal_penggunaan_ruang')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <?= htmlspecialchars($validator->getFirstError('tanggal_penggunaan_ruang')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
             <!-- Time -->
@@ -86,14 +111,37 @@
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Waktu</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= ($validator?->hasError('waktu_mulai') || $validator?->hasError('waktu_selesai')) ? 'text-red-700' : 'text-slate-600' ?>">Waktu</label>
                 <div class="flex gap-4">
-                  <input type="time" name="waktu_mulai" value="<?= substr($booking->waktu_mulai, 0, 5) ?>"
-                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  <input type="time" name="waktu_mulai"
+                    value="<?= htmlspecialchars(old('waktu_mulai') ?? substr($booking->waktu_mulai, 0, 5)) ?>"
+                    class="flex-1 px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('waktu_mulai') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
                   <span class="flex items-center text-slate-400">-</span>
-                  <input type="time" name="waktu_selesai" value="<?= substr($booking->waktu_selesai, 0, 5) ?>"
-                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  <input type="time" name="waktu_selesai"
+                    value="<?= htmlspecialchars(old('waktu_selesai') ?? substr($booking->waktu_selesai, 0, 5)) ?>"
+                    class="flex-1 px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('waktu_selesai') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
                 </div>
+                <?php if ($validator?->hasError('waktu_mulai')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <strong>Waktu Mulai:</strong>&nbsp;<?= htmlspecialchars($validator->getFirstError('waktu_mulai')) ?>
+                  </p>
+                <?php elseif ($validator?->hasError('waktu_selesai')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <strong>Waktu
+                      Selesai:</strong>&nbsp;<?= htmlspecialchars($validator->getFirstError('waktu_selesai')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
             <!-- Purpose -->
@@ -103,9 +151,20 @@
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <div class="flex-1">
-                <label class="block text-sm font-semibold text-slate-600 mb-2">Tujuan</label>
+                <label
+                  class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tujuan') ? 'text-red-700' : 'text-slate-600' ?>">Tujuan</label>
                 <textarea name="tujuan" rows="3"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all resize-none"><?= htmlspecialchars($booking->tujuan) ?></textarea>
+                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all resize-none <?= $validator?->hasError('tujuan') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>"><?= htmlspecialchars(old('tujuan') ?? $booking->tujuan) ?></textarea>
+                <?php if ($validator?->hasError('tujuan')): ?>
+                  <p class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                    </svg>
+                    <?= htmlspecialchars($validator->getFirstError('tujuan')) ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -136,7 +195,7 @@
             <?php endif; ?>
           </div>
         </div>
-        <?php if ($members->total == 0): ?>
+        <?php if ($pagination->total == 0): ?>
           <div class="text-center py-8">
             <svg class="w-16 h-16 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -146,7 +205,7 @@
           </div>
         <?php else: ?>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            <?php foreach ($members->items as $member): ?>
+            <?php foreach ($members as $member): ?>
               <div class="flex items-center p-3 bg-slate-50 rounded-xl">
                 <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                   <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,54 +238,49 @@
             <?php endforeach; ?>
           </div>
 
-          <!-- Pagination -->
-          <?php if ($allMembers->lastPage > 1): ?>
-            <?php
-            $pagination = $allMembers;
-            $paginationQuery = $_GET;
-            $paginationQuery['id'] = $booking->id_booking;
-            ?>
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-6 p-4 bg-slate-50 rounded-xl">
-              <p class="text-sm text-slate-600">
-                Menampilkan <span
-                  class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
-                sampai <span
-                  class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
-                dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota
-              </p>
-              <div class="flex gap-2 items-center">
-                <?php if ($pagination->currentPage > 1): ?>
-                  <?php $paginationQuery['page'] = 1; ?>
+          <?php
+          $paginationQuery['id'] = $booking->id_booking;
+          ?>
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-6 p-4 bg-slate-50 rounded-xl">
+            <p class="text-sm text-slate-600">
+              Menampilkan <span
+                class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+              sampai <span
+                class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+              dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> anggota
+            </p>
+            <div class="flex gap-2 items-center">
+              <?php if ($pagination->currentPage > 1): ?>
+                <?php $paginationQuery['page'] = 1; ?>
+                <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                  class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">Awal</a>
+              <?php endif; ?>
+              <?php if ($pagination->currentPage > 1): ?>
+                <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                  class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">←</a>
+              <?php endif; ?>
+              <div class="flex gap-1">
+                <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                  <?php $paginationQuery['page'] = $i; ?>
                   <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
-                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">Awal</a>
-                <?php endif; ?>
-                <?php if ($pagination->currentPage > 1): ?>
-                  <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
-                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
-                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">←</a>
-                <?php endif; ?>
-                <div class="flex gap-1">
-                  <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
-                    <?php $paginationQuery['page'] = $i; ?>
-                    <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
-                      class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-all <?= $i === $pagination->currentPage ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100' ?>">
-                      <?= $i ?>
-                    </a>
-                  <?php endfor; ?>
-                </div>
-                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
-                  <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
-                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
-                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">→</a>
-                <?php endif; ?>
-                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
-                  <?php $paginationQuery['page'] = $pagination->lastPage; ?>
-                  <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
-                    class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">Akhir</a>
-                <?php endif; ?>
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-all <?= $i === $pagination->currentPage ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100' ?>">
+                    <?= $i ?>
+                  </a>
+                <?php endfor; ?>
               </div>
+              <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                  class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">→</a>
+              <?php endif; ?>
+              <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                <a href="/admin/bookings/edit?<?= http_build_query($paginationQuery) ?>"
+                  class="px-3 py-1 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">Akhir</a>
+              <?php endif; ?>
             </div>
-          <?php endif; ?>
+          </div>
         <?php endif; ?>
         <!-- Add Member Form -->
         <form action="/admin/bookings/add" method="post" class="border-t pt-6">

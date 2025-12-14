@@ -8,6 +8,8 @@ use App\Services\RoomService;
 
 class UserRoomController extends Controller
 {
+    private const PER_PAGE = 15;
+
     public function __construct(
         private RoomService $roomService
     ) {
@@ -15,6 +17,9 @@ class UserRoomController extends Controller
 
     public function index(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Daftar Ruangan | Library Booking App');
+
         $page = (int) ($request->input('page') ?? 1);
         $nama_ruangan = $request->input('nama_ruangan') ?? '';
         $tanggal = $request->input('tanggal') ?? '';
@@ -34,7 +39,7 @@ class UserRoomController extends Controller
             'kapasitas_max' => $kapasitasmax,
         ];
 
-        $paginatedRooms = $this->roomService->getAllRooms($filters, 15, $page);
+        $paginatedRooms = $this->roomService->getAllRooms($filters, self::PER_PAGE, $page);
 
         return view('User/Rooms/Index', [
             'rooms' => $paginatedRooms->items,
@@ -45,7 +50,14 @@ class UserRoomController extends Controller
 
     public function show(Request $request)
     {
-        $id = (int) $request->query('id_ruangan');
+        $this->setLayout('main');
+        $this->setTitle('Detail Ruangan | Library Booking App');
+
+        $data = $request->validate([
+            'id_ruangan' => 'required|integer',
+        ]);
+
+        $id = (int) $data['id_ruangan'];
         $room = $this->roomService->getRoomById($id);
 
         if (!$room) {

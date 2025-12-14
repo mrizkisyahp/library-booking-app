@@ -1,7 +1,6 @@
 <?php
 use App\Core\App;
-
-dump($booking);
+$validator = $validator ?? null;
 ?>
 
 <div class="container mx-auto px-4 py-6 max-w-2xl">
@@ -84,26 +83,44 @@ dump($booking);
 
             <!-- Date -->
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Penggunaan</label>
+                <label
+                    class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tanggal_penggunaan_ruang') ? 'text-red-700' : 'text-slate-700' ?>">Tanggal
+                    Penggunaan</label>
                 <input type="date" name="tanggal_penggunaan_ruang" required min="<?= date('Y-m-d') ?>"
-                    value="<?= htmlspecialchars($booking->tanggal_penggunaan_ruang) ?>"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                    value="<?= htmlspecialchars(old('tanggal_penggunaan_ruang') ?? $booking->tanggal_penggunaan_ruang) ?>"
+                    class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('tanggal_penggunaan_ruang') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
+                <?php if ($validator?->hasError('tanggal_penggunaan_ruang')): ?>
+                    <p class="mt-1 text-sm text-red-600">
+                        <?= htmlspecialchars($validator->getFirstError('tanggal_penggunaan_ruang')) ?></p>
+                <?php endif; ?>
             </div>
 
             <!-- Start Time -->
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Mulai</label>
+                <label
+                    class="block text-sm font-semibold mb-2 <?= $validator?->hasError('waktu_mulai') ? 'text-red-700' : 'text-slate-700' ?>">Waktu
+                    Mulai</label>
                 <input type="time" name="waktu_mulai" required min="07:00" max="16:00"
-                    value="<?= htmlspecialchars(substr($booking->waktu_mulai, 0, 5)) ?>"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                    value="<?= htmlspecialchars(old('waktu_mulai') ?? substr($booking->waktu_mulai, 0, 5)) ?>"
+                    class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('waktu_mulai') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
+                <?php if ($validator?->hasError('waktu_mulai')): ?>
+                    <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('waktu_mulai')) ?>
+                    </p>
+                <?php endif; ?>
             </div>
 
             <!-- End Time -->
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Waktu Selesai</label>
+                <label
+                    class="block text-sm font-semibold mb-2 <?= $validator?->hasError('waktu_selesai') ? 'text-red-700' : 'text-slate-700' ?>">Waktu
+                    Selesai</label>
                 <input type="time" name="waktu_selesai" required min="08:00" max="17:00"
-                    value="<?= htmlspecialchars(substr($booking->waktu_selesai, 0, 5)) ?>"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                    value="<?= htmlspecialchars(old('waktu_selesai') ?? substr($booking->waktu_selesai, 0, 5)) ?>"
+                    class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('waktu_selesai') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
+                <?php if ($validator?->hasError('waktu_selesai')): ?>
+                    <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('waktu_selesai')) ?>
+                    </p>
+                <?php endif; ?>
             </div>
 
             <!-- Warning -->

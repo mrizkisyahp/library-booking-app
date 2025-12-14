@@ -42,7 +42,7 @@ class VerifyController extends Controller
 
             try {
                 $validated = $request->validate([
-                    'code' => ['required', 'string', 'min:6', 'max:6']
+                    'code' => 'required|string|min:6|max:6'
                 ]);
 
                 $success = $this->auth->completeVerification((int) $userId, $validated['code']);

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Exceptions\ValidationException;
 use App\Core\Request;
 use App\Repositories\InvitationRepository;
 use App\Services\BookingService;
@@ -10,6 +11,9 @@ use Exception;
 
 class UserBookingController extends Controller
 {
+    private const PER_PAGE_MEMBERS = 6;
+    private const PER_PAGE_BOOKINGS = 15;
+
     public function __construct(
         private BookingService $bookingService,
         private InvitationRepository $invitationRepo,
@@ -96,31 +100,37 @@ class UserBookingController extends Controller
     }
     public function showDraft(Request $request)
     {
-        try {
-            $user = auth()->user();
-            $bookingId = (int) $request->query('id');
-            $page = (int) $request->query('page', 1);
-            $perPage = 6;
+        $this->setLayout('main');
+        $this->setTitle('Draft Booking | Library Booking App');
 
-            $data = $this->bookingService->getBookingForUser(
+        try {
+            $data = $request->validate([
+                'id' => 'required|integer',
+            ]);
+
+            $user = auth()->user();
+            $bookingId = (int) $data['id'];
+            $page = (int) $request->query('page', 1);
+
+            $bookingData = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
                 $page,
-                $perPage
+                self::PER_PAGE_MEMBERS
             );
 
             $pendingInvitations = $this->invitationRepo->getPendingForBooking($bookingId);
             $joinRequests = $this->invitationRepo->getPendingJoinRequests($bookingId);
 
             return view('User/Bookings/Draft', [
-                'booking' => $data['booking'],
-                'allMembers' => $data['allMembers'], // Paginator
-                'pagination' => $data['allMembers'], // Alias for pagination UI
-                'pic' => $data['pic'], // User object
-                'isPic' => $data['isPic'],
-                'isMember' => $data['isMember'],
-                'canSubmit' => $data['canSubmit'],
+                'booking' => $bookingData['booking'],
+                'allMembers' => $bookingData['allMembers'],
+                'pagination' => $bookingData['allMembers'],
+                'pic' => $bookingData['pic'],
+                'isPic' => $bookingData['isPic'],
+                'isMember' => $bookingData['isMember'],
+                'canSubmit' => $bookingData['canSubmit'],
                 'pendingInvitations' => $pendingInvitations,
                 'joinRequests' => $joinRequests,
             ]);
@@ -133,8 +143,12 @@ class UserBookingController extends Controller
     public function submitDraft(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->submitForApproval($bookingId, $user->id_user);
 
@@ -148,6 +162,9 @@ class UserBookingController extends Controller
 
     public function showJoinForm(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Gabung Booking | Library Booking App');
+
         $prefill = $request->query()['code'] ?? '';
         return view('User/Bookings/Join', ['prefill' => $prefill]);
     }
@@ -155,8 +172,12 @@ class UserBookingController extends Controller
     public function joinByLink(Request $request)
     {
         try {
+            $data = $request->validate([
+                'invite_token' => 'required|string',
+            ]);
+
             $user = auth()->user();
-            $token = $request->all()['invite_token'];
+            $token = $data['invite_token'];
 
             $result = $this->bookingService->joinViaInviteToken($token, $user->id_user);
 
@@ -175,6 +196,9 @@ class UserBookingController extends Controller
 
     public function showMyBooking(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Booking Saya | Library Booking App');
+
         $user = auth()->user();
         $page = (int) ($request->query()['page'] ?? 1);
 
@@ -186,7 +210,7 @@ class UserBookingController extends Controller
             'jenis_ruangan' => $request->input('jenis_ruangan') ?? [],
         ];
 
-        $bookings = $this->bookingService->getBookingsByUser($user->id_user, $filters, 15, $page);
+        $bookings = $this->bookingService->getBookingsByUser($user->id_user, $filters, self::PER_PAGE_BOOKINGS, $page);
         return view('User/Bookings/Index', [
             'bookings' => $bookings->items,
             'pagination' => $bookings,
@@ -197,9 +221,14 @@ class UserBookingController extends Controller
     public function cancelBooking(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+                'reason' => 'nullable|string|max:500',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
-            $reason = $request->all()['reason'] ?? 'Dibatalkan oleh user';
+            $bookingId = (int) $data['booking_id'];
+            $reason = $data['reason'] ?? 'Dibatalkan oleh user';
 
             $this->bookingService->cancelBooking($bookingId, $user->id_user, $reason);
 
@@ -214,8 +243,12 @@ class UserBookingController extends Controller
     public function leaveBooking(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->leaveBooking($bookingId, $user->id_user);
 
@@ -230,9 +263,14 @@ class UserBookingController extends Controller
     public function kickMember(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+                'user_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
-            $memberId = (int) $request->all()['user_id'];
+            $bookingId = (int) $data['booking_id'];
+            $memberId = (int) $data['user_id'];
 
             $this->bookingService->kickMember($bookingId, $memberId, $user->id_user);
 
@@ -246,26 +284,32 @@ class UserBookingController extends Controller
 
     public function detail(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Detail Booking | Library Booking App');
+
         try {
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->query('id'); // Fixed syntax from query()['id'] if present
+            $bookingId = (int) $validated['id'];
             $page = (int) $request->query('page', 1);
-            $perPage = 6;
 
             $data = $this->bookingService->getBookingForUser(
                 $bookingId,
                 $user->id_user,
                 $user->id_role === 1,
                 $page,
-                $perPage
+                self::PER_PAGE_MEMBERS
             );
 
             $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
             return view('User/Bookings/Detail', [
                 'booking' => $data['booking'],
-                'allMembers' => $data['allMembers'], // Paginator object
-                'pagination' => $data['allMembers'], // Alias for pagination UI
+                'allMembers' => $data['allMembers'],
+                'pagination' => $data['allMembers'],
                 'pic' => $data['pic'],
                 'isPic' => $data['isPic'],
                 'isMember' => $data['isMember'],
@@ -280,9 +324,16 @@ class UserBookingController extends Controller
 
     public function showEditDraft(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Edit Draft Booking | Library Booking App');
+
         try {
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->query('id');
+            $bookingId = (int) $validated['id'];
 
             $data = $this->bookingService->getBookingForUser(
                 $bookingId,
@@ -316,21 +367,28 @@ class UserBookingController extends Controller
     public function updateDraft(Request $request)
     {
         try {
+            $validated = $request->validate([
+                'booking_id' => 'required|integer',
+                'ruangan_id' => 'required|integer',
+                'tanggal_penggunaan_ruang' => 'required|date',
+                'waktu_mulai' => 'required',
+                'waktu_selesai' => 'required',
+                'tujuan' => 'required|string|max:500',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $validated['booking_id'];
 
             $data = [
-                'ruangan_id' => (int) $request->all()['ruangan_id'],
-                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
-                'waktu_mulai' => $request->all()['waktu_mulai'],
-                'waktu_selesai' => $request->all()['waktu_selesai'],
-                'tujuan' => $request->all()['tujuan'],
+                'ruangan_id' => (int) $validated['ruangan_id'],
+                'tanggal_penggunaan_ruang' => $validated['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $validated['waktu_mulai'],
+                'waktu_selesai' => $validated['waktu_selesai'],
+                'tujuan' => $validated['tujuan'],
             ];
 
             $this->bookingService->validateUpdateDraftRules($data, $bookingId);
-
             $this->bookingService->validateNoTimeConflicts($data, $user->id_user, $bookingId);
-
             $this->bookingService->updateDraft($bookingId, $data, $user->id_user);
 
             flash('success', 'Draft booking berhasil diperbarui');
@@ -344,8 +402,12 @@ class UserBookingController extends Controller
     public function deleteDraft(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->deleteDraft($bookingId, $user->id_user);
 
@@ -360,8 +422,12 @@ class UserBookingController extends Controller
     public function cancelPending(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->cancelPending($bookingId, $user->id_user);
 
@@ -375,9 +441,16 @@ class UserBookingController extends Controller
 
     public function showRescheduleForm(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Reschedule Booking | Library Booking App');
+
         try {
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->query('id');
+            $bookingId = (int) $validated['id'];
 
             $data = $this->bookingService->getBookingForUser(
                 $bookingId,
@@ -387,13 +460,11 @@ class UserBookingController extends Controller
 
             $booking = $data['booking'];
 
-            // Only PIC can reschedule
             if (!$data['isPic']) {
                 flash('error', 'Hanya PIC yang dapat melakukan reschedule');
                 redirect('/bookings/detail?id=' . $bookingId);
             }
 
-            // Only verified bookings can be rescheduled
             if ($booking->status !== 'verified') {
                 flash('error', 'Hanya booking dengan status verified yang dapat di-reschedule');
                 redirect('/bookings/detail?id=' . $bookingId);
@@ -411,11 +482,18 @@ class UserBookingController extends Controller
     public function confirmReschedule(Request $request)
     {
         try {
+            $validated = $request->validate([
+                'booking_id' => 'required|integer',
+                'tanggal_penggunaan_ruang' => 'required|date',
+                'waktu_mulai' => 'required',
+                'waktu_selesai' => 'required',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
-            $newDate = $request->all()['tanggal_penggunaan_ruang'];
-            $newStart = $request->all()['waktu_mulai'];
-            $newEnd = $request->all()['waktu_selesai'];
+            $bookingId = (int) $validated['booking_id'];
+            $newDate = $validated['tanggal_penggunaan_ruang'];
+            $newStart = $validated['waktu_mulai'];
+            $newEnd = $validated['waktu_selesai'];
 
             $data = $this->bookingService->getBookingForUser(
                 $bookingId,
@@ -450,13 +528,20 @@ class UserBookingController extends Controller
     public function reschedule(Request $request)
     {
         try {
+            $validated = $request->validate([
+                'booking_id' => 'required|integer',
+                'tanggal_penggunaan_ruang' => 'required|date',
+                'waktu_mulai' => 'required',
+                'waktu_selesai' => 'required',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $validated['booking_id'];
 
             $newData = [
-                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
-                'waktu_mulai' => $request->all()['waktu_mulai'],
-                'waktu_selesai' => $request->all()['waktu_selesai'],
+                'tanggal_penggunaan_ruang' => $validated['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $validated['waktu_mulai'],
+                'waktu_selesai' => $validated['waktu_selesai'],
             ];
 
             $this->bookingService->createRescheduleRequest($bookingId, $newData, $user->id_user);
@@ -471,9 +556,15 @@ class UserBookingController extends Controller
 
     public function send(Request $request)
     {
+        $bookingId = null;
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer',
+                'identifier' => 'required|string',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
             $user = auth()->user();
-            $data = $request->all();
 
             $invitedUser = $this->bookingService->findUserByIdentifier($data['identifier']);
 
@@ -482,7 +573,7 @@ class UserBookingController extends Controller
             }
 
             $autoApproved = $this->bookingService->sendInvitation(
-                (int) $data['booking_id'],
+                $bookingId,
                 (int) $invitedUser->id_user,
                 $user->id_user
             );
@@ -493,18 +584,26 @@ class UserBookingController extends Controller
                 flash('success', 'Undangan berhasil dikirim');
             }
 
-            redirect('/bookings/draft?id=' . $data['booking_id']);
+            redirect('/bookings/draft?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
-            redirect('/bookings/draft?id=' . $data['booking_id']);
+            if ($bookingId) {
+                redirect('/bookings/draft?id=' . $bookingId);
+            } else {
+                back();
+            }
         }
     }
 
     public function accept(Request $request)
     {
         try {
+            $data = $request->validate([
+                'invitation_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $invitationId = (int) $request->all()['invitation_id'];
+            $invitationId = (int) $data['invitation_id'];
 
             $bookingId = $this->bookingService->acceptInvitation($invitationId, $user->id_user);
 
@@ -519,8 +618,12 @@ class UserBookingController extends Controller
     public function reject(Request $request)
     {
         try {
+            $data = $request->validate([
+                'invitation_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $invitationId = (int) $request->all()['invitation_id'];
+            $invitationId = (int) $data['invitation_id'];
 
             $this->bookingService->rejectInvitation($invitationId, $user->id_user);
 
@@ -535,9 +638,14 @@ class UserBookingController extends Controller
     public function cancel(Request $request)
     {
         try {
+            $data = $request->validate([
+                'invitation_id' => 'required|integer',
+                'booking_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $invitationId = (int) $request->all()['invitation_id'];
-            $bookingId = (int) $request->all()['booking_id'];
+            $invitationId = (int) $data['invitation_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->cancelInvitation($invitationId, $user->id_user);
 
@@ -552,10 +660,15 @@ class UserBookingController extends Controller
     public function approveJoinRequest(Request $request)
     {
         try {
-            $user = auth()->user();
-            $invitationId = (int) $request->all()['invitation_id'];
+            $data = $request->validate([
+                'invitation_id' => 'required|integer',
+                'booking_id' => 'required|integer',
+            ]);
 
-            $bookingId = (int) $request->all()['booking_id'];
+            $user = auth()->user();
+            $invitationId = (int) $data['invitation_id'];
+            $bookingId = (int) $data['booking_id'];
+
             $this->bookingService->approveJoinRequest($invitationId, $user->id_user);
 
             flash('success', 'Permintaan bergabung diterima');
@@ -569,9 +682,14 @@ class UserBookingController extends Controller
     public function rejectJoinRequest(Request $request)
     {
         try {
+            $data = $request->validate([
+                'invitation_id' => 'required|integer',
+                'booking_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $invitationId = (int) $request->all()['invitation_id'];
-            $bookingId = (int) $request->all()['booking_id'];
+            $invitationId = (int) $data['invitation_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->rejectJoinRequest($invitationId, $user->id_user);
 
@@ -586,8 +704,12 @@ class UserBookingController extends Controller
     public function cancelJoinRequest(Request $request)
     {
         try {
+            $data = $request->validate([
+                'invitation_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $invitationId = (int) $request->all()['invitation_id'];
+            $invitationId = (int) $data['invitation_id'];
 
             $this->bookingService->cancelJoinRequest($invitationId, $user->id_user);
 

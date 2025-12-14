@@ -110,6 +110,11 @@ class Validator
             case 'date':
                 return (strtotime((string) $value) !== false) ? null : 'Harus berbentuk tanggal valid.';
 
+            case 'date_format':
+                $format = $params[0] ?? 'Y-m-d';
+                $date = \DateTime::createFromFormat($format, (string) $value);
+                return ($date && $date->format($format) === (string) $value) ? null : "Format harus {$format}.";
+
             case 'after':
                 $other = $params[0] ?? null;
                 if (!$other)
@@ -135,6 +140,14 @@ class Validator
                 }
                 $matchValue = $data[$matchField] ?? null;
                 return ($value === $matchValue) ? null : "{$field} harus cocok dengan {$matchField}.";
+
+            case 'after_or_equal':
+                $otherField = $params[0] ?? null;
+                $otherValue = $data[$otherField] ?? null;
+                if ($otherValue && strtotime((string) $value) < strtotime((string) $otherValue)) {
+                    return "Harus setelah atau sama dengan {$otherField}.";
+                }
+                return null;
 
             default:
                 return null;

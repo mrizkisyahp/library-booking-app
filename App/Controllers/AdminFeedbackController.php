@@ -9,6 +9,8 @@ use Exception;
 
 class AdminFeedbackController extends Controller
 {
+    private const PER_PAGE = 15;
+
     private FeedbackRepository $feedbackRepo;
 
     public function __construct(FeedbackRepository $feedbackRepo)
@@ -18,6 +20,9 @@ class AdminFeedbackController extends Controller
 
     public function index(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Feedback | Library Booking App');
+
         try {
             $filters = [
                 'keyword' => $request->query()['keyword'] ?? '',
@@ -26,7 +31,7 @@ class AdminFeedbackController extends Controller
             ];
             $page = (int) ($request->query()['page'] ?? 1);
 
-            $paginator = $this->feedbackRepo->getAllFeedbacks($filters, 15, $page);
+            $paginator = $this->feedbackRepo->getAllFeedbacks($filters, self::PER_PAGE, $page);
 
             return view('Admin/Feedback/Index', [
                 'feedbacks' => $paginator->items,
@@ -41,8 +46,15 @@ class AdminFeedbackController extends Controller
 
     public function detail(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Detail Feedback | Library Booking App');
+
         try {
-            $id = (int) $request->query()['id'];
+            $data = $request->validate([
+                'id' => 'required|integer',
+            ]);
+
+            $id = (int) $data['id'];
             $feedback = $this->feedbackRepo->findByIdWithDetails($id);
 
             if (!$feedback) {

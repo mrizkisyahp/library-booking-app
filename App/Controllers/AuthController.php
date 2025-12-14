@@ -38,8 +38,8 @@ class AuthController extends Controller
 
             try {
                 $validated = $request->validate([
-                    'identifier' => ['required', 'string', 'max:255'],
-                    'password' => ['required', 'string', 'max:255', 'min:6']
+                    'identifier' => 'required|string|max:255',
+                    'password' => 'required|string|max:255|min:6'
                 ]);
 
                 $remember = (bool) $request->input('remember', false);
@@ -93,13 +93,13 @@ class AuthController extends Controller
 
             try {
                 $validated = $request->validate([
-                    'nama' => ['required', 'string', 'min:3'],
-                    'nim' => ['required', 'string', 'min:10', 'max:10', 'unique:users,nim'],
-                    'email' => ['required', 'email', 'unique:users,email'],
-                    'password' => ['required', 'string', 'min:8', 'max:24'],
-                    'confirm_password' => ['required', 'string', 'match:password'],
-                    'jurusan' => ['required', 'string'],
-                    'nomor_hp' => ['required', 'numeric'],
+                    'nama' => 'required|string|min:3',
+                    'nim' => 'required|string|min:10|max:10|unique:users,nim',
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required|string|min:8|max:24',
+                    'confirm_password' => 'required|string|match:password',
+                    'jurusan' => 'required|string',
+                    'nomor_hp' => 'required|numeric',
                 ]);
 
                 $registered = $this->auth->register([
@@ -134,8 +134,8 @@ class AuthController extends Controller
         $body = $request->json();
 
         $request->validate([
-            'nim' => ['required', 'string', 'min:10', 'max:10', 'unique:users,nim'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'nim' => 'required|string|min:10|max:10|unique:users,nim',
+            'email' => 'required|email|unique:users,email',
         ]);
 
         return $response->json(['valid' => true]);
@@ -146,8 +146,8 @@ class AuthController extends Controller
         $body = $request->json();
 
         $request->validate([
-            'nip' => ['required', 'string', 'min:18', 'max:18', 'unique:users,nip'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'nip' => 'required|string|min:18|max:18|unique:users,nip',
+            'email' => 'required|email|unique:users,email',
         ]);
 
         return $response->json(['valid' => true]);
@@ -168,14 +168,14 @@ class AuthController extends Controller
 
             try {
                 $validated = $request->validate([
-                    'nama' => ['required', 'string', 'min:3'],
-                    'nip' => ['required', 'string', 'min:18', 'max:18', 'unique:users,nip'],
-                    'email' => ['required', 'email', 'unique:users,email'],
-                    'password' => ['required', 'string', 'min:8', 'max:24'],
-                    'confirm_password' => ['required', 'string', 'match:password'],
-                    'jurusan' => ['required', 'string'],
-                    'role' => ['required', 'in:dosen,tendik'],
-                    'nomor_hp' => ['required', 'numeric'],
+                    'nama' => 'required|string|min:3',
+                    'nip' => 'required|string|min:18|max:18|unique:users,nip',
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required|string|min:8|max:24',
+                    'confirm_password' => 'required|string|match:password',
+                    'jurusan' => 'required|string',
+                    'role' => 'required|in:dosen,tendik',
+                    'nomor_hp' => 'required|numeric',
                 ]);
 
                 $registered = $this->auth->register([

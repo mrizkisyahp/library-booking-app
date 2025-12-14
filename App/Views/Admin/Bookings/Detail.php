@@ -1,6 +1,6 @@
 <?php
 /** @var \App\Models\Booking $bookings */
-
+$validator = $validator ?? null;
 
 $statusColors = [
   'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -206,10 +206,10 @@ $statusColors = [
             </svg>
             Anggota
           </h3>
-          <span class="text-sm text-slate-500"><?= $allMembers->total ?> anggota terdaftar</span>
+          <span class="text-sm text-slate-500"><?= $pagination->total ?> anggota terdaftar</span>
         </div>
 
-        <?php if ($allMembers->total == 0): ?>
+        <?php if ($pagination->total == 0): ?>
           <p class="text-sm text-slate-500">Belum ada anggota yang ditambahkan.</p>
         <?php else: ?>
           <div class="overflow-hidden border border-slate-100 rounded-2xl">
@@ -223,7 +223,7 @@ $statusColors = [
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
-                <?php foreach ($allMembers->items as $member): ?>
+                <?php foreach ($allMembers as $member): ?>
                   <tr>
                     <td class="px-4 py-3 text-sm font-semibold text-slate-800">
                       <?= htmlspecialchars($member['nama'] ?? '-') ?>
@@ -243,10 +243,8 @@ $statusColors = [
           </div>
 
           <!-- Pagination -->
-          <?php if ($allMembers->lastPage > 1): ?>
+          <?php if ($pagination->lastPage > 1): ?>
             <?php
-            $pagination = $allMembers;
-            $paginationQuery = $_GET;
             $paginationQuery['id'] = $bookings->id_booking;
             ?>
             <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
@@ -377,15 +375,26 @@ $statusColors = [
         <?php endif; ?>
 
         <div class="pt-4 border-t border-slate-200">
-          <form action="/admin/bookings/cancel" method="post" class="space-y-3">
+          <form action="/admin/bookings/reject" method="post" class="space-y-3">
             <?= csrf_field() ?>
             <input type="hidden" name="booking_id" value="<?= $bookings->id_booking ?>">
-            <label class="block text-sm font-semibold text-slate-700">
+            <label
+              class="block text-sm font-semibold <?= $validator?->hasError('reason') ? 'text-red-700' : 'text-slate-700' ?>">
               Batalkan Booking
               <textarea name="reason" rows="3" required
-                class="mt-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                placeholder="Alasan pembatalan"></textarea>
+                class="mt-2 w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 <?= $validator?->hasError('reason') ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-rose-500' ?>"
+                placeholder="Alasan pembatalan (minimal 5 karakter)"><?= htmlspecialchars(old('reason') ?? '') ?></textarea>
             </label>
+            <?php if ($validator?->hasError('reason')): ?>
+              <p class="text-sm text-red-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd" />
+                </svg>
+                <?= htmlspecialchars($validator->getFirstError('reason')) ?>
+              </p>
+            <?php endif; ?>
             <button type="submit"
               class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
               Batalkan Booking

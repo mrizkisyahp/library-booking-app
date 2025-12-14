@@ -3,12 +3,16 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Exceptions\ValidationException;
 use App\Core\Request;
 use App\Services\BookingService;
 use Exception;
 
 class AdminBookingController extends Controller
 {
+    private const PER_PAGE_BOOKINGS = 15;
+    private const PER_PAGE_MEMBERS = 6;
+
     public function __construct(
         private BookingService $bookingService,
     ) {
@@ -16,6 +20,9 @@ class AdminBookingController extends Controller
 
     public function index(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Kelola Booking | Library Booking App');
+
         $filters = $request->query();
         $page = (int) ($filters['page'] ?? 1);
         $keyword = $request->input('keyword') ?? '';
@@ -29,9 +36,9 @@ class AdminBookingController extends Controller
 
         // Determine which method to call based on view type
         if ($view === 'today') {
-            $paginatedBookings = $this->bookingService->getTodayBookings($filters, 15, $page);
+            $paginatedBookings = $this->bookingService->getTodayBookings($filters, self::PER_PAGE_BOOKINGS, $page);
         } else {
-            $paginatedBookings = $this->bookingService->getAllBookings($filters, 15, $page);
+            $paginatedBookings = $this->bookingService->getAllBookings($filters, self::PER_PAGE_BOOKINGS, $page);
         }
 
         // Get status counts for filter buttons (based on current view)
@@ -53,6 +60,9 @@ class AdminBookingController extends Controller
 
     public function create(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Buat Booking | Library Booking App');
+
         $rooms = $this->bookingService->getAllRooms();
         $users = $this->bookingService->getAllUsers();
 
@@ -65,13 +75,31 @@ class AdminBookingController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $request->all();
+            $data = $request->validate([
+                'user_id' => 'required|integer|exists:users,id_user',
+                'ruangan_id' => 'required|integer|exists:ruangan,id_ruangan',
+                'tanggal_penggunaan_ruang' => 'required|date',
+                'waktu_mulai' => 'required|date_format:H:i|before:waktu_selesai',
+                'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
+                'tujuan' => 'required|string|min:5|max:255',
+            ]);
+
             $targetUserId = (int) $data['user_id'];
+            unset($data['user_id'], $data['_token']);
 
             $booking = $this->bookingService->adminCreateBooking($data, $targetUserId);
 
             flash('success', 'Booking berhasil dibuat');
             redirect('/admin/bookings/edit?id=' . $booking->id_booking);
+        } catch (ValidationException $e) {
+            $rooms = $this->bookingService->getAllRooms();
+            $users = $this->bookingService->getAllUsers();
+
+            return view('Admin/Bookings/Create', [
+                'validator' => $e->getValidator(),
+                'rooms' => $rooms,
+                'users' => $users,
+            ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -80,10 +108,13 @@ class AdminBookingController extends Controller
 
     public function edit(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Edit Booking | Library Booking App');
+
         try {
             $bookingId = (int) $request->query('id');
             $page = (int) $request->query('page', 1);
-            $perPage = 6;
+            $perPage = self::PER_PAGE_MEMBERS;
 
             $data = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
 
@@ -91,10 +122,9 @@ class AdminBookingController extends Controller
 
             return view('Admin/Bookings/Edit', [
                 'booking' => $data['booking'],
-                'members' => $data['allMembers'], // Paginator (view iterates items directly if updated, or we use standard loop)
-                'allMembers' => $data['allMembers'],
+                'members' => $data['allMembers']->items,
+                'pagination' => $data['allMembers'],
                 'pic' => $data['pic'],
-                'pagination' => $data['allMembers'], // Alias for pagination snippet
                 'rooms' => $rooms,
             ]);
         } catch (Exception $e) {
@@ -106,14 +136,39 @@ class AdminBookingController extends Controller
     public function update(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
-            $data = $request->all();
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'ruangan_id' => 'required|integer|exists:ruangan,id_ruangan',
+                'tanggal_penggunaan_ruang' => 'required|date',
+                'waktu_mulai' => 'required|date_format:H:i|before:waktu_selesai',
+                'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
+                'tujuan' => 'required|string|min:5|max:255',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
             unset($data['booking_id'], $data['_token']);
 
             $this->bookingService->adminUpdateBooking($bookingId, $data);
 
             flash('success', 'Booking berhasil diupdate');
             redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (ValidationException $e) {
+            $bookingId = (int) $request->all()['booking_id'];
+            $page = (int) $request->query('page', 1);
+            $perPage = self::PER_PAGE_MEMBERS;
+
+            $data = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
+
+            $rooms = $this->bookingService->getAllRooms();
+
+            return view('Admin/Bookings/Edit', [
+                'booking' => $data['booking'],
+                'members' => $data['allMembers']->items,
+                'pagination' => $data['allMembers'],
+                'pic' => $data['pic'],
+                'rooms' => $rooms,
+                'validator' => $e->getValidator(),
+            ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -123,7 +178,11 @@ class AdminBookingController extends Controller
     public function delete(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->deleteBooking($bookingId);
 
@@ -136,10 +195,13 @@ class AdminBookingController extends Controller
     }
     public function detail(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Detail Booking | Library Booking App');
+
         try {
-            $bookingId = (int) $request->query('id'); // Using query('id') based on prev pattern
+            $bookingId = (int) $request->query('id');
             $page = (int) $request->query('page', 1);
-            $perPage = 6;
+            $perPage = self::PER_PAGE_MEMBERS;
 
             $data = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
 
@@ -148,8 +210,8 @@ class AdminBookingController extends Controller
             return view('Admin/Bookings/Detail', [
                 'bookings' => $data['booking'],
                 'pic' => $data['pic'],
-                'allMembers' => $data['allMembers'], // Paginator object
-                'pagination' => $data['allMembers'], // Alias for pagination UI
+                'allMembers' => $data['allMembers']->items,
+                'pagination' => $data['allMembers'],
                 'rescheduleRequest' => $rescheduleRequest
             ]);
         } catch (Exception $e) {
@@ -161,7 +223,11 @@ class AdminBookingController extends Controller
     public function verify(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+            ]);
+            $bookingId = (int) $data['booking_id'];
+
             $this->bookingService->approveBooking($bookingId);
 
             flash('success', 'Booking berhasil diverifikasi');
@@ -172,26 +238,13 @@ class AdminBookingController extends Controller
         }
     }
 
-    public function reject(Request $request)
-    {
-        try {
-            $bookingId = (int) $request->all()['booking_id'];
-            $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
-
-            $this->bookingService->rejectBooking($bookingId, $reason);
-
-            flash('success', 'Booking berhasil ditolak');
-            back();
-        } catch (Exception $e) {
-            flash('error', $e->getMessage());
-            back();
-        }
-    }
-
     public function complete(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+            ]);
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->completeBooking($bookingId);
 
@@ -205,30 +258,71 @@ class AdminBookingController extends Controller
     public function activate(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
-            $checkinCode = $request->all()['checkin_code'] ?? '';
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'checkin_code' => 'required|string|min:4',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
+            $checkinCode = $data['checkin_code'];
 
             $this->bookingService->activateBooking($bookingId, $checkinCode);
 
             flash('success', 'Booking berhasil diaktifkan');
-            back();
+            redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (ValidationException $e) {
+            $bookingId = (int) $request->all()['booking_id'];
+            $page = (int) $request->query('page', 1);
+            $perPage = self::PER_PAGE_MEMBERS;
+
+            $bookingData = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
+            $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
+
+            return view('Admin/Bookings/Detail', [
+                'bookings' => $bookingData['booking'],
+                'pic' => $bookingData['pic'],
+                'allMembers' => $bookingData['allMembers']->items,
+                'pagination' => $bookingData['allMembers'],
+                'rescheduleRequest' => $rescheduleRequest,
+                'validator' => $e->getValidator(),
+            ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
         }
     }
 
-    public function cancel(Request $request)
+    public function reject(Request $request)
     {
         try {
-            $user = auth()->user();
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'reason' => 'required|string|min:5|max:500',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
+            $reason = $data['reason'];
+
+            $this->bookingService->rejectBooking($bookingId, $reason);
+
+            flash('success', 'Booking berhasil ditolak');
+            redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (ValidationException $e) {
             $bookingId = (int) $request->all()['booking_id'];
-            $reason = $request->all()['reason'] ?? 'Dibatalkan oleh admin';
+            $page = (int) $request->query('page', 1);
+            $perPage = self::PER_PAGE_MEMBERS;
 
-            $this->bookingService->cancelBooking($bookingId, $user->id_user, $reason);
+            $bookingData = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
+            $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
-            flash('success', 'Booking berhasil dibatalkan');
-            back();
+            return view('Admin/Bookings/Detail', [
+                'bookings' => $bookingData['booking'],
+                'pic' => $bookingData['pic'],
+                'allMembers' => $bookingData['allMembers']->items,
+                'pagination' => $bookingData['allMembers'],
+                'rescheduleRequest' => $rescheduleRequest,
+                'validator' => $e->getValidator(),
+            ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -238,7 +332,11 @@ class AdminBookingController extends Controller
     public function noshow(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
 
             $this->bookingService->handleNoShow($bookingId);
 
@@ -252,6 +350,9 @@ class AdminBookingController extends Controller
 
     public function blockedDates(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Tanggal Diblokir | Library Booking App');
+
         $blockedDates = $this->bookingService->getBlockedDates();
         $rooms = $this->bookingService->getAllRooms();
 
@@ -261,13 +362,14 @@ class AdminBookingController extends Controller
         ]);
     }
 
-    /**
-     * Preview affected bookings before blocking dates
-     */
     public function previewBlockDate(Request $request)
     {
         try {
-            $data = $request->all();
+            $data = $request->validate([
+                'tanggal_begin' => 'required|date',
+                'tanggal_end' => 'required|date|after_or_equal:tanggal_begin',
+                'alasan' => 'nullable|string|max:255',
+            ]);
 
             // Get room IDs from form (array or empty)
             $ruanganIds = !empty($data['ruangan_ids']) ? array_map('intval', $data['ruangan_ids']) : [];
@@ -301,6 +403,15 @@ class AdminBookingController extends Controller
                 'alasan' => $data['alasan'] ?? '',
             ]);
 
+        } catch (ValidationException $e) {
+            $blockedDates = $this->bookingService->getBlockedDates();
+            $rooms = $this->bookingService->getAllRooms();
+
+            return view('Admin/Bookings/BlockedDates', [
+                'blockedDates' => $blockedDates,
+                'rooms' => $rooms,
+                'validator' => $e->getValidator(),
+            ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -313,11 +424,16 @@ class AdminBookingController extends Controller
     public function blockDate(Request $request)
     {
         try {
-            $user = auth()->user();
-            $data = $request->all();
+            $data = $request->validate([
+                'tanggal_begin' => 'required|date',
+                'tanggal_end' => 'required|date|after_or_equal:tanggal_begin',
+                'alasan' => 'nullable|string|max:255',
+            ]);
 
-            // Get room IDs from form
-            $ruanganIds = !empty($data['ruangan_ids']) ? array_map('intval', $data['ruangan_ids']) : [];
+            $user = auth()->user();
+
+            // Get room IDs from form (not validated since array rule not supported)
+            $ruanganIds = !empty($request->all()['ruangan_ids']) ? array_map('intval', $request->all()['ruangan_ids']) : [];
 
             // Block dates and cancel affected bookings
             $cancelledBookings = $this->bookingService->blockDateRangeWithCancellation(
@@ -340,8 +456,11 @@ class AdminBookingController extends Controller
     public function unblockDate(Request $request)
     {
         try {
-            $blockedDateId = (int) $request->all()['blocked_date_id'];
-            $this->bookingService->unblockDate($blockedDateId);
+            $data = $request->validate([
+                'blocked_date_id' => 'required|integer',
+            ]);
+
+            $this->bookingService->unblockDate((int) $data['blocked_date_id']);
 
             flash('success', 'Tanggal berhasil di-unblock');
             back();
@@ -354,8 +473,13 @@ class AdminBookingController extends Controller
     public function addMember(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
-            $identifier = $request->all()['member_email'];
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'member_email' => 'required|string',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
+            $identifier = $data['member_email'];
 
             $this->bookingService->addMemberByIdentifier($bookingId, $identifier);
 
@@ -369,8 +493,13 @@ class AdminBookingController extends Controller
     public function kickMember(Request $request)
     {
         try {
-            $bookingId = (int) $request->all()['booking_id'];
-            $memberId = (int) $request->all()['user_id'];
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'user_id' => 'required|integer|exists:users,id_user',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
+            $memberId = (int) $data['user_id'];
 
             $this->bookingService->kickMember($bookingId, $memberId, auth()->user()->id_user);
 
@@ -410,19 +539,34 @@ class AdminBookingController extends Controller
     public function reschedule(Request $request)
     {
         try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'tanggal_penggunaan_ruang' => 'required|date',
+                'waktu_mulai' => 'required|date_format:H:i',
+                'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
+            ]);
+
             $user = auth()->user();
-            $bookingId = (int) $request->all()['booking_id'];
+            $bookingId = (int) $data['booking_id'];
 
             $newData = [
-                'tanggal_penggunaan_ruang' => $request->all()['tanggal_penggunaan_ruang'],
-                'waktu_mulai' => $request->all()['waktu_mulai'],
-                'waktu_selesai' => $request->all()['waktu_selesai'],
+                'tanggal_penggunaan_ruang' => $data['tanggal_penggunaan_ruang'],
+                'waktu_mulai' => $data['waktu_mulai'],
+                'waktu_selesai' => $data['waktu_selesai'],
             ];
 
             $this->bookingService->rescheduleBooking($bookingId, $newData, $user->id_user);
 
             flash('success', 'Booking berhasil di-reschedule. Status kembali ke pending.');
             redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (ValidationException $e) {
+            $bookingId = (int) $request->all()['booking_id'];
+            $booking = $this->bookingService->getBookingById($bookingId);
+
+            return view('Admin/Bookings/Reschedule', [
+                'booking' => $booking,
+                'validator' => $e->getValidator(),
+            ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();
@@ -432,8 +576,12 @@ class AdminBookingController extends Controller
     public function approveReschedule(Request $request)
     {
         try {
+            $data = $request->validate([
+                'request_id' => 'required|integer',
+            ]);
+
             $user = auth()->user();
-            $requestId = (int) $request->all()['request_id'];
+            $requestId = (int) $data['request_id'];
 
             $this->bookingService->approveRescheduleRequest($requestId, $user->id_user);
 
@@ -448,9 +596,14 @@ class AdminBookingController extends Controller
     public function rejectReschedule(Request $request)
     {
         try {
+            $data = $request->validate([
+                'request_id' => 'required|integer',
+                'reason' => 'nullable|string|max:500',
+            ]);
+
             $user = auth()->user();
-            $requestId = (int) $request->all()['request_id'];
-            $reason = $request->all()['reason'] ?? 'Ditolak oleh admin';
+            $requestId = (int) $data['request_id'];
+            $reason = $data['reason'] ?? 'Ditolak oleh admin';
 
             $this->bookingService->rejectRescheduleRequest($requestId, $user->id_user, $reason);
 
@@ -496,29 +649,18 @@ class AdminBookingController extends Controller
 
     /**
      * Reopen library immediately by removing TODAY's block
+     * Handles multiple blocks (library-wide and all-rooms-blocked scenarios)
      */
     public function reopenToday(Request $request)
     {
         try {
-            // Find and delete today's library-wide closure
-            $blockedDates = $this->bookingService->getBlockedDates();
-            $today = date('Y-m-d');
+            $unblockedCount = $this->bookingService->reopenLibraryToday();
 
-            foreach ($blockedDates as $block) {
-                // Check if this is a library-wide closure for today
-                if (
-                    $block['ruangan_id'] === null
-                    && $block['tanggal_begin'] <= $today
-                    && $block['tanggal_end'] >= $today
-                ) {
-                    $this->bookingService->unblockDate($block['id_blocked_date']);
-                    flash('success', 'Perpustakaan berhasil dibuka kembali.');
-                    back();
-                    return;
-                }
+            if ($unblockedCount > 0) {
+                flash('success', "Perpustakaan berhasil dibuka kembali. {$unblockedCount} blokir dihapus.");
+            } else {
+                flash('warning', 'Tidak ada penutupan perpustakaan untuk hari ini.');
             }
-
-            flash('warning', 'Tidak ada penutupan perpustakaan untuk hari ini.');
             back();
         } catch (Exception $e) {
             flash('error', $e->getMessage());
@@ -532,13 +674,7 @@ class AdminBookingController extends Controller
     public function deleteAllBlocks(Request $request)
     {
         try {
-            $blockedDates = $this->bookingService->getBlockedDates();
-            $count = 0;
-
-            foreach ($blockedDates as $block) {
-                $this->bookingService->unblockDate($block['id_blocked_date']);
-                $count++;
-            }
+            $count = $this->bookingService->deleteAllBlockedDates();
 
             flash('success', "Berhasil menghapus {$count} tanggal yang diblokir.");
             redirect('/admin/blocked-dates');

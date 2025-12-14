@@ -16,7 +16,9 @@ class UserDashboardController extends Controller
     }
     public function index(Request $request)
     {
-        // dd("Hello");
+        $this->setLayout('main');
+        $this->setTitle('Dashboard | Library Booking App');
+
         $data = $this->dashboardService->getUserDashboardData(user()->id_user);
 
         $bookings = $data['bookings'];

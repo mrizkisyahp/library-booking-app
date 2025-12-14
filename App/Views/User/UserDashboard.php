@@ -57,11 +57,11 @@
                             <?php foreach ($feedbacks as $feedback): ?>
                                 <li class="flex items-center justify-between bg-yellow-100 px-4 py-2 rounded-lg">
                                     <span class="text-yellow-800 text-sm">
-                                        <strong><?= htmlspecialchars($feedback['nama_ruangan']) ?></strong> –
-                                        <?= htmlspecialchars($feedback['tanggal_penggunaan_ruang']) ?>
-                                        <?= htmlspecialchars($feedback['waktu_mulai']) ?>
+                                        <strong><?= htmlspecialchars($feedback->nama_ruangan) ?></strong> –
+                                        <?= htmlspecialchars($feedback->tanggal_penggunaan_ruang) ?>
+                                        <?= htmlspecialchars($feedback->waktu_mulai) ?>
                                     </span>
-                                    <a href="/feedback/create?booking=<?= (int) $feedback['id_booking'] ?>"
+                                    <a href="/feedback/create?booking=<?= (int) $feedback->id_booking ?>"
                                         class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm underline">
                                         Isi Feedback
                                     </a>

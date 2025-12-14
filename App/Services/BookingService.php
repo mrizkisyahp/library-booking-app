@@ -283,6 +283,7 @@ class BookingService
 
         $oldStatus = $booking->status;
         $booking->status = $newStatus;
+        $booking->alasan_reject = $reason;
 
         if ($newStatus === 'verified' && empty($booking->checkin_code)) {
             $booking->checkin_code = $this->generateCheckinCode();
@@ -687,8 +688,8 @@ class BookingService
                 throw new Exception('Booking tidak ditemukan');
             }
 
-            if ($booking->status !== 'pending') {
-                throw new Exception('Hanya booking dengan status pending yang dapat di reject');
+            if ($booking->status !== 'verified') {
+                throw new Exception('Hanya booking dengan status verified yang dapat di reject');
             }
 
             $this->transitionTo($bookingId, 'cancelled', $reason);
@@ -856,8 +857,6 @@ class BookingService
             }
 
             $this->transitionTo($bookingId, 'cancelled', $reason);
-
-
 
             $this->db->commit();
         } catch (Exception $e) {
@@ -1338,6 +1337,45 @@ class BookingService
     {
         $this->bookingRepo->unblockDate($blockedDateId);
         $this->logger->info('Date Unblocked', ['blocked_date_id' => $blockedDateId]);
+    }
+
+    /**
+     * Reopen library by removing all blocks that cover today
+     * @return int Number of blocks removed
+     */
+    public function reopenLibraryToday(): int
+    {
+        $blockedDates = $this->getBlockedDates();
+        $today = date('Y-m-d');
+        $unblockedCount = 0;
+
+        foreach ($blockedDates as $block) {
+            if ($block['tanggal_begin'] <= $today && $block['tanggal_end'] >= $today) {
+                $this->unblockDate($block['id_blocked_date']);
+                $unblockedCount++;
+            }
+        }
+
+        $this->logger->info('Library Reopened Today', ['unblocked_count' => $unblockedCount]);
+        return $unblockedCount;
+    }
+
+    /**
+     * Delete all blocked dates
+     * @return int Number of blocks deleted
+     */
+    public function deleteAllBlockedDates(): int
+    {
+        $blockedDates = $this->getBlockedDates();
+        $count = 0;
+
+        foreach ($blockedDates as $block) {
+            $this->unblockDate($block['id_blocked_date']);
+            $count++;
+        }
+
+        $this->logger->info('All Blocked Dates Deleted', ['count' => $count]);
+        return $count;
     }
 
     private function validateDateNotBlocked(string $date, int $ruanganId): void

@@ -71,7 +71,10 @@ $validator = $validator ?? null;
                 <label class="block text-sm font-semibold text-slate-600 mb-2">Nama Lengkap</label>
                 <input type="text" name="nama" value="<?= htmlspecialchars(old('nama') ?? '') ?>" required
                   placeholder="Masukkan nama lengkap"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  class="w-full px-4 py-3 border-2 <?= $validator?->hasError('nama') ? 'border-red-500' : 'border-gray-200' ?> rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                <?php if ($validator?->hasError('nama')): ?>
+                  <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('nama')) ?></p>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -85,7 +88,10 @@ $validator = $validator ?? null;
                 <label class="block text-sm font-semibold text-slate-600 mb-2">Email</label>
                 <input type="email" name="email" value="<?= htmlspecialchars(old('email') ?? '') ?>" required
                   placeholder="contoh@email.com"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  class="w-full px-4 py-3 border-2 <?= $validator?->hasError('email') ? 'border-red-500' : 'border-gray-200' ?> rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                <?php if ($validator?->hasError('email')): ?>
+                  <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('email')) ?></p>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -160,14 +166,17 @@ $validator = $validator ?? null;
               <div class="flex-1">
                 <label class="block text-sm font-semibold text-slate-600 mb-2">Role</label>
                 <select name="id_role" required
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                  class="w-full px-4 py-3 border-2 <?= $validator?->hasError('id_role') ? 'border-red-500' : 'border-gray-200' ?> rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
                   <option value="">Pilih Role</option>
                   <?php foreach ($roles as $role): ?>
-                    <option value="<?= htmlspecialchars($role->id_role) ?>">
+                    <option value="<?= htmlspecialchars($role->id_role) ?>" <?= old('id_role') == $role->id_role ? 'selected' : '' ?>>
                       <?= htmlspecialchars($role->nama_role) ?>
                     </option>
                   <?php endforeach; ?>
                 </select>
+                <?php if ($validator?->hasError('id_role')): ?>
+                  <p class="mt-1 text-sm text-red-600"><?= htmlspecialchars($validator->getFirstError('id_role')) ?></p>
+                <?php endif; ?>
               </div>
             </div>
 

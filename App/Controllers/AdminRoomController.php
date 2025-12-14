@@ -6,15 +6,21 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Services\RoomService;
 use App\Core\Exceptions\ValidationException;
+use Exception;
 
 class AdminRoomController extends Controller
 {
+    private const PER_PAGE = 15;
+
     public function __construct(private RoomService $roomService)
     {
     }
 
     public function index(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Kelola Ruangan | Library Booking App');
+
         $page = (int) ($request->input('page') ?? 1);
         $keyword = $request->input('keyword') ?? '';
         $jenis = $request->input('jenis_ruangan') ?? '';
@@ -30,7 +36,7 @@ class AdminRoomController extends Controller
             'status_ruangan' => $status,
         ];
 
-        $paginatedRooms = $this->roomService->getAllRooms($filters, 15, $page);
+        $paginatedRooms = $this->roomService->getAllRooms($filters, self::PER_PAGE, $page);
 
         return view('Admin/Rooms/Index', [
             'rooms' => $paginatedRooms->items,
@@ -41,6 +47,9 @@ class AdminRoomController extends Controller
 
     public function create(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Tambah Ruangan | Library Booking App');
+
         return view('Admin/Rooms/Create');
     }
 
@@ -73,7 +82,14 @@ class AdminRoomController extends Controller
 
     public function edit(Request $request)
     {
-        $id = (int) $request->query('id');
+        $this->setLayout('main');
+        $this->setTitle('Edit Ruangan | Library Booking App');
+
+        $data = $request->validate([
+            'id' => 'required|integer',
+        ]);
+
+        $id = (int) $data['id'];
         $room = $this->roomService->getRoomById($id);
 
         if (!$room) {
@@ -88,7 +104,14 @@ class AdminRoomController extends Controller
 
     public function show(Request $request)
     {
-        $id = (int) $request->query('id');
+        $this->setLayout('main');
+        $this->setTitle('Detail Ruangan | Library Booking App');
+
+        $data = $request->validate([
+            'id' => 'required|integer',
+        ]);
+
+        $id = (int) $data['id'];
         $room = $this->roomService->getRoomById($id);
 
         if (!$room) {
@@ -111,12 +134,12 @@ class AdminRoomController extends Controller
 
         try {
             $validated = $request->validate([
-                'nama_ruangan' => ['required', 'string', 'max:100'],
-                'jenis_ruangan' => ['required', 'string'],
-                'kapasitas_min' => ['required', 'numeric', 'min:1'],
-                'kapasitas_max' => ['required', 'numeric', 'min:1'],
-                'deskripsi_ruangan' => ['required', 'string'],
-                'status_ruangan' => ['required', 'string', 'in:available,unavailable,adminOnly'],
+                'nama_ruangan' => 'required|string|max:100',
+                'jenis_ruangan' => 'required|string',
+                'kapasitas_min' => 'required|numeric|min:1',
+                'kapasitas_max' => 'required|numeric|min:1',
+                'deskripsi_ruangan' => 'required|string',
+                'status_ruangan' => 'required|string|in:available,unavailable,adminOnly',
             ]);
 
             $this->roomService->updateRoom($id, $validated);
@@ -129,22 +152,27 @@ class AdminRoomController extends Controller
                 'room' => $room,
                 'validator' => $e->getValidator()
             ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            redirect('/admin/rooms');
         }
     }
 
     public function delete(Request $request)
     {
-
         if (!$request->isPost()) {
             redirect('/admin/rooms');
         }
 
-        $id = (int) $request->input('id_ruangan');
-
         try {
+            $data = $request->validate([
+                'id_ruangan' => 'required|integer',
+            ]);
+
+            $id = (int) $data['id_ruangan'];
             $this->roomService->deleteRoom($id);
             flash('success', 'Ruangan berhasil dihapus');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             flash('error', $e->getMessage());
         }
 
@@ -153,12 +181,15 @@ class AdminRoomController extends Controller
 
     public function activate(Request $request)
     {
-        $id = (int) $request->input('id_ruangan');
-
         try {
+            $data = $request->validate([
+                'id_ruangan' => 'required|integer',
+            ]);
+
+            $id = (int) $data['id_ruangan'];
             $this->roomService->setRoomAvailable($id);
             flash('success', 'Ruangan berhasil diaktifkan');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             flash('error', $e->getMessage());
         }
 
@@ -167,12 +198,15 @@ class AdminRoomController extends Controller
 
     public function deactivate(Request $request)
     {
-        $id = (int) $request->input('id_ruangan');
-
         try {
+            $data = $request->validate([
+                'id_ruangan' => 'required|integer',
+            ]);
+
+            $id = (int) $data['id_ruangan'];
             $this->roomService->setRoomUnavailable($id);
             flash('success', 'Ruangan berhasil dinonaktifkan');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             flash('error', $e->getMessage());
         }
 
@@ -181,12 +215,15 @@ class AdminRoomController extends Controller
 
     public function setAdminOnly(Request $request)
     {
-        $id = (int) $request->input('id_ruangan');
-
         try {
+            $data = $request->validate([
+                'id_ruangan' => 'required|integer',
+            ]);
+
+            $id = (int) $data['id_ruangan'];
             $this->roomService->setRoomAdminOnly($id);
             flash('success', 'Ruangan berhasil diset sebagai AdminOnly');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             flash('error', $e->getMessage());
         }
 
@@ -202,7 +239,7 @@ class AdminRoomController extends Controller
         try {
             $count = $this->roomService->activateAllRooms();
             flash('success', "Berhasil mengaktifkan {$count} ruangan");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             flash('error', $e->getMessage());
         }
 
@@ -218,7 +255,7 @@ class AdminRoomController extends Controller
         try {
             $count = $this->roomService->deactivateAllRooms();
             flash('success', "Berhasil mengnonaktifkan {$count} ruangan");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             flash('error', $e->getMessage());
         }
 

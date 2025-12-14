@@ -18,8 +18,10 @@ class ProfileController extends Controller
     }
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $this->setLayout('main');
+        $this->setTitle('Profil | Library Booking App');
 
+        $userId = auth()->id();
         $user = $this->profileService->getCurrentUserProfile($userId);
 
         return view('Profile/index', [
@@ -44,6 +46,9 @@ class ProfileController extends Controller
 
     public function detail(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Detail Akun | Library Booking App');
+
         $userId = auth()->id();
         $user = $this->profileService->getCurrentUserProfile($userId);
 
@@ -54,21 +59,24 @@ class ProfileController extends Controller
 
     public function resetPassword(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Reset Password | Library Booking App');
+
         $userId = auth()->id();
         $user = $this->profileService->getCurrentUserProfile($userId);
 
-                if ($request->isPost()) {
+        if ($request->isPost()) {
             $token = $request->input('cf-turnstile-response');
             $remoteIp = $request->ip();
 
             if (!$this->turnstile->verify($token, $remoteIp)) {
                 flash('error', 'Verifikasi CAPTCHA gagal. Silakan coba lagi.');
-                return redirect('/forgot');
+                return redirect('/profile/reset-password');
             }
 
             try {
                 $validated = $request->validate([
-                    'email' => ['required', 'email']
+                    'email' => 'required|email'
                 ]);
 
                 $sent = $this->auth->sendPasswordResetLink($validated['email']);
@@ -79,9 +87,9 @@ class ProfileController extends Controller
                     flash('success', 'Jika email tersebut terdaftar, password reset link telah dikirim.');
                 }
 
-                return redirect('/forgot');
+                return redirect('/profile/reset-password');
             } catch (ValidationException $e) {
-                return view('ResetPassword/Forgot', [
+                return view('Profile/ResetPassword', [
                     'validator' => $e->getValidator()
                 ]);
             }
@@ -94,11 +102,17 @@ class ProfileController extends Controller
 
     public function faq(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('FAQ | Library Booking App');
+
         return view('Profile/Faq');
     }
 
     public function verifikasi(Request $request)
     {
+        $this->setLayout('main');
+        $this->setTitle('Verifikasi | Library Booking App');
+
         $userId = auth()->id();
         $user = $this->profileService->getCurrentUserProfile($userId);
 

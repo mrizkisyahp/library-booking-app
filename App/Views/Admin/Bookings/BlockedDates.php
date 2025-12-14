@@ -1,5 +1,6 @@
 <?php
 use App\Core\App;
+$validator = $validator ?? null;
 ?>
 
 <div class="container mx-auto px-4 py-6">
@@ -184,15 +185,29 @@ use App\Core\App;
                     <?= csrf_field() ?>
 
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Mulai</label>
+                        <label
+                            class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tanggal_begin') ? 'text-red-700' : 'text-slate-700' ?>">Tanggal
+                            Mulai</label>
                         <input type="date" name="tanggal_begin" required min="<?= date('Y-m-d') ?>"
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
+                            value="<?= htmlspecialchars(old('tanggal_begin') ?? '') ?>"
+                            class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('tanggal_begin') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200' ?>">
+                        <?php if ($validator?->hasError('tanggal_begin')): ?>
+                            <p class="mt-1 text-sm text-red-600">
+                                <?= htmlspecialchars($validator->getFirstError('tanggal_begin')) ?></p>
+                        <?php endif; ?>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Selesai</label>
+                        <label
+                            class="block text-sm font-semibold mb-2 <?= $validator?->hasError('tanggal_end') ? 'text-red-700' : 'text-slate-700' ?>">Tanggal
+                            Selesai</label>
                         <input type="date" name="tanggal_end" required min="<?= date('Y-m-d') ?>"
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
+                            value="<?= htmlspecialchars(old('tanggal_end') ?? '') ?>"
+                            class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('tanggal_end') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200' ?>">
+                        <?php if ($validator?->hasError('tanggal_end')): ?>
+                            <p class="mt-1 text-sm text-red-600">
+                                <?= htmlspecialchars($validator->getFirstError('tanggal_end')) ?></p>
+                        <?php endif; ?>
                     </div>
 
                     <div>
@@ -242,13 +257,18 @@ use App\Core\App;
                         // Deselect All functionality
                         document.getElementById('deselectAllRooms')?.addEventListener('click', function () {
                             document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
-    });
+                        });
                     </script>
 
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan</label>
+                        <label
+                            class="block text-sm font-semibold mb-2 <?= $validator?->hasError('alasan') ? 'text-red-700' : 'text-slate-700' ?>">Alasan</label>
                         <textarea name="alasan" rows="3" placeholder="Contoh: Libur Nasional, Maintenance, dll."
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all resize-none"></textarea>
+                            class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all resize-none <?= $validator?->hasError('alasan') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200' ?>"><?= htmlspecialchars(old('alasan') ?? '') ?></textarea>
+                        <?php if ($validator?->hasError('alasan')): ?>
+                            <p class="mt-1 text-sm text-red-600">
+                                <?= htmlspecialchars($validator->getFirstError('alasan')) ?></p>
+                        <?php endif; ?>
                     </div>
 
                     <button type="submit"
@@ -362,27 +382,34 @@ use App\Core\App;
     </div>
 
     <!-- Delete All Modal -->
-    <div id='deleteAllModal' class='hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4'>
+    <div id='deleteAllModal'
+        class='hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4'>
         <div class='bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl'>
             <div class='flex items-start mb-4'>
                 <div class='flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4'>
                     <svg class='w-6 h-6 text-red-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
+                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2'
+                            d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
                     </svg>
                 </div>
                 <div class='flex-1'>
                     <h3 class='text-xl font-bold text-slate-800 mb-2'>Hapus Semua Blokir?</h3>
-                    <p class='text-slate-600 mb-4'>Tindakan ini akan menghapus <strong>semua tanggal yang diblokir</strong> dari sistem.</p>
+                    <p class='text-slate-600 mb-4'>Tindakan ini akan menghapus <strong>semua tanggal yang
+                            diblokir</strong> dari sistem.</p>
                     <div class='bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4'>
-                        <p class='text-sm text-yellow-800'><strong>Peringatan:</strong> Ini akan menghapus <?= count($blockedDates ?? []) ?> entri blokir.</p>
+                        <p class='text-sm text-yellow-800'><strong>Peringatan:</strong> Ini akan menghapus
+                            <?= count($blockedDates ?? []) ?> entri blokir.</p>
                     </div>
                 </div>
             </div>
             <form action='/admin/blocked-dates/delete-all' method='post'>
                 <?= csrf_field() ?>
                 <div class='flex gap-3'>
-                    <button type='button' onclick='document.getElementById("deleteAllModal").classList.add("hidden")' class='flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors'>Batal</button>
-                    <button type='submit' class='flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors'>Ya, Hapus Semua</button>
+                    <button type='button' onclick='document.getElementById("deleteAllModal").classList.add("hidden")'
+                        class='flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors'>Batal</button>
+                    <button type='submit'
+                        class='flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors'>Ya,
+                        Hapus Semua</button>
                 </div>
             </form>
         </div>
