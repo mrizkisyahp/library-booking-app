@@ -19,7 +19,6 @@
 <div class="max-w-4xl mx-auto p-6">
     <!-- Header -->
 
-
     <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
         <?php if ($user): ?>
             <?php if (auth()->user()->isMahasiswa()): ?>
@@ -34,6 +33,12 @@
                             <div>
                                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Bukti KuBaca Ditolak</h3>
                                 <p class="text-gray-600">Gambar KuBaca-mu ditolak. Mohon unggah foto baru yang lebih jelas.</p>
+                                <?php if (!empty($user->alasan_reject)): ?>
+                                    <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                        <p class="text-xs font-semibold text-red-700 mb-1">Alasan Penolakan:</p>
+                                        <p class="text-sm text-red-800"><?= htmlspecialchars($user->alasan_reject) ?></p>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <form action="/upload-kubaca" method="post" enctype="multipart/form-data" class="space-y-6">
@@ -121,7 +126,7 @@
                         </div>
                     </div>
                 <?php endif; ?>
-            <?php elseif ((auth()->user()->isDosen() || auth()->user()->isTendik()) && $user->status === 'active'): ?>
+            <?php elseif ((auth()->user()->isDosen() || auth()->user()->isTendik() || auth()->user()->isAdmin()) && $user->status === 'active'): ?>
                 <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-4">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">

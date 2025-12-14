@@ -23,6 +23,16 @@ class UserService
         return $this->userRepo->getAllUsers($filters, $perPage, $page);
     }
 
+    public function getPendingKubacaWithImage(array $filters, int $perPage, int $page): Paginator
+    {
+        return $this->userRepo->getPendingKubacaWithImage($filters, $perPage, $page);
+    }
+
+    public function getPendingKubacaWithImageCount(): int
+    {
+        return $this->userRepo->getPendingKubacaWithImageCount();
+    }
+
     public function getUserById(int $id): ?object
     {
         $user = $this->userRepo->findById($id);
@@ -169,7 +179,7 @@ class UserService
             throw new Exception('User tidak dalam status pending kubaca');
         }
 
-        $this->userRepo->update($id, ['status' => 'active', 'masa_aktif' => $masa_aktif]);
+        $this->userRepo->update($id, ['status' => 'active', 'masa_aktif' => $masa_aktif, 'alasan_reject' => null]);
 
         $this->logger->info('Admin approved kubaca for user', ['user_id' => $id]);
     }
@@ -187,7 +197,7 @@ class UserService
 
         $this->userRepo->update($id, [
             'status' => 'rejected',
-            'rejection_reason' => $reason,
+            'alasan_reject' => $reason,
         ]);
 
         $this->logger->info('Admin rejected kubaca for user', ['user_id' => $id, 'reason' => $reason]);

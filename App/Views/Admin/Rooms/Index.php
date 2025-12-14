@@ -3,7 +3,7 @@
 $statusOptions = [
   'available' => 'Available',
   'unavailable' => 'Unavailable',
-  'adminOnly' => 'Admin Only',
+  'adminOnly' => 'AdminOnly',
 ];
 $roomTypes = [
   'Audio Visual',

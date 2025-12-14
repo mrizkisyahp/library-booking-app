@@ -41,6 +41,11 @@ class AdminBookingController extends Controller
             $paginatedBookings = $this->bookingService->getAllBookings($filters, self::PER_PAGE_BOOKINGS, $page);
         }
 
+        // Add pending reschedule flag to each booking
+        foreach ($paginatedBookings->items as $booking) {
+            $booking->has_pending_reschedule = $this->bookingService->hasPendingRescheduleRequest($booking->id_booking);
+        }
+
         // Get status counts for filter buttons (based on current view)
         if ($view === 'today') {
             $statusCounts = $this->bookingService->getTodayStatusCounts();
@@ -64,11 +69,11 @@ class AdminBookingController extends Controller
         $this->setTitle('Buat Booking | Library Booking App');
 
         $rooms = $this->bookingService->getAllRooms();
-        $users = $this->bookingService->getAllUsers();
+        $currentAdminId = auth()->id();
 
         return view('Admin/Bookings/Create', [
             'rooms' => $rooms,
-            'users' => $users,
+            'currentAdminId' => $currentAdminId,
         ]);
     }
 

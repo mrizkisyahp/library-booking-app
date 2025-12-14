@@ -22,8 +22,8 @@ class UserRoomController extends Controller
 
         $page = (int) ($request->input('page') ?? 1);
         $nama_ruangan = $request->input('nama_ruangan') ?? '';
-        $tanggal = $request->input('tanggal') ?? '';
-        $waktu_mulai = $request->input('waktu_mulai') ?? '';
+        // $tanggal = $request->input('tanggal') ?? '';
+        // $waktu_mulai = $request->input('waktu_mulai') ?? '';
         $jenis = $request->input('jenis_ruangan') ?? [];
         $status = $request->input('status_ruangan') ?? '';
         $kapasitasmin = $request->input('kapasitas_min') ?? '';
@@ -31,8 +31,8 @@ class UserRoomController extends Controller
 
         $filters = [
             'nama_ruangan' => $nama_ruangan,
-            'tanggal' => $tanggal,
-            'waktu_mulai' => $waktu_mulai,
+            // 'tanggal' => $tanggal,
+            // 'waktu_mulai' => $waktu_mulai,
             'jenis_ruangan' => $jenis,
             'status_ruangan' => $status,
             'kapasitas_min' => $kapasitasmin,

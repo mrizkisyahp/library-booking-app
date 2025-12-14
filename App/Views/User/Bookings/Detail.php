@@ -174,8 +174,16 @@ $statusColors = [
                         (Sedang berlangsung)
                     <?php elseif ($booking->status === 'completed'): ?>
                         (Selesai)
+                    <?php elseif ($booking->status === 'cancelled'): ?>
+                        (Dibatalkan)
                     <?php endif ?>
                 </div>
+                <?php if ($booking->status === 'cancelled' && !empty($booking->alasan_reject)): ?>
+                <div class="w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p class="text-xs font-semibold text-red-700 uppercase mb-1">Alasan Pembatalan</p>
+                    <p class="text-sm text-red-800"><?= htmlspecialchars($booking->alasan_reject) ?></p>
+                </div>
+                <?php endif; ?>
 
                 <div class="w-full mb-4">
                     <?php if ($isPic && $statusKey === 'completed' && empty($booking->id_feedback)): ?>
@@ -673,9 +681,16 @@ $statusColors = [
             <?php endif; ?>
 
             <?php if ($booking->status === 'cancelled'): ?>
-                <div
-                    class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
-                    Booking telah dibatalkan
+                <div class="w-full">
+                    <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4">
+                        <p class="font-semibold text-red-800">Booking telah dibatalkan</p>
+                        <?php if (!empty($booking->alasan_reject)): ?>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p class="font-medium">Alasan:</p>
+                                <p><?= htmlspecialchars($booking->alasan_reject) ?></p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php endif; ?>
 

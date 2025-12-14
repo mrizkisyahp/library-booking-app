@@ -114,6 +114,12 @@
               <div class="col-span-2 pt-4 border-t">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Status User</p>
                 <p class="font-semibold text-gray-900"><?= ucwords(htmlspecialchars($user->status)) ?></p>
+                <?php if ($user->status === 'rejected' && !empty($user->alasan_reject)): ?>
+                  <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p class="text-xs font-semibold text-red-700 uppercase tracking-wide mb-1">Alasan Penolakan</p>
+                    <p class="text-sm text-red-800"><?= htmlspecialchars($user->alasan_reject) ?></p>
+                  </div>
+                <?php endif; ?>
                 <?php if ($user->kubaca_img): ?>
                   <p class="text-sm text-gray-600 mt-1">
                     Bukti KuBaca PNJ: Uploaded: <span
@@ -165,7 +171,7 @@
               <!-- Reason Field (part of reject form) -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="reject-reason">Alasan</label>
-                <input type="text" name="reason" id="reject-reason" form="rejectForm"
+                <input type="text" name="reason" id="reject-reason" form="rejectForm" required
                   class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition-all">
               </div>
               <!-- Modal for Masa Aktif -->

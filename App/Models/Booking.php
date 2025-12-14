@@ -29,6 +29,7 @@ class Booking extends DbModel
     public ?int $id_feedback = null;
     public ?string $nama = null;
     public ?bool $has_been_rescheduled = null;
+    public ?bool $has_pending_reschedule = null;
     public ?string $surat_path = null;
     public ?string $deleted_at = null;
 

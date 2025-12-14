@@ -61,7 +61,7 @@ class ProfileService
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'kubaca_' . $userId . '_' . time() . '.' . $extension;
 
-        $uploadDir = dirname(__DIR__, 3) . '/Public/uploads/kubaca/';
+        $uploadDir = dirname(__DIR__, 2) . '/Public/uploads/kubaca/';
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);

@@ -69,9 +69,15 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Status</label>
                     <span
-                        class="inline-block px-3 py-1 <?= $user->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' ?> text-sm font-semibold rounded-full">
+                        class="inline-block px-3 py-1 <?= $user->status === 'active' ? 'bg-green-100 text-green-800' : ($user->status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') ?> text-sm font-semibold rounded-full">
                         <?= htmlspecialchars(ucfirst($user->status)) ?>
                     </span>
+                    <?php if ($user->status === 'rejected' && !empty($user->alasan_reject)): ?>
+                        <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-xs font-semibold text-red-700 mb-1">Alasan Penolakan:</p>
+                            <p class="text-sm text-red-800"><?= htmlspecialchars($user->alasan_reject) ?></p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

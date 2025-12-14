@@ -179,6 +179,38 @@ class UserRepository
         return $query->orderBy('id_user', 'desc')->paginate($perPage, $page);
     }
 
+    /**
+     * Get pending kubaca users who have already uploaded kubaca_img
+     */
+    public function getPendingKubacaWithImage(array $filters = [], int $perPage = 15, int $page = 1): Paginator
+    {
+        $query = User::Query()
+            ->with('role')
+            ->where('status', 'pending kubaca')
+            ->whereNotNull('kubaca_img');
+
+        if (!empty($filters['keyword'])) {
+            $keyword = '%' . $filters['keyword'] . '%';
+            $query->whereRaw(
+                "(nama LIKE ? OR email LIKE ? OR nim LIKE ? OR nip LIKE ?)",
+                [$keyword, $keyword, $keyword, $keyword]
+            );
+        }
+
+        return $query->orderBy('updated_at', 'desc')->paginate($perPage, $page);
+    }
+
+    /**
+     * Count pending kubaca users who have uploaded kubaca_img
+     */
+    public function getPendingKubacaWithImageCount(): int
+    {
+        return User::Query()
+            ->where('status', 'pending kubaca')
+            ->whereNotNull('kubaca_img')
+            ->count();
+    }
+
     public function delete(int $id): bool
     {
         return User::Query()->where('id_user', $id)->delete();

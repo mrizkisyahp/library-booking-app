@@ -101,6 +101,11 @@ class BookingService
         return $this->bookingRepo->getBlockedDates();
     }
 
+    public function hasPendingRescheduleRequest(int $bookingId): bool
+    {
+        return $this->rescheduleRepo->findPendingByBookingId($bookingId) !== null;
+    }
+
     public function getAllRooms(): array
     {
         return $this->bookingRepo->getAllRooms();

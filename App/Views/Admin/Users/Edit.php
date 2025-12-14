@@ -116,7 +116,7 @@ $validator = $validator ?? null;
             </form>
 
             <!-- Reject KuBaca -->
-            <form method="post" action="/admin/users/reject-kubaca" class="inline"
+            <form method="post" action="/admin/users/reject-kubaca" class="inline" id="reject-kubaca-form"
               onsubmit="return confirm('Yakin ingin reject KuBaca user ini?');">
               <?= csrf_field() ?>
               <input type="hidden" name="id_user" value="<?= $user->id_user ?>">
@@ -130,6 +130,15 @@ $validator = $validator ?? null;
             </form>
           <?php endif; ?>
         </div>
+
+        <!-- Rejection Reason Input (shown only for pending kubaca) -->
+        <?php if ($user->status === 'pending kubaca'): ?>
+          <div class="mt-4 pt-4 border-t border-slate-200">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan Penolakan (opsional)</label>
+            <input type="text" name="reason" form="reject-kubaca-form" placeholder="Contoh: Foto tidak jelas"
+              class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200">
+          </div>
+        <?php endif; ?>
       </div>
 
       <!-- Edit Form -->
@@ -358,6 +367,12 @@ $validator = $validator ?? null;
             </span>
           </li>
           <li><strong>Peringatan:</strong> <?= htmlspecialchars((string) ($user->peringatan ?? 0)) ?>/3</li>
+          <?php if ($user->status === 'rejected' && !empty($user->alasan_reject)): ?>
+            <li class="pt-2 border-t border-emerald-200">
+              <strong>Alasan Reject:</strong>
+              <p class="text-red-700 text-xs mt-1"><?= htmlspecialchars($user->alasan_reject) ?></p>
+            </li>
+          <?php endif; ?>
         </ul>
       </div>
 

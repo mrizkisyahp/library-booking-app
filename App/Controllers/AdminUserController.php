@@ -27,8 +27,17 @@ class AdminUserController extends Controller
             'role' => $request->query()['role'] ?? '',
         ];
         $page = (int) ($request->query()['page'] ?? 1);
+        $view = $request->query()['view'] ?? 'pending'; // 'pending' or 'all' - default is pending
 
-        $paginator = $this->userService->getAllUsers($filters, self::PER_PAGE, $page);
+        // Determine which method to call based on view type
+        if ($view === 'pending') {
+            $paginator = $this->userService->getPendingKubacaWithImage($filters, self::PER_PAGE, $page);
+        } else {
+            $paginator = $this->userService->getAllUsers($filters, self::PER_PAGE, $page);
+        }
+
+        // Get pending count for tab badge
+        $pendingKubacaCount = $this->userService->getPendingKubacaWithImageCount();
 
         return view('Admin/Users/Index', [
             'users' => $paginator->items,
@@ -37,6 +46,8 @@ class AdminUserController extends Controller
             'stats' => $this->userService->getStats(),
             'roles' => $this->userService->getAllRoles(),
             'statuses' => $this->userService->getAllStatuses(),
+            'activeView' => $view,
+            'pendingKubacaCount' => $pendingKubacaCount,
         ]);
     }
 

@@ -37,35 +37,32 @@ $validator = $validator ?? null;
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
 
-        <!-- PIC Selection -->
+        <!-- PIC Selection (Auto: Current Admin) -->
         <div class="bg-white rounded-2xl shadow-lg p-8">
-          <h3
-            class="text-xl font-bold mb-6 flex items-center <?= $validator?->hasError('user_id') ? 'text-red-700' : 'text-slate-800' ?>">
+          <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
             <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            Pilih PIC (Penanggung Jawab)
+            PIC (Penanggung Jawab)
           </h3>
-          <select name="user_id" required
-            class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all <?= $validator?->hasError('user_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200' ?>">
-            <option value="">-- Pilih User --</option>
-            <?php foreach ($users as $user): ?>
-              <option value="<?= $user->id_user ?>" <?= old('user_id') == $user->id_user ? 'selected' : '' ?>>
-                <?= htmlspecialchars($user->nama) ?> (<?= htmlspecialchars($user->email) ?>)
-              </option>
-            <?php endforeach; ?>
-          </select>
-          <?php if ($validator?->hasError('user_id')): ?>
-            <p class="mt-2 text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clip-rule="evenodd" />
-              </svg>
-              <?= htmlspecialchars($validator->getFirstError('user_id')) ?>
-            </p>
-          <?php endif; ?>
+          <input type="hidden" name="user_id" value="<?= $currentAdminId ?>">
+          <div class="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-bold text-emerald-800"><?= htmlspecialchars(auth()->user()->nama) ?></p>
+                <p class="text-sm text-emerald-600"><?= htmlspecialchars(auth()->user()->email) ?></p>
+              </div>
+              <span class="ml-auto px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Admin</span>
+            </div>
+          </div>
+          <p class="mt-3 text-sm text-slate-500">Booking akan dibuat atas nama Anda sebagai PIC.</p>
         </div>
         <!-- Booking Details -->
         <div class="bg-white rounded-2xl shadow-lg p-8">

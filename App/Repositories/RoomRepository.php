@@ -50,13 +50,17 @@ class RoomRepository
             $query->where('nama_ruangan', 'like', '%' . $filters['nama_ruangan'] . '%');
         }
 
-        if (!empty($filters['tanggal'])) {
-            $query->where('tanggal_penggunaan_ruang', 'like', '%' . $filters['tanggal'] . '%');
+        if (!empty($filters['keyword'])) {
+            $query->where('nama_ruangan', 'like', '%' . $filters['keyword'] . '%');
         }
 
-        if (!empty($filters['waktu_mulai'])) {
-            $query->where('waktu_mulai', 'like', '%' . $filters['waktu_mulai'] . '%');
-        }
+        // if (!empty($filters['tanggal'])) {
+        //     $query->where('tanggal_penggunaan_ruang', 'like', '%' . $filters['tanggal'] . '%');
+        // }
+
+        // if (!empty($filters['waktu_mulai'])) {
+        //     $query->where('waktu_mulai', 'like', '%' . $filters['waktu_mulai'] . '%');
+        // }
 
         if (!empty($filters['status_ruangan'])) {
             $query->where('status_ruangan', $filters['status_ruangan']);
@@ -88,7 +92,7 @@ class RoomRepository
         return $query->where('status_ruangan', 'available')->orderBy('nama_ruangan', 'asc')->paginate($perPage, $page);
     }
 
-    public function create(array $data): bool
+    public function create(array $data): ?Room
     {
         $room = new Room();
 
@@ -98,7 +102,11 @@ class RoomRepository
             }
         }
 
-        return $room->save();
+        if ($room->save()) {
+            return $room;
+        }
+
+        return null;
     }
 
     public function delete(int $id): bool

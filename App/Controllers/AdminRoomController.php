@@ -69,7 +69,11 @@ class AdminRoomController extends Controller
                 'status_ruangan' => ['required', 'string', 'in:available,unavailable,adminOnly'],
             ]);
 
-            $this->roomService->createRoom($validated);
+            $room = $this->roomService->createRoom($validated);
+
+            if ($room && !empty($_FILES)) {
+                $this->roomService->uploadRoomImages($room->id_ruangan, $_FILES);
+            }
 
             flash('success', 'Ruangan berhasil ditambahkan!');
             redirect('/admin/rooms');
@@ -77,6 +81,9 @@ class AdminRoomController extends Controller
             return view('Admin/Rooms/Create', [
                 'validator' => $e->getValidator()
             ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            return view('Admin/Rooms/Create');
         }
     }
 
@@ -143,6 +150,10 @@ class AdminRoomController extends Controller
             ]);
 
             $this->roomService->updateRoom($id, $validated);
+
+            if (!empty($_FILES)) {
+                $this->roomService->uploadRoomImages($id, $_FILES);
+            }
 
             flash('success', 'Ruangan berhasil diperbarui!');
             redirect('/admin/rooms');

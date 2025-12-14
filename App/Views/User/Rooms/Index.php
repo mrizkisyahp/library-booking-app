@@ -102,56 +102,6 @@ $roomTypes = [
 
                 <div class="space-y-6">
 
-                    <!-- Tanggal -->
-                    <div class="group relative">
-                        <label class="block text-sm text-slate-700 mb-2">Tanggal</label>
-
-                        <div
-                            class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
-                            transition-all duration-300 group-hover:border-gray-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200 focus-within:shadow-md">
-
-                            <label for="tanggal_peminjaman"
-                                class="cursor-pointer text-gray-400 group-focus-within:text-emerald-600 group-hover:text-gray-500">
-
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                    class="size-6 text-gray-400 group-focus-within:text-emerald-600 transition">
-                                    <path d="M8 2v4" />
-                                    <path d="M16 2v4" />
-                                    <rect width="18" height="18" x="3" y="4" rx="2" />
-                                    <path d="M3 10h18" />
-                                </svg> -->
-                            </label>
-
-                            <input id="tanggal_peminjaman" type="date" name="tanggal"
-                                value="<?= htmlspecialchars($filters['tanggal'] ?? '') ?>"
-                                class="flex-1 bg-transparent appearance-none text-slate-700 cursor-pointer focus:outline-none transition-all duration-200 placeholder-gray-400">
-                        </div>
-                    </div>
-
-                    <!-- Waktu -->
-                    <div class="group relative">
-                        <label class="block text-sm text-slate-700 mb-2">Waktu Mulai</label>
-
-                        <div
-                            class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
-                            transition-all duration-300 group-hover:border-gray-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200 focus-within:shadow-md">
-
-                            <label for="waktu_mulai">
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                    class="size-6 text-gray-400 group-focus-within:text-emerald-600 transition">
-                                    <path d="M12 6v6l4 2" />
-                                    <circle cx="12" cy="12" r="10" />
-                                </svg> -->
-                            </label>
-
-                            <input type="time" name="waktu_mulai" id="waktu_mulai"
-                                value="<?= htmlspecialchars($filters['waktu_mulai'] ?? '') ?>"
-                                class="flex-1 bg-transparent appearance-none text-slate-700 cursor-pointer focus:outline-none transition-all duration-200 placeholder-gray-400">
-                        </div>
-                    </div>
-
                     <!-- Kapasitas -->
                     <div class="group relative">
                         <label class="block text-sm text-slate-700 mb-2">Kapasitas (min)</label>
@@ -305,21 +255,6 @@ $roomTypes = [
                     <h2 class="text-2xl font-bold mb-6">Filter</h2>
 
                     <div class="space-y-6">
-
-                        <!-- Tanggal -->
-                        <div>
-                            <label class="text-sm text-slate-700 mb-2 block">Tanggal</label>
-                            <input type="date" name="tanggal" value="<?= htmlspecialchars($filters['tanggal'] ?? '') ?>"
-                                class="w-full border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition">
-                        </div>
-
-                        <!-- Waktu -->
-                        <div>
-                            <label class="text-sm text-slate-700 mb-2 block">Waktu</label>
-                            <input type="time" name="waktu_mulai"
-                                value="<?= htmlspecialchars($filters['waktu_mulai'] ?? '') ?>"
-                                class="w-full border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition">
-                        </div>
 
                         <!-- Kapasitas -->
                         <div>

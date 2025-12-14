@@ -173,6 +173,7 @@
                 </ul>
               </div>
               <input type="hidden" id="statusSelected2" name="status" value="<?= $filters['status'] ?? '' ?>">
+              <input type="hidden" name="view" value="<?= htmlspecialchars($activeView ?? 'pending') ?>">
             </div>
           </label>
         </div>
@@ -226,6 +227,39 @@
         </span>
       </p>
     </div>
+  </section>
+
+  <!-- User Management Tabs: Pending / All Users -->
+  <section class="bg-white shadow rounded-lg border border-gray-100 mb-6">
+    <div class="flex gap-6 px-6 pt-4 border-b border-gray-200">
+      <button onclick="location.href='/admin/users?view=pending'"
+        class="px-4 py-3 font-semibold transition-all relative <?= ($activeView ?? 'pending') === 'pending' ? 'text-emerald-600' : 'text-gray-600 hover:text-gray-800' ?>">
+        Pending KuBaca
+        <?php if (($activeView ?? 'pending') === 'pending'): ?>
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
+        <?php endif; ?>
+      </button>
+      <button onclick="location.href='/admin/users?view=all'"
+        class="px-4 py-3 font-semibold transition-all relative <?= ($activeView ?? 'pending') === 'all' ? 'text-emerald-600' : 'text-gray-600 hover:text-gray-800' ?>">
+        All Users
+        <?php if (($activeView ?? 'pending') === 'all'): ?>
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
+        <?php endif; ?>
+      </button>
+    </div>
+
+    <?php if (($activeView ?? 'pending') === 'pending'): ?>
+      <div class="px-6 py-4 bg-yellow-50 border-b border-yellow-200">
+        <div class="flex items-center gap-2 text-yellow-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span class="text-sm font-medium">Menampilkan user dengan status "pending kubaca" yang sudah upload foto KuBaca
+            dan menunggu verifikasi admin.</span>
+        </div>
+      </div>
+    <?php endif; ?>
   </section>
 
   <section class="mt-6">
@@ -376,6 +410,7 @@
 
   <?php
   $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
+  $paginationQuery['view'] = $activeView ?? 'pending'; // Preserve view tab
   ?>
   <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">

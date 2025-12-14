@@ -58,7 +58,7 @@ $roomTypes = [
     </div>
   <?php endif; ?>
 
-  <form action="/admin/rooms" method="post">
+  <form action="/admin/rooms" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -112,10 +112,51 @@ $roomTypes = [
                 </select>
                 <?php if ($validator?->hasError('jenis_ruangan')): ?>
                   <p class="text-red-500 text-sm mt-2">
-                    <?= htmlspecialchars($validator?->getFirstError('jenis_ruangan')) ?></p>
+                    <?= htmlspecialchars($validator?->getFirstError('jenis_ruangan')) ?>
+                  </p>
                 <?php endif; ?>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Room Photos -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+          <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Foto Ruangan
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <?php for ($i = 1; $i <= 4; $i++): ?>
+              <div class="p-4 bg-slate-50 rounded-xl">
+                <label class="block text-sm font-semibold text-slate-600 mb-2">
+                  <?= $i === 1 ? 'Foto Utama (Thumbnail)' : "Foto Tambahan {$i}" ?>
+                </label>
+                <div class="relative group mb-3 hidden" id="preview-container-<?= $i ?>">
+                  <img id="preview-<?= $i ?>"
+                    class="w-full h-48 object-cover rounded-lg border border-gray-200 shadow-sm">
+                  <button type="button" onclick="removeImage(<?= $i ?>)"
+                    class="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <input type="file" name="image_<?= $i ?>" id="image_input_<?= $i ?>"
+                  accept="image/png, image/jpeg, image/jpg, image/webp" onchange="previewImage(this, <?= $i ?>)" class="w-full text-sm text-slate-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-emerald-50 file:text-emerald-700
+                            hover:file:bg-emerald-100
+                            transition-all cursor-pointer">
+                <p class="text-xs text-gray-500 mt-2">Format: JPG, PNG, WebP. Max 2MB.</p>
+              </div>
+            <?php endfor; ?>
           </div>
         </div>
 
@@ -138,7 +179,8 @@ $roomTypes = [
                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
                 <?php if ($validator?->hasError('kapasitas_min')): ?>
                   <p class="text-red-500 text-sm mt-2">
-                    <?= htmlspecialchars($validator?->getFirstError('kapasitas_min')) ?></p>
+                    <?= htmlspecialchars($validator?->getFirstError('kapasitas_min')) ?>
+                  </p>
                 <?php endif; ?>
               </div>
             </div>
@@ -152,7 +194,8 @@ $roomTypes = [
                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
                 <?php if ($validator?->hasError('kapasitas_max')): ?>
                   <p class="text-red-500 text-sm mt-2">
-                    <?= htmlspecialchars($validator?->getFirstError('kapasitas_max')) ?></p>
+                    <?= htmlspecialchars($validator?->getFirstError('kapasitas_max')) ?>
+                  </p>
                 <?php endif; ?>
               </div>
             </div>
@@ -175,7 +218,8 @@ $roomTypes = [
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all resize-none"><?= htmlspecialchars(old('deskripsi_ruangan') ?? '') ?></textarea>
               <?php if ($validator?->hasError('deskripsi_ruangan')): ?>
                 <p class="text-red-500 text-sm mt-2">
-                  <?= htmlspecialchars($validator?->getFirstError('deskripsi_ruangan')) ?></p>
+                  <?= htmlspecialchars($validator?->getFirstError('deskripsi_ruangan')) ?>
+                </p>
               <?php endif; ?>
             </div>
           </div>
@@ -265,3 +309,31 @@ $roomTypes = [
     </div>
   </form>
 </div>
+
+<script>
+function previewImage(input, index) {
+    const preview = document.getElementById('preview-' + index);
+    const container = document.getElementById('preview-container-' + index);
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            container.classList.remove('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+function removeImage(index) {
+    const input = document.getElementById('image_input_' + index);
+    const container = document.getElementById('preview-container-' + index);
+    
+    input.value = ''; // Clear input
+    container.classList.add('hidden');
+}
+</script>

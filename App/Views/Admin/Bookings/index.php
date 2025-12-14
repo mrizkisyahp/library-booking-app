@@ -118,6 +118,7 @@ $statusOptions = [
               </ul>
             </div>
             <input type="hidden" id="statusSelected" name="status" value="<?= $filters['status'] ?? '' ?>">
+            <input type="hidden" name="view" value="<?= htmlspecialchars($activeView ?? 'today') ?>">
           </div>
         </label>
       </div>
@@ -139,6 +140,10 @@ $statusOptions = [
   <section class="bg-white shadow rounded-lg border border-gray-100 mb-6">
     <!-- Main Tabs: Today / All -->
     <div class="flex gap-6 px-6 pt-4 border-b border-gray-200">
+      <?php
+      $totalCount = array_sum($statusCounts);
+      $pendingCount = $statusCounts['pending'] ?? 0;
+      ?>
       <button onclick="location.href='/admin/bookings?view=today'"
         class="px-4 py-3 font-semibold transition-all relative <?= $activeView === 'today' ? 'text-emerald-600' : 'text-gray-600 hover:text-gray-800' ?>">
         Booking Today
@@ -229,7 +234,12 @@ $statusOptions = [
                   class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow <?= $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' ?>">
                   <?= htmlspecialchars(ucfirst($booking->status)) ?>
                 </span>
-                <?php if (!empty($booking->has_been_rescheduled)): ?>
+                <?php if (!empty($booking->has_pending_reschedule)): ?>
+                  <span
+                    class="block mt-1 px-2 py-0.5 text-xs font-medium text-orange-700 bg-orange-100 rounded-full border border-orange-300">
+                    ⏳ Request Reschedule
+                  </span>
+                <?php elseif (!empty($booking->has_been_rescheduled)): ?>
                   <span class="block mt-1 px-2 py-0.5 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
                     🔄 Rescheduled
                   </span>
