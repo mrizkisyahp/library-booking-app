@@ -30,6 +30,144 @@ use App\Core\App;
         </div>
     <?php endif; ?>
 
+    <?php if ($message = App::$app->session->getFlash('warning')): ?>
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-lg">
+            <?= htmlspecialchars($message) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php
+    // Check library status - Either ruangan_id=NULL OR all rooms blocked
+    $today = date('Y-m-d');
+    $libraryClosedToday = libraryIsClosedToday(); // Check for ruangan_id = NULL
+    $closureReason = $libraryClosedToday ? getClosureReason($today) : null;
+
+    // Also check if ALL individual rooms are blocked for today
+    if (!$libraryClosedToday && !empty($rooms)) {
+        $totalRooms = count($rooms);
+        $blockedRoomIds = [];
+
+        foreach ($blockedDates as $block) {
+            // Check if this block covers today and has a specific room
+            if (
+                $block['ruangan_id'] !== null
+                && $block['tanggal_begin'] <= $today
+                && $block['tanggal_end'] >= $today
+            ) {
+                $blockedRoomIds[] = $block['ruangan_id'];
+            }
+        }
+
+        $blockedRoomIds = array_unique($blockedRoomIds);
+
+        // If all rooms are blocked, treat as library closed
+        if (count($blockedRoomIds) === $totalRooms) {
+            $libraryClosedToday = true;
+            $closureReason = "Semua ruangan diblokir"; // Default reason
+        }
+    }
+    ?>
+
+    <!-- Library Status Banner & Controls -->
+    <div class="mb-6">
+        <?php if ($libraryClosedToday): ?>
+            <!-- Library CLOSED Status -->
+            <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-6">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-bold text-red-900">Perpustakaan Sedang TUTUP</h3>
+                            <p class="text-red-800 mt-1">
+                                <strong>Alasan:</strong> <?= htmlspecialchars($closureReason ?? 'Tidak disebutkan') ?>
+                            </p>
+                            <p class="text-sm text-red-700 mt-2">
+                                Semua pengguna tidak dapat membuat, reschedule, atau cancel booking saat ini.
+                            </p>
+                        </div>
+                    </div>
+                    <form action="/admin/blocked-dates/reopen-today" method="post" class="ml-4"
+                        onsubmit="return confirm('Yakin ingin membuka perpustakaan kembali?');">
+                        <?= csrf_field() ?>
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                            </svg>
+                            Buka Perpustakaan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <?php else: ?>
+            <!-- Library OPEN - Show Close Button -->
+            <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-6">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-bold text-emerald-900">Perpustakaan BUKA</h3>
+                            <p class="text-emerald-800 mt-1">Pengguna dapat membuat booking secara normal.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('closeTodayModal').classList.remove('hidden')"
+                        class="ml-4 inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Tutup Perpustakaan HARI INI
+                    </button>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Close Library TODAY Modal -->
+    <div id="closeTodayModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Tutup Perpustakaan Hari Ini</h3>
+            <form action="/admin/blocked-dates/close-today" method="post">
+                <?= csrf_field() ?>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan Penutupan *</label>
+                    <textarea name="alasan" rows="3" required minlength="5"
+                        placeholder="Contoh: Mati listrik mendadak, Kegiatan darurat, dll."
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all resize-none"></textarea>
+                    <p class="text-xs text-slate-500 mt-1">Minimal 5 karakter</p>
+                </div>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4">
+                    <p class="text-sm text-yellow-800">
+                        <strong>Peringatan:</strong> Semua booking di hari ini akan dibatalkan/dihapus dan notifikasi
+                        akan dikirim.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="document.getElementById('closeTodayModal').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors">
+                        Tutup Perpustakaan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Add Form -->
         <div class="lg:col-span-1">
@@ -104,7 +242,7 @@ use App\Core\App;
                         // Deselect All functionality
                         document.getElementById('deselectAllRooms')?.addEventListener('click', function () {
                             document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
-                        });
+    });
                     </script>
 
                     <div>
@@ -128,13 +266,25 @@ use App\Core\App;
         <!-- List -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Daftar Tanggal Diblokir
-                </h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Daftar Tanggal Diblokir
+                    </h2>
+                    <?php if (!empty($blockedDates)): ?>
+                        <button type="button" onclick="document.getElementById('deleteAllModal').classList.remove('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-300">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Hapus Semua
+                        </button>
+                    <?php endif; ?>
+                </div>
 
                 <?php if (empty($blockedDates)): ?>
                     <div class="text-center py-12">
@@ -208,6 +358,33 @@ use App\Core\App;
                     </div>
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
+
+    <!-- Delete All Modal -->
+    <div id='deleteAllModal' class='hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4'>
+        <div class='bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl'>
+            <div class='flex items-start mb-4'>
+                <div class='flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4'>
+                    <svg class='w-6 h-6 text-red-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
+                    </svg>
+                </div>
+                <div class='flex-1'>
+                    <h3 class='text-xl font-bold text-slate-800 mb-2'>Hapus Semua Blokir?</h3>
+                    <p class='text-slate-600 mb-4'>Tindakan ini akan menghapus <strong>semua tanggal yang diblokir</strong> dari sistem.</p>
+                    <div class='bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4'>
+                        <p class='text-sm text-yellow-800'><strong>Peringatan:</strong> Ini akan menghapus <?= count($blockedDates ?? []) ?> entri blokir.</p>
+                    </div>
+                </div>
+            </div>
+            <form action='/admin/blocked-dates/delete-all' method='post'>
+                <?= csrf_field() ?>
+                <div class='flex gap-3'>
+                    <button type='button' onclick='document.getElementById("deleteAllModal").classList.add("hidden")' class='flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors'>Batal</button>
+                    <button type='submit' class='flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors'>Ya, Hapus Semua</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

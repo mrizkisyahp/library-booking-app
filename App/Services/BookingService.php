@@ -106,6 +106,11 @@ class BookingService
         return $this->bookingRepo->getAllRooms();
     }
 
+    public function findRoomById(int $roomId): ?\App\Models\Room
+    {
+        return $this->bookingRepo->findRoomById($roomId);
+    }
+
     public function getAllUsers(): array
     {
         return $this->bookingRepo->getAllUsers();
@@ -217,6 +222,7 @@ class BookingService
         $booking->tujuan = $data['tujuan'] ?? '';
         $booking->status = 'draft';
         $booking->invite_token = $this->generateInviteToken();
+        $booking->surat_path = $data['surat_path'] ?? null;
         $booking->save();
 
         $this->logger->info('Booking Created', [
@@ -818,6 +824,12 @@ class BookingService
             $user = $this->bookingRepo->findUserById($userId);
             $isAdmin = $user && $user['id_role'] === 1;
 
+            // Prevent cancellation if library is closed (users only, admins bypass)
+            if (!$isAdmin && $this->bookingRepo->isLibraryClosedToday()) {
+                $reason = $this->bookingRepo->getClosureReason(date('Y-m-d'));
+                throw new Exception("Tidak dapat membatalkan booking: Perpustakaan sedang tutup. Alasan: $reason");
+            }
+
             if (!$isAdmin && (int) $booking->user_id !== $userId) {
                 throw new Exception('Hanya PIC atau Admin yang dapat membatalkan booking');
             }
@@ -911,6 +923,12 @@ class BookingService
 
             $user = $this->bookingRepo->findUserById($userId);
             $isAdmin = $user && $user['id_role'] === 1;
+
+            // Prevent reschedule if library is closed (users only, admins bypass)
+            if (!$isAdmin && $this->bookingRepo->isLibraryClosedToday()) {
+                $reason = $this->bookingRepo->getClosureReason(date('Y-m-d'));
+                throw new Exception("Tidak dapat reschedule: Perpustakaan sedang tutup. Alasan: $reason");
+            }
 
             if (!$isAdmin && (int) $booking->user_id !== $userId) {
                 throw new Exception('Hanya PIC atau Admin yang dapat reschedule booking');
@@ -1250,10 +1268,27 @@ class BookingService
         // Block the dates
         $this->blockDateRange($dateBegin, $dateEnd, $ruanganIds, $reason, $adminId);
 
-        // Cancel affected bookings and send emails
+        // Separate drafts from other bookings
+        $draftCount = 0;
+        $cancelledCount = 0;
+
         foreach ($affectedBookings as $booking) {
-            // Update booking status to cancelled
+            // If draft: hard delete (no email)
+            if ($booking['status'] === 'draft') {
+                $this->bookingRepo->delete($booking['id_booking']);
+                $draftCount++;
+
+                $this->logger->info('Draft booking deleted due to date block', [
+                    'booking_id' => $booking['id_booking'],
+                    'user_id' => $booking['user_id'],
+                    'date' => $booking['tanggal_penggunaan_ruang']
+                ]);
+                continue;
+            }
+
+            // For other statuses: cancel and send email
             $this->transitionTo($booking['id_booking'], 'cancelled', "Ruangan diblokir: $reason");
+            $cancelledCount++;
 
             // Get full User object for email
             $user = User::Query()->where('id_user', $booking['user_id'])->first();
@@ -1286,6 +1321,15 @@ class BookingService
                 }
             }
         }
+
+        // Log summary
+        $this->logger->info('Date range blocked with booking cleanup', [
+            'date_begin' => $dateBegin,
+            'date_end' => $dateEnd,
+            'total_affected' => count($affectedBookings),
+            'drafts_deleted' => $draftCount,
+            'bookings_cancelled' => $cancelledCount
+        ]);
 
         return $affectedBookings;
     }

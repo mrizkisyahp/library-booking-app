@@ -53,9 +53,19 @@ class UserRoomController extends Controller
             redirect('/rooms');
         }
 
-        if ($room->status_ruangan === 'adminOnly' || $room->status_ruangan === 'unavailable') {
+        // Block unavailable rooms for everyone
+        if ($room->status_ruangan === 'unavailable') {
             flash('error', 'Ruangan tidak tersedia');
             redirect('/rooms');
+        }
+
+        // AdminOnly rooms: only allow Admin, Dosen, and Tendik
+        if ($room->status_ruangan === 'adminOnly') {
+            $user = auth()->user();
+            if (!$user->isAdmin() && !$user->isDosen() && !$user->isTendik()) {
+                flash('error', 'Ruangan ini hanya dapat diakses oleh Admin, Dosen, atau Tendik');
+                redirect('/rooms');
+            }
         }
 
         $photos = room_photos($room);

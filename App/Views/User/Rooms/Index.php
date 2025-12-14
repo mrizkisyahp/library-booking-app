@@ -17,6 +17,35 @@ $roomTypes = [
             <h2 class="text-4xl font-bold text-slate-800 mb-2">Cari Ruangan</h2>
             <p class="text-slate-600">Cari ruangan yang ingin dipinjam</p>
         </div>
+
+        <?php if (!auth()->user()->isAdmin() && isLibraryEffectivelyClosed()): ?>
+            <!-- Library Closed Alert Banner -->
+            <?php $closureReason = getClosureReason(date('Y-m-d')); ?>
+            <div class="mb-4 mx-auto md:px-6">
+                <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mr-3" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-blue-900">Perpustakaan Sedang Tutup</h3>
+                            <p class="text-blue-800 mt-1 text-sm">
+                                Anda dapat melihat ruangan tetapi tidak dapat membuat booking saat ini.
+                            </p>
+                            <?php if ($closureReason): ?>
+                                <div class="mt-2 p-2 bg-white rounded border border-blue-200">
+                                    <p class="text-sm text-blue-900"><strong>Alasan:</strong>
+                                        <?= htmlspecialchars($closureReason) ?></p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Form tempat input#filterToggle, search, tombol filter -->
         <form method="get" action="/rooms" class="relative mb-4 mx-auto md:px-6">
             <!-- Toggle Modal -->

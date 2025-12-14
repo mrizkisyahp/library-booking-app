@@ -391,6 +391,42 @@ class BookingRepository
     }
 
     /**
+     * Check if library is closed TODAY (all rooms blocked)
+     */
+    public function isLibraryClosedToday(): bool
+    {
+        $today = date('Y-m-d');
+
+        $qb = new QueryBuilder($this->database->pdo);
+        $result = $qb->table('blocked_dates')
+            ->where('tanggal_begin', '<=', $today)
+            ->where('tanggal_end', '>=', $today)
+            ->whereNull('ruangan_id')
+            ->whereNull('deleted_at')
+            ->first();
+
+        return $result !== null;
+    }
+
+    /**
+     * Get closure reason for a specific date
+     */
+    public function getClosureReason(string $date): ?string
+    {
+        $qb = new QueryBuilder($this->database->pdo);
+
+        $result = $qb->table('blocked_dates')
+            ->select(['alasan'])
+            ->where('tanggal_begin', '<=', $date)
+            ->where('tanggal_end', '>=', $date)
+            ->whereNull('ruangan_id')
+            ->whereNull('deleted_at')
+            ->first();
+
+        return $result ? $result['alasan'] : null;
+    }
+
+    /**
      * Block date range for multiple rooms or all rooms
      * @param array $ruanganIds Array of room IDs to block (empty = all rooms)
      */
@@ -447,7 +483,7 @@ class BookingRepository
             ->join('users u', 'b.user_id', '=', 'u.id_user')
             ->where('b.tanggal_penggunaan_ruang', '>=', $dateBegin)
             ->where('b.tanggal_penggunaan_ruang', '<=', $dateEnd)
-            ->whereIn('b.status', ['pending', 'verified', 'active']);
+            ->whereIn('b.status', ['draft', 'pending', 'verified', 'active']);
 
         // If specific rooms are being blocked, filter by those rooms only
         // If empty array (all rooms), no additional filter needed
@@ -524,5 +560,10 @@ class BookingRepository
                 [$identifier, $identifier, $identifier, $identifier]
             )
             ->first();
+    }
+
+    public function findRoomById(int $roomId): ?Room
+    {
+        return Room::Query()->where('id_ruangan', $roomId)->first();
     }
 }

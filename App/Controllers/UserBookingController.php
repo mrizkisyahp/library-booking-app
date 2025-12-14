@@ -20,9 +20,64 @@ class UserBookingController extends Controller
     {
         try {
             $user = auth()->user();
+
+            // Prevent draft creation if library is closed (admins bypass)
+            $isAdmin = $user->id_role === 1;
+            if (!$isAdmin && isLibraryEffectivelyClosed()) {
+                $reason = getClosureReason(date('Y-m-d')) ?? 'Semua ruangan diblokir';
+                throw new Exception("Tidak dapat membuat booking: Perpustakaan sedang tutup. Alasan: $reason");
+            }
+
             $data = $request->all();
             $data['user_id'] = $user->id_user;
             $data['ruangan_id'] = (int) trim($data['ruangan_id']);
+
+            // Get room to check if requires special approval (document upload)
+            $room = $this->bookingService->findRoomById($data['ruangan_id']);
+
+            // Handle surat file upload for rooms that require special approval
+            $suratPath = null;
+            if ($room && $room->requires_special_approval && !$isAdmin) {
+                $file = $request->file('pegawai_file');
+
+                if (empty($file) || $file['error'] !== UPLOAD_ERR_OK) {
+                    throw new Exception('Surat wajib diunggah untuk ruangan ini');
+                }
+
+                // Validate file type
+                $allowedTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mimeType = finfo_file($finfo, $file['tmp_name']);
+                finfo_close($finfo);
+
+                if (!in_array($mimeType, $allowedTypes)) {
+                    throw new Exception('Format file harus PDF, JPG, atau PNG');
+                }
+
+                // Validate file size (2MB max)
+                $maxSize = 2 * 1024 * 1024;
+                if ($file['size'] > $maxSize) {
+                    throw new Exception('Ukuran file maksimal 2MB');
+                }
+
+                // Generate filename and upload
+                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $filename = 'surat_' . $user->id_user . '_' . time() . '.' . $extension;
+
+                $uploadDir = dirname(__DIR__, 2) . '/Public/uploads/surat/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $destination = $uploadDir . $filename;
+                if (!move_uploaded_file($file['tmp_name'], $destination)) {
+                    throw new Exception('Gagal menyimpan file surat');
+                }
+
+                $suratPath = $filename;
+            }
+
+            $data['surat_path'] = $suratPath;
 
             $this->bookingService->validateBookingRules($data, $user);
             $this->bookingService->validateNoTimeConflicts($data, $user->id_user);

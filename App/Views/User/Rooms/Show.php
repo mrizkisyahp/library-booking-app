@@ -42,9 +42,22 @@
             ];
             $statusColor = $statusColors[strtolower($room->status_ruangan)] ?? 'bg-gray-100 text-gray-800 border-gray-300';
             ?>
-            <span class="inline-block px-4 py-2 rounded-lg font-semibold text-sm border-2 <?= $statusColor ?>">
-                <?= htmlspecialchars(ucfirst($room->status_ruangan)) ?>
-            </span>
+            <div class="flex items-center gap-2">
+                <span class="inline-block px-4 py-2 rounded-lg font-semibold text-sm border-2 <?= $statusColor ?>">
+                    <?= htmlspecialchars(ucfirst($room->status_ruangan)) ?>
+                </span>
+                <?php if ($room->requires_special_approval): ?>
+                    <span
+                        class="inline-block px-3 py-2 rounded-lg font-semibold text-sm bg-blue-100 text-blue-700 border-2 border-blue-300">
+                        <svg class="w-4 h-4 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Butuh Dokumen
+                    </span>
+                <?php endif; ?>
+            </div>
         </div>
         <div class="text-gray-400 mb-4">
             <?= htmlspecialchars($room->jenis_ruangan) ?>
@@ -96,8 +109,8 @@
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
-      </div>
-  </div>
+        </div>
+    </div>
 </div>
 
 <!-- Availability Calendar -->
@@ -179,7 +192,14 @@
         Buat Booking
     </h3>
 
-    <?php if (auth()->user()->status === 'pending kubaca' || auth()->user()->status === 'rejected'): ?>
+    <?php
+    $userStatus = auth()->user()->status;
+    $isBlocked = $userStatus === 'pending kubaca' || $userStatus === 'rejected';
+    $libraryClosedToday = !auth()->user()->isAdmin() && isLibraryEffectivelyClosed();
+    $shouldShowOverlay = $isBlocked || $libraryClosedToday;
+    ?>
+
+    <?php if ($shouldShowOverlay): ?>
         <!-- Blocked Booking Form Overlay -->
         <div class="relative">
             <!-- Blurred Form (for visual context) -->
@@ -210,22 +230,39 @@
 
             <!-- Overlay Message -->
             <div class="absolute inset-0 flex items-center justify-center">
-                <div
-                    class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 <?= auth()->user()->status === 'pending kubaca' ? 'border-amber-300' : 'border-red-300' ?> p-8 max-w-md text-center transform hover:scale-105 transition-transform">
+                <?php if ($libraryClosedToday): ?>
+                    <!-- Library Closed Overlay -->
+                    <?php $closureReason = getClosureReason(date('Y-m-d')); ?>
                     <div
-                        class="w-20 h-20 mx-auto mb-4 <?= auth()->user()->status === 'pending kubaca' ? 'bg-amber-100' : 'bg-red-100' ?> rounded-full flex items-center justify-center">
-                        <?php if (auth()->user()->status === 'pending kubaca'): ?>
+                        class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-blue-300 p-8 max-w-md text-center transform hover:scale-105 transition-transform">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-bold text-blue-900 mb-3">Perpustakaan Sedang Tutup</h4>
+                        <p class="text-blue-800 mb-2 leading-relaxed">
+                            Perpustakaan sedang ditutup sementara. Anda dapat melihat ruangan tetapi tidak dapat membuat
+                            booking.
+                        </p>
+                        <?php if ($closureReason): ?>
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <p class="text-sm font-semibold text-blue-900 mb-1">Alasan:</p>
+                                <p class="text-sm text-blue-800"><?= htmlspecialchars($closureReason) ?></p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php elseif ($userStatus === 'pending kubaca'): ?>
+                    <!-- Pending Kubaca Overlay -->
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-amber-300 p-8 max-w-md text-center transform hover:scale-105 transition-transform">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
                             <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                        <?php else: ?>
-                            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        <?php endif; ?>
-                    </div> <?php if (auth()->user()->status === 'pending kubaca'): ?>
+                        </div>
                         <h4 class="text-xl font-bold text-amber-900 mb-3">Booking Tidak Tersedia</h4>
                         <p class="text-amber-800 mb-2 leading-relaxed">
                             Akun Anda sedang dalam proses verifikasi. Anda tidak dapat membuat booking hingga akun Anda
@@ -236,7 +273,17 @@
                         <p class="text-sm text-amber-700">
                             Harap menunggu konfirmasi dari admin.
                         </p>
-                    <?php else: ?>
+                    </div>
+                <?php else:  // rejected ?>
+                    <!-- Rejected Overlay -->
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-red-300 p-8 max-w-md text-center transform hover:scale-105 transition-transform">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
                         <h4 class="text-xl font-bold text-red-900 mb-3">Akses Ditolak</h4>
                         <p class="text-red-800 mb-2 leading-relaxed">
                             Akun Anda telah ditolak. Anda tidak dapat membuat booking saat ini.
@@ -244,8 +291,8 @@
                         <p class="text-sm text-red-700">
                             Silakan upload kembali kubaca di profile.
                         </p>
-                    <?php endif; ?>
-                </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     <?php else: ?>
@@ -301,9 +348,9 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <?php if (auth()->user()->isDosen() || auth()->user()->isTendik()): ?>
+            <?php if ($room->requires_special_approval && (auth()->user()->isDosen() || auth()->user()->isTendik())): ?>
                 <div class="border-t pt-6 space-y-6">
-                    <h4 class="font-semibold text-slate-800 text-lg">Informasi Tambahan (Dosen/Pegawai)</h4>
+                    <h4 class="font-semibold text-slate-800 text-lg">Informasi Tambahan (Dokumen Diperlukan)</h4>
 
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan Pemakaian</label>
@@ -320,7 +367,7 @@
                         <label class="block text-sm font-semibold text-slate-700 mb-2">Unggah Surat Tugas / Undangan</label>
                         <input type="file" name="pegawai_file" accept=".pdf,.jpg,.png" required
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                        <p class="mt-2 text-sm text-slate-500">Format yang diterima: PDF, JPG, PNG</p>
+                        <p class="mt-2 text-sm text-slate-500">Format yang diterima: PDF, JPG, PNG (Max 2MB)</p>
                     </div>
                 </div>
             <?php endif; ?>

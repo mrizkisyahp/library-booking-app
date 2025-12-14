@@ -15,8 +15,11 @@ class RoomService
 
     public function getAllRooms(array $filters = [], int $perPage = 15, int $page = 1): Paginator
     {
-        $isAdmin = auth()->user()->id_role === 1;
-        $paginator = $this->roomRepository->getAll($filters, $perPage, $page, $isAdmin);
+        $user = auth()->user();
+        $isAdmin = $user->id_role === 1;
+        $isDosen = $user->isDosen() || $user->isTendik();
+
+        $paginator = $this->roomRepository->getAll($filters, $perPage, $page, $isAdmin, $isDosen);
 
         // Attach ratings to each room
         foreach ($paginator->items as $room) {

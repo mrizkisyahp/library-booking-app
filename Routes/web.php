@@ -107,6 +107,9 @@ $app->router->get('/admin/blocked-dates', [AdminBookingController::class, 'block
 $app->router->post('/admin/blocked-dates/preview', [AdminBookingController::class, 'previewBlockDate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/blocked-dates/confirm', [AdminBookingController::class, 'blockDate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/blocked-dates/delete', [AdminBookingController::class, 'unblockDate'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/blocked-dates/close-today', [AdminBookingController::class, 'closeToday'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/blocked-dates/reopen-today', [AdminBookingController::class, 'reopenToday'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/blocked-dates/delete-all', [AdminBookingController::class, 'deleteAllBlocks'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/bookings/add', [AdminBookingController::class, 'addMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/bookings/kick', [AdminBookingController::class, 'kickMember'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->get('/admin/bookings/reschedule', [AdminBookingController::class, 'showRescheduleForm'], ['middleware' => [new AdminMiddleware()]]);

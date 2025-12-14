@@ -17,6 +17,12 @@ class AdminDashboardController extends Controller
 
     public function settings(Request $request)
     {
-        return $this->render('Admin/Settings/Index');
+        $libraryClosedToday = libraryIsClosedToday();
+        $closureReason = $libraryClosedToday ? getClosureReason(date('Y-m-d')) : null;
+
+        return $this->render('Admin/Settings/Index', [
+            'libraryClosedToday' => $libraryClosedToday,
+            'closureReason' => $closureReason,
+        ]);
     }
 }

@@ -336,3 +336,176 @@ if (!function_exists('print_request')) {
         }
     }
 }
+
+// ==================== Library Closure Helpers ====================
+
+if (!function_exists('libraryIsClosedToday')) {
+    /**
+     * Check if library is closed TODAY
+     * Returns true if there's a blocked_dates entry with ruangan_id = NULL covering today
+     */
+    function libraryIsClosedToday(): bool
+    {
+        $today = date('Y-m-d');
+
+        $qb = new \App\Core\QueryBuilder(App::$app->db->pdo);
+        $result = $qb->table('blocked_dates')
+            ->where('tanggal_begin', '<=', $today)
+            ->where('tanggal_end', '>=', $today)
+            ->whereNull('ruangan_id')
+            ->whereNull('deleted_at')
+            ->first();
+
+        return $result !== null;
+    }
+}
+
+if (!function_exists('isDateBlocked')) {
+    /**
+     * Check if a specific date (and optionally room) is blocked
+     *
+     * @param string $date Date to check (Y-m-d format)
+     * @param int|null $roomId Optional room ID to check. If null, checks library-wide closure only.
+     * @return bool
+     */
+    function isDateBlocked(string $date, ?int $roomId = null): bool
+    {
+        $qb = new \App\Core\QueryBuilder(App::$app->db->pdo);
+
+        // Check if all rooms are blocked (library-wide closure)
+        $allBlocked = $qb->table('blocked_dates')
+            ->where('tanggal_begin', '<=', $date)
+            ->where('tanggal_end', '>=', $date)
+            ->whereNull('ruangan_id')
+            ->whereNull('deleted_at')
+            ->first();
+
+        if ($allBlocked) {
+            return true;
+        }
+
+        // If specific room provided, check room-specific blocks
+        if ($roomId !== null) {
+            $qb2 = new \App\Core\QueryBuilder(App::$app->db->pdo);
+
+            $roomBlocked = $qb2->table('blocked_dates')
+                ->where('tanggal_begin', '<=', $date)
+                ->where('tanggal_end', '>=', $date)
+                ->where('ruangan_id', $roomId)
+                ->whereNull('deleted_at')
+                ->first();
+
+            return $roomBlocked !== null;
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('getClosureReason')) {
+    /**
+     * Get closure reason for a specific date
+     * Returns the reason if library is closed on that date, null otherwise
+     *
+     * @param string $date Date to check (Y-m-d format)
+     * @return string|null
+     */
+    function getClosureReason(string $date): ?string
+    {
+        $qb = new \App\Core\QueryBuilder(App::$app->db->pdo);
+
+        $result = $qb->table('blocked_dates')
+            ->select(['alasan'])
+            ->where('tanggal_begin', '<=', $date)
+            ->where('tanggal_end', '>=', $date)
+            ->whereNull('ruangan_id')
+            ->whereNull('deleted_at')
+            ->first();
+
+        return $result ? $result['alasan'] : null;
+    }
+}
+
+
+// ==================== Library Closure Helpers ====================
+
+if (!function_exists('libraryIsClosedToday')) {
+    /**
+     * Check if library is closed TODAY
+     * Returns true if there's a blocked_dates entry with ruangan_id = NULL covering today
+     */
+    function libraryIsClosedToday(): bool
+    {
+        $repo = container(\App\Repositories\BookingRepository::class);
+        return $repo->isLibraryClosedToday();
+    }
+}
+
+if (!function_exists('isDateBlocked')) {
+    /**
+     * Check if a specific date (and optionally room) is blocked
+     *
+     * @param string $date Date to check (Y-m-d format)
+     * @param int|null $roomId Optional room ID to check. If null, checks library-wide closure only.
+     * @return bool
+     */
+    function isDateBlocked(string $date, ?int $roomId = null): bool
+    {
+        $repo = container(\App\Repositories\BookingRepository::class);
+        return $repo->isDateBlocked($date, $roomId);
+    }
+}
+
+if (!function_exists('getClosureReason')) {
+    /**
+     * Get closure reason for a specific date
+     * Returns the reason if library is closed on that date, null otherwise
+     *
+     * @param string $date Date to check (Y-m-d format)
+     * @return string|null
+     */
+    function getClosureReason(string $date): ?string
+    {
+        $repo = container(\App\Repositories\BookingRepository::class);
+        return $repo->getClosureReason($date);
+    }
+}
+
+if (!function_exists('isLibraryEffectivelyClosed')) {
+    /**
+     * Check if library is effectively closed for a given date
+     * Returns true if:
+     * 1. ruangan_id = NULL block exists for the date, OR
+     * 2. ALL individual rooms are blocked for the date
+     *
+     * @param string $date Date to check (Y-m-d format)
+     * @return bool
+     */
+    function isLibraryEffectivelyClosed(?string $date = null): bool
+    {
+        $date = $date ?? date('Y-m-d');
+        $repo = container(\App\Repositories\BookingRepository::class);
+
+        // First check library-wide closure
+        if ($repo->isDateBlocked($date, null)) {
+            return true;
+        }
+
+        // Check if all rooms are blocked
+        $allRooms = \App\Models\Room::Query()->get();
+
+        if (empty($allRooms)) {
+            return false;
+        }
+
+        // Check each room
+        foreach ($allRooms as $room) {
+            if (!$repo->isDateBlocked($date, $room->id_ruangan)) {
+                return false; // Found a room that's not blocked
+            }
+        }
+
+        // All rooms are blocked
+        return true;
+    }
+}

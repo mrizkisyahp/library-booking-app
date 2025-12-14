@@ -99,9 +99,10 @@ class EmailService
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
             <p>Reservasi ruangan kamu telah divalidasi oleh admin!</p>
-            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
-            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
-            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+            <p><strong>Check-in code:</strong> {$booking->checkin_code}</p>
             <p>Jangan lupa untuk check-in 10 menit sebelum waktu reservasi dimulai.</p>
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
@@ -119,9 +120,9 @@ class EmailService
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
             <p>Reservasi ruangan kamu telah dibatalkan.</p>
-            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
-            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
-            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+           <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
             {$reasonText}
             <p>Kamu bisa membuat reservasi baru jika diperlukan.</p>
             <p>Terima kasih,<br>Library Booking App PNJ</p>
@@ -137,9 +138,9 @@ class EmailService
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
             <p>Reservasi ruangan kamu telah berhasil disubmit dan sedang menunggu persetujuan admin.</p>
-            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
-            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
-            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
             <p>Kami akan segera memberitahu kamu status reservasi ini.</p>
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";
@@ -156,8 +157,9 @@ class EmailService
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
             <p>Terima kasih telah menggunakan ruangan kami!</p>
-            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
-            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
             <p>Kami ingin mendengar pengalaman kamu. Silakan berikan feedback melalui sistem kami.</p>
             <p><a href=\"" . ($_ENV['APP_URL'] ?? 'http://localhost') . "/feedback?booking_id={$booking->id}\">Berikan Feedback</a></p>
             <p>Terima kasih,<br>Library Booking App PNJ</p>
@@ -174,9 +176,9 @@ class EmailService
         $body = "
             <p>Hai <strong>{$user->nama}</strong>,</p>
             <p>Reservasi ruangan kamu akan dimulai dalam 10 menit!</p>
-            <p><strong>Booking Code:</strong> {$booking->booking_code}</p>
-            <p><strong>Tanggal:</strong> {$booking->booking_date}</p>
-            <p><strong>Waktu:</strong> {$booking->start_time} - {$booking->end_time}</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
             <p><strong>PENTING:</strong> Jangan lupa untuk check-in sebelum waktu dimulai, atau reservasi akan otomatis dibatalkan.</p>
             <p>Terima kasih,<br>Library Booking App PNJ</p>
         ";

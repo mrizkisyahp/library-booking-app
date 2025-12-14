@@ -461,4 +461,90 @@ class AdminBookingController extends Controller
             back();
         }
     }
+
+    /**
+     * Close library immediately for TODAY
+     */
+    public function closeToday(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->validate([
+                'alasan' => 'required|string|min:5',
+            ]);
+
+            $today = date('Y-m-d');
+            $ruanganIds = []; // Empty array = all rooms
+
+            // Block today and cancel affected bookings
+            $cancelledBookings = $this->bookingService->blockDateRangeWithCancellation(
+                $today,
+                $today,
+                $ruanganIds,
+                $data['alasan'],
+                $user->id_user
+            );
+
+            $count = count($cancelledBookings);
+            flash('success', "Perpustakaan berhasil ditutup untuk hari ini. {$count} booking dibatalkan/dihapus.");
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    /**
+     * Reopen library immediately by removing TODAY's block
+     */
+    public function reopenToday(Request $request)
+    {
+        try {
+            // Find and delete today's library-wide closure
+            $blockedDates = $this->bookingService->getBlockedDates();
+            $today = date('Y-m-d');
+
+            foreach ($blockedDates as $block) {
+                // Check if this is a library-wide closure for today
+                if (
+                    $block['ruangan_id'] === null
+                    && $block['tanggal_begin'] <= $today
+                    && $block['tanggal_end'] >= $today
+                ) {
+                    $this->bookingService->unblockDate($block['id_blocked_date']);
+                    flash('success', 'Perpustakaan berhasil dibuka kembali.');
+                    back();
+                    return;
+                }
+            }
+
+            flash('warning', 'Tidak ada penutupan perpustakaan untuk hari ini.');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    /**
+     * Delete all blocked dates at once
+     */
+    public function deleteAllBlocks(Request $request)
+    {
+        try {
+            $blockedDates = $this->bookingService->getBlockedDates();
+            $count = 0;
+
+            foreach ($blockedDates as $block) {
+                $this->bookingService->unblockDate($block['id_blocked_date']);
+                $count++;
+            }
+
+            flash('success', "Berhasil menghapus {$count} tanggal yang diblokir.");
+            redirect('/admin/blocked-dates');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
 }

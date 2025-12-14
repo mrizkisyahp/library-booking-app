@@ -42,7 +42,7 @@ class RoomRepository
         return Room::Query()->where('id_ruangan', $id)->first();
     }
 
-    public function getAll(array $filters = [], int $perPage = 15, int $page = 1, bool $isAdmin = false): Paginator
+    public function getAll(array $filters = [], int $perPage = 15, int $page = 1, bool $isAdmin = false, bool $isDosen = false): Paginator
     {
         $query = Room::Query();
 
@@ -74,11 +74,18 @@ class RoomRepository
             $query->where('kapasitas_max', '<=', $filters['kapasitas_max']);
         }
 
-        if (!$isAdmin) {
-            return $query->where('status_ruangan', 'available')->whereNotIn('status_ruangan', ['adminOnly'])->orderBy('nama_ruangan', 'asc')->paginate($perPage, $page);
+        // Admin sees all rooms
+        if ($isAdmin) {
+            return $query->orderBy('nama_ruangan', 'asc')->paginate($perPage, $page);
         }
 
-        return $query->orderBy('nama_ruangan', 'asc')->paginate($perPage, $page);
+        // Dosen/Tendik can see available AND adminOnly rooms
+        if ($isDosen) {
+            return $query->whereIn('status_ruangan', ['available', 'adminOnly'])->orderBy('nama_ruangan', 'asc')->paginate($perPage, $page);
+        }
+
+        // Students can only see available rooms (not adminOnly)
+        return $query->where('status_ruangan', 'available')->orderBy('nama_ruangan', 'asc')->paginate($perPage, $page);
     }
 
     public function create(array $data): bool
