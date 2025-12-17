@@ -81,40 +81,49 @@ class AdminReportController extends Controller
         $output = fopen('php://output', 'w');
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel UTF-8
 
-        // Header dengan filter details
-        fputcsv($output, ['LAPORAN BOOKING - LIBRARY BOOKING APP']);
-        fputcsv($output, []);
-        fputcsv($output, ['FILTER YANG DIGUNAKAN:']);
-        fputcsv($output, ['Tanggal Mulai', $filters['start_date'] ?: 'Semua']);
-        fputcsv($output, ['Tanggal Akhir', $filters['end_date'] ?: 'Semua']);
-        fputcsv($output, ['Status Filter', $filters['status'] ?: 'Semua (kecuali draft/pending)']);
-        fputcsv($output, ['Tipe Chart', $chartTypes[$filters['chart_type']] ?? 'Per Hari']);
-        fputcsv($output, ['Diekspor', date('d/m/Y H:i:s')]);
-        fputcsv($output, []);
+        // Title
+        fputcsv($output, ['LAPORAN BOOKING - LIBRARY BOOKING APP'], ',', '"', '\\');
+        fputcsv($output, [], ',', '"', '\\');
 
-        // Summary
-        fputcsv($output, ['RINGKASAN']);
-        fputcsv($output, ['Total Booking', $summary['total'] ?? 0]);
-        fputcsv($output, ['Verified', $summary['verified'] ?? 0]);
-        fputcsv($output, ['Active', $summary['active'] ?? 0]);
-        fputcsv($output, ['Completed', $summary['completed'] ?? 0]);
-        fputcsv($output, ['No Show', $summary['no_show'] ?? 0]);
-        fputcsv($output, ['Cancelled', $summary['cancelled'] ?? 0]);
-        fputcsv($output, []);
+        // Metadata table
+        fputcsv($output, ['INFORMASI LAPORAN'], ',', '"', '\\');
+        fputcsv($output, ['Item', 'Keterangan'], ',', '"', '\\');
+        fputcsv($output, ['Tanggal Mulai', $filters['start_date'] ?: 'Semua'], ',', '"', '\\');
+        fputcsv($output, ['Tanggal Akhir', $filters['end_date'] ?: 'Semua'], ',', '"', '\\');
+        fputcsv($output, ['Status Filter', $filters['status'] ?: 'Semua (kecuali draft/pending)'], ',', '"', '\\');
+        fputcsv($output, ['Tipe Chart', $chartTypes[$filters['chart_type']] ?? 'Per Hari'], ',', '"', '\\');
+        fputcsv($output, ['Tanggal Export', date('d/m/Y H:i:s')], ',', '"', '\\');
+        fputcsv($output, [], ',', '"', '\\');
+        fputcsv($output, [], ',', '"', '\\');
 
-        // Chart data
-        fputcsv($output, ['DATA CHART: ' . ($chartTypes[$filters['chart_type']] ?? 'Per Hari')]);
+        // Summary table
+        fputcsv($output, ['RINGKASAN'], ',', '"', '\\');
+        fputcsv($output, ['Status', 'Jumlah'], ',', '"', '\\');
+        fputcsv($output, ['Total Booking', $summary['total'] ?? 0], ',', '"', '\\');
+        fputcsv($output, ['Verified', $summary['verified'] ?? 0], ',', '"', '\\');
+        fputcsv($output, ['Active', $summary['active'] ?? 0], ',', '"', '\\');
+        fputcsv($output, ['Completed', $summary['completed'] ?? 0], ',', '"', '\\');
+        fputcsv($output, ['No Show', $summary['no_show'] ?? 0], ',', '"', '\\');
+        fputcsv($output, ['Cancelled', $summary['cancelled'] ?? 0], ',', '"', '\\');
+        fputcsv($output, [], ',', '"', '\\');
+        fputcsv($output, [], ',', '"', '\\');
+
+        // Chart data table
+        fputcsv($output, ['DATA ' . strtoupper($chartTypes[$filters['chart_type']] ?? 'Per Hari')], ',', '"', '\\');
+        fputcsv($output, ['Kategori', 'Jumlah Booking'], ',', '"', '\\');
         if (!empty($chartData['labels'])) {
-            fputcsv($output, ['Kategori', 'Jumlah']);
             for ($i = 0; $i < count($chartData['labels']); $i++) {
-                fputcsv($output, [$chartData['labels'][$i], $chartData['values'][$i]]);
+                fputcsv($output, [$chartData['labels'][$i], $chartData['values'][$i]], ',', '"', '\\');
             }
+        } else {
+            fputcsv($output, ['Tidak ada data', '-'], ',', '"', '\\');
         }
-        fputcsv($output, []);
+        fputcsv($output, [], ',', '"', '\\');
+        fputcsv($output, [], ',', '"', '\\');
 
-        // Detail table
-        fputcsv($output, ['DETAIL DATA (' . count($reportRows) . ' data)']);
-        fputcsv($output, ['Kode', 'User', 'Jurusan', 'Ruangan', 'Tujuan', 'Tanggal', 'Waktu', 'Status']);
+        // Detail booking table
+        fputcsv($output, ['DETAIL BOOKING (' . count($reportRows) . ' data)'], ',', '"', '\\');
+        fputcsv($output, ['Kode Booking', 'Nama User', 'Jurusan', 'Ruangan', 'Tujuan', 'Tanggal Penggunaan', 'Waktu', 'Status'], ',', '"', '\\');
 
         foreach ($reportRows as $row) {
             fputcsv($output, [
@@ -125,8 +134,8 @@ class AdminReportController extends Controller
                 $row['tujuan'] ?? '-',
                 $row['tanggal'] ?? '-',
                 ($row['waktu_mulai'] ?? '') . ' - ' . ($row['waktu_selesai'] ?? ''),
-                $row['status'] ?? '-',
-            ]);
+                strtoupper($row['status'] ?? '-'),
+            ], ',', '"', '\\');
         }
 
         fclose($output);

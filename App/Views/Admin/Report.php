@@ -85,7 +85,7 @@ $yearStart = date('Y-01-01');
             ];
             foreach ($periods as $p):
                 $isActive = ($filters['start_date'] === $p['start'] && $filters['end_date'] === $p['end']);
-                $params = http_build_query(['start_date' => $p['start'], 'end_date' => $p['end'], 'chart_type' => $chartType]);
+                $params = build_query(['start_date' => $p['start'], 'end_date' => $p['end'], 'chart_type' => $chartType]);
                 ?>
                 <a href="/admin/reports?<?= $params ?>"
                     class="px-4 py-2 text-sm rounded-lg border transition <?= $isActive ? 'bg-emerald-100 border-emerald-500 text-emerald-700' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50' ?>">
@@ -130,7 +130,7 @@ $yearStart = date('Y-01-01');
         <div class="flex gap-2 mt-6 flex-wrap">
             <?php foreach ($chartTypes as $key => $label): ?>
                 <?php
-                $params = http_build_query([
+                $params = build_query([
                     'start_date' => $filters['start_date'],
                     'end_date' => $filters['end_date'],
                     'status' => $filters['status'],
@@ -154,7 +154,7 @@ $yearStart = date('Y-01-01');
                 <!-- Export Buttons -->
                 <div class="flex gap-2">
                     <?php
-                    $exportParams = http_build_query($filters);
+                    $exportParams = build_query($filters);
                     ?>
                     <a href="/admin/reports/export-csv?<?= $exportParams ?>"
                         class="inline-flex items-center px-3 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition">

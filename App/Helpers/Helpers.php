@@ -288,6 +288,16 @@ if (!function_exists('str_slug')) {
         return trim($slug, '_');
     }
 }
+
+if (!function_exists('build_query')) {
+    /**
+     * Wrapper for http_build_query to suppress PHP 8.1 deprecation warnings
+     */
+    function build_query(array $data): string
+    {
+        return http_build_query($data, '', '&', PHP_QUERY_RFC3986);
+    }
+}
 if (!function_exists('room_photos')) {
     function room_photos(\App\Models\Room $room): array
     {

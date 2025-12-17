@@ -103,8 +103,7 @@ $warningTypes = $warningTypes ?? [];
                                 <td class="py-4 px-4">
                                     <form action="/admin/users/warnings/remove" method="POST" class="inline"
                                         onsubmit="return confirm('Hapus peringatan ini?')">
-                                        <input type="hidden" name="csrf_token"
-                                            value="<?= App::$app->session->get('csrf_token') ?>">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="warning_id" value="<?= $warning['id_peringatan_mhs'] ?>">
                                         <button type="submit"
                                             class="px-3 py-1 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">

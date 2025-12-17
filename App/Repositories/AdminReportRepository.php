@@ -156,7 +156,12 @@ class AdminReportRepository
             case 'week':
                 $sql = "
                     SELECT
-                        CONCAT('Minggu ', WEEK(b.tanggal_penggunaan_ruang, 1)) AS label,
+                        CONCAT(
+                            DATE_FORMAT(DATE_SUB(b.tanggal_penggunaan_ruang, INTERVAL WEEKDAY(b.tanggal_penggunaan_ruang) DAY), '%d %b'),
+                            ' - ',
+                            DATE_FORMAT(DATE_ADD(DATE_SUB(b.tanggal_penggunaan_ruang, INTERVAL WEEKDAY(b.tanggal_penggunaan_ruang) DAY), INTERVAL 6 DAY), '%d %b'),
+                            ' (Minggu ', WEEK(b.tanggal_penggunaan_ruang, 1), ')'
+                        ) AS label,
                         YEARWEEK(b.tanggal_penggunaan_ruang, 1) AS sort_key,
                         COUNT(*) AS value
                     FROM booking b
