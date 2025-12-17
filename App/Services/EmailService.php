@@ -284,4 +284,68 @@ class EmailService
         ";
         return $this->send($user->email, $user->nama, $subject, $body);
     }
+
+    /**
+     * Send warning notification email
+     */
+    public function sendWarningNotification(string $email, string $nama, string $warningType, string $reason = '', int $currentWarningCount = 0): bool
+    {
+        $subject = '⚠️ Peringatan Diterima | Library Booking App';
+
+        $reasonText = $reason ? "<p><strong>Alasan:</strong> {$reason}</p>" : '';
+
+        $suspensionWarning = '';
+        if ($currentWarningCount >= 2) {
+            $remaining = 3 - $currentWarningCount;
+            if ($remaining <= 0) {
+                $suspensionWarning = '
+                    <p style="color: #dc2626; font-weight: bold;">
+                        ⛔ Akun kamu telah disuspend karena mencapai 3 peringatan. 
+                        Suspensi berlaku selama 7 hari.
+                    </p>';
+            } else {
+                $suspensionWarning = "
+                    <p style=\"color: #f59e0b; font-weight: bold;\">
+                        ⚠️ Perhatian: Kamu tinggal {$remaining} peringatan lagi sebelum akun disuspend!
+                    </p>";
+            }
+        }
+
+        $body = "
+            <p>Hai <strong>{$nama}</strong>,</p>
+            <p>Kamu menerima peringatan dari sistem Library Booking App.</p>
+            <p><strong>Jenis Peringatan:</strong> {$warningType}</p>
+            {$reasonText}
+            <p><strong>Jumlah Peringatan Saat Ini:</strong> {$currentWarningCount}</p>
+            {$suspensionWarning}
+            <p>Harap perhatikan aturan penggunaan ruangan perpustakaan untuk menghindari peringatan di masa depan.</p>
+            <p>Jika kamu merasa ini adalah kesalahan, silakan hubungi admin.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($email, $nama, $subject, $body);
+    }
+
+    /**
+     * Send suspension notification email  
+     */
+    public function sendSuspensionNotification(string $email, string $nama, string $suspendUntil): bool
+    {
+        $subject = '⛔ Akun Disuspend | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$nama}</strong>,</p>
+            <p>Akun kamu telah <strong>disuspend</strong> karena mencapai 3 peringatan.</p>
+            <p><strong>Suspensi berlaku hingga:</strong> {$suspendUntil}</p>
+            <p>Selama masa suspensi, kamu tidak dapat:</p>
+            <ul>
+                <li>Membuat booking baru</li>
+                <li>Bergabung ke booking orang lain</li>
+                <li>Menggunakan fitur reservasi ruangan</li>
+            </ul>
+            <p>Setelah masa suspensi berakhir, akun kamu akan otomatis aktif kembali dan semua peringatan akan direset.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($email, $nama, $subject, $body);
+    }
 }

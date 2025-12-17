@@ -1,9 +1,9 @@
 <?php
 // default values/safety fallback
-$filters     = $filters     ?? ['start_date' => '', 'end_date' => '', 'status' => ''];
-$summary     = $summary     ?? ['total' => 0, 'completed' => 0, 'cancelled' => 0];
-$chartData   = $chartData   ?? ['labels' => [], 'values' => []];
-$reportRows  = $reportRows  ?? [];
+$filters = $filters ?? ['start_date' => '', 'end_date' => '', 'status' => ''];
+$summary = $summary ?? ['total' => 0, 'completed' => 0, 'cancelled' => 0];
+$chartData = $chartData ?? ['labels' => [], 'values' => []];
+$reportRows = $reportRows ?? [];
 
 ?>
 
@@ -44,15 +44,14 @@ $reportRows  = $reportRows  ?? [];
                 <select name="status" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-slate-50">
                     <option value="">Semua</option>
                     <?php foreach (['active', 'completed', 'cancelled'] as $st): ?>
-                        <option value="<?= $st ?>"
-                            <?= $filters['status'] === $st ? 'selected' : '' ?>>
+                        <option value="<?= $st ?>" <?= $filters['status'] === $st ? 'selected' : '' ?>>
                             <?= ucfirst($st) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
-            <!-- Appluy -->
+            <!-- Apply -->
             <div class="flex items-end">
                 <button class="w-full bg-primary text-white px-4 py-3 rounded-xl hover:bg-emerald-700 transition">
                     Terapkan
@@ -61,27 +60,91 @@ $reportRows  = $reportRows  ?? [];
 
         </form>
 
+        <!-- Quick Period Filters -->
+        <div class="flex gap-2 mt-4 flex-wrap">
+            <?php
+            $today = date('Y-m-d');
+            $weekStart = date('Y-m-d', strtotime('monday this week'));
+            $monthStart = date('Y-m-01');
+
+            // Build query params preserving chart_type and status
+            $weekParams = http_build_query([
+                'start_date' => $weekStart,
+                'end_date' => $today,
+                'chart_type' => $filters['chart_type'] ?? 'booking',
+                'status' => $filters['status'] ?? ''
+            ]);
+
+            $monthParams = http_build_query([
+                'start_date' => $monthStart,
+                'end_date' => $today,
+                'chart_type' => $filters['chart_type'] ?? 'booking',
+                'status' => $filters['status'] ?? ''
+            ]);
+            ?>
+            <a href="/admin/reports?<?= $weekParams ?>"
+                class="px-3 py-1.5 text-sm rounded-lg border <?= ($filters['start_date'] === $weekStart && $filters['end_date'] === $today) ? 'bg-emerald-100 border-emerald-500 text-emerald-700' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50' ?>">
+                Minggu Ini
+            </a>
+            <a href="/admin/reports?<?= $monthParams ?>"
+                class="px-3 py-1.5 text-sm rounded-lg border <?= ($filters['start_date'] === $monthStart && $filters['end_date'] === $today) ? 'bg-emerald-100 border-emerald-500 text-emerald-700' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50' ?>">
+                Bulan Ini
+            </a>
+            <a href="/admin/reports"
+                class="px-3 py-1.5 text-sm rounded-lg border bg-white border-gray-300 text-gray-600 hover:bg-gray-50">
+                Reset Filter
+            </a>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="flex gap-2 mt-4">
+            <?php
+            $exportParams = http_build_query([
+                'start_date' => $filters['start_date'] ?? '',
+                'end_date' => $filters['end_date'] ?? '',
+                'status' => $filters['status'] ?? '',
+                'chart_type' => $filters['chart_type'] ?? 'booking',
+            ]);
+            ?>
+            <a href="/admin/reports/export-csv?<?= $exportParams ?>"
+                class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export CSV
+            </a>
+            <a href="/admin/reports/export-pdf?<?= $exportParams ?>" target="_blank"
+                class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Export PDF
+            </a>
+        </div>
+
         <!-- hasil $getSummary -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
 
             <div class="p-6 rounded-2xl bg-white shadow border">
                 <h3 class="text-sm text-gray-500">Total Booking</h3>
                 <p class="text-3xl font-bold text-primary mt-1">
-                    <?= (int)$summary['total'] ?>
+                    <?= (int) $summary['total'] ?>
                 </p>
             </div>
 
             <div class="p-6 rounded-2xl bg-white shadow border">
                 <h3 class="text-sm text-gray-500">Selesai</h3>
                 <p class="text-3xl font-bold text-emerald-600 mt-1">
-                    <?= (int)$summary['completed'] ?>
+                    <?= (int) $summary['completed'] ?>
                 </p>
             </div>
 
             <div class="p-6 rounded-2xl bg-white shadow border">
                 <h3 class="text-sm text-gray-500">Dibatalkan</h3>
                 <p class="text-3xl font-bold text-red-500 mt-1">
-                    <?= (int)$summary['cancelled'] ?>
+                    <?= (int) $summary['cancelled'] ?>
                 </p>
             </div>
 
@@ -90,21 +153,25 @@ $reportRows  = $reportRows  ?? [];
         <!-- CHIP PEMILIHAN CHART -->
         <div class="flex gap-3 mt-6 flex-wrap">
             <?php
-                $chips = [
-                    'booking'  => 'Booking per Hari',
-                    'room'     => 'Ruangan Terpopuler',
-                    'feedback' => 'Feedback Terbanyak',
-                    'hours'    => 'Jam Sibuk'
-                ];
+            $chips = [
+                'booking' => 'Trend Booking',
+                'daily' => 'Per Hari (Senin-Minggu)',
+                'weekly' => 'Per Minggu',
+                'monthly' => 'Per Bulan',
+                'room' => 'Ruangan Terpopuler',
+                'department' => 'Per Jurusan',
+                'reason' => 'Tujuan Booking',
+                'hours' => 'Jam Sibuk',
+                'feedback' => 'Feedback'
+            ];
             ?>
 
             <?php foreach ($chips as $key => $label): ?>
-                <a href="/admin/reports?chart_type=<?= $key ?>"
-                class="px-4 py-2 rounded-full border transition
+                <a href="/admin/reports?chart_type=<?= $key ?>" class="px-4 py-2 rounded-full border transition
                         <?= ($chartType === $key)
                             ? 'bg-primary text-white border-primary'
                             : 'bg-white border-gray-300 text-slate-600 hover:bg-gray-100'
-                        ?>">
+                            ?>">
                     <?= $label ?>
                 </a>
             <?php endforeach; ?>
@@ -113,7 +180,7 @@ $reportRows  = $reportRows  ?? [];
         <!-- CHART -->
         <div class="bg-white shadow rounded-2xl p-6 mt-6">
             <h2 class="text-xl font-bold mb-4">
-                <?= isset($chips[(string)$chartType]) ? $chips[(string)$chartType] : 'Grafik Aktivitas' ?>
+                <?= isset($chips[(string) $chartType]) ? $chips[(string) $chartType] : 'Grafik Aktivitas' ?>
             </h2>
 
             <canvas id="bookingChart" class="w-full max-h-96"></canvas>
@@ -132,12 +199,12 @@ $reportRows  = $reportRows  ?? [];
         <!-- EXPORT BUTTONS -->
         <div class="flex gap-3 mt-6">
             <a href="/admin/reports/export?type=csv"
-               class="px-4 py-3 bg-primary text-white rounded-xl shadow hover:bg-emerald-700 transition">
+                class="px-4 py-3 bg-primary text-white rounded-xl shadow hover:bg-emerald-700 transition">
                 Export CSV
             </a>
 
             <a href="/admin/reports/export?type=pdf"
-               class="px-4 py-3 bg-red-600 text-white rounded-xl shadow hover:bg-red-700 transition">
+                class="px-4 py-3 bg-red-600 text-white rounded-xl shadow hover:bg-red-700 transition">
                 Export PDF
             </a>
         </div>

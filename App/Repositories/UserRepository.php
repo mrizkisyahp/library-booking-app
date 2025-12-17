@@ -224,4 +224,21 @@ class UserRepository
             ->where('masa_aktif', '<', date('Y-m-d'))
             ->update(['status' => 'nonaktif']);
     }
+
+    /**
+     * Get user's warning history with warning type names
+     */
+    public function getUserWarnings(int $userId): array
+    {
+        $stmt = $this->database->prepare("
+            SELECT pm.*, ps.nama_peringatan
+            FROM peringatan_mhs pm
+            LEFT JOIN peringatan_suspensi ps ON pm.id_peringatan = ps.id_peringatan
+            WHERE pm.id_akun = :user_id
+              AND pm.deleted_at IS NULL
+            ORDER BY pm.tgl_peringatan DESC
+        ");
+        $stmt->execute([':user_id' => $userId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

@@ -34,7 +34,8 @@ class BookingService
         private InvitationRepository $invitationRepo,
         private RescheduleRepository $rescheduleRepo,
         private Database $db,
-        private EmailService $emailService
+        private EmailService $emailService,
+        private ?SettingsService $settingsService = null
     ) {
     }
 
@@ -848,6 +849,7 @@ class BookingService
                 throw new Exception('Booking yang sudah aktif tidak dapat dibatalkan');
             }
 
+            // PIC cancelling verified booking = warning to PIC + ALL members
             if ($booking->status === 'verified' && !$isAdmin) {
                 $startDateTime = Carbon::parse("{$booking->tanggal_penggunaan_ruang} {$booking->waktu_mulai}");
                 $now = Carbon::now();
@@ -858,7 +860,8 @@ class BookingService
                     throw new Exception('Tidak dapat membatalkan booking kurang dari 15 menit sebelum waktu mulai');
                 }
 
-                $this->applyLateCancellationPenalty($booking->user_id);
+                // Apply warning to PIC + ALL members
+                $this->applyVerifiedCancellationPenalty($bookingId, $booking->user_id);
             }
 
             $this->transitionTo($bookingId, 'cancelled', $reason);
@@ -1192,6 +1195,124 @@ class BookingService
         }
     }
 
+    /**
+     * Apply "PIC Batalkan Booking Verified" warning to PIC + ALL members
+     */
+    public function applyVerifiedCancellationPenalty(int $bookingId, int $picUserId): void
+    {
+        // Get warning type ID and name
+        $stmt = $this->db->prepare("
+            SELECT id_peringatan, nama_peringatan FROM peringatan_suspensi 
+            WHERE nama_peringatan LIKE '%Batalkan%Verified%' 
+            AND deleted_at IS NULL 
+            LIMIT 1
+        ");
+        $stmt->execute();
+        $warningType = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$warningType) {
+            // Fallback: try to get any warning type
+            $stmt = $this->db->pdo->query("SELECT id_peringatan, nama_peringatan FROM peringatan_suspensi WHERE deleted_at IS NULL LIMIT 1");
+            $warningType = $stmt->fetch(\PDO::FETCH_ASSOC);
+        }
+
+        if (!$warningType) {
+            $this->logger->error('No warning type found for verified cancellation penalty');
+            return;
+        }
+
+        $peringatanId = $warningType['id_peringatan'];
+        $warningTypeName = $warningType['nama_peringatan'] ?? 'PIC Batalkan Booking Verified';
+
+        // Get all members + PIC
+        $members = $this->bookingRepo->getBookingMembers($bookingId, 1, 999);
+        $allUserIds = array_column($members->items, 'id_user');
+        $allUserIds[] = $picUserId;
+        $allUserIds = array_unique($allUserIds);
+
+        foreach ($allUserIds as $userId) {
+            try {
+                // Insert warning into peringatan_mhs
+                $stmt = $this->db->prepare("
+                    INSERT INTO peringatan_mhs (id_peringatan, id_akun, tgl_peringatan, created_at)
+                    VALUES (:id_peringatan, :id_akun, :tgl, NOW())
+                ");
+                $stmt->execute([
+                    ':id_peringatan' => $peringatanId,
+                    ':id_akun' => $userId,
+                    ':tgl' => date('Y-m-d'),
+                ]);
+
+                // Update users.peringatan
+                $user = $this->bookingRepo->findUserById($userId);
+                if ($user) {
+                    $newWarningLevel = ($user['peringatan'] ?? 0) + 1;
+                    $this->bookingRepo->updateUserWarning($userId, $newWarningLevel);
+
+                    $this->logger->warning('Verified Cancellation Penalty Applied', [
+                        'booking_id' => $bookingId,
+                        'user_id' => $userId,
+                        'new_warning_level' => $newWarningLevel,
+                    ]);
+
+                    // Send warning email
+                    try {
+                        $this->emailService->sendWarningNotification(
+                            $user['email'],
+                            $user['nama'],
+                            $warningTypeName,
+                            "Booking #{$bookingId} dibatalkan oleh PIC",
+                            $newWarningLevel
+                        );
+                    } catch (\Exception $e) {
+                        $this->logger->error('Failed to send warning email', [
+                            'user_id' => $userId,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+
+                    // Auto-suspend if >= 3
+                    if ($newWarningLevel >= 3 && $user['status'] !== 'suspended') {
+                        $suspendUntil = Carbon::now()->addDays(7)->format('Y-m-d');
+                        $this->bookingRepo->updateUserStatus($userId, 'suspended', $suspendUntil);
+
+                        // Insert suspension record
+                        $stmt = $this->db->prepare("
+                            INSERT INTO suspensi (id_akun, tgl_suspensi, created_at)
+                            VALUES (:id_akun, :tgl, NOW())
+                        ");
+                        $stmt->execute([':id_akun' => $userId, ':tgl' => date('Y-m-d')]);
+
+                        $this->logger->warning('User Auto-Suspended from verified cancellation', [
+                            'user_id' => $userId,
+                            'warning_level' => $newWarningLevel,
+                        ]);
+
+                        // Send suspension email
+                        try {
+                            $this->emailService->sendSuspensionNotification(
+                                $user['email'],
+                                $user['nama'],
+                                $suspendUntil
+                            );
+                        } catch (\Exception $e) {
+                            $this->logger->error('Failed to send suspension email', [
+                                'user_id' => $userId,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to apply verified cancellation penalty', [
+                    'booking_id' => $bookingId,
+                    'user_id' => $userId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
     public function checkAndUnsuspendUser(int $userId): bool
     {
         $user = $this->bookingRepo->findUserById($userId);
@@ -1443,12 +1564,17 @@ class BookingService
         $end = Carbon::parse($data['waktu_selesai']);
         $durationMinutes = $start->diffInMinutes($end, false);
 
-        if ($durationMinutes < 60) {
-            throw new Exception('Durasi booking minimal 1 jam');
+        $minDuration = $this->settingsService?->get('min_booking_duration') ?? 60;
+        $maxDuration = $this->settingsService?->get('max_booking_duration') ?? 180;
+
+        if ($durationMinutes < $minDuration) {
+            $minText = $minDuration >= 60 ? ($minDuration / 60) . " jam" : $minDuration . " menit";
+            throw new Exception("Durasi booking minimal {$minText}");
         }
 
-        if ($durationMinutes > 180) {
-            throw new Exception('Durasi booking maksimal 3 jam');
+        if ($durationMinutes > $maxDuration) {
+            $maxText = $maxDuration >= 60 ? ($maxDuration / 60) . " jam" : $maxDuration . " menit";
+            throw new Exception("Durasi booking maksimal {$maxText}");
         }
     }
 
@@ -1458,20 +1584,20 @@ class BookingService
         $startDateTime = Carbon::parse("$dateStr {$data['waktu_mulai']}");
         $endDateTime = Carbon::parse("$dateStr {$data['waktu_selesai']}");
 
-        // Operating hours: 08:15 - 16:00 (with 15min start buffer and 20min end buffer from 08:00-16:20)
-        $operatingStart = Carbon::parse("$dateStr 08:15");
-        $operatingEnd = Carbon::parse("$dateStr 16:00");
+        // Get operating hours from settings or use defaults
+        $openTime = $this->settingsService?->get('library_open_time') ?? '08:15';
+        $closeTime = $this->settingsService?->get('library_close_time') ?? '16:00';
 
-        // Free-form booking: just check if within operating hours
+        $operatingStart = Carbon::parse("$dateStr $openTime");
+        $operatingEnd = Carbon::parse("$dateStr $closeTime");
+
         if ($startDateTime->lt($operatingStart)) {
-            throw new Exception('Booking tidak bisa dimulai sebelum jam 08:15');
+            throw new Exception("Booking tidak bisa dimulai sebelum jam $openTime");
         }
 
         if ($endDateTime->gt($operatingEnd)) {
-            throw new Exception('Booking harus selesai sebelum jam 16:00');
+            throw new Exception("Booking harus selesai sebelum jam $closeTime");
         }
-
-        // Break time validation is handled separately by validateBreakTime()
     }
 
     private function validateBreakTime(array $data): void
@@ -1484,18 +1610,22 @@ class BookingService
         $endDateTime = Carbon::parse("$dateStr {$data['waktu_selesai']}");
 
         if ($dayOfWeek === 5) { // Jumat
-            $breakStart = Carbon::parse("$dateStr 11:00");
-            $breakEnd = Carbon::parse("$dateStr 13:00");
+            $breakStartTime = $this->settingsService?->get('break_start_friday') ?? '11:00';
+            $breakEndTime = $this->settingsService?->get('break_end_friday') ?? '13:00';
+            $breakStart = Carbon::parse("$dateStr $breakStartTime");
+            $breakEnd = Carbon::parse("$dateStr $breakEndTime");
 
             if ($startDateTime->lt($breakEnd) && $endDateTime->gt($breakStart)) {
-                throw new Exception('Booking tidak boleh melewati jam istirahat Jumat (11:00-13:00)');
+                throw new Exception("Booking tidak boleh melewati jam istirahat Jumat ($breakStartTime-$breakEndTime)");
             }
         } else { // Senin - Kamis
-            $breakStart = Carbon::parse("$dateStr 11:00");
-            $breakEnd = Carbon::parse("$dateStr 12:00");
+            $breakStartTime = $this->settingsService?->get('break_start_weekday') ?? '11:00';
+            $breakEndTime = $this->settingsService?->get('break_end_weekday') ?? '12:00';
+            $breakStart = Carbon::parse("$dateStr $breakStartTime");
+            $breakEnd = Carbon::parse("$dateStr $breakEndTime");
 
             if ($startDateTime->lt($breakEnd) && $endDateTime->gt($breakStart)) {
-                throw new Exception('Booking tidak boleh melewati jam istirahat (11:00-12:00)');
+                throw new Exception("Booking tidak boleh melewati jam istirahat ($breakStartTime-$breakEndTime)");
             }
         }
     }
@@ -2167,5 +2297,120 @@ class BookingService
             }
         }
         return $user;
+    }
+
+    /**
+     * Get all warning types for dropdowns
+     */
+    public function getWarningTypes(): array
+    {
+        $stmt = $this->db->pdo->query("
+            SELECT id_peringatan, nama_peringatan 
+            FROM peringatan_suspensi 
+            WHERE deleted_at IS NULL 
+            ORDER BY id_peringatan
+        ");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Assign warnings to all members of a booking
+     */
+    public function assignWarningsToBooking(int $bookingId, int $warningTypeId, ?string $reason = null): array
+    {
+        $booking = $this->bookingRepo->findByIdWithDetails($bookingId);
+        if (!$booking) {
+            throw new Exception('Booking tidak ditemukan');
+        }
+
+        // Get all members (including PIC) via direct SQL
+        $stmt = $this->db->prepare("
+            SELECT DISTINCT u.id_user, u.nama, u.email, u.peringatan, u.status
+            FROM users u
+            LEFT JOIN anggota_booking ab ON u.id_user = ab.user_id
+            WHERE ab.booking_id = :booking_id1
+               OR u.id_user = :pic_id
+        ");
+        $stmt->execute([
+            ':booking_id1' => $bookingId,
+            ':pic_id' => $booking->id_user,
+        ]);
+        $members = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (empty($members)) {
+            throw new Exception('Tidak ada anggota dalam booking ini');
+        }
+
+        // Get warning type name
+        $warningTypes = $this->getWarningTypes();
+        $warningName = 'Peringatan';
+        foreach ($warningTypes as $type) {
+            if ((int) $type['id_peringatan'] === $warningTypeId) {
+                $warningName = $type['nama_peringatan'];
+                break;
+            }
+        }
+
+        $warnedUsers = [];
+
+        foreach ($members as $member) {
+            $userId = (int) $member['id_user'];
+
+            // Get fresh user data
+            $userStmt = $this->db->prepare("SELECT * FROM users WHERE id_user = :id");
+            $userStmt->execute([':id' => $userId]);
+            $userData = $userStmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$userData)
+                continue;
+
+            $user = $this->hydrateUser($userData);
+
+            // Insert warning
+            $insertStmt = $this->db->prepare("
+                INSERT INTO peringatan_mhs (id_akun, id_peringatan, tgl_peringatan, created_at)
+                VALUES (:id_akun, :id_peringatan, CURDATE(), NOW())
+            ");
+            $insertStmt->execute([
+                ':id_akun' => $userId,
+                ':id_peringatan' => $warningTypeId,
+            ]);
+
+            // Increment user warning count
+            $newWarningCount = ($user->peringatan ?? 0) + 1;
+            $user->peringatan = $newWarningCount;
+            $user->save();
+
+            // Send warning email
+            $this->emailService->sendWarningNotification($user->email, $user->nama, $warningName, '', $newWarningCount);
+
+            // Check for auto-suspension (3+ warnings)
+            if ($newWarningCount >= 3 && $user->status !== 'suspended') {
+                $suspensionEndDate = Carbon::now()->addDays(14)->format('Y-m-d');
+
+                $suspendStmt = $this->db->prepare("
+                    INSERT INTO suspensi (id_akun, tgl_suspensi, created_at)
+                    VALUES (:id_akun, CURDATE(), NOW())
+                ");
+                $suspendStmt->execute([':id_akun' => $userId]);
+
+                $user->status = 'suspended';
+                $user->suspensi_terakhir = $suspensionEndDate;
+                $user->save();
+
+                $this->emailService->sendSuspensionNotification($user->email, $user->nama, $suspensionEndDate);
+            }
+
+            $warnedUsers[] = $user->nama;
+        }
+
+        $this->logger->info('Admin assigned warnings to booking members', [
+            'booking_id' => $bookingId,
+            'warning_type_id' => $warningTypeId,
+            'reason' => $reason,
+            'warned_users' => $warnedUsers,
+        ]);
+
+        return $warnedUsers;
     }
 }

@@ -247,4 +247,223 @@ class AdminReportRepository
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Fetch bookings grouped by user jurusan (department)
+     */
+    public function fetchBookingsByDepartment(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['start_date'])) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) >= :start_date";
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) <= :end_date";
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSQL = $where ? "WHERE " . implode(" AND ", $where) : "";
+
+        $sql = "
+            SELECT 
+                COALESCE(u.jurusan, 'Tidak Diketahui') AS label, 
+                COUNT(b.id_booking) AS value
+            FROM booking b
+            LEFT JOIN users u ON b.user_id = u.id_user
+            $whereSQL
+            GROUP BY u.jurusan
+            ORDER BY value DESC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+        ];
+    }
+
+    /**
+     * Fetch bookings grouped by reason/purpose (tujuan)
+     */
+    public function fetchBookingsByReason(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['start_date'])) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) >= :start_date";
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = "DATE(b.tanggal_penggunaan_ruang) <= :end_date";
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSQL = $where ? "WHERE " . implode(" AND ", $where) : "";
+
+        // Group by first 50 chars of tujuan to avoid too many categories
+        $sql = "
+            SELECT 
+                SUBSTRING(b.tujuan, 1, 50) AS label, 
+                COUNT(*) AS value
+            FROM booking b
+            $whereSQL
+            GROUP BY SUBSTRING(b.tujuan, 1, 50)
+            ORDER BY value DESC
+            LIMIT 10
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+        ];
+    }
+
+    // Fetch bookings grouped by day of week (Senin, Selasa, etc.)
+    public function fetchBookingsByDay(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'b.status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['start_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) >= :start_date';
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) <= :end_date';
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $sql = "
+            SELECT
+                DAYOFWEEK(b.tanggal_penggunaan_ruang) AS day_num,
+                CASE DAYOFWEEK(b.tanggal_penggunaan_ruang)
+                    WHEN 1 THEN 'Minggu'
+                    WHEN 2 THEN 'Senin'
+                    WHEN 3 THEN 'Selasa'
+                    WHEN 4 THEN 'Rabu'
+                    WHEN 5 THEN 'Kamis'
+                    WHEN 6 THEN 'Jumat'
+                    WHEN 7 THEN 'Sabtu'
+                END AS label,
+                COUNT(*) AS value
+            FROM booking b
+            $whereSql
+            GROUP BY DAYOFWEEK(b.tanggal_penggunaan_ruang)
+            ORDER BY day_num ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+        ];
+    }
+
+    // Fetch bookings grouped by week
+    public function fetchBookingsByWeek(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'b.status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['start_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) >= :start_date';
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) <= :end_date';
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $sql = "
+            SELECT
+                CONCAT('Minggu ', WEEK(b.tanggal_penggunaan_ruang, 1), ' (', 
+                    DATE_FORMAT(DATE_SUB(b.tanggal_penggunaan_ruang, INTERVAL WEEKDAY(b.tanggal_penggunaan_ruang) DAY), '%d/%m'),
+                    ')') AS label,
+                YEARWEEK(b.tanggal_penggunaan_ruang, 1) AS week_num,
+                COUNT(*) AS value
+            FROM booking b
+            $whereSql
+            GROUP BY YEARWEEK(b.tanggal_penggunaan_ruang, 1)
+            ORDER BY week_num ASC
+            LIMIT 12
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+        ];
+    }
+
+    // Fetch bookings grouped by month
+    public function fetchBookingsByMonth(array $filters): array
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = 'b.status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['start_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) >= :start_date';
+            $params[':start_date'] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $where[] = 'DATE(b.tanggal_penggunaan_ruang) <= :end_date';
+            $params[':end_date'] = $filters['end_date'];
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $sql = "
+            SELECT
+                DATE_FORMAT(b.tanggal_penggunaan_ruang, '%b %Y') AS label,
+                DATE_FORMAT(b.tanggal_penggunaan_ruang, '%Y-%m') AS month_num,
+                COUNT(*) AS value
+            FROM booking b
+            $whereSql
+            GROUP BY DATE_FORMAT(b.tanggal_penggunaan_ruang, '%Y-%m')
+            ORDER BY month_num ASC
+            LIMIT 12
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+        ];
+    }
 }

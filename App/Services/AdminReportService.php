@@ -31,6 +31,21 @@ class AdminReportService
             case 'hours':
                 return $this->repo->fetchBusyHours($filters);
 
+            case 'department':
+                return $this->repo->fetchBookingsByDepartment($filters);
+
+            case 'reason':
+                return $this->repo->fetchBookingsByReason($filters);
+
+            case 'daily':
+                return $this->repo->fetchBookingsByDay($filters);
+
+            case 'weekly':
+                return $this->repo->fetchBookingsByWeek($filters);
+
+            case 'monthly':
+                return $this->repo->fetchBookingsByMonth($filters);
+
             case 'booking':
             default:
                 return $this->repo->fetchBookingCountsByDate($filters);

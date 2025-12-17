@@ -51,9 +51,11 @@ class ProfileController extends Controller
 
         $userId = auth()->id();
         $user = $this->profileService->getCurrentUserProfile($userId);
+        $userWarnings = $this->profileService->getUserWarnings($userId);
 
         return view('Profile/Detail', [
             'user' => $user,
+            'userWarnings' => $userWarnings,
         ]);
     }
 

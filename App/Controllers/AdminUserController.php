@@ -272,4 +272,142 @@ class AdminUserController extends Controller
             back();
         }
     }
+
+    public function warnings(Request $request)
+    {
+        $this->setLayout('main');
+        $this->setTitle('Peringatan Pengguna | Library Booking App');
+
+        $page = (int) ($request->query()['page'] ?? 1);
+        $paginator = $this->userService->getAllWarningsPaginated(15, $page);
+        $warningTypes = $this->userService->getWarningTypes();
+
+        return view('Admin/Users/Warnings', [
+            'warnings' => $paginator->items,
+            'paginator' => $paginator,
+            'warningTypes' => $warningTypes,
+        ]);
+    }
+
+    public function suspensions(Request $request)
+    {
+        $this->setLayout('main');
+        $this->setTitle('Suspensi Pengguna | Library Booking App');
+
+        $page = (int) ($request->query()['page'] ?? 1);
+        $paginator = $this->userService->getAllSuspensionsPaginated(15, $page);
+
+        return view('Admin/Users/Suspensions', [
+            'suspensions' => $paginator->items,
+            'paginator' => $paginator,
+        ]);
+    }
+
+    public function addWarning(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'user_id' => 'required|integer',
+                'peringatan_id' => 'required|integer',
+                'reason' => 'nullable|string|max:500',
+            ]);
+
+            $this->userService->addWarning(
+                (int) $data['user_id'],
+                (int) $data['peringatan_id'],
+                $data['reason'] ?? null
+            );
+
+            flash('success', 'Peringatan berhasil ditambahkan');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function removeWarning(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'warning_id' => 'required|integer',
+            ]);
+
+            $this->userService->removeWarning((int) $data['warning_id']);
+
+            flash('success', 'Peringatan berhasil dihapus');
+            back();
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    // ==================== WARNING TYPES CRUD ====================
+
+    public function warningTypes(Request $request)
+    {
+        $this->setLayout('main');
+        $this->setTitle('Jenis Peringatan | Library Booking App');
+
+        $page = (int) ($request->query()['page'] ?? 1);
+        $paginator = $this->userService->getWarningTypesPaginated(15, $page);
+
+        return view('Admin/Users/WarningTypes', [
+            'warningTypes' => $paginator->items,
+            'paginator' => $paginator,
+        ]);
+    }
+
+    public function storeWarningType(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'nama_peringatan' => 'required|string|max:100',
+            ]);
+
+            $this->userService->createWarningType($data['nama_peringatan']);
+
+            flash('success', 'Jenis peringatan berhasil ditambahkan');
+            redirect('/admin/users/warning-types');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function updateWarningType(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'id' => 'required|integer',
+                'nama_peringatan' => 'required|string|max:100',
+            ]);
+
+            $this->userService->updateWarningType((int) $data['id'], $data['nama_peringatan']);
+
+            flash('success', 'Jenis peringatan berhasil diupdate');
+            redirect('/admin/users/warning-types');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    public function deleteWarningType(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'id' => 'required|integer',
+            ]);
+
+            $this->userService->deleteWarningType((int) $data['id']);
+
+            flash('success', 'Jenis peringatan berhasil dihapus');
+            redirect('/admin/users/warning-types');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
 }

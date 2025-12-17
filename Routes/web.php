@@ -89,6 +89,7 @@ $app->router->post('/feedback/store', [UserFeedbackController::class, 'store'], 
 // Admin routes
 $app->router->get('/admin', [AdminDashboardController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->get('/admin/settings', [AdminDashboardController::class, 'settings'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->post('/admin/settings/update', [AdminDashboardController::class, 'updateSettings'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin bookings
 $app->router->get('/admin/bookings', [AdminBookingController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
@@ -117,6 +118,7 @@ $app->router->post('/admin/bookings/reschedule', [AdminBookingController::class,
 $app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->post('/admin/bookings/reschedule/approve', [AdminBookingController::class, 'approveReschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/bookings/reschedule/reject', [AdminBookingController::class, 'rejectReschedule'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/bookings/assign-warning', [AdminBookingController::class, 'assignWarning'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin users
 $app->router->get('/admin/users', [AdminUserController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
@@ -131,6 +133,14 @@ $app->router->post('/admin/users/unsuspend', [AdminUserController::class, 'unsus
 $app->router->post('/admin/users/reset-password', [AdminUserController::class, 'resetPassword'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/users/approve-kubaca', [AdminUserController::class, 'approveKubaca'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 $app->router->post('/admin/users/reject-kubaca', [AdminUserController::class, 'rejectKubaca'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/admin/users/warnings', [AdminUserController::class, 'warnings'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->get('/admin/users/suspensions', [AdminUserController::class, 'suspensions'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->post('/admin/users/warnings/add', [AdminUserController::class, 'addWarning'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/users/warnings/remove', [AdminUserController::class, 'removeWarning'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->get('/admin/users/warning-types', [AdminUserController::class, 'warningTypes'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->post('/admin/users/warning-types/store', [AdminUserController::class, 'storeWarningType'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/users/warning-types/update', [AdminUserController::class, 'updateWarningType'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
+$app->router->post('/admin/users/warning-types/delete', [AdminUserController::class, 'deleteWarningType'], ['middleware' => [new AdminMiddleware(), new CsrfMiddleware()]]);
 
 // Admin rooms
 $app->router->get('/admin/rooms', [AdminRoomController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
@@ -150,3 +160,5 @@ $app->router->post('/admin/rooms/deactivate-all', [AdminRoomController::class, '
 $app->router->get('/admin/feedback', [AdminFeedbackController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->get('/admin/feedback/detail', [AdminFeedbackController::class, 'detail'], ['middleware' => [new AdminMiddleware()]]);
 $app->router->get('/admin/reports', [AdminReportController::class, 'index'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->get('/admin/reports/export-csv', [AdminReportController::class, 'exportCsv'], ['middleware' => [new AdminMiddleware()]]);
+$app->router->get('/admin/reports/export-pdf', [AdminReportController::class, 'exportPdf'], ['middleware' => [new AdminMiddleware()]]);
