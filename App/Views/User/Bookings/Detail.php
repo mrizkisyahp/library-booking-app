@@ -179,10 +179,10 @@ $statusColors = [
                     <?php endif ?>
                 </div>
                 <?php if ($booking->status === 'cancelled' && !empty($booking->alasan_reject)): ?>
-                <div class="w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <p class="text-xs font-semibold text-red-700 uppercase mb-1">Alasan Pembatalan</p>
-                    <p class="text-sm text-red-800"><?= htmlspecialchars($booking->alasan_reject) ?></p>
-                </div>
+                    <div class="w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <p class="text-xs font-semibold text-red-700 uppercase mb-1">Alasan Pembatalan</p>
+                        <p class="text-sm text-red-800"><?= htmlspecialchars($booking->alasan_reject) ?></p>
+                    </div>
                 <?php endif; ?>
 
                 <div class="w-full mb-4">
@@ -479,13 +479,9 @@ $statusColors = [
                     Waktu Tersisa
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
-                    <div class="text-2xl font-bold">
-                        <?php
-                        $datetime1 = new DateTime($booking->waktu_mulai);
-                        $datetime2 = new DateTime($booking->waktu_selesai);
-                        $interval = $datetime1->diff($datetime2);
-                        echo $interval->format('%H:%I:%S');
-                        ?>
+                    <div class="text-2xl font-bold" id="countdown-timer"
+                        data-end-time="<?= date('Y-m-d H:i:s', strtotime($booking->tanggal_penggunaan_ruang . ' ' . $booking->waktu_selesai)) ?>">
+                        00:00:00
                     </div>
                 </div>
             <?php endif; ?>
@@ -662,13 +658,9 @@ $statusColors = [
                     Waktu Tersisa
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
-                    <div class="text-2xl font-bold">
-                        <?php
-                        $datetime1 = new DateTime($booking->waktu_mulai);
-                        $datetime2 = new DateTime($booking->waktu_selesai);
-                        $interval = $datetime1->diff($datetime2);
-                        echo $interval->format('%H:%I:%S');
-                        ?>
+                    <div class="text-2xl font-bold" id="countdown-timer-mobile"
+                        data-end-time="<?= date('Y-m-d H:i:s', strtotime($booking->tanggal_penggunaan_ruang . ' ' . $booking->waktu_selesai)) ?>">
+                        00:00:00
                     </div>
                 </div>
             <?php endif; ?>
@@ -704,3 +696,77 @@ $statusColors = [
     </nav>
 
 </div>
+
+<!-- Modal Waktu Habis -->
+<div id="modal-waktu-habis"
+    class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all flex justify-center items-center z-[9999] backdrop-blur-sm">
+    <div class="bg-white p-8 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 relative">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <svg class="h-10 w-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-slate-800 mb-2">
+                Waktu Habis
+            </h1>
+            <p class="text-sm text-slate-600 mb-6">
+                Waktu booking Anda telah berakhir. Silakan refresh halaman untuk melihat status terbaru.
+            </p>
+            <button onclick="location.reload()"
+                class="w-full bg-primary text-white p-4 rounded-2xl hover:bg-emerald-700 transition-all font-semibold shadow cursor-pointer">
+                Refresh Halaman
+            </button>
+        </div>
+    </div>
+</div>
+
+<?php if ($booking->status === 'active'): ?>
+    <script>
+        function startCountdown(elementId) {
+            const timerElement = document.getElementById(elementId);
+            if (!timerElement) return;
+
+            const endTime = new Date(timerElement.getAttribute('data-end-time')).getTime();
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    timerElement.textContent = '00:00:00';
+                    showWaktuHabisModal();
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                timerElement.textContent =
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+
+                setTimeout(updateTimer, 1000);
+            }
+
+            updateTimer();
+        }
+
+        function showWaktuHabisModal() {
+            const modal = document.getElementById('modal-waktu-habis');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100', 'pointer-events-auto');
+                modal.querySelector('div > div').classList.remove('scale-95');
+                modal.querySelector('div > div').classList.add('scale-100');
+            }
+        }
+
+        // Start countdown for both desktop and mobile timers
+        startCountdown('countdown-timer');
+        startCountdown('countdown-timer-mobile');
+    </script>
+<?php endif; ?>

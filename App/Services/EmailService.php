@@ -131,6 +131,32 @@ class EmailService
         return $this->send($user->email, $user->nama, $subject, $body);
     }
 
+    // send reject to draft notif
+    public function sendBookingRejectedToDraft(User $user, $booking, string $reason = ''): bool
+    {
+        $reasonText = $reason ? "<p><strong>Alasan:</strong> {$reason}</p>" : '';
+
+        $subject = 'Booking Perlu Diperbaiki | Library Booking App';
+        $body = "
+            <p>Hai <strong>{$user->nama}</strong>,</p>
+            <p>Reservasi ruangan kamu perlu diperbaiki dan dikembalikan ke status draft.</p>
+            <p><strong>Ruangan:</strong> {$booking->nama_ruangan}</p>
+            <p><strong>Tanggal:</strong> {$booking->tanggal_penggunaan_ruang}</p>
+            <p><strong>Waktu:</strong> {$booking->waktu_mulai} - {$booking->waktu_selesai}</p>
+            {$reasonText}
+            <p><strong>Langkah selanjutnya:</strong></p>
+            <ul>
+                <li>Perbaiki booking sesuai alasan di atas</li>
+                <li>Submit ulang untuk mendapatkan persetujuan admin</li>
+            </ul>
+            <p>Silakan login ke aplikasi untuk mengedit dan submit ulang booking kamu.</p>
+            <p>Terima kasih,<br>Library Booking App PNJ</p>
+        ";
+
+        return $this->send($user->email, $user->nama, $subject, $body);
+    }
+
+
     // send submitted notif
     public function sendBookingSubmitted(User $user, $booking): bool
     {

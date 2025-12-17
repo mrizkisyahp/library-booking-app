@@ -528,6 +528,17 @@ class BookingService
                 $this->validateMemberCanJoin($userId, $lockedBooking->id_booking);
                 $this->invitationRepo->accept($existing->id_invitation);
                 $this->bookingRepo->addMember($lockedBooking->id_booking, $userId);
+
+                // Send notification that they joined (accepted invitation)
+                $user = $this->bookingRepo->findUserById($userId);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($lockedBooking->id_booking);
+                if ($user && $bookingDetails) {
+                    $this->emailService->sendJoinRequestApproved(
+                        $this->hydrateUser($user),
+                        (object) $bookingDetails
+                    );
+                }
+
                 $this->logger->info('User auto-accepted PIC invitation via token', [
                     'booking_id' => $lockedBooking->id_booking,
                     'user_id' => $userId,
@@ -694,8 +705,8 @@ class BookingService
                 throw new Exception('Booking tidak ditemukan');
             }
 
-            if ($booking->status !== 'verified') {
-                throw new Exception('Hanya booking dengan status verified yang dapat di reject');
+            if (!in_array($booking->status, ['pending', 'verified'])) {
+                throw new Exception('Hanya booking dengan status pending atau verified yang dapat di reject');
             }
 
             $this->transitionTo($bookingId, 'cancelled', $reason);
@@ -716,6 +727,41 @@ class BookingService
             throw $e;
         }
     }
+
+    public function rejectPendingBooking(int $bookingId, string $reason = 'Rejected by admin'): void
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $booking = $this->bookingRepo->findByIdWithLock($bookingId);
+
+            if (!$booking) {
+                throw new Exception('Booking tidak ditemukan');
+            }
+
+            if ($booking->status !== 'pending') {
+                throw new Exception('Hanya booking dengan status pending yang dapat di-reject ke draft');
+            }
+
+            $this->transitionTo($bookingId, 'draft', $reason);
+
+            // Send notification
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $userObj = $this->hydrateUser($user);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingRejectedToDraft($userObj, (object) $bookingDetails, $reason);
+                }
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw $e;
+        }
+    }
+
 
     public function activateBooking(int $bookingId, string $checkinCode): void
     {
@@ -780,6 +826,19 @@ class BookingService
         $this->transitionTo($bookingId, 'no_show', 'No show - tidak check-in dalam 10 menit');
 
         $this->applyNoShowPenalty($booking->user_id);
+
+        // Send notification to PIC about no-show penalty
+        $user = $this->bookingRepo->findUserById($booking->user_id);
+        if ($user) {
+            $warningCount = $user['peringatan'] ?? 0;
+            $this->emailService->sendWarningNotification(
+                $user['email'],
+                $user['nama'],
+                'no_show',
+                'Tidak check-in dalam 10 menit setelah waktu mulai',
+                $warningCount
+            );
+        }
     }
 
     public function completeBooking(int $bookingId): void
@@ -795,6 +854,15 @@ class BookingService
         }
 
         $this->transitionTo($bookingId, 'completed', 'Booking completed by admin');
+
+        // Send feedback request to PIC
+        $user = $this->bookingRepo->findUserById($booking->user_id);
+        if ($user) {
+            $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+            if ($bookingDetails) {
+                $this->emailService->sendFeedbackRequest($this->hydrateUser($user), (object) $bookingDetails);
+            }
+        }
     }
 
     public function autoCompleteBooking(int $bookingId): void
@@ -814,6 +882,15 @@ class BookingService
 
         if ($now->gte($endDateTime)) {
             $this->transitionTo($bookingId, 'completed', 'Auto-completed after end time');
+
+            // Send feedback request to PIC
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendFeedbackRequest($this->hydrateUser($user), (object) $bookingDetails);
+                }
+            }
         }
     }
 
@@ -866,6 +943,16 @@ class BookingService
 
             $this->transitionTo($bookingId, 'cancelled', $reason);
 
+            // Send cancellation confirmation email
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $userObj = $this->hydrateUser($user);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingCancelled($userObj, (object) $bookingDetails, $reason);
+                }
+            }
+
             $this->db->commit();
         } catch (Exception $e) {
             $this->db->rollback();
@@ -892,6 +979,20 @@ class BookingService
 
         if ($minutesUntilStart < 15) {
             $this->transitionTo($bookingId, 'expired', 'Draft expired - not submitted before 15 min deadline');
+
+            // Notify PIC about draft expiration
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $userObj = $this->hydrateUser($user);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingCancelled(
+                        $userObj,
+                        (object) $bookingDetails,
+                        'Draft booking expired - tidak di-submit dalam waktu 15 menit sebelum waktu mulai'
+                    );
+                }
+            }
         }
     }
 
@@ -914,6 +1015,20 @@ class BookingService
 
         if ($minutesUntilStart < 5) {
             $this->transitionTo($bookingId, 'cancelled', 'Auto-cancelled - not verified 5 minutes before start');
+
+            // Notify PIC about pending expiration
+            $user = $this->bookingRepo->findUserById($booking->user_id);
+            if ($user) {
+                $userObj = $this->hydrateUser($user);
+                $bookingDetails = $this->bookingRepo->findByIdWithDetails($bookingId);
+                if ($bookingDetails) {
+                    $this->emailService->sendBookingCancelled(
+                        $userObj,
+                        (object) $bookingDetails,
+                        'Booking dibatalkan otomatis - tidak diverifikasi admin dalam waktu 5 menit sebelum waktu mulai'
+                    );
+                }
+            }
         }
     }
 

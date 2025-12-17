@@ -174,7 +174,7 @@ class RoomRepository
             ->where('ruangan_id', $roomId)
             ->where('tanggal_penggunaan_ruang', '>=', $startDate->format('Y-m-d'))
             ->where('tanggal_penggunaan_ruang', '<=', $endDate->format('Y-m-d'))
-            ->whereIn('status', ['verified', 'active'])
+            ->whereIn('status', ['verified', 'active', 'completed'])
             ->orderBy('tanggal_penggunaan_ruang', 'ASC')
             ->orderBy('waktu_mulai', 'ASC')
             ->get();
