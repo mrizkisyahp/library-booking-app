@@ -510,6 +510,7 @@ class BookingRepository
         return $qb->table('blocked_dates')
             ->select(['blocked_dates.*', 'ruangan.nama_ruangan'])
             ->leftJoin('ruangan', 'blocked_dates.ruangan_id', '=', 'ruangan.id_ruangan')
+            ->whereNull('blocked_dates.deleted_at')
             ->orderBy('blocked_dates.tanggal_begin', 'asc')
             ->get();
     }

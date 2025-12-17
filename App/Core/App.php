@@ -87,7 +87,8 @@ class App
             RoomRepository::class,
             fn($c) => new RoomRepository(
                 $c->make(Database::class),
-                $c->make(BookingRepository::class)
+                $c->make(BookingRepository::class),
+                $c->make(SettingsService::class)
             )
         );
         $this->container->singleton(FeedbackRepository::class, fn($c) => new FeedbackRepository($this->db));

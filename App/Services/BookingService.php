@@ -1635,19 +1635,24 @@ class BookingService
         $bookingDate = Carbon::parse($data['tanggal_penggunaan_ruang']);
         $today = Carbon::today();
 
+        // Get active operating days from system settings
+        $activeDays = $this->settingsService?->getActiveDays() ?? [1, 2, 3, 4, 5]; // Default Mon-Fri
+
         $maxDate = $today->copy();
         $workingDays = 0;
         while ($workingDays < 7) {
             $maxDate->addDay();
-            if ($maxDate->isWeekday()) {
+            // Check if this day is an active operating day
+            if (in_array($maxDate->dayOfWeek, $activeDays)) {
                 $workingDays++;
             }
         }
         if ($bookingDate->gt($maxDate)) {
             throw new Exception('Booking hanya bisa dibuat untuk 7 hari kerja ke depan');
         }
-        if ($bookingDate->isWeekend()) {
-            throw new Exception('Booking tidak tersedia pada hari Sabtu dan Minggu');
+        // Check if booking date is on an operating day
+        if (!in_array($bookingDate->dayOfWeek, $activeDays)) {
+            throw new Exception('Booking tidak tersedia pada hari ini (bukan hari operasional)');
         }
     }
 
