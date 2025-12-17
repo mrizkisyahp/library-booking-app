@@ -1,10 +1,16 @@
-<div class="p-6">
-  <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Feedback Pengguna</h1>
-      <p class="text-gray-600">Monitor seluruh feedback yang diberikan oleh pengguna</p>
+<!-- Header -->
+<div class="p-4 bg-white shadow-b-md w-full">
+    <div class="flex items-center gap-4 p-4 justify-between">
+        <div class="flex items-center gap-4">
+            <span class="text-black font-bold text-4xl capitalize">
+                Feedback Pengguna
+                <p class="text-gray-600 text-base font-normal">Monitor seluruh feedback yang diberikan oleh pengguna</p>
+            </span>
+        </div>
     </div>
-  </div>
+</div>
+
+<div class="p-6">
 
   <section class="bg-white shadow rounded-lg p-6 mb-8 border border-gray-100">
     <h2 class="text-lg font-semibold flex items-center gap-2 mb-4">

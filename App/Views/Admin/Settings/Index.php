@@ -3,7 +3,7 @@
     <p class="text-gray-600 mt-2">Konfigurasi operasional sistem booking perpustakaan</p>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
     <!-- Library Status Card -->
     <div
         class="bg-white rounded-2xl shadow-lg p-6 border-2 <?= $libraryClosedToday ? 'border-red-300' : 'border-emerald-300' ?>">

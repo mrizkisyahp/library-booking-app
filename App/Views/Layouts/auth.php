@@ -12,7 +12,7 @@ use App\Core\App;
     <link rel="stylesheet" href="css/output.css">
 </head>
 
-<body class="min-h-dvh bg-primary font-sans">
+<body class="min-h-dvh bg-primary font-md-sans select-none">
     {{content}}
     <script src="src/script.js"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

@@ -13,7 +13,7 @@ class AdminMiddleware extends Middleware
     public function handle(Request $request, Response $response): bool
     {
         if (auth()->guest()) {
-            flash('error', 'Mohon login terlebih dahulu sebelum mengakses halaman ini.');
+            flash('error', 'Mohon login untuk mengakses halaman.');
             redirect('/login');
             return false;
         }

@@ -16,7 +16,7 @@ use App\Core\App;
 <body class="min-h-dvh bg-slate-100 select-none">
     <!-- sidebar -->
     <aside
-        class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-28 hover:w-80 z-10 border-r border-emerald-700">
+        class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-24 hover:w-80 z-10 border-r border-emerald-700">
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
             <!-- Logo -->
@@ -256,7 +256,7 @@ use App\Core\App;
         <div class="mx-auto bg-primary md:bg-slate-100">
 
             <div class="bg-white top-0 left-0 w-full h-40 fixed -z-10">
-
+                <!-- empty div for bg -->
             </div>
             <!-- Flash Messages -->
             <?php if ($m = App::$app->session->getFlash('success')): ?>
