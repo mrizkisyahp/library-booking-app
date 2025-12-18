@@ -486,7 +486,7 @@ $statusColors = [
                 </div>
             <?php endif; ?>
 
-            <?php if ($booking->status === 'completed' && empty($booking->id_feedback)): ?>
+            <?php if ($isPic && $booking->status === 'completed' && empty($booking->id_feedback)): ?>
                 <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                     class="inline-block bg-primary hover:bg-emerald-700 font-regular text-white active:bg-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                     Isi Feedback (Wajib)
@@ -625,12 +625,12 @@ $statusColors = [
 
 
             <?php if ($booking->status === 'verified'): ?>
-                <div class="text-2xl font-bold mb-4">
+                <div class="text-2xl font-bold mb-4 text-black">
                     Kode Kedatangan
                 </div>
                 <div>
-                    <span>Berlaku sampai </span>
-                    <span><?= htmlspecialchars($booking->waktu_mulai + 15) ?></span>
+                    <div class="text-black">Berlaku sampai </div>
+                    <div class="text-black"><?= htmlspecialchars($booking->waktu_mulai) ?></div>
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
                     <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="checkinCode">
@@ -665,7 +665,7 @@ $statusColors = [
                 </div>
             <?php endif; ?>
 
-            <?php if ($booking->status === 'completed' && $booking->feedback() === null): ?>
+            <?php if ($isPic && $booking->status === 'completed' && $booking->feedback() === null): ?>
                 <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                     class="inline-block bg-primary hover:bg-emerald-700 font-regular text-white active:bg-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                     Isi Feedback (Wajib)
@@ -693,12 +693,6 @@ $statusColors = [
                 </div>
             <?php endif; ?>
 
-            <?php if ($booking->status === 'completed'): ?>
-                <div
-                    class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
-                    Seluruh rangkaian booking sudah diselesaikan
-                </div>
-            <?php endif; ?>
         </div>
     </nav>
 

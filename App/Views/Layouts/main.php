@@ -13,7 +13,7 @@ use App\Core\App;
     <link href="css/output.css" rel="stylesheet">
 </head>
 
-<body class="min-h-dvh bg-slate-100 select-none">
+<body class="min-h-dvh bg-slate-100">
     <!-- sidebar -->
     <aside
         class="hidden md:flex group flex-col fixed items-start justify-between overflow-hidden left-0 top-0 h-dvh bg-primary text-white rounded-r-3xl transition-all duration-300 w-24 hover:w-80 z-10 border-r border-emerald-700">
@@ -432,7 +432,7 @@ use App\Core\App;
     <header
         class="fixed left-0 top-0 right-0 bg-primary text-white w-full flex items-center justify-between px-6 py-4 z-40 md:hidden">
 
-        <div>Logo</div>
+        <div class="flex items-center gap-2"><img src="/src/logoPinrupus.png" alt="" class="size-8 "> PINRUPUS PNJ</div>
         <div>
             <a href="#">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"

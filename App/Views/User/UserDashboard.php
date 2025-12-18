@@ -392,7 +392,7 @@
                                                         Lihat Detail
                                                     </a>
                                                 <?php endif; ?>
-                                                <?php if ($booking->status === 'completed' && empty($booking->feedback_submitted)): ?>
+                                                <?php if ($booking->user_id === user()->id_user && $booking->status === 'completed' && empty($booking->feedback_submitted)): ?>
                                                     <a href="/feedback/create?booking=<?= (int) $booking->id_booking ?>"
                                                         class="inline-block text-emerald-600 hover:text-emerald-700 font-regular text-sm active:text-emerald-800 w-full px-4 py-2 rounded-xl text-center mb-4 font-regular tracking-wide underline focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all">
                                                         Isi Feedback
@@ -410,9 +410,9 @@
             </div>
             <!-- <div>
                 <!-- widget -->
-                <!-- <div class="lg:col-span-2 space-y-6 mb-6"> -->
-                    <!-- Statistics -->
-                    <!-- <div class="bg-white shadow rounded-3xl p-6">
+            <!-- <div class="lg:col-span-2 space-y-6 mb-6"> -->
+            <!-- Statistics -->
+            <!-- <div class="bg-white shadow rounded-3xl p-6">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div
                                 class="bg-linear-to-br from-purple-50 to-purple-100 p-4 border-2 border-purple-200 rounded-2xl">
@@ -449,7 +449,7 @@
                     </div>
                 </div> -->
 
-                <!-- tambah widget
+            <!-- tambah widget
                 <div class="mb-6">
                     <a href=""
                         class="flex gap-4 w-full border border-4xl border-dashed items-center justify-center rounded-3xl p-6 text-gray-400">
