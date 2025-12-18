@@ -878,6 +878,9 @@
   .flex-col {
     flex-direction: column;
   }
+  .flex-row-reverse {
+    flex-direction: row-reverse;
+  }
   .flex-nowrap {
     flex-wrap: nowrap;
   }
@@ -2336,6 +2339,22 @@
   .peer-checked\:text-yellow-400 {
     &:is(:where(.peer):checked ~ *) {
       color: var(--color-yellow-400);
+    }
+  }
+  .peer-hover\:text-yellow-300 {
+    &:is(:where(.peer):hover ~ *) {
+      @media (hover: hover) {
+        color: var(--color-yellow-300);
+      }
+    }
+  }
+  .peer-hover\:peer-checked\:text-yellow-400 {
+    &:is(:where(.peer):hover ~ *) {
+      @media (hover: hover) {
+        &:is(:where(.peer):checked ~ *) {
+          color: var(--color-yellow-400);
+        }
+      }
     }
   }
   .file\:mr-4 {
