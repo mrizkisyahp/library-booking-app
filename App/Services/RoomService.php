@@ -63,7 +63,49 @@ class RoomService
             throw new \Exception('Ruangan tidak ditemukan');
         }
 
+        // If room name is changing, rename existing photos
+        if (isset($data['nama_ruangan']) && $data['nama_ruangan'] !== $room->nama_ruangan) {
+            $this->renameRoomPhotos($room->nama_ruangan, $data['nama_ruangan']);
+        }
+
         return $this->roomRepository->update($id, $data);
+    }
+
+    /**
+     * Rename room photos when room name changes
+     */
+    private function renameRoomPhotos(string $oldName, string $newName): void
+    {
+        $uploadDir = \App\Core\App::$ROOT_DIR . '/Public/uploads/Room_Photos/';
+
+        if (!is_dir($uploadDir)) {
+            return; // No photos directory, nothing to do
+        }
+
+        $oldSlug = str_slug($oldName);
+        $newSlug = str_slug($newName);
+
+        // Find all photos with the old slug pattern
+        $pattern = $uploadDir . $oldSlug . '_*.{jpg,jpeg,png,webp}';
+        $oldFiles = glob($pattern, GLOB_BRACE) ?: [];
+
+        foreach ($oldFiles as $oldFile) {
+            // Extract the index number and extension from filename
+            // Example: Ruang_Meeting_1.jpg -> get "1" and "jpg"
+            $filename = basename($oldFile);
+            if (preg_match('/' . preg_quote($oldSlug, '/') . '_(\d+)\.(\w+)$/', $filename, $matches)) {
+                $index = $matches[1];
+                $extension = $matches[2];
+
+                $newFilename = $newSlug . '_' . $index . '.' . $extension;
+                $newFile = $uploadDir . $newFilename;
+
+                // Rename the file
+                if (file_exists($oldFile)) {
+                    rename($oldFile, $newFile);
+                }
+            }
+        }
     }
 
     public function deleteRoom(int $id): bool

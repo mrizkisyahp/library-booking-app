@@ -2,9 +2,9 @@
 @import "./styles/font.css";
 
 @theme {
-    --color-primary: #064E3B;
-    --font-md-sans: "DM Sans", sans-serif;
-    --font-plus-jakarta-sans: "Plus Jakarta Sans", sans-serif;
+  --color-primary: #064E3B;
+  --font-md-sans: "DM Sans", sans-serif;
+  --font-plus-jakarta-sans: "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {

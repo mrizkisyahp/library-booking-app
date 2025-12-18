@@ -187,6 +187,18 @@ class UserService
 
         $this->userRepo->update($id, ['status' => 'active', 'masa_aktif' => $masa_aktif, 'alasan_reject' => null]);
 
+        // Send email notification about KuBaca verification
+        if ($this->emailService) {
+            try {
+                $this->emailService->sendKubacaVerified($user);
+            } catch (Exception $e) {
+                $this->logger->error('Failed to send KuBaca verified email', [
+                    'user_id' => $id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
         $this->logger->info('Admin approved kubaca for user', ['user_id' => $id]);
     }
 

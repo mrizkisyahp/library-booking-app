@@ -1,57 +1,48 @@
 <?php
+
 namespace App\Services;
 
 use App\Repositories\AdminReportRepository;
 
 class AdminReportService
 {
-    private AdminReportRepository $repo;
-
-    public function __construct(AdminReportRepository $repo)
-    {
-        $this->repo = $repo;
+    public function __construct(
+        private AdminReportRepository $repo
+    ) {
     }
 
+    /**
+     * Get summary statistics
+     */
     public function getSummary(array $filters): array
     {
         return $this->repo->fetchSummary($filters);
     }
 
+    /**
+     * Get chart data based on chart type
+     */
     public function getChartData(array $filters): array
     {
-        $chartType = $filters['chart_type'] ?? 'booking';
+        $chartType = $filters['chart_type'] ?? 'day';
 
-        switch ($chartType) {
-            case 'room':
-                return $this->repo->fetchTopRooms($filters);
-
-            case 'feedback':
-                return $this->repo->fetchTopFeedback($filters);
-
-            case 'hours':
-                return $this->repo->fetchBusyHours($filters);
-
-            case 'department':
-                return $this->repo->fetchBookingsByDepartment($filters);
-
-            case 'reason':
-                return $this->repo->fetchBookingsByReason($filters);
-
-            case 'daily':
-                return $this->repo->fetchBookingsByDay($filters);
-
-            case 'weekly':
-                return $this->repo->fetchBookingsByWeek($filters);
-
-            case 'monthly':
-                return $this->repo->fetchBookingsByMonth($filters);
-
-            case 'booking':
-            default:
-                return $this->repo->fetchBookingCountsByDate($filters);
-        }
+        return match ($chartType) {
+            'day' => $this->repo->fetchTotalByPeriod($filters, 'day'),
+            'week' => $this->repo->fetchTotalByPeriod($filters, 'week'),
+            'month' => $this->repo->fetchTotalByPeriod($filters, 'month'),
+            'semester' => $this->repo->fetchTotalByPeriod($filters, 'semester'),
+            'year' => $this->repo->fetchTotalByPeriod($filters, 'year'),
+            'room' => $this->repo->fetchFavoriteRooms($filters),
+            'department' => $this->repo->fetchByDepartment($filters),
+            'purpose' => $this->repo->fetchByPurpose($filters),
+            'hours' => $this->repo->fetchBusyHours($filters),
+            default => $this->repo->fetchTotalByPeriod($filters, 'day'),
+        };
     }
 
+    /**
+     * Get detailed table data for display/export
+     */
     public function getTableData(array $filters): array
     {
         return $this->repo->fetchReportRows($filters);

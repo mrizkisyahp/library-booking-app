@@ -338,6 +338,48 @@ class AdminBookingController extends Controller
         }
     }
 
+    public function rejectPending(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'reason' => 'required|string|min:5|max:500',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
+            $reason = $data['reason'];
+
+            $this->bookingService->rejectPendingBooking($bookingId, $reason);
+
+            flash('success', 'Booking dikembalikan ke draft. Email notifikasi telah dikirim ke PIC.');
+            redirect('/admin/bookings/detail?id=' . $bookingId);
+        } catch (ValidationException $e) {
+            $bookingId = (int) $request->all()['booking_id'];
+            $page = (int) $request->query('page', 1);
+            $perPage = self::PER_PAGE_MEMBERS;
+
+            $bookingData = $this->bookingService->getBookingForUser($bookingId, 0, true, $page, $perPage);
+            $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
+
+            // Get warning types for assign warning dropdown
+            $warningTypes = $this->bookingService->getWarningTypes();
+
+            return view('Admin/Bookings/Detail', [
+                'bookings' => $bookingData['booking'],
+                'pic' => $bookingData['pic'],
+                'allMembers' => $bookingData['allMembers']->items,
+                'pagination' => $bookingData['allMembers'],
+                'rescheduleRequest' => $rescheduleRequest,
+                'warningTypes' => $warningTypes,
+                'validator' => $e->getValidator(),
+            ]);
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+
     public function noshow(Request $request)
     {
         try {

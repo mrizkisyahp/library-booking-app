@@ -8,13 +8,15 @@ use App\Core\Paginator;
 use App\Core\Database;
 use App\Core\QueryBuilder;
 use App\Repositories\BookingRepository;
+use App\Services\SettingsService;
 use Carbon\Carbon;
 
 class RoomRepository
 {
     public function __construct(
         private Database $database,
-        private BookingRepository $bookingRepository
+        private BookingRepository $bookingRepository,
+        private SettingsService $settingsService
     ) {
     }
 
@@ -53,14 +55,6 @@ class RoomRepository
         if (!empty($filters['keyword'])) {
             $query->where('nama_ruangan', 'like', '%' . $filters['keyword'] . '%');
         }
-
-        // if (!empty($filters['tanggal'])) {
-        //     $query->where('tanggal_penggunaan_ruang', 'like', '%' . $filters['tanggal'] . '%');
-        // }
-
-        // if (!empty($filters['waktu_mulai'])) {
-        //     $query->where('waktu_mulai', 'like', '%' . $filters['waktu_mulai'] . '%');
-        // }
 
         if (!empty($filters['status_ruangan'])) {
             $query->where('status_ruangan', $filters['status_ruangan']);
@@ -151,16 +145,26 @@ class RoomRepository
             ->update(['status_ruangan' => 'unavailable']);
     }
 
+    /**
+     * Check if a given date is an operating day based on system settings
+     */
+    private function isOperatingDay(Carbon $date): bool
+    {
+        $activeDays = $this->settingsService->getActiveDays();
+        // Carbon dayOfWeek: 0=Sunday, 1=Monday, ..., 6=Saturday
+        return in_array($date->dayOfWeek, $activeDays);
+    }
+
     public function getAvailability(int $roomId, int $days = 7): array
     {
         $startDate = Carbon::today();
         $endDate = $startDate->copy();
 
-        // Calculate end date (skip weekends)
+        // Calculate end date (skip non-operating days)
         $addedDays = 0;
         while ($addedDays < $days) {
             $endDate->addDay();
-            if ($endDate->isWeekday()) {
+            if ($this->isOperatingDay($endDate)) {
                 $addedDays++;
             }
         }
@@ -170,7 +174,7 @@ class RoomRepository
             ->where('ruangan_id', $roomId)
             ->where('tanggal_penggunaan_ruang', '>=', $startDate->format('Y-m-d'))
             ->where('tanggal_penggunaan_ruang', '<=', $endDate->format('Y-m-d'))
-            ->whereIn('status', ['verified', 'active'])
+            ->whereIn('status', ['verified', 'active', 'completed'])
             ->orderBy('tanggal_penggunaan_ruang', 'ASC')
             ->orderBy('waktu_mulai', 'ASC')
             ->get();
@@ -181,15 +185,21 @@ class RoomRepository
         $blockingReasons = [];
 
         foreach ($blockedDatesData as $blocked) {
-            if ($blocked['ruangan_id'] == $roomId || $blocked['ruangan_id'] === null) {
-                $begin = Carbon::parse($blocked['tanggal_begin']);
-                $end = Carbon::parse($blocked['tanggal_end']);
+            // Handle both array and object access
+            $blockedRoomId = is_array($blocked) ? ($blocked['ruangan_id'] ?? null) : ($blocked->ruangan_id ?? null);
+            $tanggalBegin = is_array($blocked) ? $blocked['tanggal_begin'] : $blocked->tanggal_begin;
+            $tanggalEnd = is_array($blocked) ? $blocked['tanggal_end'] : $blocked->tanggal_end;
+            $alasan = is_array($blocked) ? ($blocked['alasan'] ?? 'Blocked by admin') : ($blocked->alasan ?? 'Blocked by admin');
 
-                // Add all dates in the blocked range
+            if ($blockedRoomId == $roomId || $blockedRoomId === null) {
+                $begin = Carbon::parse($tanggalBegin);
+                $end = Carbon::parse($tanggalEnd);
+
+                // Add all dates in the blocked range (inclusive of end date)
                 for ($date = $begin->copy(); $date->lte($end); $date->addDay()) {
                     $dateKey = $date->format('Y-m-d');
                     $blockedDates[] = $dateKey;
-                    $blockingReasons[$dateKey] = $blocked['alasan'] ?? 'Blocked by admin';
+                    $blockingReasons[$dateKey] = $alasan;
                 }
             }
         }
@@ -198,11 +208,11 @@ class RoomRepository
         $currentDate = Carbon::today();
 
         while (count($calendar) < $days) {
-            // Skip weekends
-            if ($currentDate->isWeekday()) {
+            // Skip non-operating days using system settings
+            if ($this->isOperatingDay($currentDate)) {
                 $dateStr = $currentDate->format('Y-m-d');
 
-                // Determine availability status
+                // Check if blocked
                 $isBlocked = in_array($dateStr, $blockedDates);
                 $dayBookings = [];
 
@@ -217,7 +227,6 @@ class RoomRepository
                 }
 
                 // Determine availability status (only 2 states: available or blocked)
-                $isBlocked = in_array($dateStr, $blockedDates);
                 $availabilityStatus = $isBlocked ? 'blocked' : 'available';
 
                 $calendar[] = [

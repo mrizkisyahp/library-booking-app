@@ -256,7 +256,7 @@ class BookingRepository
 
     public function findConflictingBookings(int $roomId, string $date, ?int $excludeId = null): array
     {
-        $query = Booking::Query()->where('ruangan_id', $roomId)->where('tanggal_penggunaan_ruang', $date)->whereIn('status', ['verified', 'active']);
+        $query = Booking::Query()->where('ruangan_id', $roomId)->where('tanggal_penggunaan_ruang', $date)->whereIn('status', ['verified', 'active', 'completed']);
 
         if ($excludeId) {
             $query->where('id_booking', '!=', $excludeId);
@@ -267,7 +267,7 @@ class BookingRepository
 
     public function findUserBookingsOnDate(int $userId, string $date, ?int $excludeId = null): array
     {
-        $query = Booking::Query()->where('user_id', $userId)->where('tanggal_penggunaan_ruang', $date)->whereIn('status', ['draft', 'pending', 'verified', 'active']);
+        $query = Booking::Query()->where('user_id', $userId)->where('tanggal_penggunaan_ruang', $date)->whereIn('status', ['draft', 'pending', 'verified', 'active', 'completed']);
 
         if ($excludeId) {
             $query->where('id_booking', '!=', $excludeId);
@@ -510,6 +510,7 @@ class BookingRepository
         return $qb->table('blocked_dates')
             ->select(['blocked_dates.*', 'ruangan.nama_ruangan'])
             ->leftJoin('ruangan', 'blocked_dates.ruangan_id', '=', 'ruangan.id_ruangan')
+            ->whereNull('blocked_dates.deleted_at')
             ->orderBy('blocked_dates.tanggal_begin', 'asc')
             ->get();
     }

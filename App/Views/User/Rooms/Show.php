@@ -140,7 +140,16 @@
                                 <?= htmlspecialchars($day['month']) ?>
                             </td>
                             <td class="px-4 py-4">
-                                <?php if (empty($day['bookings'])): ?>
+                                <?php if ($day['is_blocked']): ?>
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                        </svg>
+                                        <?= htmlspecialchars($day['blocking_reason'] ?? 'Diblokir') ?>
+                                    </span>
+                                <?php elseif (empty($day['bookings'])): ?>
                                     <span
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

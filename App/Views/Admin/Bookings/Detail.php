@@ -319,12 +319,12 @@ $statusColors = [
             <?= htmlspecialchars($bookings->invite_token ?? '-') ?>
           </div>
         </div>
-        <div>
+        <!-- <div>
           <p class="text-xs font-semibold text-slate-500 uppercase mb-2">Kode Check-in</p>
           <div class="p-4 bg-slate-100 rounded-xl font-mono tracking-widest text-center text-lg text-slate-800">
             <?= $bookings->checkin_code ? htmlspecialchars($bookings->checkin_code) : 'Belum tersedia' ?>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <div class="bg-white rounded-2xl shadow-lg p-6 space-y-5">
@@ -339,6 +339,36 @@ $statusColors = [
               Konfirmasi Booking
             </button>
           </form>
+
+          <!-- Reject Pending Booking Form -->
+          <div class="pt-4 border-t border-slate-200">
+            <form action="/admin/bookings/reject-pending" method="post" class="space-y-3">
+              <?= csrf_field() ?>
+              <input type="hidden" name="booking_id" value="<?= $bookings->id_booking ?>">
+              <label
+                class="block text-sm font-semibold <?= $validator?->hasError('reason') ? 'text-red-700' : 'text-slate-700' ?>">
+                Reject Booking
+                <textarea name="reason" rows="3" required
+                  class="mt-2 w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 <?= $validator?->hasError('reason') ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-amber-500' ?>"
+                  placeholder="Alasan penolakan (minimal 5 karakter)"><?= htmlspecialchars(old('reason') ?? '') ?></textarea>
+              </label>
+              <?php if ($validator?->hasError('reason')): ?>
+                <p class="text-sm text-red-600 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  <?= htmlspecialchars($validator->getFirstError('reason')) ?>
+                </p>
+              <?php endif; ?>
+              <button type="submit"
+                class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
+                Reject Booking (Kembali ke Draft)
+              </button>
+            </form>
+          </div>
+
         <?php elseif ($bookings->status === 'verified'): ?>
           <form action="/admin/bookings/activate" method="post" class="space-y-3">
             <?= csrf_field() ?>
@@ -362,6 +392,36 @@ $statusColors = [
             </svg>
             Reschedule
           </a>
+
+          <!-- Batalkan Booking - only for verified status -->
+          <div class="pt-4 border-t border-slate-200">
+            <form action="/admin/bookings/reject" method="post" class="space-y-3">
+              <?= csrf_field() ?>
+              <input type="hidden" name="booking_id" value="<?= $bookings->id_booking ?>">
+              <label
+                class="block text-sm font-semibold <?= $validator?->hasError('reason') ? 'text-red-700' : 'text-slate-700' ?>">
+                Batalkan Booking
+                <textarea name="reason" rows="3" required
+                  class="mt-2 w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 <?= $validator?->hasError('reason') ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-rose-500' ?>"
+                  placeholder="Alasan pembatalan (minimal 5 karakter)"><?= htmlspecialchars(old('reason') ?? '') ?></textarea>
+              </label>
+              <?php if ($validator?->hasError('reason')): ?>
+                <p class="text-sm text-red-600 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  <?= htmlspecialchars($validator->getFirstError('reason')) ?>
+                </p>
+              <?php endif; ?>
+              <button type="submit"
+                class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
+                Batalkan Booking
+              </button>
+            </form>
+          </div>
+
         <?php elseif ($bookings->status === 'active'): ?>
           <form action="/admin/bookings/complete" method="post" class="space-y-3">
             <?= csrf_field() ?>
@@ -374,34 +434,6 @@ $statusColors = [
         <?php else: ?>
           <p class="text-sm text-slate-500">Tidak ada aksi lanjutan untuk status saat ini.</p>
         <?php endif; ?>
-
-        <div class="pt-4 border-t border-slate-200">
-          <form action="/admin/bookings/reject" method="post" class="space-y-3">
-            <?= csrf_field() ?>
-            <input type="hidden" name="booking_id" value="<?= $bookings->id_booking ?>">
-            <label
-              class="block text-sm font-semibold <?= $validator?->hasError('reason') ? 'text-red-700' : 'text-slate-700' ?>">
-              Batalkan Booking
-              <textarea name="reason" rows="3" required
-                class="mt-2 w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 <?= $validator?->hasError('reason') ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-rose-500' ?>"
-                placeholder="Alasan pembatalan (minimal 5 karakter)"><?= htmlspecialchars(old('reason') ?? '') ?></textarea>
-            </label>
-            <?php if ($validator?->hasError('reason')): ?>
-              <p class="text-sm text-red-600 flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
-                </svg>
-                <?= htmlspecialchars($validator->getFirstError('reason')) ?>
-              </p>
-            <?php endif; ?>
-            <button type="submit"
-              class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
-              Batalkan Booking
-            </button>
-          </form>
-        </div>
 
         <a href="/admin/bookings"
           class="inline-flex items-center justify-center w-full border border-slate-300 text-slate-700 font-semibold py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors">
