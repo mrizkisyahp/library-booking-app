@@ -214,16 +214,6 @@ if (!function_exists('csrf_field')) {
     }
 }
 
-if (!function_exists('dispatch')) {
-    /**
-     * Dispatch a job to the queue
-     */
-    function dispatch(\App\Core\Queue\QueueJob $job): string
-    {
-        return \App\Core\Queue\Queue::push($job);
-    }
-}
-
 if (!function_exists('container')) {
     /**
      * Get the container instance or resolve a service
