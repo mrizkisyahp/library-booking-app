@@ -408,6 +408,43 @@ $statusColors = [
           Kembali ke daftar
         </a>
       </div>
+
+      <!-- Assign Warnings -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          Berikan Peringatan
+        </h3>
+        <p class="text-sm text-slate-600">Berikan peringatan ke semua anggota booking ini jika melakukan pelanggaran.
+        </p>
+
+        <form action="/admin/bookings/assign-warning" method="post" class="space-y-3">
+          <?= csrf_field() ?>
+          <input type="hidden" name="booking_id" value="<?= (int) $bookings->id_booking ?>">
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Jenis Peringatan</label>
+            <select name="warning_type_id" required
+              class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+              <option value="">Pilih jenis peringatan...</option>
+              <?php if (!empty($warningTypes)): ?>
+                <?php foreach ($warningTypes as $type): ?>
+                  <option value="<?= $type['id_peringatan'] ?>"><?= htmlspecialchars($type['nama_peringatan']) ?></option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+          </div>
+
+          <button type="submit"
+            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
+            onclick="return confirm('Berikan peringatan ke PIC dan semua anggota booking ini?')">
+            ⚠️ Berikan Peringatan ke Semua Anggota
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </div>

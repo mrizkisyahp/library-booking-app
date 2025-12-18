@@ -34,6 +34,18 @@ class RoomService
         return $this->roomRepository->findById($id);
     }
 
+    /**
+     * Get all active rooms (status available or adminOnly)
+     */
+    public function getActiveRooms(): array
+    {
+        return Room::Query()
+            ->whereIn('status_ruangan', ['available', 'adminOnly'])
+            ->whereNull('deleted_at')
+            ->orderBy('nama_ruangan', 'ASC')
+            ->get();
+    }
+
     public function createRoom(array $data): ?Room
     {
         if (empty($data['nama_ruangan'])) {

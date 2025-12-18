@@ -168,17 +168,6 @@
               </svg>
             </div>
           </div>
-          <div class="w-full mb-4">
-            <button type="button"
-              onclick="navigator.clipboard.writeText(window.location.origin + '/bookings/join?code=<?= rawurlencode($booking->invite_token) ?>'); alert('Link berhasil disalin!');"
-              class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-sm flex items-center justify-center">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Salin Link Undangan
-            </button>
-          </div>
         <?php endif; ?>
 
         <hr class="h-px py-4 text-gray-400">

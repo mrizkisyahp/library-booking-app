@@ -84,4 +84,12 @@ class ProfileService
             'status' => 'pending kubaca',
         ]);
     }
+
+    /**
+     * Get user's warning history with warning type names
+     */
+    public function getUserWarnings(int $userId): array
+    {
+        return $this->userRepo->getUserWarnings($userId);
+    }
 }

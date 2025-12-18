@@ -6,7 +6,6 @@ use App\Core\Relations\BelongsTo;
 use App\Core\Relations\HasMany;
 use App\Core\Relations\HasOne;
 use App\Core\Relations\BelongsToMany;
-use App\Core\Event;
 use App\Core\Relations\Relation;
 
 abstract class DbModel extends Model
@@ -52,10 +51,6 @@ abstract class DbModel extends Model
             }
             $result = static::Query()->where($primaryKey, $this->{$primaryKey})->update($fields) > 0;
 
-            if ($result) {
-                Event::dispatch(static::tableName() . '.updated', $this);
-            }
-
             return $result;
         }
 
@@ -74,7 +69,6 @@ abstract class DbModel extends Model
 
         if ($inserted) {
             $this->{$primaryKey} = (int) App::$app->db->pdo->lastInsertId();
-            Event::dispatch(static::tableName() . '.created', $this);
         }
 
         return $inserted;
@@ -86,22 +80,10 @@ abstract class DbModel extends Model
 
         if ($this->softDeletes) {
             $this->deleted_at = date('Y-m-d H:i:s');
-            $result = $this->save();
-
-            if ($result) {
-                Event::dispatch(static::tableName() . '.deleted', $this);
-            }
-
-            return $result;
+            return $this->save();
         }
 
-        $result = static::Query()->where($primaryKey, $this->{$primaryKey})->delete() > 0;
-
-        if ($result) {
-            Event::dispatch(static::tableName() . '.deleted', $this);
-        }
-
-        return $result;
+        return static::Query()->where($primaryKey, $this->{$primaryKey})->delete() > 0;
     }
 
     public static function withTrashed(): QueryBuilder
@@ -122,13 +104,7 @@ abstract class DbModel extends Model
         }
 
         $this->deleted_at = null;
-        $result = $this->save();
-
-        if ($result) {
-            Event::dispatch(static::tableName() . '.restored', $this);
-        }
-
-        return $result;
+        return $this->save();
     }
 
     public function forceDelete(): bool

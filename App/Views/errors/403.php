@@ -10,19 +10,19 @@ use App\Core\App;
         403
       </div>
       <h1 class="text-3xl font-extrabold text-gray-800">Forbidden</h1>
-      <p class="text-gray-600">You are not authorized to access this page.</p>
+      <p class="text-gray-600">Kamu tidak memiliki izin untuk mengakses halaman ini.</p>
     </div>
 
     <?php if (!empty($message)): ?>
       <div class="bg-red-50 border-l-4 border-red-500 text-left p-4 rounded-lg mb-6">
         <p class="text-sm text-red-700 font-medium">
-          <strong>Error Details:</strong> <?= htmlspecialchars($message) ?>
+          <strong>Detail Error:</strong> <?= htmlspecialchars($message) ?>
         </p>
       </div>
     <?php endif; ?>
 
     <a href="/login" class="inline-block px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-      Go to Login
+        Kembali ke Halaman Login
     </a>
   </div>
 </div>

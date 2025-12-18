@@ -25,7 +25,7 @@ class GuestMiddleware extends Middleware
         }
 
         if (!guest()) {
-            flash('error', 'You are already logged in.');
+            flash('info', 'Kamu sudah login.');
             if (user()->isAdmin()) {
                 redirect('/admin');
             } else {

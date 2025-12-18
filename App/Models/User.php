@@ -132,6 +132,22 @@ class User extends DbModel
         return (string) $this->id_role === '4';
     }
 
+    /**
+     * Get warning count from peringatan_mhs table
+     * More performant than updating users.peringatan field
+     */
+    public function getWarningCount(): int
+    {
+        $stmt = App::$app->db->prepare("
+            SELECT COUNT(*) 
+            FROM peringatan_mhs 
+            WHERE id_akun = :user_id 
+            AND deleted_at IS NULL
+        ");
+        $stmt->execute([':user_id' => $this->id_user]);
+        return (int) $stmt->fetchColumn();
+    }
+
     // public static function search(array $filters = []): array
     // {
     //     [$sql, $params] = self::buildQuery($filters);

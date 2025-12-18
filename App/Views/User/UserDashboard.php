@@ -224,60 +224,6 @@
                             </svg>
                             Booking Saya
                         </h2>
-
-                        <!-- Flash Messages -->
-                        <?php if ($m = flash('success')): ?>
-                            <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <svg class="w-6 h-6 text-emerald-500 shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <p class="text-emerald-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($m = flash('error')): ?>
-                            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <p class="text-red-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($m = flash('warning')): ?>
-                            <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <svg class="w-6 h-6 text-yellow-500 shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <p class="text-yellow-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($m = flash('info')): ?>
-                            <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <p class="text-blue-800 font-medium"><?= nl2br(htmlspecialchars($m)) ?></p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
                         <?php if (empty($bookings)): ?>
                             <div class="text-center py-12 rounded-3xl border-2 border-gray-400 bg-gray-100 mb-4">
                                 <div class="flex justify-center mb-6 text-gray-600">
@@ -293,16 +239,18 @@
                                 <p class="text-slate-600 mb-4">Sepertinya tidak ada booking yang aktif </p>
                             </div>
 
-                            <a href="/rooms"
-                                class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular mb-4 shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
-                                Cari Ruangan
-                            </a>
+                            <div class="flex flex-col md:flex-row items-center gap-4">
+                                <a href="/rooms"
+                                    class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
+                                    Cari Ruangan
+                                </a>
 
-                            <!-- ini tombol pop up ya buat kode booking -->
-                            <a href="/dashboard#modal-invite"
-                                class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
-                                Masukkan Kode Undangan
-                            </a>
+                                <!-- ini tombol pop up ya buat kode booking -->
+                                <a href="/dashboard#modal-invite"
+                                    class="inline-flex w-full justify-center items-center bg-primary text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 active:bg-emerald-700 transition-all font-regular shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
+                                    Masukkan Kode Undangan
+                                </a>
+                            </div>
 
                             <!-- modal menu kode booking-->
                             <div id="modal-invite"
@@ -464,25 +412,29 @@
                 <!-- widget -->
                 <div class="lg:col-span-2 space-y-6 mb-6">
                     <!-- Statistics -->
-                    <div>
+                    <div class="bg-white shadow rounded-3xl p-6">
                         <div class="grid grid-cols-1 gap-4 *:rounded-2xl">
                             <div class="bg-linear-to-br from-purple-50 to-purple-100 p-4 border-2 border-purple-200">
-                                <p class="text-xs font-semibold text-purple-600 mb-1">Total</p>
+                                <p class="text-xs font-semibold text-purple-600 mb-1">Total Booking</p>
                                 <p class="text-2xl font-bold text-purple-800">100</p>
                             </div>
                             <div class="bg-linear-to-br from-emerald-50 to-emerald-100 p-4 border-2 border-emerald-200">
-                                <p class="text-xs font-semibold text-emerald-600 mb-1">Available</p>
+                                <p class="text-xs font-semibold text-emerald-600 mb-1">Booking Diselesaikan</p>
                                 <p class="text-2xl font-bold text-emerald-800">666</p>
                             </div>
                             <div class="bg-linear-to-br from-rose-50 to-rose-100 p-4 border-2 border-rose-200">
-                                <p class="text-xs font-semibold text-rose-600 mb-1">Unavailable</p>
+                                <p class="text-xs font-semibold text-rose-600 mb-1">Booking Dibatalkan</p>
                                 <p class="text-2xl font-bold text-rose-800">999</p>
+                            </div>
+                            <div class="bg-linear-to-br from-amber-50 to-amber-100 p-4 border-2 border-amber-200">
+                                <p class="text-xs font-semibold text-amber-600 mb-1">Riwayat Suspensi</p>
+                                <p class="text-2xl font-bold text-amber-800">777</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- tambah widget -->
+                <!-- tambah widget
                 <div class="mb-6">
                     <a href=""
                         class="flex gap-4 w-full border border-4xl border-dashed items-center justify-center rounded-3xl p-6 text-gray-400">
@@ -496,7 +448,7 @@
                             Tambah Widget
                         </span>
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

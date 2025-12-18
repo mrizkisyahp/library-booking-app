@@ -170,6 +170,20 @@ use App\Core\App;
                             </span>
                         </a>
                     </li>
+                    <li class="w-full px-3">
+                        <a href="/admin/settings"
+                            class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-settings size-6 shrink-0">
+                                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            <span class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
+                                Pengaturan
+                            </span>
+                        </a>
+                    </li>
                     <!-- User Biasa 😄 -->
                 <?php else: ?>
                     <li class="w-full px-3">
@@ -231,9 +245,8 @@ use App\Core\App;
                     </a>
                 </li>
                 <li class="mx-2 px-2">
-                    <form action="/logout" method="post">
-                        <?= csrf_field() ?>
-                        <button type="submit"
+                    <!-- button logout -->
+                        <a href="#modal-logout"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-red-600 transition-all mb-4 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -245,20 +258,52 @@ use App\Core\App;
                                 class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
                                 Logout
                             </span>
-                        </button>
-                    </form>
+                        </a>
+
+                <!-- modal menu logout-->
+                <div id="modal-logout"
+                    class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999 backdrop-blur-xs">
+
+                    <div
+                        class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
+
+                        <h1 class="text-4xl font-bold text-slate-800 mb-2">
+                            Peringatan
+                        </h1>
+                        <p class="text-sm text-slate-600 mb-4">
+                            Apakah Kamu yakin ingin keluar dari aplikasi?
+                        </p>
+
+                        <form action="/logout" method="post" class="space-y-3">
+                            <?= csrf_field() ?>
+
+                            <div class="flex items-center gap-4 mt-6 text-center">
+                                <a href="#"
+                                    class="w-full bg-slate-200 text-black p-4 rounded-2xl hover:bg-slate-300 transition-all font-regular border border-slate-400 shadow cursor-pointer">
+                                    Tidak
+                                </a>
+
+                                <button type="submit"
+                                    class="w-full bg-rose-500 text-white p-4 rounded-2xl hover:bg-rose-600 transition-all font-regular border border-rose-700 shadow cursor-pointer">
+                                    Ya, Keluar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 </li>
             <?php endif; ?>
         </ul>
     </aside>
     <!-- Main Content -->
-    <main class="py-12 md:pt-0 min-h-dvh md:pl-28">
+    <main class="py-12 md:pt-0 min-h-dvh md:pl-24">
         <div class="mx-auto bg-primary md:bg-slate-100">
 
-            <div class="bg-white top-0 left-0 w-full h-40 fixed -z-10">
+            <div class="bg-white top-0 left-0 w-24 h-40 fixed -z-10 hidden md:block">
                 <!-- empty div for bg -->
             </div>
-            <!-- Flash Messages -->
+            <!-- Flash Toaster Messages -->
             <?php if ($m = App::$app->session->getFlash('success')): ?>
                 <input type="checkbox" id="toast-success" class="peer hidden" checked>
 

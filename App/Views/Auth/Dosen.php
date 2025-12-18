@@ -3,6 +3,11 @@
 $validator = $validator ?? null;
 ?>
 
+<a href="/register" class="flex items-center gap-2 hover:underline active:underline top-0 left-0 p-4 text-white fixed">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2-icon lucide-undo-2 size-6"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+    <span>Kembali ke halaman sebelumnya</span>
+</a>
+
 <div class="flex items-center justify-center min-h-dvh mx-4">
   <div>
     <div class="px-4 md:px-0 py-8">
@@ -91,7 +96,7 @@ $validator = $validator ?? null;
             </div>
 
             <button type="button" onclick="nextStep()"
-              class="w-full px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 active:bg-emerald-800 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer">
+              class="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-emerald-700 active:bg-emerald-800 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer">
               Berikutnya
             </button>
           </div>
@@ -265,7 +270,7 @@ $validator = $validator ?? null;
         </div>
       </div>
 
-      <p class="mt-4 text-sm">© 2025 Politeknik Negeri Jakarta. All rights reserved.</p>
+      <!-- <p class="mt-4 text-sm">© 2025 Politeknik Negeri Jakarta. All rights reserved.</p> -->
     </div>
   </div>
 </div>

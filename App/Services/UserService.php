@@ -3,16 +3,22 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
+use App\Repositories\WarningRepository;
+use App\Repositories\SuspensionRepository;
 use App\Core\Paginator;
 use App\Services\Logger;
 use App\Models\Role;
+use App\Models\User;
 use Exception;
 
 class UserService
 {
     public function __construct(
         private UserRepository $userRepo,
-        private Logger $logger
+        private WarningRepository $warningRepo,
+        private SuspensionRepository $suspensionRepo,
+        private Logger $logger,
+        private ?EmailService $emailService = null
     ) {
     }
 
@@ -201,5 +207,176 @@ class UserService
         ]);
 
         $this->logger->info('Admin rejected kubaca for user', ['user_id' => $id, 'reason' => $reason]);
+    }
+
+    // ==================== WARNINGS & SUSPENSIONS ====================
+
+    /**
+     * Add warning to user and auto-suspend if reaches 3 warnings
+     */
+    public function addWarning(int $userId, int $peringatanId, ?string $reason = null): void
+    {
+        $user = $this->userRepo->findById($userId);
+        if (!$user) {
+            throw new Exception('User tidak ditemukan');
+        }
+
+        // Add warning via repository (insert into peringatan_mhs)
+        $this->warningRepo->create($userId, $peringatanId, date('Y-m-d'));
+
+        // Update users.peringatan column (increment)
+        $newCount = $user->peringatan + 1;
+        $this->userRepo->update($userId, [
+            'peringatan' => $newCount
+        ]);
+
+        // Get warning type name for email
+        $warningType = $this->warningRepo->getWarningTypeById($peringatanId);
+        $warningTypeName = $warningType['nama_peringatan'] ?? 'Peringatan';
+
+        $this->logger->info('Warning added to user', [
+            'user_id' => $userId,
+            'peringatan_id' => $peringatanId,
+            'reason' => $reason
+        ]);
+
+        // Send warning email notification
+        if ($this->emailService) {
+            try {
+                $this->emailService->sendWarningNotification(
+                    $user->email,
+                    $user->nama,
+                    $warningTypeName,
+                    $reason ?? '',
+                    $newCount
+                );
+            } catch (Exception $e) {
+                $this->logger->error('Failed to send warning email', [
+                    'user_id' => $userId,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        // Check if user should be auto-suspended (3 or more warnings)
+        if ($newCount >= 3 && $user->status !== 'suspended') {
+            $suspendUntil = date('Y-m-d', strtotime('+7 days'));
+            $this->suspendUser($userId);
+
+            // Add suspension record via repository
+            $this->suspensionRepo->create($userId, date('Y-m-d'));
+
+            $this->logger->warning('User auto-suspended due to 3 warnings', ['user_id' => $userId]);
+
+            // Send suspension email
+            if ($this->emailService) {
+                try {
+                    $this->emailService->sendSuspensionNotification(
+                        $user->email,
+                        $user->nama,
+                        $suspendUntil
+                    );
+                } catch (Exception $e) {
+                    $this->logger->error('Failed to send suspension email', [
+                        'user_id' => $userId,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove warning from user
+     */
+    public function removeWarning(int $warningId): void
+    {
+        // Get user ID from warning before deleting
+        $warning = $this->warningRepo->findById($warningId);
+
+        $deleted = $this->warningRepo->delete($warningId);
+
+        if (!$deleted) {
+            throw new Exception('Peringatan tidak ditemukan');
+        }
+
+        // Update users.peringatan column (decrement, but never below 0)
+        if ($warning && isset($warning['id_akun'])) {
+            $user = $this->userRepo->findById($warning['id_akun']);
+            if ($user && $user->peringatan > 0) {
+                $this->userRepo->update($warning['id_akun'], [
+                    'peringatan' => $user->peringatan - 1
+                ]);
+            }
+        }
+
+        $this->logger->info('Warning removed', ['warning_id' => $warningId]);
+    }
+
+    /**
+     * Get all warnings for a user
+     */
+    public function getUserWarnings(int $userId): array
+    {
+        return $this->warningRepo->getByUserId($userId);
+    }
+
+    /**
+     * Get all warnings across all users (for admin view) - PAGINATED
+     */
+    public function getAllWarningsPaginated(int $perPage = 15, int $page = 1): \App\Core\Paginator
+    {
+        return $this->warningRepo->getAllPaginated($perPage, $page);
+    }
+
+    /**
+     * Get all suspensions (for admin view) - PAGINATED
+     */
+    public function getAllSuspensionsPaginated(int $perPage = 15, int $page = 1): \App\Core\Paginator
+    {
+        return $this->suspensionRepo->getAllPaginated($perPage, $page);
+    }
+
+    /**
+     * Get all warnings across all users (for admin view) - legacy
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->warningRepo->getAll();
+    }
+
+    /**
+     * Get all suspensions (for admin view) - legacy
+     */
+    public function getAllSuspensions(): array
+    {
+        return $this->suspensionRepo->getAll();
+    }
+
+    // ==================== WARNING TYPES CRUD ====================
+
+    public function getWarningTypes(): array
+    {
+        return $this->warningRepo->getWarningTypes();
+    }
+
+    public function getWarningTypesPaginated(int $perPage = 15, int $page = 1): \App\Core\Paginator
+    {
+        return $this->warningRepo->getWarningTypesPaginated($perPage, $page);
+    }
+
+    public function createWarningType(string $name): int
+    {
+        return $this->warningRepo->createWarningType($name);
+    }
+
+    public function updateWarningType(int $id, string $name): bool
+    {
+        return $this->warningRepo->updateWarningType($id, $name);
+    }
+
+    public function deleteWarningType(int $id): bool
+    {
+        return $this->warningRepo->deleteWarningType($id);
     }
 }

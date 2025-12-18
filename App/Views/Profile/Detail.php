@@ -57,8 +57,27 @@
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Peringatan</label>
                     <span
                         class="inline-block px-3 py-1 <?= $user->peringatan > 0 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800' ?> text-sm font-semibold rounded-full">
-                        <?= htmlspecialchars($user->peringatan) ?>
+                        <?= htmlspecialchars($user->peringatan) ?> peringatan
                     </span>
+                    <?php if (!empty($userWarnings) && count($userWarnings) > 0): ?>
+                        <div class="mt-3 space-y-2">
+                            <?php foreach ($userWarnings as $warning): ?>
+                                <div class="flex items-center gap-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <svg class="w-4 h-4 text-yellow-500 shrink-0" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <div class="flex-1">
+                                        <span
+                                            class="text-sm font-medium text-yellow-800"><?= htmlspecialchars($warning['nama_peringatan'] ?? 'Peringatan') ?></span>
+                                        <span
+                                            class="text-xs text-yellow-600 ml-2"><?= date('d M Y', strtotime($warning['tgl_peringatan'])) ?></span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Role</label>
@@ -78,17 +97,23 @@
                             <p class="text-sm text-red-800"><?= htmlspecialchars($user->alasan_reject) ?></p>
                         </div>
                     <?php endif; ?>
+                    <?php if ($user->status === 'suspended' && !empty($user->suspensi_terakhir)): ?>
+                        <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-xs font-semibold text-red-700 mb-1">Disuspend sampai:</p>
+                            <p class="text-sm text-red-800"><?= date('d M Y', strtotime($user->suspensi_terakhir)) ?></p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-        <a href="/profile/edit"
+        <!-- <a href="/profile/edit"
             class="flex items-center w-full gap-4 justify-center px-8 py-4 rounded-2xl hover:bg-emerald-700 bg-emerald-600 md:bg-primary shadow-md text-white transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:bg-emerald-600 focus:ring-emerald-500 focus:ring-offset-2">
             <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Ubah data akun
-        </a>
+        </a> -->
 
     <?php endif; ?>
 </div>

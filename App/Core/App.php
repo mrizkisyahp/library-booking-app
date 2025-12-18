@@ -17,6 +17,7 @@ use App\Services\RoomService;
 use App\Services\DashboardService;
 use App\Services\AdminReportService;
 use App\Services\FeedbackService;
+use App\Services\SettingsService;
 
 use App\Repositories\UserRepository;
 use App\Repositories\BookingRepository;
@@ -26,6 +27,9 @@ use App\Repositories\InvitationRepository;
 use App\Repositories\AdminReportRepository;
 use App\Repositories\RescheduleRepository;
 use App\Repositories\RoleRepository;
+use App\Repositories\SettingsRepository;
+use App\Repositories\WarningRepository;
+use App\Repositories\SuspensionRepository;
 use App\Models\User;
 
 class App
@@ -91,6 +95,9 @@ class App
         $this->container->singleton(AdminReportRepository::class, fn($c) => new AdminReportRepository($this->db));
         $this->container->singleton(RescheduleRepository::class, fn($c) => new RescheduleRepository($this->db));
         $this->container->singleton(RoleRepository::class, fn($c) => new RoleRepository($this->db));
+        $this->container->singleton(SettingsRepository::class, fn($c) => new SettingsRepository($this->db));
+        $this->container->singleton(WarningRepository::class, fn($c) => new WarningRepository($this->db));
+        $this->container->singleton(SuspensionRepository::class, fn($c) => new SuspensionRepository($this->db));
 
         // Services
         $this->container->singleton(BookingService::class, function ($c) {
@@ -101,11 +108,18 @@ class App
                 $c->make(InvitationRepository::class),
                 $c->make(RescheduleRepository::class),
                 $this->db,
-                $c->make(EmailService::class)
+                $c->make(EmailService::class),
+                $c->make(SettingsService::class)
             );
         });
         $this->container->singleton(UserService::class, function ($c) {
-            return new UserService($c->make(UserRepository::class), $c->make(Logger::class));
+            return new UserService(
+                $c->make(UserRepository::class),
+                $c->make(WarningRepository::class),
+                $c->make(SuspensionRepository::class),
+                $c->make(Logger::class),
+                $c->make(EmailService::class)
+            );
         });
         $this->container->singleton(ProfileService::class, fn($c) => new ProfileService($c->make(UserRepository::class)));
         $this->container->singleton(RoomService::class, fn($c) => new RoomService($c->make(RoomRepository::class)));
@@ -116,6 +130,7 @@ class App
         ));
         $this->container->singleton(AdminReportService::class, fn($c) => new AdminReportService($c->make(AdminReportRepository::class)));
         $this->container->singleton(FeedbackService::class, fn($c) => new FeedbackService($c->make(FeedbackRepository::class), $c->make(BookingRepository::class)));
+        $this->container->singleton(SettingsService::class, fn($c) => new SettingsService($c->make(SettingsRepository::class)));
 
 
         $this->container->singleton(

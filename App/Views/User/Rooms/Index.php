@@ -10,7 +10,7 @@ $roomTypes = [
 
 ?>
 
-<div class="min-h-dvh">
+<div class="min-h-dvh bg-slate-100">
     <!-- Header -->
     <div class="w-full bg-white p-6 mb-8">
         <div class="mb-4 mx-auto md:px-6 ">
@@ -24,7 +24,7 @@ $roomTypes = [
             <div class="mb-4 mx-auto md:px-6">
                 <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
                     <div class="flex items-start">
-                        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mr-3" fill="none" stroke="currentColor"
+                        <svg class="w-6 h-6 text-blue-600 shrink-0 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -144,23 +144,6 @@ $roomTypes = [
                         </div>
                     </div>
 
-                    <div>
-                        <p class="block text-sm font-medium text-slate-700 mb-2">Jenis Ruangan</p>
-                        <div class="flex flex-wrap gap-2">
-                            <?php foreach ($roomTypes as $roomType):
-                                $safeId = 'rt_' . preg_replace('/[^a-z0-9]+/i', '_', strtolower($roomType));
-                                ?>
-                                <label for="<?= $safeId ?>"
-                                    class="flex items-center bg-slate-100 py-2 px-4 border-2 border-gray-300 rounded-2xl cursor-pointer ">
-                                    <input id="<?= $safeId ?>" type="checkbox" name="jenis_ruangan[]"
-                                        value="<?= htmlspecialchars($roomType) ?>" class="appearance-none "
-                                        <?= in_array($roomType, $filters['jenis_ruangan'] ?? []) ? 'checked' : '' ?> />
-                                    <span class="text-sm"><?= htmlspecialchars($roomType) ?></span>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
                     <!-- Action Buttons -->
                     <div class="flex gap-3">
                         <button type="submit" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-2xl font-semibold
@@ -196,7 +179,7 @@ $roomTypes = [
                 <?php foreach ($rooms as $room): ?>
                     <?php $thumbnail = room_thumbnail($room); ?>
 
-                    <div class="bg-white rounded-3xl shadow-lg h-fit overflow-hidden">
+                    <div class="bg-white rounded-3xl shadow-lg h-fit overflow-hidden mb-6">
 
                         <!-- Thumbnail -->
                         <?php if ($thumbnail): ?>

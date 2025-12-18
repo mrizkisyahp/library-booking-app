@@ -212,12 +212,16 @@ class AdminBookingController extends Controller
 
             $rescheduleRequest = $this->bookingService->getPendingRescheduleRequest($bookingId);
 
+            // Get warning types for assign warning dropdown
+            $warningTypes = $this->bookingService->getWarningTypes();
+
             return view('Admin/Bookings/Detail', [
                 'bookings' => $data['booking'],
                 'pic' => $data['pic'],
                 'allMembers' => $data['allMembers']->items,
                 'pagination' => $data['allMembers'],
-                'rescheduleRequest' => $rescheduleRequest
+                'rescheduleRequest' => $rescheduleRequest,
+                'warningTypes' => $warningTypes,
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
@@ -683,6 +687,32 @@ class AdminBookingController extends Controller
 
             flash('success', "Berhasil menghapus {$count} tanggal yang diblokir.");
             redirect('/admin/blocked-dates');
+        } catch (Exception $e) {
+            flash('error', $e->getMessage());
+            back();
+        }
+    }
+
+    /**
+     * Assign warnings to all booking members
+     */
+    public function assignWarning(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'booking_id' => 'required|integer|exists:booking,id_booking',
+                'warning_type_id' => 'required|integer',
+            ]);
+
+            $bookingId = (int) $data['booking_id'];
+            $warningTypeId = (int) $data['warning_type_id'];
+            $reason = $request->input('reason') ?? null;
+
+            $warnedUsers = $this->bookingService->assignWarningsToBooking($bookingId, $warningTypeId, $reason);
+
+            $count = count($warnedUsers);
+            flash('success', "Peringatan berhasil diberikan ke {$count} anggota: " . implode(', ', $warnedUsers));
+            redirect('/admin/bookings/detail?id=' . $bookingId);
         } catch (Exception $e) {
             flash('error', $e->getMessage());
             back();

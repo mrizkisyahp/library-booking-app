@@ -10,7 +10,7 @@ $roomTypes = [
 
 ?>
 
-<div class="min-h-dvh">
+<div class="min-h-dvh bg-slate-100">
     <!-- Header -->
     <div class="w-full bg-white p-6 mb-8">
         <div class="mb-4 mx-auto md:px-6 ">
