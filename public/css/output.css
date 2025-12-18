@@ -432,9 +432,6 @@
   .z-999 {
     z-index: 999;
   }
-  .z-\[999\] {
-    z-index: 999;
-  }
   .z-\[9999\] {
     z-index: 9999;
   }
@@ -690,9 +687,6 @@
   .max-h-80 {
     max-height: calc(var(--spacing) * 80);
   }
-  .max-h-96 {
-    max-height: calc(var(--spacing) * 96);
-  }
   .min-h-dvh {
     min-height: 100dvh;
   }
@@ -743,9 +737,6 @@
   }
   .w-full {
     width: 100%;
-  }
-  .w-lg {
-    width: var(--container-lg);
   }
   .w-xl {
     width: var(--container-xl);
@@ -3226,11 +3217,6 @@
   .md\:min-h-\[60dvh\] {
     @media (width >= 48rem) {
       min-height: 60dvh;
-    }
-  }
-  .md\:min-h-\[60vh\] {
-    @media (width >= 48rem) {
-      min-height: 60vh;
     }
   }
   .md\:w-xl {
