@@ -2197,11 +2197,6 @@
     -webkit-user-select: none;
     user-select: none;
   }
-  .\*\:rounded-2xl {
-    :is(& > *) {
-      border-radius: var(--radius-2xl);
-    }
-  }
   .\*\:px-4 {
     :is(& > *) {
       padding-inline: calc(var(--spacing) * 4);
@@ -2348,15 +2343,6 @@
     &:is(:where(.peer):hover ~ *) {
       @media (hover: hover) {
         color: var(--color-yellow-300);
-      }
-    }
-  }
-  .peer-hover\:peer-checked\:text-yellow-400 {
-    &:is(:where(.peer):hover ~ *) {
-      @media (hover: hover) {
-        &:is(:where(.peer):checked ~ *) {
-          color: var(--color-yellow-400);
-        }
       }
     }
   }
@@ -2848,13 +2834,6 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-white);
-      }
-    }
-  }
-  .hover\:text-yellow-300 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-yellow-300);
       }
     }
   }

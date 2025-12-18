@@ -692,6 +692,13 @@ $statusColors = [
                     Seluruh rangkaian booking sudah diselesaikan
                 </div>
             <?php endif; ?>
+
+            <?php if ($booking->status === 'completed'): ?>
+                <div
+                    class="bg-gray-200 rounded-lg p-3 mb-4 border text-gray-800 border-gray-400 flex justify-between items-center">
+                    Seluruh rangkaian booking sudah diselesaikan
+                </div>
+            <?php endif; ?>
         </div>
     </nav>
 
