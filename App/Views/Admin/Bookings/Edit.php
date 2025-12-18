@@ -1,16 +1,25 @@
 <?php $validator = $validator ?? null; ?>
+
+<!-- Back Button -->
+<div class="p-4 bg-white shadow-md w-full mb-6">
+    <div class="flex items-center gap-4 py-4">
+        <div class="flex items-center gap-4 ">
+            <a href="/admin/bookings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chevron-left-icon lucide-chevron-left size-9">
+                    <path d="m15 18-6-6 6-6" />
+                </svg>
+            </a>
+            <span class="text-black font-bold text-4xl">
+                Kembali ke daftar Booking
+            </span>
+        </div>
+    </div>
+</div>
+
 <div class="max-w-5xl mx-auto">
-  <!-- Back Button -->
-  <div class="mb-6">
-    <a href="/admin/bookings"
-      class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-semibold group">
-      <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none"
-        stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-      Kembali ke Daftar Booking
-    </a>
-  </div>
+
   <!-- Page Header -->
   <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
     <div class="flex items-center justify-between mb-2">
@@ -21,7 +30,7 @@
         </svg>
         Edit Booking #<?= $booking->id_booking ?>
       </h2>
-      <span class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border-2 
+      <span class="inline-flex px-4 py-2 rounded-lg font-semibold text-sm border-2
         <?php if ($booking->status === 'verified'): ?>bg-emerald-100 text-emerald-800 border-emerald-300
         <?php elseif ($booking->status === 'active'): ?>bg-blue-100 text-blue-800 border-blue-300
         <?php elseif ($booking->status === 'draft'): ?>bg-gray-100 text-gray-800 border-gray-300

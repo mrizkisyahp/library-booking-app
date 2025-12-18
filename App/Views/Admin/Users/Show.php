@@ -1,15 +1,24 @@
-<body>
+
+<div class="p-4 bg-white shadow-md w-full mb-6">
+    <div class="flex items-center gap-4 py-4">
+        <div class="flex items-center gap-4 ">
+            <a href="/admin/users">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chevron-left-icon lucide-chevron-left size-9">
+                    <path d="m15 18-6-6 6-6" />
+                </svg>
+            </a>
+            <span class="text-black font-bold text-4xl">
+                Kembali ke daftar user
+            </span>
+        </div>
+    </div>
+</div>
+
   <div class="min-h-screen bg-gray-50 p-6">
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
-      <div class="mb-6">
-        <a href="/admin/users" class="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Kembali ke daftar user
-        </a>
-      </div>
       <!-- Flash Messages -->
       <?php if ($message = flash('success')): ?>
         <div class="mb-6 bg-green-50 border-l-4 border-emerald-500 rounded-lg p-4 shadow-sm">
@@ -211,4 +220,3 @@
       </div>
     </div>
   </div>
-</body>
