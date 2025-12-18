@@ -382,66 +382,66 @@ $roomTypes = [
 
     </div>
 
-</div>
-
-<!-- Pagination -->
-<?php
-$paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
-?>
-<div class="bg-white rounded-2xl shadow-lg p-6 mt-6 max-w-7xl mx-auto">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-sm text-slate-600">
-            Menampilkan <span
-                class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
-            sampai <span
-                class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
-            dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> booking
-        </p>
-        <div class="flex gap-2 items-center">
-            <!-- First Page -->
-            <?php if ($pagination->currentPage > 1): ?>
-                <?php $paginationQuery['page'] = 1; ?>
-                <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
-                    class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                    Awal
-                </a>
-            <?php endif; ?>
-            <!-- Previous -->
-            <?php if ($pagination->currentPage > 1): ?>
-                <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
-                <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
-                    class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                    ← Sebelumnya
-                </a>
-            <?php endif; ?>
-            <!-- Page Numbers -->
-            <div class="flex gap-1">
-                <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
-                    <?php $paginationQuery['page'] = $i; ?>
-                    <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
-                <?= $i === $pagination->currentPage
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
-                        <?= $i ?>
+    <!-- Pagination -->
+    <?php
+    $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
+    ?>
+    <div class="bg-white rounded-2xl shadow-lg p-6 mt-6 max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-slate-600">
+                Menampilkan <span
+                    class="font-semibold text-slate-800"><?= (($pagination->currentPage - 1) * $pagination->perPage) + 1 ?></span>
+                sampai <span
+                    class="font-semibold text-slate-800"><?= min($pagination->currentPage * $pagination->perPage, $pagination->total) ?></span>
+                dari <span class="font-semibold text-slate-800"><?= $pagination->total ?></span> booking
+            </p>
+            <div class="flex gap-2 items-center">
+                <!-- First Page -->
+                <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = 1; ?>
+                    <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        Awal
                     </a>
-                <?php endfor; ?>
+                <?php endif; ?>
+                <!-- Previous -->
+                <?php if ($pagination->currentPage > 1): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage - 1; ?>
+                    <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        ← Sebelumnya
+                    </a>
+                <?php endif; ?>
+                <!-- Page Numbers -->
+                <div class="flex gap-1">
+                    <?php for ($i = 1; $i <= $pagination->lastPage; $i++): ?>
+                        <?php $paginationQuery['page'] = $i; ?>
+                        <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>" class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-all
+                    <?= $i === $pagination->currentPage
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+                <!-- Next -->
+                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
+                    <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        Selanjutnya →
+                    </a>
+                <?php endif; ?>
+                <!-- Last Page -->
+                <?php if ($pagination->currentPage < $pagination->lastPage): ?>
+                    <?php $paginationQuery['page'] = $pagination->lastPage; ?>
+                    <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
+                        class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        Akhir
+                    </a>
+                <?php endif; ?>
             </div>
-            <!-- Next -->
-            <?php if ($pagination->currentPage < $pagination->lastPage): ?>
-                <?php $paginationQuery['page'] = $pagination->currentPage + 1; ?>
-                <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
-                    class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                    Selanjutnya →
-                </a>
-            <?php endif; ?>
-            <!-- Last Page -->
-            <?php if ($pagination->currentPage < $pagination->lastPage): ?>
-                <?php $paginationQuery['page'] = $pagination->lastPage; ?>
-                <a href="/my-bookings?<?= http_build_query($paginationQuery) ?>"
-                    class="px-4 py-2 border-2 border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                    Akhir
-                </a>
-            <?php endif; ?>
         </div>
     </div>
 </div>
+

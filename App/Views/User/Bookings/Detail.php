@@ -421,7 +421,7 @@ $statusColors = [
                             Peringatan
                         </h1>
                         <p class="text-sm text-slate-600 mb-4">
-                            Apakah Kamu yakin untuk menghapus Draft?
+                            Apakah Kamu yakin membatalkan pengajuan Draft?
                         </p>
 
                         <form action="/bookings/cancel-pending" method="post" class="space-y-3">
@@ -475,7 +475,7 @@ $statusColors = [
             <?php endif; ?>
 
             <?php if ($booking->status === 'active'): ?>
-                <div class="text-2xl font-bold mb-4">
+                <div class="text-2xl font-bold mb-4 text-black">
                     Waktu Tersisa
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
@@ -654,7 +654,7 @@ $statusColors = [
             <?php endif; ?>
 
             <?php if ($booking->status === 'active'): ?>
-                <div class="text-2xl font-bold mb-4">
+                <div class="text-2xl font-bold mb-4 text-black">
                     Waktu Tersisa
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
