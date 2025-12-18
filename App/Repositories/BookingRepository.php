@@ -133,15 +133,15 @@ class BookingRepository
 
         return $query
             ->whereNotIn('b.status', ['draft'])
-            ->orderBy("CASE b.status 
-                WHEN 'pending' THEN 1 
-                WHEN 'verified' THEN 2 
-                WHEN 'active' THEN 3 
-                WHEN 'completed' THEN 4 
-                WHEN 'cancelled' THEN 5 
-                WHEN 'expired' THEN 6 
-                WHEN 'no_show' THEN 7 
-                ELSE 8 
+            ->orderBy("CASE b.status
+                WHEN 'pending' THEN 1
+                WHEN 'verified' THEN 2
+                WHEN 'active' THEN 3
+                WHEN 'completed' THEN 4
+                WHEN 'cancelled' THEN 5
+                WHEN 'expired' THEN 6
+                WHEN 'no_show' THEN 7
+                ELSE 8
             END", 'asc')
             ->orderBy('b.waktu_mulai', 'asc')
             ->paginate($perPage, $page);
@@ -180,16 +180,16 @@ class BookingRepository
         return $query
             ->whereNotIn('b.status', ['draft'])
             ->orderBy('b.tanggal_penggunaan_ruang', 'desc')
-            ->orderBy("CASE b.status 
-                WHEN 'pending' THEN 1 
-                WHEN 'verified' THEN 2 
-                WHEN 'active' THEN 3 
-                WHEN 'completed' THEN 4 
-                WHEN 'draft' THEN 5 
-                WHEN 'cancelled' THEN 6 
-                WHEN 'expired' THEN 7 
-                WHEN 'no_show' THEN 8 
-                ELSE 9 
+            ->orderBy("CASE b.status
+                WHEN 'pending' THEN 1
+                WHEN 'verified' THEN 2
+                WHEN 'active' THEN 3
+                WHEN 'completed' THEN 4
+                WHEN 'draft' THEN 5
+                WHEN 'cancelled' THEN 6
+                WHEN 'expired' THEN 7
+                WHEN 'no_show' THEN 8
+                ELSE 9
             END", 'asc')
             ->orderBy('b.created_at', 'asc')
             ->paginate($perPage, $page);
@@ -567,4 +567,5 @@ class BookingRepository
     {
         return Room::Query()->where('id_ruangan', $roomId)->first();
     }
+    
 }

@@ -21,13 +21,15 @@
 
     <?php if ($user): ?>
         <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-6">
-            <div class="mb-8">
-                <p class="text-gray-600">Informasi lengkap akun Anda</p>
+            <div class="mb-8 flex justify-between items-center">
+                <p class="text-gray-600 text-lg">Informasi lengkap akun Anda</p>
+                <?php if ($user->role?->nama_role != 'admin'): ?>
+                    <p class="text-gray-900 font-medium select-all">Masa Aktif: <?= htmlspecialchars($user->masa_aktif) ?></p>
+                <?php endif; ?>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Nama</label>
-                    <p class="text-gray-900 font-medium select-all"><?= htmlspecialchars($user->nama) ?></p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Email</label>

@@ -63,17 +63,17 @@
                             <h4 class="text-sm font-semibold text-slate-600 mb-3">Rooms</h4>
                             <div class="grid grid-cols-3 gap-3">
                                 <div
-                                    class="rounded-2xl p-4 border border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+                                    class="rounded-2xl p-4 border border-purple-200 bg-linear-to-br from-purple-50 to-purple-100">
                                     <p class="text-xs font-semibold text-purple-600">Total</p>
                                     <p class="text-2xl font-bold text-purple-900"><?= $rooms['total'] ?></p>
                                 </div>
                                 <div
-                                    class="rounded-2xl p-4 border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+                                    class="rounded-2xl p-4 border border-emerald-200 bg-linear-to-br from-emerald-50 to-emerald-100">
                                     <p class="text-xs font-semibold text-emerald-600">Available</p>
                                     <p class="text-2xl font-bold text-emerald-900"><?= $rooms['available'] ?></p>
                                 </div>
                                 <div
-                                    class="rounded-2xl p-4 border border-rose-200 bg-gradient-to-br from-rose-50 to-rose-100">
+                                    class="rounded-2xl p-4 border border-rose-200 bg-linear-to-br from-rose-50 to-rose-100">
                                     <p class="text-xs font-semibold text-rose-600">Unavailable</p>
                                     <p class="text-2xl font-bold text-rose-900"><?= $rooms['unavailable'] ?></p>
                                 </div>
@@ -85,17 +85,17 @@
                             <h4 class="text-sm font-semibold text-slate-600 mb-3">Users</h4>
                             <div class="grid grid-cols-3 gap-3">
                                 <div
-                                    class="rounded-2xl p-4 border border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+                                    class="rounded-2xl p-4 border border-teal-200 bg-linear-to-br from-teal-50 to-teal-100">
                                     <p class="text-xs font-semibold text-teal-600">Total</p>
                                     <p class="text-2xl font-bold text-teal-900"><?= $users['total'] ?></p>
                                 </div>
                                 <div
-                                    class="rounded-2xl p-4 border border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+                                    class="rounded-2xl p-4 border border-cyan-200 bg-linear-to-br from-cyan-50 to-cyan-100">
                                     <p class="text-xs font-semibold text-cyan-600">Active</p>
                                     <p class="text-2xl font-bold text-cyan-900"><?= $users['active'] ?></p>
                                 </div>
                                 <div
-                                    class="rounded-2xl p-4 border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100">
+                                    class="rounded-2xl p-4 border border-amber-200 bg-linear-to-br from-amber-50 to-amber-100">
                                     <p class="text-xs font-semibold text-amber-600">Pending</p>
                                     <p class="text-2xl font-bold text-amber-900"><?= $users['pending kubaca'] ?></p>
                                 </div>
@@ -190,7 +190,7 @@
                     <?php endif; ?>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <!-- <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">
                         Rooms Usage
                     </h2>
@@ -233,7 +233,7 @@
                             </table>
                         </div>
                     <?php endif; ?>
-                </div>
+                </div> -->
             </div>
 
             <div class="space-y-6">

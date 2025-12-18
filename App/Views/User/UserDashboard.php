@@ -212,7 +212,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Content -->
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-3 space-y-6">
                 <!-- Statistics -->
                 <div class="bg-gray-100 rounded-t-3xl md:rounded-3xl shadow-lg md:shadow-none p-6 md:p-0 ">
                     <div class="bg-white rounded-3xl p-6 mb-6">
@@ -408,31 +408,46 @@
                     </div>
                 </div>
             </div>
-            <div>
+            <!-- <div>
                 <!-- widget -->
-                <div class="lg:col-span-2 space-y-6 mb-6">
+                <!-- <div class="lg:col-span-2 space-y-6 mb-6"> -->
                     <!-- Statistics -->
-                    <div class="bg-white shadow rounded-3xl p-6">
-                        <div class="grid grid-cols-1 gap-4 *:rounded-2xl">
-                            <div class="bg-linear-to-br from-purple-50 to-purple-100 p-4 border-2 border-purple-200">
+                    <!-- <div class="bg-white shadow rounded-3xl p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div
+                                class="bg-linear-to-br from-purple-50 to-purple-100 p-4 border-2 border-purple-200 rounded-2xl">
                                 <p class="text-xs font-semibold text-purple-600 mb-1">Total Booking</p>
-                                <p class="text-2xl font-bold text-purple-800">100</p>
+                                <p class="text-2xl font-bold text-purple-800">
+                                    <?= $bookingStats['total'] ?? 0 ?>
+                                </p>
                             </div>
-                            <div class="bg-linear-to-br from-emerald-50 to-emerald-100 p-4 border-2 border-emerald-200">
+
+                            <div
+                                class="bg-linear-to-br from-emerald-50 to-emerald-100 p-4 border-2 border-emerald-200 rounded-2xl">
                                 <p class="text-xs font-semibold text-emerald-600 mb-1">Booking Diselesaikan</p>
-                                <p class="text-2xl font-bold text-emerald-800">666</p>
+                                <p class="text-2xl font-bold text-emerald-800">
+                                    <?= $bookingStats['statuses']['completed'] ?? 0 ?>
+                                </p>
                             </div>
-                            <div class="bg-linear-to-br from-rose-50 to-rose-100 p-4 border-2 border-rose-200">
+
+                            <div
+                                class="bg-linear-to-br from-rose-50 to-rose-100 p-4 border-2 border-rose-200 rounded-2xl">
                                 <p class="text-xs font-semibold text-rose-600 mb-1">Booking Dibatalkan</p>
-                                <p class="text-2xl font-bold text-rose-800">999</p>
+                                <p class="text-2xl font-bold text-rose-800">
+                                    <?= $bookingStats['statuses']['cancelled'] ?? 0 ?>
+                                </p>
                             </div>
-                            <div class="bg-linear-to-br from-amber-50 to-amber-100 p-4 border-2 border-amber-200">
+
+                            <div
+                                class="bg-linear-to-br from-amber-50 to-amber-100 p-4 border-2 border-amber-200 rounded-2xl">
                                 <p class="text-xs font-semibold text-amber-600 mb-1">Riwayat Suspensi</p>
-                                <p class="text-2xl font-bold text-amber-800">777</p>
+                                <p class="text-2xl font-bold text-amber-800">
+                                    <?= $bookingStats['statuses']['suspended'] ?? 0 ?>
+                                </p>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- tambah widget
                 <div class="mb-6">
@@ -449,7 +464,7 @@
                         </span>
                     </a>
                 </div> -->
-            </div>
+            </div> -->
         </div>
     </div>
     <div>

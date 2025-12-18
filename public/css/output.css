@@ -432,9 +432,6 @@
   .z-999 {
     z-index: 999;
   }
-  .z-\[999\] {
-    z-index: 999;
-  }
   .z-\[9999\] {
     z-index: 9999;
   }
@@ -603,6 +600,10 @@
     width: calc(var(--spacing) * 6);
     height: calc(var(--spacing) * 6);
   }
+  .size-8 {
+    width: calc(var(--spacing) * 8);
+    height: calc(var(--spacing) * 8);
+  }
   .size-9 {
     width: calc(var(--spacing) * 9);
     height: calc(var(--spacing) * 9);
@@ -690,9 +691,6 @@
   .max-h-80 {
     max-height: calc(var(--spacing) * 80);
   }
-  .max-h-96 {
-    max-height: calc(var(--spacing) * 96);
-  }
   .min-h-dvh {
     min-height: 100dvh;
   }
@@ -743,9 +741,6 @@
   }
   .w-full {
     width: 100%;
-  }
-  .w-lg {
-    width: var(--container-lg);
   }
   .w-xl {
     width: var(--container-xl);
@@ -1736,9 +1731,6 @@
   }
   .text-left {
     text-align: left;
-  }
-  .text-right {
-    text-align: right;
   }
   .indent-1 {
     text-indent: calc(var(--spacing) * 1);
@@ -3228,11 +3220,6 @@
       min-height: 60dvh;
     }
   }
-  .md\:min-h-\[60vh\] {
-    @media (width >= 48rem) {
-      min-height: 60vh;
-    }
-  }
   .md\:w-xl {
     @media (width >= 48rem) {
       width: var(--container-xl);
@@ -3397,6 +3384,11 @@
   .lg\:col-span-2 {
     @media (width >= 64rem) {
       grid-column: span 2 / span 2;
+    }
+  }
+  .lg\:col-span-3 {
+    @media (width >= 64rem) {
+      grid-column: span 3 / span 3;
     }
   }
   .lg\:grid-cols-2 {

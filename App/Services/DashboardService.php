@@ -18,7 +18,6 @@ class DashboardService
     public function getUserDashboardData(int $userId): array
     {
         $user = $this->userRepo->findById($userId);
-
         $bookings = $this->bookingRepo->getUserActiveBookings($userId);
         $pendingFeedbacks = $this->bookingRepo->getUserPendingFeedbacks($userId);
 
@@ -27,7 +26,19 @@ class DashboardService
             'bookings' => $bookings,
             'pendingFeedbacks' => $pendingFeedbacks,
         ];
+
+        // return [
+        //     'user' => $user,
+        //     'bookings' => $this->bookingRepo->getUserActiveBookings($userId),
+        //     'pendingFeedbacks' => $this->bookingRepo->getUserPendingFeedbacks($userId),
+
+        //     'bookingStats' => [
+        //         'total' => $this->bookingRepo->getTotalBookingsByUser($userId),
+        //         'statuses' => $this->bookingRepo->getBookingCountByStatusForUser($userId),
+        //     ],
+        // ];
     }
+
 
     public function getAdminDashboardData(): array
     {

@@ -27,6 +27,18 @@ class UserDashboardController extends Controller
         $pendingInvitations = $this->bookingService->getPendingForUser($user->id_user);
         $myJoinRequests = $this->bookingService->getMyPendingJoinRequests($user->id_user);
 
+        $data = $this->dashboardService->getUserDashboardData(user()->id_user);
+
+        // return view('User/UserDashboard', [
+        //     'user' => $data['user'],
+        //     'bookings' => $data['bookings'],
+        //     'feedbacks' => $data['pendingFeedbacks'],
+        //     'bookingStats' => $data['bookingStats'],
+        //     'pendingInvitations' => $pendingInvitations,
+        //     'myJoinRequests' => $myJoinRequests,
+        // ]);
+
+
         return view('User/UserDashboard', [
             'bookings' => $bookings,
             'user' => $user,
