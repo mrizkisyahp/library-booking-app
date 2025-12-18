@@ -1839,10 +1839,35 @@ class BookingService
 
     private function validateOneBookingPerDay(int $userId, string $date): void
     {
-        $existingBookings = $this->bookingRepo->findUserBookingsOnDate($userId, $date);
-
-        if (count($existingBookings) > 0) {
+        // Check if user is PIC of any booking on this date
+        $existingPicBookings = $this->bookingRepo->findUserBookingsOnDate($userId, $date);
+        if (count($existingPicBookings) > 0) {
             throw new Exception('Anda hanya dapat melakukan 1 booking per hari');
+        }
+
+        // Check if user is member of any booking on this date
+        $existingMemberBookings = $this->bookingRepo->findUserMemberBookingsOnDate($userId, $date);
+        if (count($existingMemberBookings) > 0) {
+            throw new Exception('Anda sudah menjadi anggota booking lain pada tanggal ini');
+        }
+    }
+
+    /**
+     * Validate that a user can only join/be member of 1 booking per day
+     * This is called when a member is trying to join a booking
+     */
+    private function validateMemberOneBookingPerDay(int $userId, string $date, int $excludeBookingId): void
+    {
+        // Check if user is PIC of any booking on this date
+        $existingPicBookings = $this->bookingRepo->findUserBookingsOnDate($userId, $date, $excludeBookingId);
+        if (count($existingPicBookings) > 0) {
+            throw new Exception('Anda sudah memiliki booking pada tanggal ini');
+        }
+
+        // Check if user is member of any other booking on this date
+        $existingMemberBookings = $this->bookingRepo->findUserMemberBookingsOnDate($userId, $date, $excludeBookingId);
+        if (count($existingMemberBookings) > 0) {
+            throw new Exception('Anda sudah menjadi anggota booking lain pada tanggal ini');
         }
     }
 
@@ -1958,6 +1983,9 @@ class BookingService
         ];
 
         $this->validateMemberNoOverlap($data, $userId, $bookingId);
+
+        // Check 1 booking per day rule for member
+        $this->validateMemberOneBookingPerDay($userId, $booking->tanggal_penggunaan_ruang, $bookingId);
 
         $room = $this->bookingRepo->findByRoomId($booking->ruangan_id);
 

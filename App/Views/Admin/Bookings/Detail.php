@@ -164,7 +164,8 @@ $statusColors = [
                     <div class="p-4 bg-slate-50 rounded-xl">
                         <p class="text-xs font-semibold text-slate-500 uppercase">Tujuan</p>
                         <p class="text-lg font-bold text-slate-700">
-                            <?= nl2br(htmlspecialchars($bookings->tujuan ?? '-')) ?></p>
+                            <?= nl2br(htmlspecialchars($bookings->tujuan ?? '-')) ?>
+                        </p>
                     </div>
 
                     <?php if (!empty($bookings->surat_path)): ?>
@@ -255,6 +256,31 @@ $statusColors = [
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Modal Image Pop-up KuBaca -->
+                    <div id="imagePopUp"
+                        class="hidden fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center backdrop-blur-xs">
+                        <div
+                            class="bg-white rounded-2xl p-6 max-w-lg w-11/12 shadow-xl opacity-0 scale-95 transition-all duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase">NIM/NIP</p>
+                                    <p id="popUpId" class="text-lg font-bold text-slate-800"></p>
+                                    <p id="popUpNama" class="text-sm text-slate-600 capitalize"></p>
+                                </div>
+                                <button id="closePopUp" class="p-2 rounded-full hover:bg-gray-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M18 6 6 18" />
+                                        <path d="M6 6 18 18" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <img id="popUpImage" src="" alt="KuBaca Image"
+                                class="w-full rounded-xl object-contain max-h-96">
+                        </div>
                     </div>
 
                     <!-- Pagination -->

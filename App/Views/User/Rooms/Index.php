@@ -120,6 +120,23 @@ $roomTypes = [
                         </div>
                     </div>
 
+                    <!-- Kapasitas -->
+                    <div class="group relative">
+                        <label class="block text-sm text-slate-700 mb-2">Kapasitas (max)</label>
+
+                        <div class="flex items-center gap-3 border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white shadow
+                            transition-all duration-300 group-hover:border-gray-300 focus-within:border-emerald-500
+                            focus-within:ring-2 focus-within:ring-emerald-200">
+
+                            <span class="text-gray-400 group-hover:text-gray-500 group-focus-within:text-emerald-600">
+                                #
+                            </span>
+
+                            <input type="number" name="kapasitas_max" min="0"
+                                value="<?= htmlspecialchars($filters['kapasitas_max'] ?? '') ?>"
+                                class="flex-1 bg-transparent focus:outline-none text-slate-700" />
+                        </div>
+                    </div>
 
                     <!-- Jenis Ruangan -->
                     <div>
@@ -163,13 +180,17 @@ $roomTypes = [
 
     <!-- Room List -->
     <?php if (empty($rooms)): ?>
-        <div class="bg-white rounded-2xl shadow-lg p-16 text-center">
+        <div class="bg-white rounded-2xl shadow-lg p-16 text-center mx-6">
             <svg class="w-24 h-24 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h3 class="text-xl font-semibold text-slate-700 mb-2">Tidak Ada Ruangan Ditemukan</h3>
-            <p class="text-slate-500">Coba ubah filter pencarian Anda</p>
+            <p class="text-slate-500 mb-8">Coba ubah filter pencarian Anda</p>
+            <a href="/rooms"
+                class="inline-block px-6 py-3 border-2 border-slate-300 rounded-2xl text-slate-700 text-center hover:bg-slate-100 transition">
+                Reset
+            </a>
         </div>
     <?php else: ?>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 px-6 mb-8 mx-6">
@@ -244,6 +265,13 @@ $roomTypes = [
                             <label class="text-sm text-slate-700 mb-2 block">Kapasitas (min)</label>
                             <input type="number" name="kapasitas_min"
                                 value="<?= htmlspecialchars($filters['kapasitas_min'] ?? '') ?>"
+                                class="w-full border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-700 mb-2 block">Kapasitas (max)</label>
+                            <input type="number" name="kapasitas_max"
+                                value="<?= htmlspecialchars($filters['kapasitas_max'] ?? '') ?>"
                                 class="w-full border-2 border-gray-200 rounded-2xl px-4 py-2 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition">
                         </div>
 
