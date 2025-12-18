@@ -10,7 +10,7 @@
 
 <div class="max-w-7xl mx-auto md:grid md:grid-cols-2 gap-4 p-6 h-dvh md:h-[80dvh]">
 <!-- Header -->
-<div class="mb-12 md:mb-0 p-6 md:bg-primary md:rounded-2xl
+<div class="pb-12 md:mb-0 p-6 md:bg-primary md:rounded-2xl
             grid place-items-center h-fit md:min-h-[60dvh] justify-center">
     <div class="text-center text-white space-y-4">
         <div class="p-6 w-fit rounded-3xl bg-emerald-800 border-2 border-emerald-700 mx-auto">
