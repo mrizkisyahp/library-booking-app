@@ -20,6 +20,16 @@ use App\Core\App;
         <ul class="flex flex-col mt-10 space-y-4 w-full px-3">
             <!-- sidebar items -->
             <!-- Logo -->
+             <li class="w-full px-3">
+                <div
+                    class="flex items-center gap-4 p-3 w-full  ">
+                    <img src="/src/logoPinrupus.png" alt="Logo" class="size-6 shrink-0">
+                    <span
+                        class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0 font-semibold text-lg tracking-wide">
+                        PinRuPus PNJ
+                    </span>
+            </div>
+             </li>
             <li class="w-full px-3">
                 <a class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all "
                     <?php if (auth()->guest()): ?>

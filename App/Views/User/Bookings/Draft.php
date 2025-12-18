@@ -232,7 +232,7 @@
                                 </svg>
                             </div> -->
                 <div class="flex flex-1 min-w-0 items-center justify-start md:justify-between">
-                  <div>
+                  <div >
                     <p class="font-semibold text-slate-800 truncate capitalize">
                       <?= htmlspecialchars($member['nama'] ?? 'Unknown') ?>
                     </p>
@@ -244,7 +244,7 @@
                       class="text-xs text-white font-semibold flex items-center mt-1 bg-emerald-600 p-2 rounded-md border border-emerald-700">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-crown-icon lucide-crown">
+                        class="lucide lucide-crown-icon lucide-crown size-4 md:size-6">
                         <path
                           d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
                         <path d="M5 21h14" />
@@ -343,17 +343,17 @@
             <?= csrf_field() ?>
             <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
             <label class="block text-sm font-semibold text-slate-700 mb-2">Tambah Anggota</label>
-            <div class="flex gap-3">
-              <input type="text" name="identifier" placeholder="NIM / NIP / Email"
-                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all text-sm"
-                required>
-              <button type="submit"
-                class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold whitespace-nowrap">
-                <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Undang
-              </button>
+                <div class="flex gap-6 flex-col md:flex-row justify-between items-start md:items-center">
+                  <input type="text" name="identifier" placeholder="NIM / NIP / Email"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all text-sm"
+                    required>
+                  <button type="submit"
+                    class="bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all font-semibold whitespace-nowrap w-full">
+                    <svg class="inline-block w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Undang
+                  </button>
             </div>
           </form>
 
@@ -469,7 +469,7 @@
     </div>
   </div>
   <?php if ($isPic): ?>
-    <div class="w-full mb-8">
+    <div class="w-full mb-16">
       <form action="/bookings/delete-draft" method="post" onsubmit="return confirm('Yakin ingin menghapus draft ini?');">
         <?= csrf_field() ?>
         <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
