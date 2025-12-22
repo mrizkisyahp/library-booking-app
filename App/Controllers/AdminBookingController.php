@@ -99,11 +99,13 @@ class AdminBookingController extends Controller
         } catch (ValidationException $e) {
             $rooms = $this->bookingService->getAllRooms();
             $users = $this->bookingService->getAllUsers();
+            $currentAdminId = auth()->id();
 
             return view('Admin/Bookings/Create', [
                 'validator' => $e->getValidator(),
                 'rooms' => $rooms,
                 'users' => $users,
+                'currentAdminId' => $currentAdminId,
             ]);
         } catch (Exception $e) {
             flash('error', $e->getMessage());

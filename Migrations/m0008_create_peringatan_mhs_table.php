@@ -14,9 +14,6 @@ class m0008_create_peringatan_mhs_table
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-            INDEX idx_id_akun (id_akun),
-            INDEX idx_id_peringatan (id_peringatan),
-
             CONSTRAINT fk_peringatan_mhs_akun 
                 FOREIGN KEY (id_akun) REFERENCES users(id_user)
                 ON DELETE CASCADE ON UPDATE CASCADE,

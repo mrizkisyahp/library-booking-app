@@ -178,12 +178,7 @@ $statusColors = [
                         (Dibatalkan)
                     <?php endif ?>
                 </div>
-                <?php if ($booking->status === 'cancelled' && !empty($booking->alasan_reject)): ?>
-                    <div class="w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                        <p class="text-xs font-semibold text-red-700 uppercase mb-1">Alasan Pembatalan</p>
-                        <p class="text-sm text-red-800"><?= htmlspecialchars($booking->alasan_reject) ?></p>
-                    </div>
-                <?php endif; ?>
+
 
                 <div class="w-full mb-4">
                     <?php if ($isPic && $statusKey === 'completed' && empty($booking->id_feedback)): ?>
@@ -448,45 +443,46 @@ $statusColors = [
             <?php if ($booking->status === 'verified'): ?>
                 <div class="bg-white w-full rounded-3xl shadow my-2 p-6 max-w-7xl mx-auto mb-8">
                     <div class="text-2xl font-bold mb-4">
-                    Kode Kedatangan
-                </div>
-                <div class="mb-4">
-                    <span>Berlaku sampai </span>
-                    <span class="font-semibold"><?= htmlspecialchars($booking->waktu_mulai) ?></span>
-                </div>
-                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
-                    <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="checkinCode">
-                        <?= htmlspecialchars($booking->checkin_code) ?>
-                    </p>
-                    <div onclick="copyToken()"
-                        class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
-
-                        <span id="copyToast"
-                            class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
-                            Copied!
-                        </span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-copy-icon lucide-copy size-4">
-                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                        </svg>
+                        Kode Kedatangan
                     </div>
-                </div>
+                    <div class="mb-4">
+                        <span>Berlaku sampai </span>
+                        <span class="font-semibold"><?= htmlspecialchars($booking->waktu_mulai) ?></span>
+                    </div>
+                    <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                        <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="checkinCode">
+                            <?= htmlspecialchars($booking->checkin_code) ?>
+                        </p>
+                        <div onclick="copyToken()"
+                            class="relative p-2 cursor-pointer rounded-full hover:bg-emerald-50 hover:text-emerald-700 hover:border hover:border-emerald-700 active:text-emerald-700 active:border active:border-emerald-700 text-center transition-all">
+
+                            <span id="copyToast"
+                                class="absolute -top-8 right-0 text-xs bg-emerald-600 text-white px-2 py-1 rounded-md opacity-0 pointer-events-none transition-all duration-300">
+                                Copied!
+                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-copy-icon lucide-copy size-4">
+                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
 
             <?php if ($booking->status === 'active'): ?>
-                <div class="py-6 px-12 bg-white rounded-3xl shadow w-full max-w-7xl mx-auto flex justify-between items-center mb-6">
+                <div
+                    class="py-6 px-12 bg-white rounded-3xl shadow w-full max-w-7xl mx-auto flex justify-between items-center mb-6">
                     <div class="text-2xl font-bold text-black">
-                    Waktu Tersisa
-                </div>
-                <div class="bg-gray-200 rounded-lg p-3 border border-gray-400 flex justify-between items-center">
-                    <div class="text-2xl font-bold" id="countdown-timer"
-                        data-end-time="<?= date('Y-m-d H:i:s', strtotime($booking->tanggal_penggunaan_ruang . ' ' . $booking->waktu_selesai)) ?>">
-                        00:00:00
+                        Waktu Tersisa
                     </div>
-                </div>
+                    <div class="bg-gray-200 rounded-lg p-3 border border-gray-400 flex justify-between items-center">
+                        <div class="text-2xl font-bold" id="countdown-timer"
+                            data-end-time="<?= date('Y-m-d H:i:s', strtotime($booking->tanggal_penggunaan_ruang . ' ' . $booking->waktu_selesai)) ?>">
+                            00:00:00
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
 
@@ -680,12 +676,7 @@ $statusColors = [
                 <div class="w-full">
                     <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4">
                         <p class="font-semibold text-red-800">Booking telah dibatalkan</p>
-                        <?php if (!empty($booking->alasan_reject)): ?>
-                            <div class="mt-2 text-sm text-red-700">
-                                <p class="font-medium">Alasan:</p>
-                                <p><?= htmlspecialchars($booking->alasan_reject) ?></p>
-                            </div>
-                        <?php endif; ?>
+
                     </div>
                 </div>
             <?php endif; ?>

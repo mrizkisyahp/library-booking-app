@@ -22,10 +22,8 @@ class m0002_create_users_table
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-            INDEX idx_email (email),
             INDEX idx_nim (nim),
             INDEX idx_nip (nip),
-            INDEX idx_id_role (id_role),
             INDEX idx_status (status),
             INDEX idx_jurusan (jurusan),
             INDEX idx_nomor_hp (nomor_hp),

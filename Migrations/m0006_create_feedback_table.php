@@ -14,9 +14,7 @@ class m0006_create_feedback_table
             komentar TEXT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-            INDEX idx_booking_id (booking_id),
-            INDEX idx_user_id (user_id),
+            
             INDEX idx_rating (rating),
 
             CONSTRAINT fk_feedback_booking 

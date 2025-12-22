@@ -33,12 +33,6 @@
                             <div>
                                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Bukti KuBaca Ditolak</h3>
                                 <p class="text-gray-600">Gambar KuBaca-mu ditolak. Mohon unggah foto baru yang lebih jelas.</p>
-                                <?php if (!empty($user->alasan_reject)): ?>
-                                    <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                        <p class="text-xs font-semibold text-red-700 mb-1">Alasan Penolakan:</p>
-                                        <p class="text-sm text-red-800"><?= htmlspecialchars($user->alasan_reject) ?></p>
-                                    </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                         <form action="/upload-kubaca" method="post" enctype="multipart/form-data" class="space-y-6">

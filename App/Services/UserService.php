@@ -185,7 +185,7 @@ class UserService
             throw new Exception('User tidak dalam status pending kubaca');
         }
 
-        $this->userRepo->update($id, ['status' => 'active', 'masa_aktif' => $masa_aktif, 'alasan_reject' => null]);
+        $this->userRepo->update($id, ['status' => 'active', 'masa_aktif' => $masa_aktif]);
 
         // Send email notification about KuBaca verification
         if ($this->emailService) {
@@ -215,10 +215,9 @@ class UserService
 
         $this->userRepo->update($id, [
             'status' => 'rejected',
-            'alasan_reject' => $reason,
         ]);
 
-        $this->logger->info('Admin rejected kubaca for user', ['user_id' => $id, 'reason' => $reason]);
+        $this->logger->info('Admin rejected kubaca for user', ['user_id' => $id]);
     }
 
     // ==================== WARNINGS & SUSPENSIONS ====================

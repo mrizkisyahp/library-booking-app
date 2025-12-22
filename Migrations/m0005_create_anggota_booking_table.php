@@ -13,9 +13,6 @@ class m0005_create_anggota_booking_table
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-            INDEX idx_booking_id (booking_id),
-            INDEX idx_user_id (user_id),
-
             CONSTRAINT fk_anggota_booking 
                 FOREIGN KEY (booking_id) REFERENCES booking(id_booking) 
                 ON DELETE CASCADE ON UPDATE CASCADE,

@@ -289,7 +289,6 @@ class BookingService
 
         $oldStatus = $booking->status;
         $booking->status = $newStatus;
-        $booking->alasan_reject = $reason;
 
         if ($newStatus === 'verified' && empty($booking->checkin_code)) {
             $booking->checkin_code = $this->generateCheckinCode();

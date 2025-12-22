@@ -4,20 +4,20 @@ $validator = $validator ?? null;
 
 <!-- Back Button -->
 <div class="p-4 bg-white shadow-md w-full mb-6">
-    <div class="flex items-center gap-4 py-4">
-        <div class="flex items-center gap-4 ">
-            <a href="/admin/users">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-chevron-left-icon lucide-chevron-left size-9">
-                    <path d="m15 18-6-6 6-6" />
-                </svg>
-            </a>
-            <span class="text-black font-bold text-4xl">
-                Kembali ke daftar user
-            </span>
-        </div>
+  <div class="flex items-center gap-4 py-4">
+    <div class="flex items-center gap-4 ">
+      <a href="/admin/users">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-chevron-left-icon lucide-chevron-left size-9">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </a>
+      <span class="text-black font-bold text-4xl">
+        Kembali ke daftar user
+      </span>
     </div>
+  </div>
 </div>
 
 <div class="max-w-5xl mx-auto">
@@ -374,12 +374,7 @@ $validator = $validator ?? null;
             </span>
           </li>
           <li><strong>Peringatan:</strong> <?= htmlspecialchars((string) ($user->peringatan ?? 0)) ?>/3</li>
-          <?php if ($user->status === 'rejected' && !empty($user->alasan_reject)): ?>
-            <li class="pt-2 border-t border-emerald-200">
-              <strong>Alasan Reject:</strong>
-              <p class="text-red-700 text-xs mt-1"><?= htmlspecialchars($user->alasan_reject) ?></p>
-            </li>
-          <?php endif; ?>
+
         </ul>
       </div>
 

@@ -352,18 +352,18 @@ class BookingRepository
             ->update(['peringatan' => $warningLevel]);
     }
 
-    public function updateUserStatus(int $userId, string $status, ?string $suspendUntil = null): void
-    {
-        $data = ['status' => $status];
+        public function updateUserStatus(int $userId, string $status, ?string $suspendUntil = null): void
+        {
+            $data = ['status' => $status];
 
-        if ($suspendUntil !== null) {
-            $data['suspensi_terakhir'] = $suspendUntil;
+            if ($suspendUntil !== null) {
+                $data['suspensi_terakhir'] = $suspendUntil;
+            }
+            $qb = new QueryBuilder($this->database->pdo);
+            $qb->table('users')
+                ->where('id_user', $userId)
+                ->update($data);
         }
-        $qb = new QueryBuilder($this->database->pdo);
-        $qb->table('users')
-            ->where('id_user', $userId)
-            ->update($data);
-    }
 
     public function isDateBlocked(string $date, ?int $ruanganId = null): bool
     {

@@ -19,8 +19,6 @@ class m0004_create_booking_table
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-            INDEX idx_user_id (user_id),
-            INDEX idx_ruangan_id (ruangan_id),
             INDEX idx_tanggal_penggunaan (tanggal_penggunaan_ruang),
             INDEX idx_status (status),
 

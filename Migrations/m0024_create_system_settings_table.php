@@ -16,7 +16,6 @@ class m0024_create_system_settings_table
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-            INDEX idx_setting_key (setting_key),
             INDEX idx_setting_group (setting_group)
         ) ENGINE=InnoDB 
           DEFAULT CHARSET=utf8mb4 

@@ -13,7 +13,6 @@ class m0009_create_suspensi_table
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-            INDEX idx_id_akun (id_akun),
             INDEX idx_tgl_suspensi (tgl_suspensi),
 
             CONSTRAINT fk_suspensi_akun 
