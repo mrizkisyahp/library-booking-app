@@ -272,7 +272,6 @@ class AdminReportController extends Controller
         </head>
         <body>
             <div class="print-controls">
-                <a href="javascript:history.back()" class="btn-back">Kembali</a>
                 <button onclick="window.print()" class="btn-print">
                     Cetak Laporan / Simpan PDF
                 </button>

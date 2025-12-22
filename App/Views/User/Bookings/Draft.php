@@ -527,6 +527,7 @@
                 </button>
             </form>
         </div>
+        
     <?php endif; ?>
 
     <nav class="fixed left-0 bottom-0 right-0 bg-gray-100 text-white md:hidden z-999 rounded-t-4xl py-6 shadow-xl">

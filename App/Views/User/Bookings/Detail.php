@@ -43,7 +43,7 @@ $statusColors = [
     <?php endif; ?>
 
     <?php if ($rescheduleRequest): ?>
-        <div class="w-full mb-4">
+        <div class="w-full mb-4 max-w-7xl mx-auto">
             <div class="bg-amber-100 border-2 border-amber-400 rounded-3xl px-6 py-4">
                 <div class="flex items-center gap-3 mb-2">
                     <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,12 +446,13 @@ $statusColors = [
             <?php endif; ?>
 
             <?php if ($booking->status === 'verified'): ?>
-                <div class="text-2xl font-bold mb-4">
+                <div class="bg-white w-full rounded-3xl shadow my-2 p-6 max-w-7xl mx-auto mb-8">
+                    <div class="text-2xl font-bold mb-4">
                     Kode Kedatangan
                 </div>
-                <div>
+                <div class="mb-4">
                     <span>Berlaku sampai </span>
-                    <span><?= htmlspecialchars($booking->waktu_mulai) ?></span>
+                    <span class="font-semibold"><?= htmlspecialchars($booking->waktu_mulai) ?></span>
                 </div>
                 <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
                     <p class="font-medium tracking-[0.4rem] px-2 text-black break-all" id="checkinCode">
@@ -472,17 +473,20 @@ $statusColors = [
                         </svg>
                     </div>
                 </div>
+                </div>
             <?php endif; ?>
 
             <?php if ($booking->status === 'active'): ?>
-                <div class="text-2xl font-bold mb-4 text-black">
+                <div class="py-6 px-12 bg-white rounded-3xl shadow w-full max-w-7xl mx-auto flex justify-between items-center mb-6">
+                    <div class="text-2xl font-bold text-black">
                     Waktu Tersisa
                 </div>
-                <div class="bg-gray-200 rounded-lg p-3 mb-6 border border-gray-400 flex justify-between items-center">
+                <div class="bg-gray-200 rounded-lg p-3 border border-gray-400 flex justify-between items-center">
                     <div class="text-2xl font-bold" id="countdown-timer"
                         data-end-time="<?= date('Y-m-d H:i:s', strtotime($booking->tanggal_penggunaan_ruang . ' ' . $booking->waktu_selesai)) ?>">
                         00:00:00
                     </div>
+                </div>
                 </div>
             <?php endif; ?>
 
@@ -501,7 +505,7 @@ $statusColors = [
         </div>
 
         <?php if ($isPic && $booking->status === 'verified'): ?>
-            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-4">
+            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-4 max-w-7xl mx-auto">
                 <h3 class="text-xl font-bold text-slate-800 mb-4">Aksi</h3>
 
                 <!-- Reschedule Button -->
@@ -540,7 +544,7 @@ $statusColors = [
                     <?= csrf_field() ?>
                     <input type="hidden" name="booking_id" value="<?= (int) $booking->id_booking ?>">
                     <button type="submit"
-                        class="w-full bg-red-500 text-white px-8 py-4 rounded-xl hover:bg-red-600 transition-all font-semibold shadow-lg flex items-center justify-center">
+                        class="w-full bg-red-500 text-white px-8 py-4 rounded-xl hover:bg-red-600 transition-all font-semibold shadow-lg flex items-center justify-center cursor-pointer">
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />

@@ -62,7 +62,7 @@ $statusColors = [
     <?php endif; ?>
 
     <!-- Filters Section -->
-    <section class="bg-white shadow rounded-lg p-6 mb-8 border border-gray-100">
+    <section class="bg-white shadow rounded-lg p-6 mb-8 border border-gray-100 max-w-7xl mx-auto">
         <h2 class="text-lg font-semibold flex items-center gap-2 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -241,7 +241,7 @@ $statusColors = [
         </div>
     <?php else: ?>
         <!-- Rooms Table -->
-        <div class="bg-white rounded-md shadow-md overflow-x-auto border border-gray-200">
+        <div class="bg-white rounded-md shadow-md overflow-x-auto border border-gray-200 max-w-7xl mx-auto">
             <table class="w-full text-sm text-left">
                 <thead class="bg-linear-to-br from-emerald-600 to-emerald-800">
                     <tr
@@ -335,7 +335,7 @@ $statusColors = [
 <?php
 $paginationQuery = array_filter($filters, fn($value) => $value !== '' && $value !== []);
 ?>
-<div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+<div class="bg-white rounded-2xl shadow-lg p-6 mt-6 max-w-7xl mx-auto">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <p class="text-sm text-slate-600">
             Menampilkan <span

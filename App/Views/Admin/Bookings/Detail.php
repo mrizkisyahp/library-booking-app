@@ -18,7 +18,7 @@ $statusColors = [
                     <path d="m15 18-6-6 6-6" />
                 </svg>
             </a>
-            <span class="text-black font-bold text-4xl">
+            <span class="text-black font-bold text-xl md:text-4xl">
                 Kembali ke daftar Booking
             </span>
         </div>
@@ -519,6 +519,38 @@ $statusColors = [
                         Berikan Peringatan ke Semua Anggota
                     </button>
                 </form>
+
+                    <div id="modal-warning"
+                        class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none duration-300 transition-all target:opacity-100 target:pointer-events-auto flex justify-center items-center z-999 backdrop-blur-xs">
+
+                        <div
+                            class="bg-white p-6 rounded-2xl w-11/12 max-w-md shadow-lg scale-95 transition-all duration-300 target:scale-100 relative">
+
+                            <h1 class="text-4xl font-bold text-slate-800 mb-2">
+                                Peringatan
+                            </h1>
+                            <p class="text-sm text-slate-600 mb-4">
+                                Apakah Kamu yakin ingin berikan peringatan ke PIC dan semua anggota booking ini?
+                            </p>
+
+                            <form action="/logout" method="post" class="space-y-3">
+                                <?= csrf_field() ?>
+
+                                <div class="flex items-center gap-4 mt-6 text-center">
+                                    <a href="/profile"
+                                        class="w-full bg-slate-200 text-black p-4 rounded-2xl hover:bg-slate-300 transition-all font-regular border border-slate-400 shadow cursor-pointer">
+                                        Tidak
+                                    </a>
+
+                                    <button type="submit"
+                                        class="w-full bg-amber-500 text-white p-4 rounded-2xl hover:bg-amber-600 transition-all font-regular border border-amber-700 shadow cursor-pointer">
+                                        Ya, Berikan
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                
             </div>
         </div>
     </div>

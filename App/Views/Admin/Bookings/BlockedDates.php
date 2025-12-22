@@ -137,7 +137,7 @@ $validator = $validator ?? null;
 
     <!-- Close Library TODAY Modal -->
     <div id="closeTodayModal"
-        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        class="hidden fixed inset-0 bg-black/50 bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <h3 class="text-xl font-bold text-slate-800 mb-4">Tutup Perpustakaan Hari Ini</h3>
             <form action="/admin/blocked-dates/close-today" method="post">

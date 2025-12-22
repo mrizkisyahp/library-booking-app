@@ -128,7 +128,8 @@ class BookingRepository
 
         if (!empty($filters['keyword'])) {
             $query->where('r.nama_ruangan', 'LIKE', '%' . $filters['keyword'] . '%')
-                ->orWhere('u.nama', 'LIKE', '%' . $filters['keyword'] . '%');
+                ->orWhere('u.nama', 'LIKE', '%' . $filters['keyword'] . '%')
+                ->orWhere('b.tanggal_penggunaan_ruang', 'LIKE', '%' . $filters['keyword'] . '%');
         }
 
         return $query
@@ -567,5 +568,5 @@ class BookingRepository
     {
         return Room::Query()->where('id_ruangan', $roomId)->first();
     }
-    
+
 }

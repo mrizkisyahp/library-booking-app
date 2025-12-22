@@ -28,7 +28,7 @@ $roomTypes = [
                     <path d="m15 18-6-6 6-6" />
                 </svg>
             </a>
-            <span class="text-black font-bold text-4xl">
+            <span class="text-black font-bold text-xl md:text-4xl">
                 Kembali ke daftar ruangan
             </span>
         </div>
