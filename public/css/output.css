@@ -751,12 +751,6 @@
   .w-full {
     width: 100%;
   }
-  .w-max {
-    width: max-content;
-  }
-  .w-min {
-    width: min-content;
-  }
   .w-xl {
     width: var(--container-xl);
   }
@@ -3251,26 +3245,6 @@
   .md\:min-h-\[60dvh\] {
     @media (width >= 48rem) {
       min-height: 60dvh;
-    }
-  }
-  .md\:w-2xl {
-    @media (width >= 48rem) {
-      width: var(--container-2xl);
-    }
-  }
-  .md\:w-\[50dvh\] {
-    @media (width >= 48rem) {
-      width: 50dvh;
-    }
-  }
-  .md\:w-\[50vh\] {
-    @media (width >= 48rem) {
-      width: 50vh;
-    }
-  }
-  .md\:w-\[80vh\] {
-    @media (width >= 48rem) {
-      width: 80vh;
     }
   }
   .md\:w-xl {
