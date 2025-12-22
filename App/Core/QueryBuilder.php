@@ -282,6 +282,20 @@ class QueryBuilder
         return $this;
     }
 
+    public function orWhereRaw(string $sql, array $bindings = []): static
+    {
+        foreach ($bindings as $binding) {
+            $this->bindings[] = $binding;
+        }
+
+        $this->wheres[] = [
+            'sql' => $sql,
+            'boolean' => 'or'
+        ];
+
+        return $this;
+    }
+
     public function join(string $table, string $first, string $operator, string $second): static
     {
         $this->joins[] = "INNER JOIN {$table} ON {$first} {$operator} {$second}";

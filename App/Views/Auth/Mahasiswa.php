@@ -2,7 +2,7 @@
 $validator = $validator ?? null;
 ?>
 
-<a href="/register" class="flex items-center gap-2 hover:underline active:underline top-0 left-0 p-4 text-white fixed">
+<a href="/register" class="hidden md:flex items-center gap-2 hover:underline active:underline top-0 left-0 p-4 text-white fixed">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2-icon lucide-undo-2 size-6"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
     <span>Kembali ke halaman sebelumnya</span>
 </a>

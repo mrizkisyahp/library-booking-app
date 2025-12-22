@@ -50,7 +50,7 @@ use App\Core\App;
                     </svg>
                     <span
                         class="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2.5 group-hover:translate-x-0">
-                        Library Booking App
+                        Beranda
                     </span>
                 </a>
             </li>
@@ -162,7 +162,7 @@ use App\Core\App;
                             </span>
                         </a>
                     </li>
-                    <li class="w-full px-3">
+                    <!-- <li class="w-full px-3">
                         <a href="/rooms"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -179,7 +179,7 @@ use App\Core\App;
                                 Buat Booking
                             </span>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="w-full px-3">
                         <a href="/admin/settings"
                             class="flex items-center gap-4 p-3 w-full rounded-xl hover:bg-emerald-600 transition-all">
@@ -325,7 +325,7 @@ use App\Core\App;
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-
+                
                         <p class="flex-1 font-medium">
                             <?= nl2br(htmlspecialchars($m)) ?>
                         </p>

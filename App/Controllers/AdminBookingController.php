@@ -10,7 +10,7 @@ use Exception;
 
 class AdminBookingController extends Controller
 {
-    private const PER_PAGE_BOOKINGS = 15;
+    private const PER_PAGE_BOOKINGS = 5;
     private const PER_PAGE_MEMBERS = 6;
 
     public function __construct(

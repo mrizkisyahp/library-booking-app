@@ -7,10 +7,10 @@ $getValue = function($key, $default = '') use ($settings) {
 };
 ?>
 
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-4 py-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">System Settings</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Pengaturan Sistem</h1>
         <p class="text-gray-600 mt-2">Konfigurasi operasional sistem booking perpustakaan</p>
     </div>
 

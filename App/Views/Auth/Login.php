@@ -13,9 +13,9 @@ $cookie = $rememberedIdentifier;
     </div>
     <!-- right side -->
     <div>
-        <div class="px-4 md:px-0 py-8">
+        <!-- <div class="px-4 md:px-0 py-8">
             <p class="text-4xl md:text-2xl text-white font-semibold capitalize">Selamat datang di PinRuPus</p>
-        </div>
+        </div> -->
         <div
             class="container w-fit mx-auto align-middle px-12 py-4 bg-gray-100 rounded-md shadow border border-gray-300">
             <div class="text-left py-2">
