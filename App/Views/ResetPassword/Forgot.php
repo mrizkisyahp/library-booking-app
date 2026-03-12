@@ -54,8 +54,8 @@ $email = $email ?? '';
 
       <div class="mt-6 text-center text-sm">
         <div>
-          <a href="javascript:history.back()" class="italic capitalize text-gray-700 hover:underline active:underline">
-            ← Kembali ke halaman awal
+          <a href="/login" class="italic capitalize text-gray-700 hover:underline active:underline">
+            ← Kembali ke halaman login
           </a>
         </div>
       </div>
