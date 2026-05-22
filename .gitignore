@@ -18,3 +18,9 @@ public/css/*
 Booking Rules.txt
 Storage/*
 public/css/output.css
+/bin/
+/Libs/
+/.settings/
+/.classpath
+.svn/
+.cache/
